@@ -1,0 +1,257 @@
+<html class="dark" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#e49f0c",
+                        "background-light": "#f8f7f5",
+                        "background-dark": "#0D1117",
+                        "card-dark": "rgba(34, 28, 16, 0.4)",
+                        "lunar-white": "#E6EDF3",
+                        "nebula-silver": "#8B949E"
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .amber-glow:hover {
+            box-shadow: 0 0 20px rgba(228, 159, 12, 0.2);
+            border-color: rgba(228, 159, 12, 0.4);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
+<!-- Top Navigation -->
+<nav class="sticky top-0 z-50 glass border-b border-white/10 px-6 py-3 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-3xl">layers</span>
+<h1 class="text-xl font-black tracking-tight text-lunar-white">RenderRoom</h1>
+</div>
+<div class="hidden md:flex items-center gap-8">
+<a class="text-sm font-medium text-primary border-b-2 border-primary pb-1" href="#">Dashboard</a>
+<a class="text-sm font-medium text-nebula-silver hover:text-lunar-white" href="#">Galería</a>
+<a class="text-sm font-medium text-nebula-silver hover:text-lunar-white" href="#">Precios</a>
+</div>
+<div class="flex items-center gap-4">
+<button class="bg-primary hover:bg-primary/90 text-background-dark px-5 py-2 rounded-lg font-bold text-sm transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">add_circle</span>
+                Nuevo Render
+            </button>
+<div class="w-10 h-10 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="User profile avatar male professional" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDmZ1Hx1TiaJatKqtsSgCiT39qL-9JxbCOiqn6OCgvjECgChkUrOCtEdJWUddM5M_mgvtyGUGRswdpaAOH4dyBwLFK6_1vB3e4SPE-wRlNNFjymfrL5kUoILjjdXG6K-XOU6DnCcPRSEeU2sBdiTbvVDZIkYgUOXlzC7a8Z3J5mtRYcvWyxtEXI4X2GTAktE5n9o2d4hqvig3w8o-YGyUvdJGqvewYxY91tOMbNhcBZQGc4bBK_4yhuO0Saody4RQQuvFHdSo-jOdWz"/>
+</div>
+</div>
+</nav>
+<main class="max-w-7xl mx-auto px-6 py-10">
+<!-- Header & Stats -->
+<div class="mb-10">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+<div>
+<h2 class="text-4xl font-black text-lunar-white mb-2">Mis Renders</h2>
+<p class="text-nebula-silver text-lg">Gestiona y visualiza tus transformaciones de espacios con IA</p>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+<div class="glass p-6 rounded-xl flex items-center gap-4">
+<div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">collections</span>
+</div>
+<div>
+<p class="text-nebula-silver text-sm uppercase tracking-wider font-semibold">Total Renders</p>
+<p class="text-2xl font-bold text-lunar-white">12</p>
+</div>
+</div>
+<div class="glass p-6 rounded-xl flex items-center gap-4">
+<div class="w-12 h-12 rounded-lg bg-purple-500/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-purple-400">sync</span>
+</div>
+<div>
+<p class="text-nebula-silver text-sm uppercase tracking-wider font-semibold">En Proceso</p>
+<p class="text-2xl font-bold text-lunar-white">4</p>
+</div>
+</div>
+<div class="glass p-6 rounded-xl flex items-center gap-4">
+<div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">payments</span>
+</div>
+<div>
+<p class="text-nebula-silver text-sm uppercase tracking-wider font-semibold">Precio por Render</p>
+<p class="text-2xl font-bold text-lunar-white">2,50€</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Filter Bar -->
+<div class="flex flex-col lg:flex-row gap-4 items-center justify-between mb-8 border-b border-white/10 pb-4">
+<div class="flex gap-8">
+<button class="text-lunar-white font-bold border-b-2 border-primary pb-4 px-1">Todos</button>
+<button class="text-nebula-silver hover:text-lunar-white font-medium pb-4 px-1">Completados</button>
+<button class="text-nebula-silver hover:text-lunar-white font-medium pb-4 px-1">En Proceso</button>
+<button class="text-nebula-silver hover:text-lunar-white font-medium pb-4 px-1">Borradores</button>
+</div>
+<div class="flex gap-4 w-full lg:w-auto">
+<div class="relative flex-1 lg:w-64">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-nebula-silver">search</span>
+<input class="w-full bg-white/5 border-white/10 rounded-lg pl-10 text-sm text-lunar-white focus:ring-primary focus:border-primary" placeholder="Buscar renders..." type="text"/>
+</div>
+<button class="glass px-4 py-2 rounded-lg text-sm flex items-center gap-2 text-lunar-white">
+<span class="material-symbols-outlined text-sm">sort</span>
+                    Más recientes
+                </button>
+</div>
+</div>
+<!-- Renders Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<!-- Card 1: Completed -->
+<div class="glass rounded-xl overflow-hidden amber-glow transition-all group">
+<div class="relative h-56 overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="Modern living room after AI interior design rendering" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJ9uXK3LwIXRhBMEEx2bLIhHPvZr7nv4qFu5GvK5TVXkIaM7RL_beDCCUCwzZIe9HizvuKPkvmf0ADp2GTJzFUbccYZJXnQxhfdQ68HtKDMiIeH1RvA-ULxa_7gfixtfewXaWN2VP2Un0D4Om-JpqX5UXbEzUVkYlj7EfWSWK9dnzQnwaSNNekVMxLISqrDs4WcIIdr1AnBdTpeDHIBctmnw5O4uqTNC5id5WlUq2Fm3Ooeb4Z8bseEmpACP8Z4NZdPGVZ07Ei5_X0"/>
+<div class="absolute top-3 left-3 bg-green-500/90 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded">Completado</div>
+<div class="absolute bottom-3 right-3 bg-black/60 backdrop-blur-md text-white p-2 rounded-lg cursor-pointer">
+<span class="material-symbols-outlined text-lg">compare</span>
+</div>
+</div>
+<div class="p-5">
+<h3 class="text-lunar-white font-bold text-lg mb-1">Salón Principal - Estilo Moderno</h3>
+<p class="text-nebula-silver text-xs mb-4 flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">calendar_today</span> Hace 2 horas
+                    </p>
+<button class="w-full bg-primary/20 hover:bg-primary text-primary hover:text-background-dark py-2.5 rounded-lg font-bold text-sm transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">download</span>
+                        Descargar HD
+                    </button>
+</div>
+</div>
+<!-- Card 2: Completed -->
+<div class="glass rounded-xl overflow-hidden amber-glow transition-all group">
+<div class="relative h-56 overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="Minimalist bedroom interior render with natural light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC8WUr517MO9kYlRsa3hU2pipGMDzMQJX8tZmPxPzrsjTDmw2BhwYVAR-dfyA7FO3P848QPn97Mlu8Am4Rdfx4bFteZH902XGLqUfAyVzsXcom1UCZoFtkvPn4uY5kqAeK5r2oeAmF-Q4l3C_Qr-LbRv7hymlMNAFmPjYhZ5p_MLlN5LTS6CWaqg4YDCvdm4VQ86b97ZeuZUFHAlYspjzubQ5boznLpLrojhzcz8i6LlH_S_tRjv5yasjatZuLxh9_8Q6qtM_Xiq1vU"/>
+<div class="absolute top-3 left-3 bg-green-500/90 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded">Completado</div>
+</div>
+<div class="p-5">
+<h3 class="text-lunar-white font-bold text-lg mb-1">Dormitorio Master</h3>
+<p class="text-nebula-silver text-xs mb-4 flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">calendar_today</span> Hace 1 día
+                    </p>
+<button class="w-full bg-primary/20 hover:bg-primary text-primary hover:text-background-dark py-2.5 rounded-lg font-bold text-sm transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">download</span>
+                        Descargar HD
+                    </button>
+</div>
+</div>
+<!-- Card 3: In Progress -->
+<div class="glass rounded-xl overflow-hidden amber-glow transition-all">
+<div class="relative h-56 bg-slate-800/50 overflow-hidden flex items-center justify-center">
+<div class="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-primary/10 animate-pulse"></div>
+<div class="flex flex-col items-center gap-3 z-10">
+<div class="relative">
+<span class="material-symbols-outlined text-5xl text-purple-400 drop-shadow-[0_0_10px_rgba(168,85,247,0.5)]">settings_suggest</span>
+</div>
+<p class="text-lunar-white font-black text-xl tracking-wider">73%</p>
+</div>
+<div class="absolute bottom-0 left-0 w-full h-1.5 bg-white/10">
+<div class="h-full bg-primary w-[73%] shadow-[0_0_10px_#e49f0c]"></div>
+</div>
+</div>
+<div class="p-5">
+<h3 class="text-lunar-white font-bold text-lg mb-1">Cocina Minimalista</h3>
+<p class="text-purple-400 text-sm font-semibold mb-4 animate-pulse">Procesando render...</p>
+<button class="w-full bg-white/5 text-nebula-silver py-2.5 rounded-lg font-bold text-sm cursor-not-allowed" disabled="">
+                        Espere por favor
+                    </button>
+</div>
+</div>
+<!-- Card 4: Completed -->
+<div class="glass rounded-xl overflow-hidden amber-glow transition-all group">
+<div class="relative h-56 overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="Scandinavian dining room design AI render" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDO0Nsn1GMG4Bg1dE8oBX1eOzPZcbmwN142zbwjMLQ5h5lZf6ZsacQBt81rElosoxqZKCpfTNdmSyF87UhTj9H5bOfW9dnZaHCcO6Sz9neD2-Dwx5g8Z1AtDvJ5eZPapfTLRW27W0uY17JL9nZMgi7NKHs85I6wUkzeLe1DBtgk0S5hleOMT5avroWa1eAJ2rUAg3aZArtSDPfKQs-ZGLx0i9guPSuIJ_A5VeGOWR4lznK04llqxGzr8w2Rzxj9ywi8ErY3zSstwRbX"/>
+<div class="absolute top-3 left-3 bg-green-500/90 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded">Completado</div>
+</div>
+<div class="p-5">
+<h3 class="text-lunar-white font-bold text-lg mb-1">Comedor Escandinavo</h3>
+<p class="text-nebula-silver text-xs mb-4 flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">calendar_today</span> Hace 3 días
+                    </p>
+<button class="w-full bg-primary/20 hover:bg-primary text-primary hover:text-background-dark py-2.5 rounded-lg font-bold text-sm transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">download</span>
+                        Descargar HD
+                    </button>
+</div>
+</div>
+<!-- Card 5: In Queue -->
+<div class="glass rounded-xl overflow-hidden amber-glow transition-all">
+<div class="relative h-56 bg-slate-900/80 flex flex-col items-center justify-center gap-4">
+<span class="material-symbols-outlined text-4xl text-nebula-silver">hourglass_top</span>
+<p class="text-nebula-silver font-medium">En cola de procesamiento</p>
+</div>
+<div class="p-5">
+<h3 class="text-lunar-white font-bold text-lg mb-1">Oficina / Estudio</h3>
+<p class="text-nebula-silver text-sm mb-4">Posición en cola: #3</p>
+<button class="w-full bg-white/5 text-nebula-silver py-2.5 rounded-lg font-bold text-sm cursor-not-allowed" disabled="">
+                        En espera
+                    </button>
+</div>
+</div>
+<!-- Card 6: Completed -->
+<div class="glass rounded-xl overflow-hidden amber-glow transition-all group">
+<div class="relative h-56 overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="Luxury bathroom marble interior design AI render" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDSsib99Goiq6Dw2KnIhHAIS9OcKNP7Z1w9zPEalAKPL7ZOZUhjn-XSq_PCZUzdbQltov369mFBmIoTvcU6VfzTMvTm3Ftv_AU2BlO1TA5pqok4IvZbfOETnrUfET5rg1rozF-QV2PJIaZ0_6sQ9BVFwRYJvhKvZcAWhHdjrUsBrv2w6FjuLR3xHRtbi_7X_Lg-Tn5PieE5N0rKI4f2AgK2EXazeCosc0WhKzNE0zFb_Or_BC9fKsn4JjtwL_AOIJKRZgzxmhUFozCg"/>
+<div class="absolute top-3 left-3 bg-green-500/90 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded">Completado</div>
+</div>
+<div class="p-5">
+<h3 class="text-lunar-white font-bold text-lg mb-1">Baño de Lujo - Mármol</h3>
+<p class="text-nebula-silver text-xs mb-4 flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">calendar_today</span> Hace 1 semana
+                    </p>
+<button class="w-full bg-primary/20 hover:bg-primary text-primary hover:text-background-dark py-2.5 rounded-lg font-bold text-sm transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">download</span>
+                        Descargar HD
+                    </button>
+</div>
+</div>
+</div>
+<!-- Call to Action -->
+<div class="mt-20 text-center pb-20">
+<h3 class="text-2xl font-bold text-lunar-white mb-4">¿Quieres transformar otra habitación?</h3>
+<p class="text-nebula-silver mb-8 max-w-lg mx-auto">Sube una foto de cualquier espacio y deja que nuestra IA haga la magia en segundos.</p>
+<button class="inline-flex items-center gap-3 bg-gradient-to-r from-primary to-amber-600 hover:from-amber-500 hover:to-primary text-background-dark px-10 py-4 rounded-xl font-black text-lg transition-all transform hover:scale-105 shadow-xl shadow-primary/20">
+<span class="material-symbols-outlined">add_photo_alternate</span>
+                Nuevo Render por 2,50€
+            </button>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-black/40 border-t border-white/5 py-12 px-6">
+<div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
+<div class="flex items-center gap-2 opacity-50">
+<span class="material-symbols-outlined text-primary text-2xl">layers</span>
+<span class="text-lunar-white font-bold">RenderRoom</span>
+</div>
+<div class="flex gap-8 text-sm text-nebula-silver">
+<a class="hover:text-primary transition-colors" href="#">Términos</a>
+<a class="hover:text-primary transition-colors" href="#">Privacidad</a>
+<a class="hover:text-primary transition-colors" href="#">Soporte</a>
+<a class="hover:text-primary transition-colors" href="#">API</a>
+</div>
+<p class="text-nebula-silver text-xs">© 2024 RenderRoom AI. Todos los derechos reservados.</p>
+</div>
+</footer>
+</body></html>

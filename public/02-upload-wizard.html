@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RenderRoom - Paso 1: Sube tu Foto</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f0a400",
+                        "background-light": "#f8f7f5",
+                        "background-dark": "#0D1117",
+                        "surface-dark": "#161B22",
+                        "border-dark": "#484F58",
+                        "muted-text": "#8B949E",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+<!-- Top Navigation Bar -->
+<header class="flex items-center justify-between border-b border-border-dark px-10 py-4 sticky top-0 bg-background-dark/80 backdrop-blur-md z-50">
+<div class="flex items-center gap-3">
+<div class="size-8 text-primary">
+<svg fill="currentColor" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M44 11.2727C44 14.0109 39.8386 16.3957 33.69 17.6364C39.8386 18.877 44 21.2618 44 24C44 26.7382 39.8386 29.123 33.69 30.3636C39.8386 31.6043 44 33.9891 44 36.7273C44 40.7439 35.0457 44 24 44C12.9543 44 4 40.7439 4 36.7273C4 33.9891 8.16144 31.6043 14.31 30.3636C8.16144 29.123 4 26.7382 4 24C4 21.2618 8.16144 18.877 14.31 17.6364C8.16144 16.3957 4 14.0109 4 11.2727C4 7.25611 12.9543 4 24 4C35.0457 4 44 7.25611 44 11.2727Z"></path>
+</svg>
+</div>
+<h2 class="text-xl font-black tracking-tight">RenderRoom</h2>
+</div>
+<div class="flex items-center gap-10">
+<nav class="hidden md:flex items-center gap-8">
+<div class="flex flex-col items-center">
+<span class="text-primary text-xs font-bold uppercase tracking-wider">Paso 1</span>
+<span class="text-sm font-semibold">Sube tu Foto</span>
+</div>
+<div class="w-12 h-[2px] bg-border-dark"></div>
+<div class="flex flex-col items-center opacity-50">
+<span class="text-muted-text text-xs font-bold uppercase tracking-wider">Paso 2</span>
+<span class="text-sm font-semibold">Elige Estilo</span>
+</div>
+<div class="w-12 h-[2px] bg-border-dark"></div>
+<div class="flex flex-col items-center opacity-50">
+<span class="text-muted-text text-xs font-bold uppercase tracking-wider">Paso 3</span>
+<span class="text-sm font-semibold">Confirma y Paga</span>
+</div>
+</nav>
+<div class="bg-primary/10 border border-primary/20 rounded-full p-1">
+<div class="size-8 rounded-full bg-cover bg-center" data-alt="Avatar de usuario" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAv2jvQtkEBSlbsIZxQg9x6DxHsVLfzjrM7e4ZKNQMylSQ3MNs-cr1qgBBErLHJh50h9qkdPKLtM-5NFdQlMUqVJ_yc8b28Pbt_koUvr6batQJ13Do7E5il9faDELMaKngLQKrczeakY91rHqHyzt7yUYeC4RG50hU4O8VLhjFj18XDu3RmS4hWJ2G5C42Gmt4LQKzbEHcJ7Vn1Ws3UE1hDY_DxZ7dzyVrmNlHuqLqmwZj-mf8Vou7MbDHxEs1FzGgQQwPJ7TwQqQSh')"></div>
+</div>
+</div>
+</header>
+<main class="flex-1 flex flex-col items-center justify-start py-12 px-6 max-w-5xl mx-auto w-full">
+<!-- Progress Indicator Mobile -->
+<div class="w-full mb-8 space-y-3 md:hidden">
+<div class="flex justify-between items-end">
+<p class="text-primary font-bold">Paso 1: Sube tu Foto</p>
+<p class="text-muted-text text-sm">33% completado</p>
+</div>
+<div class="h-2 w-full bg-surface-dark rounded-full overflow-hidden">
+<div class="h-full bg-primary w-1/3"></div>
+</div>
+</div>
+<!-- Main Content Step 1 -->
+<div class="w-full flex flex-col items-center text-center mb-12">
+<h1 class="text-4xl md:text-5xl font-black tracking-tighter mb-4 text-slate-100">Sube una foto de tu habitación</h1>
+<p class="text-muted-text text-lg max-w-2xl">Para obtener el mejor renderizado, asegúrate de que la habitación esté bien iluminada y se vea el mayor espacio posible.</p>
+</div>
+<!-- Upload Zone -->
+<div class="w-full bg-surface-dark rounded-xl border-2 border-dashed border-border-dark p-12 flex flex-col items-center justify-center gap-6 hover:border-primary/50 transition-colors group cursor-pointer relative overflow-hidden">
+<div class="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="size-20 rounded-full bg-primary/20 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined !text-5xl">photo_camera</span>
+</div>
+<div class="space-y-2 text-center relative z-10">
+<h3 class="text-xl font-bold">Arrastra tu imagen aquí</h3>
+<p class="text-muted-text">O haz clic para seleccionar un archivo desde tu dispositivo</p>
+<p class="text-xs text-muted-text/60 mt-2">Formatos aceptados: JPG, PNG, WEBP (Máx. 10MB)</p>
+</div>
+<button class="bg-primary hover:bg-primary/90 text-background-dark font-bold py-3 px-8 rounded-lg shadow-lg shadow-primary/20 transition-all relative z-10">
+                        Seleccionar archivo
+                    </button>
+</div>
+<!-- Tips Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12 w-full">
+<div class="bg-surface-dark p-6 rounded-xl border border-border-dark flex items-start gap-4">
+<span class="material-symbols-outlined text-primary">light_mode</span>
+<div>
+<h4 class="font-bold text-sm">Buena iluminación</h4>
+<p class="text-xs text-muted-text mt-1">Enciende las luces o abre las cortinas para captar detalles.</p>
+</div>
+</div>
+<div class="bg-surface-dark p-6 rounded-xl border border-border-dark flex items-start gap-4">
+<span class="material-symbols-outlined text-primary">straighten</span>
+<div>
+<h4 class="font-bold text-sm">Ángulo amplio</h4>
+<p class="text-xs text-muted-text mt-1">Toma la foto desde una esquina para mostrar todo el espacio.</p>
+</div>
+</div>
+<div class="bg-surface-dark p-6 rounded-xl border border-border-dark flex items-start gap-4">
+<span class="material-symbols-outlined text-primary">person_off</span>
+<div>
+<h4 class="font-bold text-sm">Sin distracciones</h4>
+<p class="text-xs text-muted-text mt-1">Evita que salgan personas, mascotas u objetos en movimiento.</p>
+</div>
+</div>
+</div>
+<!-- Step 2 Teaser -->
+<div class="w-full mt-24 border-t border-border-dark pt-12">
+<div class="flex justify-between items-end mb-8">
+<div>
+<h2 class="text-2xl font-bold">Paso 2: Elige tu Estilo</h2>
+<p class="text-muted-text">Personaliza el look final de tu habitación</p>
+</div>
+<span class="text-primary font-bold text-sm">Próximo paso</span>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 opacity-50 grayscale hover:grayscale-0 transition-all cursor-not-allowed">
+<div class="space-y-2">
+<div class="aspect-square bg-surface-dark rounded-lg overflow-hidden border border-border-dark shadow-sm">
+<div class="w-full h-full bg-cover bg-center" data-alt="Estilo moderno de interior" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCeD0jph8zKQ1yU-xPc9xOlRAfGHYuQqGRPpz1lxowg2_VHpwHrkDwQpQmnUI-j_Xt__rUCnoS4rltEBnnKQSEX6BtXuPsTA8GQ0YgaGo_kHF16t4G_LquFNWy6a0aZTjxhTH7SiKlANz-JiwucCl5UtIQ43wUr4xZLWK5tlU5kDUoi89YQg7j_y34_6gtXjqe2ntF8is3rxS1o74e0UsGolbIpBIL85Pt1EvIMgB68AghrTwH5a7wZdNb_ReCV0Vp1xbSXaSZU0YkR')"></div>
+</div>
+<p class="text-center text-xs font-bold">Moderno</p>
+</div>
+<div class="space-y-2">
+<div class="aspect-square bg-surface-dark rounded-lg overflow-hidden border border-border-dark shadow-sm">
+<div class="w-full h-full bg-cover bg-center" data-alt="Estilo nórdico de interior" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCfrHfWtmToGg9YE3TKWdI7m2dvlldUoO7KOzn0vNZ_lh3oKPigYkWrcFWokGoOyA5ZhLI8aXnDiqIgDN2j8g9v2CdgF24nKi4Fie3HL93OIbpHWW6kkr2RvuOJgFA5jxSdwSATBLhyQcw2GRxura3cELhdkcgxzLSAj1wvNBm1PQ4nJG44L-KNmJJXelXVatVU2sM6i66k9Dg9IXnEfMMepWG_pUa4dSJ4N0FEa3sEYDtp1kiKnD38fymwbOqWteljmgaymCcguLZ-')"></div>
+</div>
+<p class="text-center text-xs font-bold">Nórdico</p>
+</div>
+<div class="space-y-2">
+<div class="aspect-square bg-surface-dark rounded-lg overflow-hidden border border-border-dark shadow-sm">
+<div class="w-full h-full bg-cover bg-center" data-alt="Estilo industrial de interior" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDbnSBo09PLlYq-m8tkTThdITdXW18xNL3_Bezg09pRGd3CQYFcD9ayzN6yoleZDdAuU715IG_KOVnMs6u8wcJ-SfAJXysUQGrG3PbWsu5N4ycIllZRZAxVbnzssuop5IhRd8eiC3fozSmTvnf9HDnszE29dAZYeJcxKdd_V3EKgeQ1_xdQDYorhUxT-VJZNrZYvbKm8gboXDvftla3F45aUe5d6xxorcNGSsh_e7brUa5EPwA_s9fqT5Xgz-KtEMAhop2tahDPP2wj')"></div>
+</div>
+<p class="text-center text-xs font-bold">Industrial</p>
+</div>
+<div class="space-y-2">
+<div class="aspect-square bg-surface-dark rounded-lg overflow-hidden border border-border-dark shadow-sm">
+<div class="w-full h-full bg-cover bg-center" data-alt="Estilo minimalista de interior" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAKoYAX31IeOBw0iQVNMFQnzKJsTzHDEVcFDJTmYN7DdUxZckDvVJgZKFTgSNovhbELCgwPBuAIMN1mu0P90-xO07jp6sZ32KZBwcrzqldr-ZRFQjCgiohAGmNO2xozuQdYvHscydxsMTEPaQx-SIVTUqg8r25F3zpXHuSiJCDd76rIEadSls50jr5Tg1nZWYOjw0K1KOqfPuqoa0hEvTYI62MuAFy88FKXD8jQOPMA57aBnOgDfHP6PRIbD2wRDMzAoJT33G1pEld5')"></div>
+</div>
+<p class="text-center text-xs font-bold">Minimalista</p>
+</div>
+<div class="space-y-2">
+<div class="aspect-square bg-surface-dark rounded-lg overflow-hidden border border-border-dark shadow-sm">
+<div class="w-full h-full bg-cover bg-center" data-alt="Estilo rústico de interior" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCH9CiGpN4jRdFokgGbL0hCn7_C54CSQ-XDPI23aYWhVPsbSDOCa6mpL265WkYq73afA0OLvScdAbpT8WUmvJTmkBxFApkqUI2vekEH6H0kMZ-8TeVTo0-QNJDfzcoGmCV_qj8ixjNqPgouvTEKPKUQsGRtWTtcqnSjbhnHtVKDAAw1Eh7_KnC0VvnqRg2DLd-lUoEZ4TqbZbyuZAE29YCoF6eCzRfllR-lttChdVVzTrgIvQaK2cR-LChWCv__hcEegmdPkX119rBA')"></div>
+</div>
+<p class="text-center text-xs font-bold">Rústico</p>
+</div>
+<div class="space-y-2">
+<div class="aspect-square bg-surface-dark rounded-lg overflow-hidden border border-border-dark shadow-sm">
+<div class="w-full h-full bg-cover bg-center" data-alt="Estilo bohemio de interior" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBT9WjvXbKujhpaFydJOD2z1Wzcfy91UZoRKXW5Cf1HjLZ1qe1fZofn6PU1LMoIg7zHIZnMH6ENS0nuS67cJgySCmzPkOiCqzD6SSWfiOAFGiHwPWnYPLNXzmlz8ahGXf3BJdHti9Nz3XMqrN1gN7mlvXlwDy-xLoq6q24-IizbXMN1t5iUpX27PvK8Ep6e4NHMRMOvBfApgGViR5JYg3Ul6MuJT30Dg_SRl5iZSHp05fRDk8NGTVcMWt3uoBLd5XbrxeqZQAfRUCF8')"></div>
+</div>
+<p class="text-center text-xs font-bold">Bohemio</p>
+</div>
+</div>
+</div>
+<!-- Step 3 Teaser -->
+<div class="w-full mt-16 flex flex-col md:flex-row items-center gap-8 bg-primary/5 rounded-2xl p-8 border border-primary/20">
+<div class="flex-1">
+<h3 class="text-xl font-bold mb-2">Resumen del servicio</h3>
+<p class="text-muted-text">Renderizado AI de alta fidelidad, exportación 4K y 3 variaciones de iluminación.</p>
+</div>
+<div class="flex flex-col items-center md:items-end gap-3">
+<div class="flex items-baseline gap-1">
+<span class="text-4xl font-black text-primary">2,50€</span>
+<span class="text-muted-text">/ foto</span>
+</div>
+<button class="bg-surface-dark border border-border-dark text-slate-300 font-bold py-2 px-6 rounded-lg flex items-center gap-2 cursor-not-allowed opacity-50">
+<span class="material-symbols-outlined text-sm">credit_card</span>
+                            Pagar con tarjeta
+                        </button>
+</div>
+</div>
+</main>
+<!-- Footer Controls -->
+<footer class="sticky bottom-0 bg-background-dark/90 backdrop-blur-xl border-t border-border-dark p-6">
+<div class="max-w-5xl mx-auto flex justify-between items-center w-full">
+<button class="text-muted-text hover:text-slate-100 font-bold px-6 py-2 transition-colors">
+                        Volver
+                    </button>
+<div class="flex items-center gap-4">
+<p class="text-muted-text text-sm hidden md:block">Sube una foto para continuar</p>
+<button class="bg-primary/20 text-primary cursor-not-allowed font-bold py-3 px-10 rounded-xl border border-primary/30 transition-all opacity-60">
+                            Continuar
+                        </button>
+</div>
+</div>
+</footer>
+</div>
+</div>
+</body></html>
