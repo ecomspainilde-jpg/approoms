@@ -1,12 +1,12 @@
-FROM nginx:alpine
+FROM python:3.10-slim
 
-# Copiar la configuración de nginx
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+WORKDIR /app
 
-# Copiar las pantallas de Stitch a la carpeta pública de nginx
-COPY public/ /usr/share/nginx/html/
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Puerto en el que Cloud Run espera el tráfico
+COPY . .
+
 EXPOSE 8080
 
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--workers", "1", "--threads", "8", "--timeout", "0", "app:app"]

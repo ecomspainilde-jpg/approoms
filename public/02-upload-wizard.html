@@ -101,6 +101,24 @@
                         Seleccionar archivo
                     </button>
 </div>
+
+<!-- AI Prompt Input -->
+<div class="w-full mt-8 bg-surface-dark rounded-xl border border-border-dark p-6">
+    <h3 class="text-xl font-bold mb-4">Describe la habitación de tus sueños</h3>
+    <textarea id="prompt-input" class="w-full bg-background-dark/50 border border-border-dark rounded-lg p-4 text-slate-100 placeholder-muted-text focus:ring-primary focus:border-primary" rows="4" placeholder="Ej: Una habitación moderna, minimalista con luz natural, paredes blancas y plantas..."></textarea>
+    
+    <div class="mt-4 flex flex-col sm:flex-row gap-4 items-center justify-between">
+        <button id="btn-generate" class="bg-primary hover:bg-primary/90 text-background-dark font-bold py-3 px-8 rounded-lg shadow-lg shadow-primary/20 transition-all w-full sm:w-auto flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined">auto_awesome</span> Simular Pago y Generar
+        </button>
+    </div>
+    
+    <div id="result-container" class="mt-6 p-4 rounded-lg hidden bg-background-dark border border-border-dark">
+        <h4 class="font-bold text-primary mb-2" id="result-title">Resultado</h4>
+        <p id="result-text" class="text-slate-300"></p>
+    </div>
+</div>
+
 <!-- Tips Cards -->
 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12 w-full">
 <div class="bg-surface-dark p-6 rounded-xl border border-border-dark flex items-start gap-4">
@@ -194,7 +212,7 @@
 <!-- Footer Controls -->
 <footer class="sticky bottom-0 bg-background-dark/90 backdrop-blur-xl border-t border-border-dark p-6">
 <div class="max-w-5xl mx-auto flex justify-between items-center w-full">
-<button class="text-muted-text hover:text-slate-100 font-bold px-6 py-2 transition-colors">
+<button class="text-muted-text hover:text-slate-100 font-bold px-6 py-2 transition-colors" onclick="window.history.back()">
                         Volver
                     </button>
 <div class="flex items-center gap-4">
@@ -207,4 +225,58 @@
 </footer>
 </div>
 </div>
+<script>
+    document.getElementById('btn-generate').addEventListener('click', async () => {
+        const promptText = document.getElementById('prompt-input').value;
+        const resultContainer = document.getElementById('result-container');
+        const resultContent = document.getElementById('result-text');
+        const resultTitle = document.getElementById('result-title');
+        
+        if (!promptText) {
+            alert("Por favor, introduce una descripción para tu habitación.");
+            return;
+        }
+
+        resultContainer.classList.remove('hidden');
+        resultTitle.innerText = "Simulando pago...";
+        resultContent.innerText = "Procesando pago de 1 EUR...";
+
+        try {
+            const payRes = await fetch('/api/simulate-payment', { method: 'POST' });
+            const payData = await payRes.json();
+            
+            if (!payRes.ok || !payData.success) {
+                resultTitle.innerText = "Error en el pago";
+                resultTitle.className = "font-bold text-red-500 mb-2";
+                resultContent.innerText = "Payment required to generate the final render. " + (payData.message || "");
+                return;
+            }
+
+            resultTitle.innerText = "Pago exitoso. Generando render final...";
+            resultTitle.className = "font-bold text-green-500 mb-2";
+            resultContent.innerText = "Conectando con Vertex AI...";
+
+            const aiRes = await fetch('/api/generate-image', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt: promptText })
+            });
+            const aiData = await aiRes.json();
+            
+            if (aiRes.ok) {
+                resultTitle.innerText = "Final render of the improved room interior";
+                resultTitle.className = "font-bold text-primary mb-2";
+                resultContent.innerHTML = aiData.description.replace(/\n/g, '<br>');
+            } else {
+                resultTitle.innerText = "Error generando la imagen";
+                resultTitle.className = "font-bold text-red-500 mb-2";
+                resultContent.innerText = aiData.error || "Error desconocido";
+            }
+        } catch (err) {
+            resultTitle.innerText = "Error de red";
+            resultTitle.className = "font-bold text-red-500 mb-2";
+            resultContent.innerText = err.message;
+        }
+    });
+</script>
 </body></html>
