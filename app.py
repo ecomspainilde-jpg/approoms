@@ -1,7 +1,8 @@
 import os
+import base64
 from flask import Flask, request, jsonify, send_from_directory
 import vertexai
-from vertexai.generative_models import GenerativeModel
+from vertexai.preview.vision_models import ImageGenerationModel
 
 app = Flask(__name__, static_folder="public", static_url_path="")
 
@@ -11,30 +12,24 @@ location = "us-central1"
 
 try:
     vertexai.init(project=project_id, location=location)
-    model = GenerativeModel("gemini-1.5-pro-001")
 except Exception as e:
     print("Warning: Could not initialize Vertex AI locally:", e)
-    model = None
 
 def generate_image(prompt):
-    if not model:
-        return "Vertex AI is not initialized."
-    responses = model.generate_content(
-        [prompt],
-        generation_config={
-            "max_output_tokens": 2048,
-            "temperature": 0.9,
-            "top_p": 1
-        },
-        safety_settings={
-            "HARM_CATEGORY_HARASSMENT": "BLOCK_MEDIUM_AND_ABOVE",
-            "HARM_CATEGORY_HATE_SPEECH": "BLOCK_MEDIUM_AND_ABOVE",
-            "HARM_CATEGORY_SEXUALLY_EXPLICIT": "BLOCK_MEDIUM_AND_ABOVE",
-            "HARM_CATEGORY_DANGEROUS_CONTENT": "BLOCK_MEDIUM_AND_ABOVE",
-        },
-        stream=False,
-    )
-    return responses.text
+    try:
+        model = ImageGenerationModel.from_pretrained("imagegeneration@006")
+        images = model.generate_images(
+            prompt=prompt,
+            number_of_images=1,
+            language="es",
+            aspect_ratio="1:1"
+        )
+        # Extraemos los bytes y convertimos a base64
+        import base64
+        b64_image = base64.b64encode(images[0]._image_bytes).decode("utf-8")
+        return {"success": True, "image_base64": b64_image}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
 
 @app.route("/")
 def index():
@@ -67,7 +62,10 @@ def api_generate_image():
     
     try:
         result = generate_image(prompt)
-        return jsonify({"description": result})
+        if result.get("success"):
+            return jsonify({"image_base64": result["image_base64"]})
+        else:
+            return jsonify({"error": result.get("error", "Unknown error")}), 500
     except Exception as e:
         print("Error generating content:", e)
         return jsonify({"error": str(e)}), 500

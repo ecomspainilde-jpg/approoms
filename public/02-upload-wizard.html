@@ -264,9 +264,9 @@
             const aiData = await aiRes.json();
             
             if (aiRes.ok) {
-                resultTitle.innerText = "Final render of the improved room interior";
-                resultTitle.className = "font-bold text-primary mb-2";
-                resultContent.innerHTML = aiData.description.replace(/\n/g, '<br>');
+                resultTitle.innerText = "Wow! Aquí tienes el nuevo diseño real:";
+                resultTitle.className = "font-bold text-primary mb-2 text-xl";
+                resultContent.innerHTML = `<img src="data:image/png;base64,${aiData.image_base64}" alt="Generated Room" class="w-full rounded-lg shadow-xl shadow-primary/10 border-2 border-primary/20 aspect-square object-cover" />`;
             } else {
                 resultTitle.innerText = "Error generando la imagen";
                 resultTitle.className = "font-bold text-red-500 mb-2";
