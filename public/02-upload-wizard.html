@@ -50,20 +50,21 @@
 </div>
 <div class="flex items-center gap-10">
 <nav class="hidden md:flex items-center gap-8">
+<a href="01-landing-page.html" class="text-sm font-medium hover:text-primary transition-colors">Inicio</a>
 <div class="flex flex-col items-center">
 <span class="text-primary text-xs font-bold uppercase tracking-wider">Paso 1</span>
 <span class="text-sm font-semibold">Sube tu Foto</span>
 </div>
 <div class="w-12 h-[2px] bg-border-dark"></div>
-<div class="flex flex-col items-center opacity-50">
+<a href="04-pago-bizum.html" class="flex flex-col items-center opacity-50 hover:opacity-80 transition-opacity">
 <span class="text-muted-text text-xs font-bold uppercase tracking-wider">Paso 2</span>
 <span class="text-sm font-semibold">Elige Estilo</span>
-</div>
+</a>
 <div class="w-12 h-[2px] bg-border-dark"></div>
-<div class="flex flex-col items-center opacity-50">
+<a href="04-pago-bizum.html" class="flex flex-col items-center opacity-50 hover:opacity-80 transition-opacity">
 <span class="text-muted-text text-xs font-bold uppercase tracking-wider">Paso 3</span>
 <span class="text-sm font-semibold">Confirma y Paga</span>
-</div>
+</a>
 </nav>
 <div class="bg-primary/10 border border-primary/20 rounded-full p-1">
 <div class="size-8 rounded-full bg-cover bg-center" data-alt="Avatar de usuario" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAv2jvQtkEBSlbsIZxQg9x6DxHsVLfzjrM7e4ZKNQMylSQ3MNs-cr1qgBBErLHJh50h9qkdPKLtM-5NFdQlMUqVJ_yc8b28Pbt_koUvr6batQJ13Do7E5il9faDELMaKngLQKrczeakY91rHqHyzt7yUYeC4RG50hU4O8VLhjFj18XDu3RmS4hWJ2G5C42Gmt4LQKzbEHcJ7Vn1Ws3UE1hDY_DxZ7dzyVrmNlHuqLqmwZj-mf8Vou7MbDHxEs1FzGgQQwPJ7TwQqQSh')"></div>
@@ -212,14 +213,14 @@
 <!-- Footer Controls -->
 <footer class="sticky bottom-0 bg-background-dark/90 backdrop-blur-xl border-t border-border-dark p-6">
 <div class="max-w-5xl mx-auto flex justify-between items-center w-full">
-<button class="text-muted-text hover:text-slate-100 font-bold px-6 py-2 transition-colors" onclick="window.history.back()">
+<button class="text-muted-text hover:text-slate-100 font-bold px-6 py-2 transition-colors" onclick="window.location.href='01-landing-page.html'">
                         Volver
                     </button>
 <div class="flex items-center gap-4">
 <p class="text-muted-text text-sm hidden md:block">Sube una foto para continuar</p>
-<button class="bg-primary/20 text-primary cursor-not-allowed font-bold py-3 px-10 rounded-xl border border-primary/30 transition-all opacity-60">
+<a href="04-pago-bizum.html" class="bg-primary hover:bg-primary/90 text-background-dark font-bold py-3 px-10 rounded-xl border border-primary/30 transition-all">
                             Continuar
-                        </button>
+                        </a>
 </div>
 </div>
 </footer>
