@@ -1,26 +1,14 @@
-# Python bytecode / cache
-__pycache__/
-*.py[cod]
-*$py.class
+# Dependency directories
+node_modules/
+approoms/node_modules/
 
-# Distribution / env
-.env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
+# Next.js build output
+.next/
+approoms/.next/
 
-# Firebase
-.firebase/
-firebase-debug.log*
-firestore-debug.log*
-ui-debug.log*
-
-# Service account keys
-service-account*.json
-*.key.json
+# Environment files
+.env*
+approoms/.env*
 
 # IDEs
 .vscode/
@@ -31,3 +19,31 @@ service-account*.json
 # OS files
 .DS_Store
 Thumbs.db
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+firebase-debug.log*
+firestore-debug.log*
+ui-debug.log*
+
+# Python bytecode / cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Firebase
+.firebase/
+
+# Service account keys
+service-account*.json
+*.key.json

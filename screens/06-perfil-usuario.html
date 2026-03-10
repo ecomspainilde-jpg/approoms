@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RenderRoom User Profile Settings</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#e49f0c",
+                        "accent-violet": "#8b5cf6",
+                        "background-light": "#f8f7f5",
+                        "background-dark": "#0D1117",
+                        "surface-dark": "#161b22",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .glass-nav {
+            background: rgba(13, 17, 23, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(228, 159, 12, 0.1);
+        }
+        .profile-gradient {
+            background: linear-gradient(135deg, #161b22 0%, #0D1117 100%);
+            border-bottom: 1px solid rgba(228, 159, 12, 0.15);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
+<!-- Top Navigation -->
+<nav class="fixed top-0 w-full z-50 glass-nav">
+<div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-3xl">deployed_code</span>
+<h1 class="text-xl font-bold tracking-tight text-slate-100">Render<span class="text-primary">Room</span></h1>
+</div>
+<div class="hidden md:flex items-center gap-8">
+<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Galería</a>
+<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Modelos</a>
+<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Precios</a>
+<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Soporte</a>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 rounded-lg hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined text-slate-400">notifications</span>
+</button>
+<div class="h-10 w-10 rounded-full border-2 border-primary overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="User profile picture of Emilio Martínez" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB7NllOaVYjtYFTeGnTokZe5-lw0PAFfbI8NUqLR7c5Ep7HACjfDinxkfgKyC2PDliU_vFqp_mizszhdG-a6ZGaPJoMytTHTRTYmsZO-Gq-w5UhKWIZ0GNeVVYQYG_KObaQnl5Nd5x-yb-q79YvX3IAsTSaNASInKJeoFtgL8WTEuteJ-3hVH8SceCYwiQo2KFohHvsX7wPywWMNN4Nqz1ktCdQ2xKATYCxu66y2GsPJtRiP1A6d_gRVaWw2MG7D9T8-uaPDPH75wxC"/>
+</div>
+</div>
+</div>
+</nav>
+<!-- Profile Header Section -->
+<header class="pt-16 profile-gradient">
+<div class="max-w-7xl mx-auto px-6 py-12">
+<div class="flex flex-col md:flex-row items-center md:items-end gap-8">
+<div class="relative">
+<div class="w-32 h-32 rounded-full border-4 border-primary p-1 bg-background-dark shadow-2xl shadow-primary/20">
+<img class="w-full h-full rounded-full object-cover" data-alt="Large profile avatar of Emilio Martínez" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBDjGylHy9MVJYWH4RRsWCEiYEyGiQJG8cuLwxBvHrAx9iauBN8KusDo8HEZuHLEPj9eSFwIG0RHaC5pj8SmadkRM6MHpcrUWTUOdbFMM7vemsyuZ2pDWVK5R0Iiy8CwKtKfOSXtTJoCXh7TAmoRTLR8xenys5729Vfx5-EjFHUCcYpoNQiiFGTbhj_04zv77sMqNyaCuDS1xPAw50VHITlNBi3845Yjqzg3ngC3a6nNQqouQeWEALH1YqLBgVHicWQFbLChxRrjutr"/>
+</div>
+<button class="absolute bottom-1 right-1 bg-primary text-background-dark p-1.5 rounded-full shadow-lg">
+<span class="material-symbols-outlined text-sm font-bold">edit</span>
+</button>
+</div>
+<div class="flex-1 text-center md:text-left">
+<div class="flex items-center justify-center md:justify-start gap-3 mb-2">
+<h2 class="text-3xl font-bold text-slate-100">Emilio Martínez</h2>
+<span class="px-3 py-1 bg-primary/20 text-primary text-xs font-bold rounded-full border border-primary/30 uppercase tracking-wider">Premium</span>
+</div>
+<p class="text-slate-400 flex items-center justify-center md:justify-start gap-2">
+<span class="material-symbols-outlined text-sm">calendar_today</span>
+                        Miembro desde Enero 2024
+                    </p>
+</div>
+<div class="grid grid-cols-3 gap-4 w-full md:w-auto">
+<div class="bg-surface-dark border border-white/5 rounded-xl p-4 text-center min-w-[120px]">
+<p class="text-2xl font-bold text-slate-100">24</p>
+<p class="text-xs text-slate-500 uppercase font-semibold">Renders</p>
+</div>
+<div class="bg-surface-dark border border-white/5 rounded-xl p-4 text-center min-w-[120px]">
+<p class="text-2xl font-bold text-slate-100">3</p>
+<p class="text-xs text-slate-500 uppercase font-semibold">Favoritos</p>
+</div>
+<div class="bg-surface-dark border border-white/5 rounded-xl p-4 text-center min-w-[120px]">
+<p class="text-2xl font-bold text-slate-100">12,50€</p>
+<p class="text-xs text-slate-500 uppercase font-semibold">Gastados</p>
+</div>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content Tabs & Grid -->
+<main class="max-w-7xl mx-auto px-6 py-8">
+<div class="flex gap-8 mb-8 border-b border-white/5">
+<button class="pb-4 border-b-2 border-primary text-primary font-bold text-sm">Información Personal</button>
+<button class="pb-4 border-b-2 border-transparent text-slate-500 hover:text-slate-300 font-bold text-sm">Seguridad</button>
+<button class="pb-4 border-b-2 border-transparent text-slate-500 hover:text-slate-300 font-bold text-sm">Facturación</button>
+<button class="pb-4 border-b-2 border-transparent text-slate-500 hover:text-slate-300 font-bold text-sm">API Keys</button>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+<!-- Left Column: Personal Info & Payments -->
+<div class="lg:col-span-7 space-y-8">
+<!-- Personal Info Card -->
+<section class="bg-surface-dark rounded-xl border border-white/5 overflow-hidden">
+<div class="p-6 border-b border-white/5 flex justify-between items-center">
+<h3 class="text-lg font-bold flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">person</span>
+                            Datos Personales
+                        </h3>
+<button class="text-sm text-primary font-semibold hover:underline">Guardar cambios</button>
+</div>
+<div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="space-y-2">
+<label class="text-xs font-bold text-slate-500 uppercase">Nombre Completo</label>
+<input class="w-full bg-background-dark border-white/10 rounded-lg focus:border-primary focus:ring-primary text-slate-200" type="text" value="Emilio Martínez"/>
+</div>
+<div class="space-y-2">
+<label class="text-xs font-bold text-slate-500 uppercase">Correo Electrónico</label>
+<input class="w-full bg-background-dark border-white/10 rounded-lg focus:border-primary focus:ring-primary text-slate-200" type="email" value="emilio.mtz@renderroom.ai"/>
+</div>
+<div class="space-y-2">
+<label class="text-xs font-bold text-slate-500 uppercase">Teléfono</label>
+<input class="w-full bg-background-dark border-white/10 rounded-lg focus:border-primary focus:ring-primary text-slate-200" type="text" value="+34 612 345 678"/>
+</div>
+<div class="space-y-2">
+<label class="text-xs font-bold text-slate-500 uppercase">Ubicación</label>
+<input class="w-full bg-background-dark border-white/10 rounded-lg focus:border-primary focus:ring-primary text-slate-200" type="text" value="Madrid, España"/>
+</div>
+</div>
+</section>
+<!-- Payment Methods Card -->
+<section class="bg-surface-dark rounded-xl border border-white/5 overflow-hidden">
+<div class="p-6 border-b border-white/5">
+<h3 class="text-lg font-bold flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">payments</span>
+                            Métodos de Pago
+                        </h3>
+</div>
+<div class="p-6">
+<div class="flex items-center justify-between p-4 bg-background-dark rounded-xl border border-primary/20">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">smartphone</span>
+</div>
+<div>
+<p class="font-bold text-slate-200">Bizum Directo</p>
+<p class="text-sm text-slate-500">+34 612 345 678</p>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-green-500 text-sm">verified</span>
+<span class="text-xs font-bold text-green-500 uppercase">Verificado</span>
+</div>
+</div>
+<button class="w-full mt-4 py-3 border border-dashed border-white/20 rounded-xl text-slate-500 text-sm font-semibold hover:border-primary hover:text-primary transition-all">
+                            + Añadir nuevo método
+                        </button>
+</div>
+</section>
+</div>
+<!-- Right Column: Preferences & Activity -->
+<div class="lg:col-span-5 space-y-8">
+<!-- Preferences Card -->
+<section class="bg-surface-dark rounded-xl border border-white/5 overflow-hidden">
+<div class="p-6 border-b border-white/5">
+<h3 class="text-lg font-bold flex items-center gap-2">
+<span class="material-symbols-outlined text-accent-violet">settings_input_component</span>
+                            Preferencias de Diseño
+                        </h3>
+</div>
+<div class="p-6 space-y-6">
+<div class="space-y-3">
+<label class="text-xs font-bold text-slate-500 uppercase">Estilo Predeterminado</label>
+<div class="flex flex-wrap gap-2">
+<button class="px-4 py-2 rounded-full border border-white/10 text-sm hover:border-primary transition-colors">Moderno</button>
+<button class="px-4 py-2 rounded-full border border-primary bg-primary/10 text-primary text-sm font-bold">Nórdico</button>
+<button class="px-4 py-2 rounded-full border border-white/10 text-sm hover:border-primary transition-colors">Industrial</button>
+<button class="px-4 py-2 rounded-full border border-white/10 text-sm hover:border-primary transition-colors">Minimalista</button>
+</div>
+</div>
+<div class="flex items-center justify-between py-2">
+<div>
+<p class="text-sm font-bold text-slate-200">Alta Resolución (4K)</p>
+<p class="text-xs text-slate-500">Renderizado premium habilitado</p>
+</div>
+<div class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</div>
+</div>
+<div class="flex items-center justify-between py-2 border-t border-white/5 pt-4">
+<div>
+<p class="text-sm font-bold text-slate-200">Notificaciones Email</p>
+<p class="text-xs text-slate-500">Aviso al terminar render</p>
+</div>
+<div class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Activity Card -->
+<section class="bg-surface-dark rounded-xl border border-white/5 overflow-hidden">
+<div class="p-6 border-b border-white/5">
+<h3 class="text-lg font-bold flex items-center gap-2">
+<span class="material-symbols-outlined text-accent-violet">history</span>
+                            Actividad Reciente
+                        </h3>
+</div>
+<div class="divide-y divide-white/5">
+<div class="p-4 flex items-center gap-4 hover:bg-white/5 transition-colors">
+<div class="w-10 h-10 rounded-lg bg-background-dark overflow-hidden flex-shrink-0">
+<img class="w-full h-full object-cover opacity-80" data-alt="Small thumbnail of a modern living room render" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAdcPa7_Wu7YT585bwhnMwwKSb6gemQrKx6PlcKEKmfGlm_rZBLNJ80uStuxI1XcVxWRXhitdpov3V3XoTy-55SaAlAjOkgBM_JY5puERkvFopT1qN2asn-lilmz1SeAUvqOipxKxGv6NCZcbhKYEKf1PwwNKP1oGwUpkOkPeMuiBRJAFlPaUlIuqSxELZTPHSYRtSD2mJAhfMUC6beSC_fGYzqZaYoYCuXkE6ueu9hHGydJqHGLFNPTAHlP-LyqTbCuXO1EpQX6II-"/>
+</div>
+<div class="flex-1">
+<p class="text-sm font-semibold text-slate-200">Salón Moderno Loft</p>
+<p class="text-xs text-slate-500">Finalizado hace 2h</p>
+</div>
+<div class="h-2 w-2 rounded-full bg-green-500 shadow-lg shadow-green-500/20"></div>
+</div>
+<div class="p-4 flex items-center gap-4 hover:bg-white/5 transition-colors">
+<div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-primary text-xl">shopping_cart</span>
+</div>
+<div class="flex-1">
+<p class="text-sm font-semibold text-slate-200">Pago Recibo #8291</p>
+<p class="text-xs text-slate-500">Ayer a las 18:30</p>
+</div>
+<div class="h-2 w-2 rounded-full bg-primary shadow-lg shadow-primary/20"></div>
+</div>
+<div class="p-4 flex items-center gap-4 hover:bg-white/5 transition-colors">
+<div class="w-10 h-10 rounded-lg bg-background-dark overflow-hidden flex-shrink-0">
+<img class="w-full h-full object-cover opacity-80" data-alt="Small thumbnail of a minimalist kitchen render" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDeiZroX3FIqwHICC4hXOBTU50uMtBV46Rzkd_0PAoy_6Bgdc3QklACuHTI0eb4xjmZPzW05DPOE-101VZPFhcxnMuHhwz6CTd7kpcFfccWysLjzt-wNKV8oumUPDhrdttE4x-R9CxZV7fSFl8IaSIcKJpKxCK63Aw_gfaTTdIcxLjlzb81vLyfv5E-lD7cfnlLKBlQfe4X16GwORJm08gDdBf_MWZqgGUn5tttLJ4MUlmLqi5rtx-vWa-PaQogD-HJex1n_pKjq-It"/>
+</div>
+<div class="flex-1">
+<p class="text-sm font-semibold text-slate-200">Cocina Minimalista</p>
+<p class="text-xs text-slate-500">22 Mar 2024</p>
+</div>
+<div class="h-2 w-2 rounded-full bg-slate-600"></div>
+</div>
+</div>
+<div class="p-4 text-center">
+<button class="text-xs font-bold text-slate-500 hover:text-primary transition-colors uppercase tracking-widest">Ver todo el historial</button>
+</div>
+</section>
+</div>
+</div>
+<!-- Danger Zone -->
+<section class="mt-12 mb-20 p-6 rounded-xl border border-red-500/20 bg-red-500/5 flex flex-col md:flex-row items-center justify-between gap-6">
+<div>
+<h3 class="text-lg font-bold text-red-500">Zona de Peligro</h3>
+<p class="text-sm text-slate-500">Una vez eliminada la cuenta, no hay vuelta atrás. Tus créditos y renders se perderán.</p>
+</div>
+<button class="px-6 py-2.5 bg-transparent border border-red-500 text-red-500 rounded-lg font-bold text-sm hover:bg-red-500 hover:text-white transition-all">
+                Eliminar mi cuenta
+            </button>
+</section>
+</main>
+<footer class="max-w-7xl mx-auto px-6 py-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-slate-500 text-sm">
+<p>© 2024 RenderRoom AI Service. Todos los derechos reservados.</p>
+<div class="flex gap-6">
+<a class="hover:text-primary" href="#">Términos</a>
+<a class="hover:text-primary" href="#">Privacidad</a>
+<a class="hover:text-primary" href="#">Cookies</a>
+</div>
+</footer>
+</body></html>

@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RenderRoom – Navegador de Pantallas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Inter", sans-serif;
+        background: #0d1117;
+        color: #e6edf3;
+        min-height: 100vh;
+        padding: 3rem 2rem;
+      }
+      .header {
+        text-align: center;
+        margin-bottom: 3rem;
+      }
+      .logo {
+        font-size: 2rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #f0a500, #ffb830);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
+      }
+      .subtitle {
+        color: #8b949e;
+        font-size: 1rem;
+      }
+      .badge {
+        display: inline-block;
+        margin-top: 1rem;
+        background: rgba(240, 165, 0, 0.15);
+        border: 1px solid rgba(240, 165, 0, 0.3);
+        color: #f0a500;
+        padding: 0.3rem 1rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 1.5rem;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      .card {
+        background: #161b22;
+        border: 1px solid rgba(72, 79, 88, 0.3);
+        border-radius: 16px;
+        overflow: hidden;
+        transition:
+          transform 0.2s ease,
+          box-shadow 0.2s ease,
+          border-color 0.2s ease;
+        text-decoration: none;
+        color: inherit;
+        display: flex;
+        flex-direction: column;
+      }
+      .card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 40px rgba(240, 165, 0, 0.15);
+        border-color: rgba(240, 165, 0, 0.4);
+      }
+      .card-num {
+        background: linear-gradient(135deg, #f0a500, #ffb830);
+        color: #0d1117;
+        font-weight: 800;
+        font-size: 0.75rem;
+        padding: 0.4rem 1rem;
+        letter-spacing: 0.05em;
+      }
+      .card-body {
+        padding: 1.5rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+      .card-icon {
+        font-size: 2rem;
+        margin-bottom: 0.75rem;
+      }
+      .card-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #e6edf3;
+        margin-bottom: 0.4rem;
+      }
+      .card-desc {
+        font-size: 0.85rem;
+        color: #8b949e;
+        line-height: 1.6;
+        flex: 1;
+      }
+      .card-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        margin-top: 1.25rem;
+        background: linear-gradient(135deg, #f0a500, #ffb830);
+        color: #0d1117;
+        font-weight: 600;
+        font-size: 0.85rem;
+        padding: 0.6rem 1.25rem;
+        border-radius: 8px;
+        text-decoration: none;
+        width: fit-content;
+        transition: opacity 0.2s;
+      }
+      .card-link:hover {
+        opacity: 0.85;
+      }
+      .card-link.missing {
+        background: rgba(72, 79, 88, 0.3);
+        color: #8b949e;
+        pointer-events: none;
+      }
+      .footer {
+        text-align: center;
+        margin-top: 4rem;
+        color: #484f58;
+        font-size: 0.85rem;
+      }
+      .stitch-link {
+        color: #f0a500;
+        text-decoration: none;
+      }
+      .stitch-link:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <div class="logo">🏠 RenderRoom</div>
+      <p class="subtitle">
+        Renders de habitaciones por solo 2,50€ — ¡1€ menos que un perrito! 🌭
+      </p>
+      <span class="badge">7 Pantallas exportadas desde Stitch</span>
+    </div>
+
+    <div class="grid">
+      <a class="card" href="01-landing-page.html" target="_blank">
+        <div class="card-num">01 · LANDING PAGE</div>
+        <div class="card-body">
+          <div class="card-icon">🏠</div>
+          <div class="card-title">Landing Page Cinematográfica</div>
+          <div class="card-desc">
+            Hero con precio "2,50€" resaltado, comparación con perrito caliente,
+            sección Cómo Funciona, galería de renders y pricing card con borde
+            ámbar-violeta animado.
+          </div>
+          <span class="card-link">Abrir pantalla →</span>
+        </div>
+      </a>
+
+      <a class="card" href="02-upload-wizard.html" target="_blank">
+        <div class="card-num">02 · UPLOAD WIZARD</div>
+        <div class="card-body">
+          <div class="card-icon">📤</div>
+          <div class="card-title">Wizard de Subida de Foto</div>
+          <div class="card-desc">
+            Stepper de 3 pasos (Sube foto → Elige estilo → Paga). Zona dropzone
+            con borde ámbar en drag, tips de fotografía, preview de estilos de
+            diseño.
+          </div>
+          <span class="card-link">Abrir pantalla →</span>
+        </div>
+      </a>
+
+      <a class="card" href="03-dashboard.html" target="_blank">
+        <div class="card-num">03 · DASHBOARD</div>
+        <div class="card-body">
+          <div class="card-icon">📊</div>
+          <div class="card-title">Dashboard "Mis Renders"</div>
+          <div class="card-desc">
+            Stats con glassmorphism, grid de 6 renders con estados
+            (completado/procesando/en cola), barras de progreso con glow
+            violeta, filtros por estado.
+          </div>
+          <span class="card-link">Abrir pantalla →</span>
+        </div>
+      </a>
+
+      <a class="card" href="04-pago-bizum.html" target="_blank">
+        <div class="card-num">04 · PAGO BIZUM</div>
+        <div class="card-body">
+          <div class="card-icon">💳</div>
+          <div class="card-title">Pago Rápido con Bizum</div>
+          <div class="card-desc">
+            Checkout con Bizum como método principal, resumen del pedido con
+            desglose de precio 2,50€, campo teléfono +34, opciones alternativas
+            y trust badges de seguridad.
+          </div>
+          <span class="card-link">Abrir pantalla →</span>
+        </div>
+      </a>
+
+      <a class="card" href="05-gracias.html" target="_blank">
+        <div class="card-num">05 · CONFIRMACIÓN</div>
+        <div class="card-body">
+          <div class="card-icon">🎉</div>
+          <div class="card-title">Pantalla de Gracias</div>
+          <div class="card-desc">
+            Confirmación celebratoria con checkmark animado, confetti, detalles
+            del pedido, timeline del proceso de IA y programa de referidos con
+            código promocional.
+          </div>
+          <span class="card-link">Abrir pantalla →</span>
+        </div>
+      </a>
+
+      <a class="card" href="06-perfil-usuario.html" target="_blank">
+        <div class="card-num">06 · PERFIL</div>
+        <div class="card-body">
+          <div class="card-icon">👤</div>
+          <div class="card-title">Perfil de Usuario</div>
+          <div class="card-desc">
+            Datos personales editables, Bizum verificado como método de pago,
+            preferencias de estilos en pills, toggles de notificaciones y
+            actividad reciente.
+          </div>
+          <span class="card-link">Abrir pantalla →</span>
+        </div>
+      </a>
+
+      <a class="card" href="07-consejos-decoracion.html" target="_blank">
+        <div class="card-num">07 · BLOG</div>
+        <div class="card-body">
+          <div class="card-icon">💡</div>
+          <div class="card-title">Consejos de Decoración</div>
+          <div class="card-desc">
+            Página estilo revista con artículo destacado, grid de 6 artículos
+            por tipo de habitación, filtros por categoría, CTA de render
+            integrado y suscripción a newsletter.
+          </div>
+          <span class="card-link">Abrir pantalla →</span>
+        </div>
+      </a>
+    </div>
+
+    <div class="footer">
+      <p>
+        Proyecto generado con
+        <a
+          class="stitch-link"
+          href="https://stitch.withgoogle.com/projects/10149300038889827122"
+          target="_blank"
+          >Stitch by Google</a
+        >
+        · ID: 10149300038889827122
+      </p>
+      <p style="margin-top: 0.5rem">
+        Sistema de diseño documentado en
+        <code style="color: #f0a500">DESIGN.md</code> · Hecho con ❤️ e IA ✨
+      </p>
+    </div>
+  </body>
+</html>
