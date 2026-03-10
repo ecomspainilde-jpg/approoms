@@ -15,13 +15,13 @@ from firebase_admin import credentials, auth, firestore, storage
 app = Flask(__name__, static_folder="public", static_url_path="")
 
 # Initialize Vertex AI
-project_id = "gen-lang-client-0426824151"
-location = "us-central1"
+project_id = os.environ.get("GCP_PROJECT_ID", "gen-lang-client-0426824151")
+location = os.environ.get("GCP_LOCATION", "us-central1")
 
 try:
     vertexai.init(project=project_id, location=location)
 except Exception as e:
-    print("Warning: Could not initialize Vertex AI locally:", e)
+    print(f"Warning: Could not initialize Vertex AI for project {project_id} in {location}:", e)
 
 # Initialize Firebase Admin
 try:
