@@ -493,7 +493,20 @@ async function analyzeImage() {
         document.getElementById('analysis-loading').classList.add('hidden');
         if (res.ok && data.detailed_description_es) {
             state.roomData = data;
-            document.getElementById('analysis-text').textContent = data.detailed_description_es;
+            const analysisHtml = `
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div class="bg-background-dark/40 p-2 rounded">
+                        <p class="text-[10px] text-muted-text uppercase font-bold">Tipo de Habitación</p>
+                        <p class="text-sm font-bold text-white">${data.room_type || 'Detectando...'}</p>
+                    </div>
+                    <div class="bg-background-dark/40 p-2 rounded">
+                        <p class="text-[10px] text-muted-text uppercase font-bold">Tamaño Estimado</p>
+                        <p class="text-sm font-bold text-white">${data.approx_size || 'Detectando...'}</p>
+                    </div>
+                </div>
+                <p class="text-slate-300 text-sm leading-relaxed">${data.detailed_description_es}</p>
+            `;
+            document.getElementById('analysis-text').innerHTML = analysisHtml;
             document.getElementById('analysis-result').classList.remove('hidden');
         } else {
             document.getElementById('analysis-error-text').textContent = data.error || 'Error del servicio';
@@ -556,6 +569,8 @@ function goToStep3() {
         summaryGrid.appendChild(img);
     });
     document.getElementById('summary-style').textContent = state.selectedStyle.charAt(0).toUpperCase() + state.selectedStyle.slice(1);
+    const roomInfo = state.roomData ? `${state.roomData.room_type} (${state.roomData.approx_size})` : '';
+    document.getElementById('summary-style').innerHTML = `${state.selectedStyle.charAt(0).toUpperCase() + state.selectedStyle.slice(1)} <span class="text-xs text-muted-text ml-2">${roomInfo}</span>`;
     document.getElementById('summary-prompt').textContent = document.getElementById('prompt-input').value || '(sin descripción adicional)';
     showSection('section-generate');
     setActiveStep(3);

@@ -111,7 +111,7 @@
                         <tr class="text-xs font-bold text-slate-500 uppercase tracking-widest border-b border-white/5">
                             <th class="px-6 py-4">Usuario</th>
                             <th class="px-6 py-4">Email</th>
-                            <th class="px-6 py-4">Ubicación</th>
+                            <th class="px-6 py-4">Último Render</th>
                             <th class="px-6 py-4">Rol</th>
                             <th class="px-6 py-4 text-right">Acciones</th>
                         </tr>
@@ -168,13 +168,18 @@
     });
 
     async function loadStats() {
-        try {
             const userSnap = await db.collection('users').get();
             const renderSnap = await db.collection('renders').get();
+            const purchaseSnap = await db.collection('purchases').get();
             
             document.getElementById('stat-total-users').textContent = userSnap.size;
             document.getElementById('stat-total-renders').textContent = renderSnap.size;
-            document.getElementById('stat-total-revenue').textContent = (renderSnap.size * 2.5).toFixed(2) + '€';
+            
+            let totalRevenue = 0;
+            purchaseSnap.forEach(doc => {
+                totalRevenue += doc.data().amount || 0;
+            });
+            document.getElementById('stat-total-revenue').textContent = totalRevenue.toFixed(2) + '€';
             
             const conversion = userSnap.size > 0 ? ((renderSnap.size / userSnap.size) * 100).toFixed(1) : 0;
             document.getElementById('stat-conversion').textContent = conversion + '%';
@@ -189,9 +194,24 @@
             const snapshot = await db.collection('users').orderBy('createdAt', 'desc').get();
             tableBody.innerHTML = '';
             
-            snapshot.forEach(doc => {
+            snapshot.forEach(async doc => {
                 const user = doc.data();
                 const isAdmin = user.isAdmin || false;
+                
+                // Get latest render for this user
+                let lastRenderInfo = 'Ninguno';
+                try {
+                    const rSnap = await db.collection('renders')
+                                        .where('userId', '==', doc.id)
+                                        .orderBy('createdAt', 'desc')
+                                        .limit(1)
+                                        .get();
+                    if (!rSnap.empty) {
+                        const r = rSnap.docs[0].data();
+                        lastRenderInfo = `<span class="text-primary font-bold">${r.room_type || 'Hab.'}</span> <span class="text-[10px]">(${r.approx_size || '?'})</span>`;
+                    }
+                } catch(e) {}
+
                 tableBody.innerHTML += `
                     <tr class="hover:bg-white/5 transition-colors">
                         <td class="px-6 py-4">
@@ -203,7 +223,7 @@
                             </div>
                         </td>
                         <td class="px-6 py-4 text-slate-400 text-sm">${user.email}</td>
-                        <td class="px-6 py-4 text-slate-400 text-sm">${user.location || 'N/A'}</td>
+                        <td class="px-6 py-4 text-slate-400 text-sm">${lastRenderInfo}</td>
                         <td class="px-6 py-4">
                             <span class="px-2 py-1 ${isAdmin ? 'bg-primary/20 text-primary' : 'bg-slate-500/20 text-slate-500'} text-[10px] font-bold uppercase rounded">
                                 ${isAdmin ? 'Admin' : 'Usuario'}

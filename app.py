@@ -17,6 +17,7 @@ app = Flask(__name__, static_folder="public", static_url_path="")
 # Initialize Vertex AI
 project_id = os.environ.get("GCP_PROJECT_ID", "gen-lang-client-0426824151")
 location = os.environ.get("GCP_LOCATION", "us-central1")
+storage_bucket = os.environ.get("FIREBASE_STORAGE_BUCKET", f"{project_id}.firebasestorage.app")
 
 try:
     vertexai.init(project=project_id, location=location)
@@ -28,7 +29,7 @@ try:
     if not firebase_admin._apps:
         # Default credentials should work in Cloud Run
         firebase_admin.initialize_app(options={
-            'storageBucket': f"{project_id}.firebasestorage.app"
+            'storage_bucket': storage_bucket
         })
     db = firestore.client()
     bucket = storage.bucket()
@@ -66,6 +67,8 @@ Return ONLY a valid JSON object with the following structure:
   "materials_en": "Existing textures (wood, concrete, paint, tile).",
   "layout_en": "Spatial arrangement and depth context.",
   "furniture_en": "Summary of existing furniture and their placement.",
+  "room_type": "The type of room (e.g., bedroom, living room, office, etc.).",
+  "approx_size": "Estimated size/dimensions description (e.g., small, spacious, 15m2).",
   "detailed_description_es": "Descripción profesional y detallada en español para el cliente.",
   "imagen_prompt_seed_en": "A comma-separated list of architectural keywords to preserve the room's geometry."
 }
@@ -254,18 +257,47 @@ def api_generate_image():
             if not db:
                 print("Firestore not initialized")
             else:
+                # Extract extra metadata if available
+                room_type = room_data.get("room_type", "unknown")
+                room_size = room_data.get("approx_size", "unknown")
+
                 render_doc = {
                     "userId": user["uid"],
+                    "email": user.get("email", "unknown"),
                     "prompt": prompt,
                     "style": style,
+                    "room_type": room_type,
+                    "approx_size": room_size,
                     "imageUrl": filename,
+                    "inputImageUrl": None, # Will be set if we upload the input image
                     "createdAt": datetime.now(timezone.utc),
                     "roomData": room_data,
-                    "fullPrompt": result["full_prompt"]
+                    "fullPrompt": result["full_prompt"],
+                    "price": 2.50,
+                    "currency": "EUR",
+                    "status": "completed"
                 }
-                db.collection("renders").add(render_doc)
+                
+                # If we have the base image, we could theoretically save it too
+                # For now, we'll just mark that we processed this render successfully
+                doc_ref = db.collection("renders").document(image_id)
+                doc_ref.set(render_doc)
+
+                # Record as a formal purchase for direct reporting
+                purchase_doc = {
+                    "userId": user["uid"],
+                    "email": user.get("email", "unknown"),
+                    "productId": f"render_{style}",
+                    "amount": 2.50,
+                    "currency": "EUR",
+                    "timestamp": datetime.now(timezone.utc),
+                    "renderId": image_id,
+                    "method": "simulated_bizum"
+                }
+                db.collection("purchases").add(purchase_doc)
 
             return jsonify({
+                "image_id": image_id,
                 "image_base64": image_b64,
                 "full_prompt": result["full_prompt"],
                 "style_description": result["style_description"],
