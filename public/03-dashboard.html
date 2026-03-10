@@ -5,6 +5,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
@@ -52,13 +56,20 @@
 <a class="text-sm font-medium text-nebula-silver hover:text-lunar-white" href="07-consejos-decoracion.html">Blog</a>
 </div>
 <div class="flex items-center gap-4">
-<a href="02-upload-wizard.html" class="bg-primary hover:bg-primary/90 text-background-dark px-5 py-2 rounded-lg font-bold text-sm transition-all flex items-center gap-2">
-<span class="material-symbols-outlined text-sm">add_circle</span>
-                Nuevo Render
-            </a>
-<a href="06-perfil-usuario.html" class="w-10 h-10 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center overflow-hidden">
-<img class="w-full h-full object-cover" data-alt="User profile avatar male professional" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDmZ1Hx1TiaJatKqtsSgCiT39qL-9JxbCOiqn6OCgvjECgChkUrOCtEdJWUddM5M_mgvtyGUGRswdpaAOH4dyBwLFK6_1vB3e4SPE-wRlNNFjymfrL5kUoILjjdXG6K-XOU6DnCcPRSEeU2sBdiTbvVDZIkYgUOXlzC7a8Z3J5mtRYcvWyxtEXI4X2GTAktE5n9o2d4hqvig3w8o-YGyUvdJGqvewYxY91tOMbNhcBZQGc4bBK_4yhuO0Saody4RQQuvFHdSo-jOdWz"/>
-</a>
+    <a href="02-upload-wizard.html" class="bg-primary hover:bg-primary/90 text-background-dark px-5 py-2 rounded-lg font-bold text-sm transition-all flex items-center gap-2">
+        <span class="material-symbols-outlined text-sm">add_circle</span>
+        Nuevo Render
+    </a>
+    <div id="admin-link-container" class="hidden">
+        <a href="admin-dashboard.html" class="text-primary hover:text-primary/80 transition-colors">
+            <span class="material-symbols-outlined">admin_panel_settings</span>
+        </a>
+    </div>
+    <a href="06-perfil-usuario.html" class="flex items-center gap-3 group">
+        <div id="user-initials" class="w-10 h-10 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-primary font-bold">
+            U
+        </div>
+    </a>
 </div>
 </nav>
 <main class="max-w-7xl mx-auto px-6 py-10">
@@ -120,114 +131,12 @@
 </div>
 </div>
 <!-- Renders Grid -->
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-<!-- Card 1: Completed -->
-<div class="glass rounded-xl overflow-hidden amber-glow transition-all group">
-<div class="relative h-56 overflow-hidden">
-<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="Modern living room after AI interior design rendering" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJ9uXK3LwIXRhBMEEx2bLIhHPvZr7nv4qFu5GvK5TVXkIaM7RL_beDCCUCwzZIe9HizvuKPkvmf0ADp2GTJzFUbccYZJXnQxhfdQ68HtKDMiIeH1RvA-ULxa_7gfixtfewXaWN2VP2Un0D4Om-JpqX5UXbEzUVkYlj7EfWSWK9dnzQnwaSNNekVMxLISqrDs4WcIIdr1AnBdTpeDHIBctmnw5O4uqTNC5id5WlUq2Fm3Ooeb4Z8bseEmpACP8Z4NZdPGVZ07Ei5_X0"/>
-<div class="absolute top-3 left-3 bg-green-500/90 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded">Completado</div>
-<div class="absolute bottom-3 right-3 bg-black/60 backdrop-blur-md text-white p-2 rounded-lg cursor-pointer">
-<span class="material-symbols-outlined text-lg">compare</span>
-</div>
-</div>
-<div class="p-5">
-<h3 class="text-lunar-white font-bold text-lg mb-1">Salón Principal - Estilo Moderno</h3>
-<p class="text-nebula-silver text-xs mb-4 flex items-center gap-1">
-<span class="material-symbols-outlined text-xs">calendar_today</span> Hace 2 horas
-                    </p>
-<button class="w-full bg-primary/20 hover:bg-primary text-primary hover:text-background-dark py-2.5 rounded-lg font-bold text-sm transition-colors flex items-center justify-center gap-2">
-<span class="material-symbols-outlined text-sm">download</span>
-                        Descargar HD
-                    </button>
-</div>
-</div>
-<!-- Card 2: Completed -->
-<div class="glass rounded-xl overflow-hidden amber-glow transition-all group">
-<div class="relative h-56 overflow-hidden">
-<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="Minimalist bedroom interior render with natural light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC8WUr517MO9kYlRsa3hU2pipGMDzMQJX8tZmPxPzrsjTDmw2BhwYVAR-dfyA7FO3P848QPn97Mlu8Am4Rdfx4bFteZH902XGLqUfAyVzsXcom1UCZoFtkvPn4uY5kqAeK5r2oeAmF-Q4l3C_Qr-LbRv7hymlMNAFmPjYhZ5p_MLlN5LTS6CWaqg4YDCvdm4VQ86b97ZeuZUFHAlYspjzubQ5boznLpLrojhzcz8i6LlH_S_tRjv5yasjatZuLxh9_8Q6qtM_Xiq1vU"/>
-<div class="absolute top-3 left-3 bg-green-500/90 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded">Completado</div>
-</div>
-<div class="p-5">
-<h3 class="text-lunar-white font-bold text-lg mb-1">Dormitorio Master</h3>
-<p class="text-nebula-silver text-xs mb-4 flex items-center gap-1">
-<span class="material-symbols-outlined text-xs">calendar_today</span> Hace 1 día
-                    </p>
-<button class="w-full bg-primary/20 hover:bg-primary text-primary hover:text-background-dark py-2.5 rounded-lg font-bold text-sm transition-colors flex items-center justify-center gap-2">
-<span class="material-symbols-outlined text-sm">download</span>
-                        Descargar HD
-                    </button>
-</div>
-</div>
-<!-- Card 3: In Progress -->
-<div class="glass rounded-xl overflow-hidden amber-glow transition-all">
-<div class="relative h-56 bg-slate-800/50 overflow-hidden flex items-center justify-center">
-<div class="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-primary/10 animate-pulse"></div>
-<div class="flex flex-col items-center gap-3 z-10">
-<div class="relative">
-<span class="material-symbols-outlined text-5xl text-purple-400 drop-shadow-[0_0_10px_rgba(168,85,247,0.5)]">settings_suggest</span>
-</div>
-<p class="text-lunar-white font-black text-xl tracking-wider">73%</p>
-</div>
-<div class="absolute bottom-0 left-0 w-full h-1.5 bg-white/10">
-<div class="h-full bg-primary w-[73%] shadow-[0_0_10px_#e49f0c]"></div>
-</div>
-</div>
-<div class="p-5">
-<h3 class="text-lunar-white font-bold text-lg mb-1">Cocina Minimalista</h3>
-<p class="text-purple-400 text-sm font-semibold mb-4 animate-pulse">Procesando render...</p>
-<button class="w-full bg-white/5 text-nebula-silver py-2.5 rounded-lg font-bold text-sm cursor-not-allowed" disabled="">
-                        Espere por favor
-                    </button>
-</div>
-</div>
-<!-- Card 4: Completed -->
-<div class="glass rounded-xl overflow-hidden amber-glow transition-all group">
-<div class="relative h-56 overflow-hidden">
-<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="Scandinavian dining room design AI render" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDO0Nsn1GMG4Bg1dE8oBX1eOzPZcbmwN142zbwjMLQ5h5lZf6ZsacQBt81rElosoxqZKCpfTNdmSyF87UhTj9H5bOfW9dnZaHCcO6Sz9neD2-Dwx5g8Z1AtDvJ5eZPapfTLRW27W0uY17JL9nZMgi7NKHs85I6wUkzeLe1DBtgk0S5hleOMT5avroWa1eAJ2rUAg3aZArtSDPfKQs-ZGLx0i9guPSuIJ_A5VeGOWR4lznK04llqxGzr8w2Rzxj9ywi8ErY3zSstwRbX"/>
-<div class="absolute top-3 left-3 bg-green-500/90 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded">Completado</div>
-</div>
-<div class="p-5">
-<h3 class="text-lunar-white font-bold text-lg mb-1">Comedor Escandinavo</h3>
-<p class="text-nebula-silver text-xs mb-4 flex items-center gap-1">
-<span class="material-symbols-outlined text-xs">calendar_today</span> Hace 3 días
-                    </p>
-<button class="w-full bg-primary/20 hover:bg-primary text-primary hover:text-background-dark py-2.5 rounded-lg font-bold text-sm transition-colors flex items-center justify-center gap-2">
-<span class="material-symbols-outlined text-sm">download</span>
-                        Descargar HD
-                    </button>
-</div>
-</div>
-<!-- Card 5: In Queue -->
-<div class="glass rounded-xl overflow-hidden amber-glow transition-all">
-<div class="relative h-56 bg-slate-900/80 flex flex-col items-center justify-center gap-4">
-<span class="material-symbols-outlined text-4xl text-nebula-silver">hourglass_top</span>
-<p class="text-nebula-silver font-medium">En cola de procesamiento</p>
-</div>
-<div class="p-5">
-<h3 class="text-lunar-white font-bold text-lg mb-1">Oficina / Estudio</h3>
-<p class="text-nebula-silver text-sm mb-4">Posición en cola: #3</p>
-<button class="w-full bg-white/5 text-nebula-silver py-2.5 rounded-lg font-bold text-sm cursor-not-allowed" disabled="">
-                        En espera
-                    </button>
-</div>
-</div>
-<!-- Card 6: Completed -->
-<div class="glass rounded-xl overflow-hidden amber-glow transition-all group">
-<div class="relative h-56 overflow-hidden">
-<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="Luxury bathroom marble interior design AI render" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDSsib99Goiq6Dw2KnIhHAIS9OcKNP7Z1w9zPEalAKPL7ZOZUhjn-XSq_PCZUzdbQltov369mFBmIoTvcU6VfzTMvTm3Ftv_AU2BlO1TA5pqok4IvZbfOETnrUfET5rg1rozF-QV2PJIaZ0_6sQ9BVFwRYJvhKvZcAWhHdjrUsBrv2w6FjuLR3xHRtbi_7X_Lg-Tn5PieE5N0rKI4f2AgK2EXazeCosc0WhKzNE0zFb_Or_BC9fKsn4JjtwL_AOIJKRZgzxmhUFozCg"/>
-<div class="absolute top-3 left-3 bg-green-500/90 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded">Completado</div>
-</div>
-<div class="p-5">
-<h3 class="text-lunar-white font-bold text-lg mb-1">Baño de Lujo - Mármol</h3>
-<p class="text-nebula-silver text-xs mb-4 flex items-center gap-1">
-<span class="material-symbols-outlined text-xs">calendar_today</span> Hace 1 semana
-                    </p>
-<button class="w-full bg-primary/20 hover:bg-primary text-primary hover:text-background-dark py-2.5 rounded-lg font-bold text-sm transition-colors flex items-center justify-center gap-2">
-<span class="material-symbols-outlined text-sm">download</span>
-                        Descargar HD
-                    </button>
-</div>
-</div>
+<div id="renders-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <!-- Renders will be loaded here -->
+    <div class="col-span-full py-20 text-center text-nebula-silver" id="loading-renders">
+        <svg class="animate-spin h-10 w-10 mx-auto mb-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+        Cargando tus renders...
+    </div>
 </div>
 <!-- Call to Action -->
 <div class="mt-20 text-center pb-20">
@@ -255,4 +164,87 @@
 <p class="text-nebula-silver text-xs">© 2024 RenderRoom AI. Todos los derechos reservados.</p>
 </div>
 </footer>
-</body></html>
+<script>
+// ── Firebase Config ─────────────────────────────
+const firebaseConfig = {
+  projectId: "gen-lang-client-0426824151",
+  appId: "1:124806819551:web:1c90d1154b458fa064036a",
+  storageBucket: "gen-lang-client-0426824151.firebasestorage.app",
+  apiKey: "AIzaSyDj99qdmDt4GiVeRkvCSfTOSDw3uqD-_Ew",
+  authDomain: "gen-lang-client-0426824151.firebaseapp.com",
+  messagingSenderId: "124806819551"
+};
+firebase.initializeApp(firebaseConfig);
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+firebase.auth().onAuthStateChanged(async user => {
+    if (!user) {
+        window.location.href = '01-landing-page.html';
+    } else {
+        // Update UI
+        const initials = (user.displayName || user.email || 'U').charAt(0).toUpperCase();
+        document.getElementById('user-initials').textContent = initials;
+        
+        // Check Admin
+        try {
+            const doc = await db.collection('users').doc(user.uid).get();
+            if (doc.exists && doc.data().isAdmin) {
+                document.getElementById('admin-link-container').classList.remove('hidden');
+            }
+        } catch (e) {
+            console.error("Admin check error:", e);
+        }
+
+        user.getIdToken().then(token => {
+            localStorage.setItem('rr_token', token);
+            loadRenders();
+        });
+    }
+});
+
+async function loadRenders() {
+    const grid = document.getElementById('renders-grid');
+    try {
+        const res = await fetch('/api/my-renders', {
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('rr_token')}` }
+        });
+        const data = await res.json();
+        
+        grid.innerHTML = '';
+        if (data.length === 0) {
+            grid.innerHTML = '<div class="col-span-full py-20 text-center text-nebula-silver">Aún no tienes renders. ¡Crea el primero!</div>';
+            return;
+        }
+
+        data.forEach(render => {
+            const date = new Date(render.createdAt).toLocaleDateString();
+            const card = `
+                <div class="glass rounded-xl overflow-hidden amber-glow transition-all group">
+                    <div class="relative h-56 overflow-hidden">
+                        <img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" src="${render.imageUrl}" alt="${render.style}"/>
+                        <div class="absolute top-3 left-3 bg-green-500/90 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded">Completado</div>
+                    </div>
+                    <div class="p-5">
+                        <h3 class="text-lunar-white font-bold text-lg mb-1">Estilo ${render.style}</h3>
+                        <p class="text-nebula-silver text-xs mb-4 flex items-center gap-1">
+                            <span class="material-symbols-outlined text-xs">calendar_today</span> ${date}
+                        </p>
+                        <a href="${render.imageUrl}" target="_blank" download class="w-full bg-primary/20 hover:bg-primary text-primary hover:text-background-dark py-2.5 rounded-lg font-bold text-sm transition-colors flex items-center justify-center gap-2">
+                            <span class="material-symbols-outlined text-sm">download</span>
+                            Descargar HD
+                        </a>
+                    </div>
+                </div>
+            `;
+            grid.innerHTML += card;
+        });
+
+    } catch (e) {
+        grid.innerHTML = '<div class="col-span-full py-20 text-center text-red-400">Error al cargar renders.</div>';
+    }
+}
+</script>
+</body>
+</html>

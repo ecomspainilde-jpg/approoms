@@ -1,265 +1,536 @@
-<html class="dark"><head>
+<!DOCTYPE html>
+<html class="dark" lang="es">
+<head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RenderRoom AI - Transforma tu Habitación con IA</title>
+<meta name="description" content="Rediseña cualquier habitación con inteligencia artificial. Sube una foto, elige un estilo y recibe un render profesional en segundos por solo 2,50€."/>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 <script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#f0a400",
-                        "background-light": "#f8f7f5",
-                        "background-dark": "#0D1117",
-                        "charcoal": "#161B22",
-                        "nebula": "#C9D1D9"
-                    },
-                    fontFamily: {
-                        "display": ["Inter", "sans-serif"]
-                    },
-                    borderRadius: {
-                        "DEFAULT": "0.5rem",
-                        "lg": "1rem",
-                        "xl": "1.5rem",
-                        "full": "9999px"
-                    },
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: {
+                    "primary": "#f0a400",
+                    "background-light": "#f8f7f5",
+                    "background-dark": "#0D1117",
+                    "charcoal": "#161B22",
+                    "nebula": "#C9D1D9"
                 },
+                fontFamily: { "display": ["Inter", "sans-serif"] },
+                borderRadius: { "DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px" },
             },
-        }
-    </script>
+        },
+    }
+</script>
 <style>
-        .glass-nav {
-            background: rgba(13, 17, 23, 0.7);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-        }
-        .amber-glow {
-            box-shadow: 0 0 20px rgba(240, 164, 0, 0.15);
-        }
-        .gradient-border {
-            position: relative;
-            background: #161B22;
-            border-radius: 1.5rem;
-        }
-        .gradient-border::before {
-            content: "";
-            position: absolute;
-            inset: -2px;
-            z-index: -1;
-            background: linear-gradient(45deg, #f0a400, #7c3aed);
-            border-radius: 1.6rem;
-        }
-    </style>
+    .glass-nav { background: rgba(13,17,23,0.7); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+    .amber-glow { box-shadow: 0 0 20px rgba(240,164,0,0.15); }
+    .gradient-border { position: relative; background: #161B22; border-radius: 1.5rem; }
+    .gradient-border::before { content:""; position:absolute; inset:-2px; z-index:-1; background:linear-gradient(45deg,#f0a400,#7c3aed); border-radius:1.6rem; }
+    /* Auth modal */
+    #auth-modal { transition: opacity .3s, visibility .3s; }
+    #auth-modal.hidden { opacity:0; visibility:hidden; pointer-events:none; }
+    #auth-modal:not(.hidden) { opacity:1; visibility:visible; }
+    .modal-card { animation: slideUp .35s ease; }
+    @keyframes slideUp { from { opacity:0; transform:translateY(30px) } to { opacity:1; transform:translateY(0) } }
+    .tab-btn.active { color:#f0a400; border-bottom-color:#f0a400; }
+    .tab-btn { border-bottom:2px solid transparent; transition:all .2s; }
+    
+    /* Before/After Animation */
+    @keyframes slide-clip {
+        0%, 10% { clip-path: inset(0 100% 0 0); }
+        45%, 55% { clip-path: inset(0 0% 0 0); }
+        90%, 100% { clip-path: inset(0 100% 0 0); }
+    }
+    @keyframes slide-bar {
+        0%, 10% { left: 0%; }
+        45%, 55% { left: 100%; }
+        90%, 100% { left: 0%; }
+    }
+    .after-layer { animation: slide-clip 8s ease-in-out infinite; }
+    .slider-bar { animation: slide-bar 8s ease-in-out infinite; }
+</style>
 </head>
 <body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-nebula antialiased selection:bg-primary/30">
+
+<!-- ── AUTH MODAL ─────────────────────────────────────────── -->
+<div id="auth-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="closeAuth()"></div>
+    <div class="modal-card relative w-full max-w-md bg-charcoal rounded-2xl border border-white/10 shadow-2xl overflow-hidden">
+        <!-- Close -->
+        <button onclick="closeAuth()" class="absolute top-4 right-4 text-nebula/50 hover:text-nebula transition-colors z-10"><span class="material-symbols-outlined">close</span></button>
+        <!-- Logo -->
+        <div class="p-8 pb-0 text-center">
+            <div class="size-12 bg-gradient-to-br from-primary to-orange-600 rounded-xl flex items-center justify-center text-background-dark mx-auto mb-3">
+                <span class="material-symbols-outlined">deployed_code</span>
+            </div>
+            <h2 class="text-2xl font-black">Render<span class="text-primary">Room</span></h2>
+        </div>
+        <!-- Tabs -->
+        <div class="flex border-b border-white/10 mt-6 px-8">
+            <button id="tab-login" class="tab-btn active flex-1 py-3 text-sm font-semibold" onclick="switchTab('login')">Iniciar sesión</button>
+            <button id="tab-register" class="tab-btn flex-1 py-3 text-sm font-semibold text-nebula/60" onclick="switchTab('register')">Crear cuenta</button>
+        </div>
+        <!-- Login form -->
+        <div id="form-login" class="p-8 space-y-4">
+            <div>
+                <label class="text-xs text-nebula/60 font-semibold uppercase tracking-wider">Email</label>
+                <input id="login-email" type="email" placeholder="tu@email.com" class="w-full mt-1 bg-background-dark border border-white/10 rounded-xl px-4 py-3 text-sm text-nebula placeholder-nebula/30 focus:outline-none focus:ring-2 focus:ring-primary/50"/>
+            </div>
+            <div>
+                <label class="text-xs text-nebula/60 font-semibold uppercase tracking-wider">Contraseña</label>
+                <input id="login-password" type="password" placeholder="••••••••" class="w-full mt-1 bg-background-dark border border-white/10 rounded-xl px-4 py-3 text-sm text-nebula placeholder-nebula/30 focus:outline-none focus:ring-2 focus:ring-primary/50"/>
+            </div>
+            <button onclick="handleLogin()" class="w-full bg-primary hover:bg-primary/90 text-background-dark font-black py-3 rounded-xl transition-all amber-glow">
+                Entrar
+            </button>
+            <div class="relative py-2">
+                <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-white/10"></div></div>
+                <div class="relative flex justify-center text-xs uppercase"><span class="bg-charcoal px-2 text-nebula/40">O continuar con</span></div>
+            </div>
+            <button onclick="handleGoogleLogin()" class="w-full bg-white hover:bg-slate-100 text-slate-900 font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="size-5" alt="Google"/>
+                Google
+            </button>
+            <p class="text-center text-xs text-nebula/40">¿Olvidaste tu contraseña? <a href="#" class="text-primary hover:underline">Recupérala</a></p>
+            <div id="login-msg" class="text-center text-sm hidden"></div>
+        </div>
+        <!-- Register form -->
+        <div id="form-register" class="hidden p-8 space-y-4">
+            <div>
+                <label class="text-xs text-nebula/60 font-semibold uppercase tracking-wider">Nombre completo</label>
+                <input id="reg-name" type="text" placeholder="María García" class="w-full mt-1 bg-background-dark border border-white/10 rounded-xl px-4 py-3 text-sm text-nebula placeholder-nebula/30 focus:outline-none focus:ring-2 focus:ring-primary/50"/>
+            </div>
+            <div>
+                <label class="text-xs text-nebula/60 font-semibold uppercase tracking-wider">Email</label>
+                <input id="reg-email" type="email" placeholder="tu@email.com" class="w-full mt-1 bg-background-dark border border-white/10 rounded-xl px-4 py-3 text-sm text-nebula placeholder-nebula/30 focus:outline-none focus:ring-2 focus:ring-primary/50"/>
+            </div>
+            <div>
+                <label class="text-xs text-nebula/60 font-semibold uppercase tracking-wider">Contraseña</label>
+                <input id="reg-password" type="password" placeholder="Mínimo 8 caracteres" class="w-full mt-1 bg-background-dark border border-white/10 rounded-xl px-4 py-3 text-sm text-nebula placeholder-nebula/30 focus:outline-none focus:ring-2 focus:ring-primary/50"/>
+            </div>
+            <div class="flex items-start gap-3">
+                <input id="reg-terms" type="checkbox" class="mt-1 rounded border-white/20 bg-background-dark text-primary focus:ring-primary/50"/>
+                <label for="reg-terms" class="text-xs text-nebula/60 leading-relaxed">Acepto los <a href="#" class="text-primary hover:underline">términos de uso</a> y la <a href="#" class="text-primary hover:underline">política de privacidad</a></label>
+            </div>
+            <button onclick="handleRegister()" class="w-full bg-primary hover:bg-primary/90 text-background-dark font-black py-3 rounded-xl transition-all amber-glow">
+                Crear cuenta gratuita
+            </button>
+            <div class="relative py-2">
+                <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-white/10"></div></div>
+                <div class="relative flex justify-center text-xs uppercase"><span class="bg-charcoal px-2 text-nebula/40">O continuar con</span></div>
+            </div>
+            <button onclick="handleGoogleLogin()" class="w-full bg-white hover:bg-slate-100 text-slate-900 font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="size-5" alt="Google"/>
+                Google
+            </button>
+            <div id="reg-msg" class="text-center text-sm hidden"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ── NAV ───────────────────────────────────────────────── -->
 <nav class="fixed top-0 left-0 right-0 z-50 glass-nav border-b border-white/10">
-<div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-<div class="flex items-center gap-3">
-<div class="size-10 bg-gradient-to-br from-primary to-orange-600 rounded-lg flex items-center justify-center text-background-dark">
-<span class="material-symbols-outlined font-bold">deployed_code</span>
-</div>
-<h2 class="text-slate-100 text-2xl font-black tracking-tight">Render<span class="text-primary">Room</span></h2>
-</div>
-<div class="hidden md:flex items-center gap-10">
-<a class="text-sm font-medium hover:text-primary transition-colors" href="#como-funciona">Cómo Funciona</a>
-<a class="text-sm font-medium hover:text-primary transition-colors" href="#galeria">Galería</a>
-<a class="text-sm font-medium hover:text-primary transition-colors" href="#precios">Precios</a>
-<a class="text-sm font-medium hover:text-primary transition-colors" href="07-consejos-decoracion.html">Blog</a>
-<a class="text-sm font-medium hover:text-primary transition-colors" href="03-dashboard.html">Mis Renders</a>
-<a class="text-sm font-medium hover:text-primary transition-colors" href="06-perfil-usuario.html">Perfil</a>
-</div>
-<a href="02-upload-wizard.html" class="bg-primary hover:bg-primary/90 text-background-dark px-6 py-2.5 rounded-xl text-sm font-bold tracking-wide transition-all hover:scale-105 amber-glow">
-                Renderiza Ahora
-            </a>
-</div>
-</nav>
-<main class="pt-32">
-<section class="max-w-7xl mx-auto px-6 py-12 lg:py-20">
-<div class="grid lg:grid-cols-2 gap-16 items-center">
-<div class="space-y-8">
-<div class="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 px-4 py-1.5 rounded-full">
-<span class="size-2 bg-primary rounded-full animate-pulse"></span>
-<span class="text-primary text-xs font-bold uppercase tracking-widest">Nueva IA Generativa V4</span>
-</div>
-<h1 class="text-5xl lg:text-7xl font-black text-slate-100 leading-[1.1] tracking-tight">
-                        Transforma tu Habitación <br/>
-<span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-orange-400">con IA</span>
-</h1>
-<div class="flex flex-col gap-4">
-<div class="flex items-baseline gap-4">
-<span class="text-6xl font-black text-primary">2,50€</span>
-<div class="flex flex-col">
-<span class="text-slate-500 line-through text-lg font-medium">3,50€ precio de un perrito</span>
-<span class="bg-white/5 border border-white/10 text-white text-[10px] font-bold px-2 py-0.5 rounded-md w-fit mt-1">¡1€ MENOS!</span>
-</div>
-</div>
-<p class="text-lg text-slate-400 max-w-md">Rediseña cualquier espacio en segundos con realismo fotográfico profesional. Sin arquitectos, sin esperas.</p>
-</div>
-<div class="flex flex-col sm:flex-row gap-4">
-<a href="02-upload-wizard.html" class="bg-gradient-to-r from-primary to-orange-500 hover:opacity-90 text-background-dark px-8 py-4 rounded-xl text-lg font-black transition-all hover:scale-105 amber-glow flex items-center justify-center gap-2">
-<span class="material-symbols-outlined">upload_file</span>
-                            Sube tu Foto Ahora
-                        </a>
-</div>
-</div>
-<div class="relative group">
-<div class="absolute -inset-4 bg-primary/20 blur-3xl rounded-full opacity-30"></div>
-<div class="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
-<img alt="Luxury room before and after render comparison" class="w-full aspect-[4/3] object-cover" data-alt="Cinematic side-by-side comparison of a messy room and its AI redesign" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHnar0I75dBNNo0vN3W3BKEtOk48RO5MEEPL2ErhfeILLRyTcNHjtABzi3h24rhR04Xw8fDsn1Se4H8-_x_J13HUyGI4cNTf96lWc9Ts0YvPzY4MJQYcI94QatZTMjALx2Tb8BcnhzoWZvRS299lC_Doq9LzE6HKvaby0uC2WFs27sAVVIR8CRK8MnLjdwOYeXbEBjV95bLL0GAtyMsoKsDRhG-YBoiuEzrnP5Q2wzBZSEehqMP9cI5fUqE7bPT2fQtckr4O0l5VbQ"/>
-<div class="absolute inset-0 flex items-center justify-center">
-<div class="w-1 bg-white/50 h-full relative">
-<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-10 bg-white rounded-full flex items-center justify-center shadow-lg cursor-pointer">
-<span class="material-symbols-outlined text-background-dark">unfold_more</span>
-</div>
-</div>
-</div>
-<div class="absolute bottom-4 left-4 bg-background-dark/80 backdrop-blur px-3 py-1 rounded-lg text-xs font-bold text-white uppercase tracking-tighter">Antes</div>
-<div class="absolute bottom-4 right-4 bg-primary/90 backdrop-blur px-3 py-1 rounded-lg text-xs font-bold text-background-dark uppercase tracking-tighter">Después (IA)</div>
-</div>
-</div>
-</div>
-</section>
-<section id="como-funciona" class="max-w-7xl mx-auto px-6 py-24 border-t border-white/5">
-<div class="text-center mb-16 space-y-4">
-<h2 class="text-3xl lg:text-4xl font-black text-slate-100">Cómo Funciona</h2>
-<p class="text-slate-400">Tu nuevo hogar está a solo tres pasos</p>
-</div>
-<div class="relative">
-<div class="hidden lg:block absolute top-1/2 left-0 w-full h-px border-t border-dashed border-primary/30 -z-10"></div>
-<div class="grid md:grid-cols-3 gap-8">
-<div class="bg-charcoal p-8 rounded-2xl border border-white/5 flex flex-col items-center text-center group hover:border-primary/30 transition-colors">
-<div class="size-16 bg-primary/10 text-primary rounded-full flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-background-dark transition-all">
-<span class="material-symbols-outlined text-3xl">add_photo_alternate</span>
-</div>
-<h3 class="text-xl font-bold text-slate-100 mb-2">Sube tu Foto</h3>
-<p class="text-slate-400 text-sm">Captura tu habitación actual con buena luz natural.</p>
-</div>
-<div class="bg-charcoal p-8 rounded-2xl border border-white/5 flex flex-col items-center text-center group hover:border-primary/30 transition-colors">
-<div class="size-16 bg-primary/10 text-primary rounded-full flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-background-dark transition-all">
-<span class="material-symbols-outlined text-3xl">style</span>
-</div>
-<h3 class="text-xl font-bold text-slate-100 mb-2">Elige tu Estilo</h3>
-<p class="text-slate-400 text-sm">Selecciona entre más de 20 estilos de diseño curados.</p>
-</div>
-<div class="bg-charcoal p-8 rounded-2xl border border-white/5 flex flex-col items-center text-center group hover:border-primary/30 transition-colors">
-<div class="size-16 bg-primary/10 text-primary rounded-full flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-background-dark transition-all">
-<span class="material-symbols-outlined text-3xl">magic_button</span>
-</div>
-<h3 class="text-xl font-bold text-slate-100 mb-2">Recibe el Diseño</h3>
-<p class="text-slate-400 text-sm">Descarga tu renderizado 4K ultra-realista en segundos.</p>
-</div>
-</div>
-</div>
-</section>
-<section id="galeria" class="bg-white/5 py-24">
-<div class="max-w-7xl mx-auto px-6">
-<div class="flex justify-between items-end mb-12">
-<div>
-<h2 class="text-3xl lg:text-4xl font-black text-slate-100 mb-2">Galería de Inspiración</h2>
-<p class="text-slate-400">Resultados reales generados por nuestra comunidad</p>
-</div>
-<button class="text-primary font-bold flex items-center gap-2 hover:underline">
-                        Ver todo <span class="material-symbols-outlined text-sm">arrow_forward</span>
-</button>
-</div>
-<div class="grid grid-cols-2 lg:grid-cols-3 gap-6">
-<div class="relative group aspect-square rounded-2xl overflow-hidden border border-white/10">
-<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="Modern minimalist living room render" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDQWUpjKgOEYra8zmJWr2VCifCD-lUnq5hV_HGRMF2wRJdcDMZbtfzFp6m-8aotXqBKz4Jlw4lAu7USRZGkusVadQ_y4fxtiJ8HNQlrzWAquhNvLCyUEXRQr_HKoEjr9LpJrDoURbfpQ0J9pprzJyX9ALY19d6wVKcZCnZ5OVXL6pp68YRSSsENKTY72t1HCeELB7MAZ1ANhhubCP6eIzb_kId0zPn2GaGEM63eEBvnZRYq4y86XsSEneUZBUbycGRHleBuCaqyNYAi"/>
-<div class="absolute inset-0 bg-gradient-to-t from-background-dark via-transparent to-transparent opacity-80"></div>
-<div class="absolute bottom-4 left-4">
-<p class="text-white font-bold">Moderno</p>
-</div>
-</div>
-<div class="relative group aspect-square rounded-2xl overflow-hidden border border-white/10">
-<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="Scandinavian style bedroom render" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZrrIvKTFLqHxJoHi_FXo04996A9dVLQUHdJ7kfMAxEvI3uqx-hXexqxOj_malhP2RVLFnIQWbxursLuaPSYJhcfmsNLZ3_irqT3sgNhe8dPNxvar25PFaUNGmViLW6J3pG3eZRR5YHNXOQ_egLBFnm7NK0yIhXrQtOJKx3H4UJ1sdHjGGpWBW7rM0k1M6cV_odS0Z5rioDKk1lyJz9N1hsiULKchxrHG1RC-IJIPOrGVYHD20_VTlg_ymPKr9OMSZYrGRfGYTmOhh"/>
-<div class="absolute inset-0 bg-gradient-to-t from-background-dark via-transparent to-transparent opacity-80"></div>
-<div class="absolute bottom-4 left-4">
-<p class="text-white font-bold">Nórdico</p>
-</div>
-</div>
-<div class="relative group aspect-square rounded-2xl overflow-hidden border border-white/10">
-<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="Industrial loft interior render" src="https://lh3.googleusercontent.com/aida-public/AB6AXuATikHqmuLZezQLfCydfw0_YkgCObP9NFHal9C0rKAw4LXu4Y90TF14gRjlhXi1y-Lp5TOf7xOBA5mkvXIuc2rXHXF5jL0Kr6MP-jbyA24QU4yzL35U-tcyDtA8M2H_dO_-WMdfOJzP9FWVwTEv-CfGguNvScXjrUIsQeGhCe-ktCwQmiC6KiG3yWhXnQHhlaFUzHbtlQlFOYv_qSqC8moqacIAEYmtWtktXRGEvKMsqfGSAUvwzhCo7pGYkNj-yDIazydC8KjMAWfU"/>
-<div class="absolute inset-0 bg-gradient-to-t from-background-dark via-transparent to-transparent opacity-80"></div>
-<div class="absolute bottom-4 left-4">
-<p class="text-white font-bold">Industrial</p>
-</div>
-</div>
-<div class="relative group aspect-square rounded-2xl overflow-hidden border border-white/10">
-<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="Minimalist apartment interior design" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBA1qYdoHIRPRAQsKae6k7Y6QTrc5ZlH5k9Ip-dFL6BEJE0IVyM7viZlXseMXtFnEn6wVpkq0S82ZwtyasLdiRjZr1orkSlp_ONsWMYuqOJ99JVt20otdA5sAUxSnDPaLjWXQ80fHst_0rjote5mgjkXaKdyNYdUsg1_Q3L4mJ_B4KBnxj39bfctroxrticbBpUF1H3zVrLdW92gJweHw7zqyfuZWgReFKsOJIMpeCX3dV0kBvjKdKFJzzbZfBDGFzriUrWbGyOAaV8"/>
-<div class="absolute inset-0 bg-gradient-to-t from-background-dark via-transparent to-transparent opacity-80"></div>
-<div class="absolute bottom-4 left-4">
-<p class="text-white font-bold">Minimalista</p>
-</div>
-</div>
-<div class="relative group aspect-square rounded-2xl overflow-hidden border border-white/10">
-<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="Rustic cozy cabin bedroom render" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCwXLOCIuSfGX6G4h_TYK6rawpZwSbp4IFxZc2ed8YS4-pJlNj6290wvsPBgKK4qxIeD0qGksvjGB-TKIdc09Kf7mJBqKqXl2rKjQg08CksFtE2ISjsMFrwUAhXqYdMFkUlEulBSz0Vy2a8N7JMFyoys5yxxT86RbtLVX4tAMx8Pd6kKbyOxVNRiFUePpkLilQehUSkq4F91MSztiSB7ya2kQVe1tfRyotZWzPBRwr0bncL3vtmvfJdiyeNQlNf-_38dtd3-7pHHTAV"/>
-<div class="absolute inset-0 bg-gradient-to-t from-background-dark via-transparent to-transparent opacity-80"></div>
-<div class="absolute bottom-4 left-4">
-<p class="text-white font-bold">Rústico</p>
-</div>
-</div>
-<div class="relative group aspect-square rounded-2xl overflow-hidden border border-white/10">
-<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="Bohemian eclectic living space" src="https://lh3.googleusercontent.com/aida-public/AB6AXuABxM-EuwUK6FPXM89_dgGgI1tK1rr9BquOaV5A5s9l50qOYWg1XUQgbZWspqGrm1leUHhnJdoew2ElMhEx4ob5m8l5Upg_Oq1EIbMubdk7kq3p-pXdLoHA3AA-JN59ApnQ1MQi9ym5K9uwwuY2UOqkghXox6Quv9yos-cdeyIkRZmywCv4F_s0niFNF4ti6wzCxTdOcambHcHCltBbbNUgiMsWea5vVsYqySlBnREda9uKvuIIuOqvOaaoKpHOxUX-jjPIFAKFCqZ_"/>
-<div class="absolute inset-0 bg-gradient-to-t from-background-dark via-transparent to-transparent opacity-80"></div>
-<div class="absolute bottom-4 left-4">
-<p class="text-white font-bold">Boho</p>
-</div>
-</div>
-</div>
-</div>
-</section>
-<section id="precios" class="max-w-7xl mx-auto px-6 py-24 flex justify-center">
-<div class="w-full max-w-md gradient-border p-12 text-center shadow-2xl">
-<h3 class="text-2xl font-bold text-slate-100 mb-2">Plan Render Único</h3>
-<div class="flex items-center justify-center gap-2 mb-8">
-<span class="text-5xl font-black text-primary">2,50€</span>
-<span class="text-slate-500 font-medium">/ render</span>
-</div>
-<ul class="text-left space-y-4 mb-10">
-<li class="flex items-center gap-3">
-<span class="material-symbols-outlined text-primary">check_circle</span>
-<span class="text-slate-300">Resolución 4K Ultra HD</span>
-</li>
-<li class="flex items-center gap-3">
-<span class="material-symbols-outlined text-primary">check_circle</span>
-<span class="text-slate-300">20+ Estilos disponibles</span>
-</li>
-<li class="flex items-center gap-3">
-<span class="material-symbols-outlined text-primary">check_circle</span>
-<span class="text-slate-300">Entrega en &lt; 30 segundos</span>
-</li>
-<li class="flex items-center gap-3">
-<span class="material-symbols-outlined text-primary">check_circle</span>
-<span class="text-slate-300">Uso comercial incluido</span>
-</li>
-</ul>
-<a href="02-upload-wizard.html" class="w-full block bg-primary hover:bg-primary/90 text-background-dark py-4 rounded-xl font-black text-lg transition-all amber-glow text-center">
-                    Comenzar Ahora
+    <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <div class="size-10 bg-gradient-to-br from-primary to-orange-600 rounded-lg flex items-center justify-center text-background-dark">
+                <span class="material-symbols-outlined font-bold">deployed_code</span>
+            </div>
+            <h1 class="text-slate-100 text-2xl font-black tracking-tight">Render<span class="text-primary">Room</span></h1>
+        </div>
+        <div class="hidden md:flex items-center gap-10">
+            <a class="text-sm font-medium hover:text-primary transition-colors" href="#como-funciona">Cómo Funciona</a>
+            <a class="text-sm font-medium hover:text-primary transition-colors" href="#galeria">Galería</a>
+            <a class="text-sm font-medium hover:text-primary transition-colors" href="#precios">Precios</a>
+            <a class="text-sm font-medium hover:text-primary transition-colors" href="07-consejos-decoracion.html">Blog</a>
+            <a class="text-sm font-medium hover:text-primary transition-colors" href="03-dashboard.html">Mis Renders</a>
+        </div>
+        <div class="flex items-center gap-3">
+            <!-- User status display -->
+            <div id="user-logged-out" class="flex items-center gap-3">
+                <button onclick="openAuth('login')" class="text-sm text-nebula/70 hover:text-primary transition-colors font-medium hidden md:block">Iniciar sesión</button>
+                <button onclick="openAuth('register')" class="bg-primary hover:bg-primary/90 text-background-dark px-5 py-2 rounded-xl text-sm font-bold tracking-wide transition-all hover:scale-105 amber-glow">Crear cuenta</button>
+            </div>
+            <div id="user-logged-in" class="hidden items-center gap-3">
+                <div id="admin-link-container" class="hidden">
+                    <a href="admin-dashboard.html" class="text-primary hover:text-primary/80 transition-colors">
+                        <span class="material-symbols-outlined">admin_panel_settings</span>
+                    </a>
+                </div>
+                <span id="user-greeting" class="text-sm text-nebula/70 hidden md:block"></span>
+                <a href="06-perfil-usuario.html" class="flex items-center gap-2 group">
+                    <div id="user-initials" class="w-8 h-8 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-primary font-bold text-xs group-hover:bg-primary/30 transition-colors">
+                        U
+                    </div>
                 </a>
-<p class="mt-4 text-xs text-slate-500 uppercase tracking-widest font-bold">Sin suscripciones mensuales</p>
-</div>
-</section>
+                <button onclick="handleLogout()" class="text-[10px] text-nebula/40 hover:text-primary transition-colors border border-white/5 px-2 py-1 rounded">Salir</button>
+                <a href="02-upload-wizard.html" class="bg-primary hover:bg-primary/90 text-background-dark px-5 py-2 rounded-xl text-sm font-bold tracking-wide transition-all hover:scale-105 amber-glow">Renderiza Ahora</a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<main class="pt-32">
+    <!-- ── HERO ──────────────────────────────────────────── -->
+    <section class="max-w-7xl mx-auto px-6 py-12 lg:py-20">
+        <div class="grid lg:grid-cols-2 gap-16 items-center">
+            <div class="space-y-8">
+                <div class="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 px-4 py-1.5 rounded-full">
+                    <span class="size-2 bg-primary rounded-full animate-pulse"></span>
+                    <span class="text-primary text-xs font-bold uppercase tracking-widest">Nueva IA Generativa V4</span>
+                </div>
+                <h2 class="text-5xl lg:text-7xl font-black text-slate-100 leading-[1.1] tracking-tight">
+                    Transforma tu Habitación <br/>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-orange-400">con IA</span>
+                </h2>
+                <div class="flex flex-col gap-4">
+                    <div class="flex items-baseline gap-4">
+                        <span class="text-6xl font-black text-primary">2,50€</span>
+                        <div class="flex flex-col">
+                            <span class="text-slate-500 line-through text-lg font-medium">3,50€ precio de un perrito</span>
+                            <span class="bg-white/5 border border-white/10 text-white text-[10px] font-bold px-2 py-0.5 rounded-md w-fit mt-1">¡1€ MENOS!</span>
+                        </div>
+                    </div>
+                    <p class="text-lg text-slate-400 max-w-md">Rediseña cualquier espacio en segundos con realismo fotográfico profesional. Sin arquitectos, sin esperas.</p>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <button onclick="handleStart()" class="bg-gradient-to-r from-primary to-orange-500 hover:opacity-90 text-background-dark px-8 py-4 rounded-xl text-lg font-black transition-all hover:scale-105 amber-glow flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined">upload_file</span> Sube tu Foto Ahora
+                    </button>
+                    <button onclick="openAuth('register')" class="border border-white/10 hover:border-primary/40 text-nebula px-8 py-4 rounded-xl text-lg font-semibold transition-all hover:scale-105 flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined text-primary">person_add</span> Crear cuenta gratis
+                    </button>
+                </div>
+            </div>
+            <div class="relative group">
+                <div class="absolute -inset-4 bg-primary/20 blur-3xl rounded-full opacity-30"></div>
+                <div class="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl aspect-[4/3] bg-background-dark">
+                    
+                    <!-- 1) Capa Base: Imagen "Antes" (mitad izquierda del split) -->
+                    <div class="absolute inset-0 bg-[url('img/hero_split.png')] bg-[length:200%_100%] bg-[position:0%_center]"></div>
+                    
+                    <!-- 2) Capa Superior Animada: Imagen "Después" (mitad derecha del split) -->
+                    <div class="after-layer absolute inset-0 bg-[url('img/hero_split.png')] bg-[length:200%_100%] bg-[position:100%_center]"></div>
+                    
+                    <!-- 3) Barra separadora animada -->
+                    <div class="slider-bar absolute top-0 bottom-0 w-1 bg-white shadow-[0_0_15px_rgba(255,255,255,0.8)] z-10">
+                        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-10 bg-white rounded-full flex items-center justify-center shadow-lg">
+                            <span class="material-symbols-outlined text-background-dark text-xl">compare_arrows</span>
+                        </div>
+                    </div>
+
+                    <div class="absolute bottom-4 left-4 bg-background-dark/80 backdrop-blur px-3 py-1 rounded-lg text-xs font-bold text-white uppercase tracking-tighter shadow-lg z-20">Antes</div>
+                    <div class="absolute bottom-4 right-4 bg-primary/90 backdrop-blur px-3 py-1 rounded-lg text-xs font-bold text-background-dark uppercase tracking-tighter shadow-lg z-20">Después (IA)</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── COMO FUNCIONA ─────────────────────────────────── -->
+    <section id="como-funciona" class="max-w-7xl mx-auto px-6 py-24 border-t border-white/5">
+        <div class="text-center mb-16 space-y-4">
+            <h2 class="text-3xl lg:text-4xl font-black text-slate-100">Cómo Funciona</h2>
+            <p class="text-slate-400">Tu nuevo hogar está a solo tres pasos</p>
+        </div>
+        <div class="relative">
+            <div class="hidden lg:block absolute top-1/2 left-0 w-full h-px border-t border-dashed border-primary/30 -z-10"></div>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-charcoal p-8 rounded-2xl border border-white/5 flex flex-col items-center text-center group hover:border-primary/30 transition-colors">
+                    <div class="size-16 bg-primary/10 text-primary rounded-full flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-background-dark transition-all">
+                        <span class="material-symbols-outlined text-3xl">add_photo_alternate</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-100 mb-2">Sube tu Foto</h3>
+                    <p class="text-slate-400 text-sm">Captura tu habitación actual. Nuestra IA (Gemini Vision) la analiza automáticamente.</p>
+                </div>
+                <div class="bg-charcoal p-8 rounded-2xl border border-white/5 flex flex-col items-center text-center group hover:border-primary/30 transition-colors">
+                    <div class="size-16 bg-primary/10 text-primary rounded-full flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-background-dark transition-all">
+                        <span class="material-symbols-outlined text-3xl">style</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-100 mb-2">Elige tu Estilo</h3>
+                    <p class="text-slate-400 text-sm">Selecciona entre 6 estilos curados: Moderno, Nórdico, Industrial, Minimalista, Rústico o Bohemio.</p>
+                </div>
+                <div class="bg-charcoal p-8 rounded-2xl border border-white/5 flex flex-col items-center text-center group hover:border-primary/30 transition-colors">
+                    <div class="size-16 bg-primary/10 text-primary rounded-full flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-background-dark transition-all">
+                        <span class="material-symbols-outlined text-3xl">magic_button</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-100 mb-2">Recibe Propuesta</h3>
+                    <p class="text-slate-400 text-sm">Descarga tu render 4K y lee la propuesta completa: análisis, cambios detallados y prompt exacto.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── GALERÍA ────────────────────────────────────────── -->
+    <section id="galeria" class="bg-white/5 py-24">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex justify-between items-end mb-12">
+                <div>
+                    <h2 class="text-3xl lg:text-4xl font-black text-slate-100 mb-2">Galería de Estilos</h2>
+                    <p class="text-slate-400">Haz clic en cada estilo para ver todos los detalles</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 lg:grid-cols-3 gap-6">
+                <a href="08-estilo-moderno.html" class="relative group aspect-square rounded-2xl overflow-hidden border border-white/10 hover:border-primary/40 transition-colors">
+                    <img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDQWUpjKgOEYra8zmJWr2VCifCD-lUnq5hV_HGRMF2wRJdcDMZbtfzFp6m-8aotXqBKz4Jlw4lAu7USRZGkusVadQ_y4fxtiJ8HNQlrzWAquhNvLCyUEXRQr_HKoEjr9LpJrDoURbfpQ0J9pprzJyX9ALY19d6wVKcZCnZ5OVXL6pp68YRSSsENKTY72t1HCeELB7MAZ1ANhhubCP6eIzb_kId0zPn2GaGEM63eEBvnZRYq4y86XsSEneUZBUbycGRHleBuCaqyNYAi" alt="Moderno"/>
+                    <div class="absolute inset-0 bg-gradient-to-t from-background-dark via-transparent to-transparent opacity-80"></div>
+                    <div class="absolute bottom-4 left-4 flex items-center gap-2">
+                        <p class="text-white font-bold">Moderno</p>
+                        <span class="material-symbols-outlined text-primary text-sm">arrow_forward</span>
+                    </div>
+                </a>
+                <a href="09-estilo-nordico.html" class="relative group aspect-square rounded-2xl overflow-hidden border border-white/10 hover:border-primary/40 transition-colors">
+                    <img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZrrIvKTFLqHxJoHi_FXo04996A9dVLQUHdJ7kfMAxEvI3uqx-hXexqxOj_malhP2RVLFnIQWbxursLuaPSYJhcfmsNLZ3_irqT3sgNhe8dPNxvar25PFaUNGmViLW6J3pG3eZRR5YHNXOQ_egLBFnm7NK0yIhXrQtOJKx3H4UJ1sdHjGGpWBW7rM0k1M6cV_odS0Z5rioDKk1lyJz9N1hsiULKchxrHG1RC-IJIPOrGVYHD20_VTlg_ymPKr9OMSZYrGRfGYTmOhh" alt="Nórdico"/>
+                    <div class="absolute inset-0 bg-gradient-to-t from-background-dark via-transparent to-transparent opacity-80"></div>
+                    <div class="absolute bottom-4 left-4 flex items-center gap-2">
+                        <p class="text-white font-bold">Nórdico</p>
+                        <span class="material-symbols-outlined text-primary text-sm">arrow_forward</span>
+                    </div>
+                </a>
+                <a href="10-estilo-industrial.html" class="relative group aspect-square rounded-2xl overflow-hidden border border-white/10 hover:border-primary/40 transition-colors">
+                    <img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuATikHqmuLZezQLfCydfw0_YkgCObP9NFHal9C0rKAw4LXu4Y90TF14gRjlhXi1y-Lp5TOf7xOBA5mkvXIuc2rXHXF5jL0Kr6MP-jbyA24QU4yzL35U-tcyDtA8M2H_dO_-WMdfOJzP9FWVwTEv-CfGguNvScXjrUIsQeGhCe-ktCwQmiC6KiG3yWhXnQHhlaFUzHbtlQlFOYv_qSqC8moqacIAEYmtWtktXRGEvKMsqfGSAUvwzhCo7pGYkNj-yDIazydC8KjMAWfU" alt="Industrial"/>
+                    <div class="absolute inset-0 bg-gradient-to-t from-background-dark via-transparent to-transparent opacity-80"></div>
+                    <div class="absolute bottom-4 left-4 flex items-center gap-2">
+                        <p class="text-white font-bold">Industrial</p>
+                        <span class="material-symbols-outlined text-primary text-sm">arrow_forward</span>
+                    </div>
+                </a>
+                <a href="11-estilo-minimalista.html" class="relative group aspect-square rounded-2xl overflow-hidden border border-white/10 hover:border-primary/40 transition-colors">
+                    <img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBA1qYdoHIRPRAQsKae6k7Y6QTrc5ZlH5k9Ip-dFL6BEJE0IVyM7viZlXseMXtFnEn6wVpkq0S82ZwtyasLdiRjZr1orkSlp_ONsWMYuqOJ99JVt20otdA5sAUxSnDPaLjWXQ80fHst_0rjote5mgjkXaKdyNYdUsg1_Q3L4mJ_B4KBnxj39bfctroxrticbBpUF1H3zVrLdW92gJweHw7zqyfuZWgReFKsOJIMpeCX3dV0kBvjKdKFJzzbZfBDGFzriUrWbGyOAaV8" alt="Minimalista"/>
+                    <div class="absolute inset-0 bg-gradient-to-t from-background-dark via-transparent to-transparent opacity-80"></div>
+                    <div class="absolute bottom-4 left-4 flex items-center gap-2">
+                        <p class="text-white font-bold">Minimalista</p>
+                        <span class="material-symbols-outlined text-primary text-sm">arrow_forward</span>
+                    </div>
+                </a>
+                <a href="12-estilo-rustico.html" class="relative group aspect-square rounded-2xl overflow-hidden border border-white/10 hover:border-primary/40 transition-colors">
+                    <img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCwXLOCIuSfGX6G4h_TYK6rawpZwSbp4IFxZc2ed8YS4-pJlNj6290wvsPBgKK4qxIeD0qGksvjGB-TKIdc09Kf7mJBqKqXl2rKjQg08CksFtE2ISjsMFrwUAhXqYdMFkUlEulBSz0Vy2a8N7JMFyoys5yxxT86RbtLVX4tAMx8Pd6kKbyOxVNRiFUePpkLilQehUSkq4F91MSztiSB7ya2kQVe1tfRyotZWzPBRwr0bncL3vtmvfJdiyeNQlNf-_38dtd3-7pHHTAV" alt="Rústico"/>
+                    <div class="absolute inset-0 bg-gradient-to-t from-background-dark via-transparent to-transparent opacity-80"></div>
+                    <div class="absolute bottom-4 left-4 flex items-center gap-2">
+                        <p class="text-white font-bold">Rústico</p>
+                        <span class="material-symbols-outlined text-primary text-sm">arrow_forward</span>
+                    </div>
+                </a>
+                <a href="13-estilo-bohemio.html" class="relative group aspect-square rounded-2xl overflow-hidden border border-white/10 hover:border-primary/40 transition-colors">
+                    <img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuABxM-EuwUK6FPXM89_dgGgI1tK1rr9BquOaV5A5s9l50qOYWg1XUQgbZWspqGrm1leUHhnJdoew2ElMhEx4ob5m8l5Upg_Oq1EIbMubdk7kq3p-pXdLoHA3AA-JN59ApnQ1MQi9ym5K9uwwuY2UOqkghXox6Quv9yos-cdeyIkRZmywCv4F_s0niFNF4ti6wzCxTdOcambHcHCltBbbNUgiMsWea5vVsYqySlBnREda9uKvuIIuOqvOaaoKpHOxUX-jjPIFAKFCqZ_" alt="Bohemio"/>
+                    <div class="absolute inset-0 bg-gradient-to-t from-background-dark via-transparent to-transparent opacity-80"></div>
+                    <div class="absolute bottom-4 left-4 flex items-center gap-2">
+                        <p class="text-white font-bold">Boho</p>
+                        <span class="material-symbols-outlined text-primary text-sm">arrow_forward</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── PRECIOS ────────────────────────────────────────── -->
+    <section id="precios" class="max-w-7xl mx-auto px-6 py-24 flex justify-center">
+        <div class="w-full max-w-md gradient-border p-12 text-center shadow-2xl">
+            <h3 class="text-2xl font-bold text-slate-100 mb-2">Plan Render Único</h3>
+            <div class="flex items-center justify-center gap-2 mb-8">
+                <span class="text-5xl font-black text-primary">2,50€</span>
+                <span class="text-slate-500 font-medium">/ render</span>
+            </div>
+            <ul class="text-left space-y-4 mb-10">
+                <li class="flex items-center gap-3"><span class="material-symbols-outlined text-primary">check_circle</span><span class="text-slate-300">Análisis IA de tu habitación (Gemini Vision)</span></li>
+                <li class="flex items-center gap-3"><span class="material-symbols-outlined text-primary">check_circle</span><span class="text-slate-300">Render 4K Ultra HD con Vertex AI Imagen</span></li>
+                <li class="flex items-center gap-3"><span class="material-symbols-outlined text-primary">check_circle</span><span class="text-slate-300">Propuesta de diseño detallada</span></li>
+                <li class="flex items-center gap-3"><span class="material-symbols-outlined text-primary">check_circle</span><span class="text-slate-300">6 estilos · Entrega en &lt; 30 segundos</span></li>
+            </ul>
+            <button onclick="handleStart()" class="w-full block bg-primary hover:bg-primary/90 text-background-dark py-4 rounded-xl font-black text-lg transition-all amber-glow text-center">Comenzar Ahora</button>
+            <p class="mt-4 text-xs text-slate-500 uppercase tracking-widest font-bold">Sin suscripciones mensuales</p>
+        </div>
+    </section>
 </main>
+
 <footer class="border-t border-white/5 py-12">
-<div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
-<div class="flex items-center gap-3">
-<div class="size-8 bg-primary/20 rounded-lg flex items-center justify-center text-primary">
-<span class="material-symbols-outlined text-sm">deployed_code</span>
-</div>
-<h2 class="text-slate-100 text-lg font-bold tracking-tight">RenderRoom</h2>
-</div>
-<p class="text-slate-500 text-sm">Hecho con ❤️ e IA por el equipo de RenderRoom</p>
-<div class="flex gap-6 text-slate-500">
-<a class="hover:text-primary transition-colors" href="#"><span class="material-symbols-outlined">brand_awareness</span></a>
-<a class="hover:text-primary transition-colors" href="#"><span class="material-symbols-outlined">alternate_email</span></a>
-<a class="hover:text-primary transition-colors" href="#"><span class="material-symbols-outlined">policy</span></a>
-</div>
-</div>
-<div class="max-w-7xl mx-auto px-6 mt-8 pt-8 border-t border-white/5 text-center">
-<p class="text-slate-600 text-[10px] uppercase tracking-[0.2em] font-bold">© 2024 RenderRoom AI. Todos los derechos reservados.</p>
-</div>
+    <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
+        <div class="flex items-center gap-3">
+            <div class="size-8 bg-primary/20 rounded-lg flex items-center justify-center text-primary"><span class="material-symbols-outlined text-sm">deployed_code</span></div>
+            <h2 class="text-slate-100 text-lg font-bold tracking-tight">RenderRoom</h2>
+        </div>
+        <p class="text-slate-500 text-sm">Hecho con ❤️ e IA · RenderRoom 2024</p>
+        <div class="flex gap-6 text-slate-500">
+            <a class="hover:text-primary transition-colors" href="#"><span class="material-symbols-outlined">brand_awareness</span></a>
+            <a class="hover:text-primary transition-colors" href="#"><span class="material-symbols-outlined">alternate_email</span></a>
+            <a class="hover:text-primary transition-colors" href="#"><span class="material-symbols-outlined">policy</span></a>
+        </div>
+    </div>
+    <div class="max-w-7xl mx-auto px-6 mt-8 pt-8 border-t border-white/5 text-center">
+        <p class="text-slate-600 text-[10px] uppercase tracking-[0.2em] font-bold">© 2024 RenderRoom AI. Todos los derechos reservados.</p>
+    </div>
 </footer>
-</body></html>
+
+<script>
+// ── Firebase Config ─────────────────────────────
+const firebaseConfig = {
+  projectId: "gen-lang-client-0426824151",
+  appId: "1:124806819551:web:1c90d1154b458fa064036a",
+  storageBucket: "gen-lang-client-0426824151.firebasestorage.app",
+  apiKey: "AIzaSyDj99qdmDt4GiVeRkvCSfTOSDw3uqD-_Ew",
+  authDomain: "gen-lang-client-0426824151.firebaseapp.com",
+  messagingSenderId: "124806819551"
+};
+firebase.initializeApp(firebaseConfig);
+
+// ── Auth Logic ─────────────────────────────
+function handleStart() {
+    const user = firebase.auth().currentUser;
+    if (user) {
+        window.location.href = '02-upload-wizard.html';
+    } else {
+        openAuth('register');
+    }
+}
+
+function openAuth(tab) {
+    document.getElementById('auth-modal').classList.remove('hidden');
+    switchTab(tab || 'login');
+    document.body.style.overflow = 'hidden';
+}
+function closeAuth() {
+    document.getElementById('auth-modal').classList.add('hidden');
+    document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeAuth(); });
+
+function switchTab(tab) {
+    const isLogin = tab === 'login';
+    document.getElementById('form-login').classList.toggle('hidden', !isLogin);
+    document.getElementById('form-register').classList.toggle('hidden', isLogin);
+    document.getElementById('tab-login').classList.toggle('active', isLogin);
+    document.getElementById('tab-register').classList.toggle('active', !isLogin);
+    document.getElementById('tab-login').classList.toggle('text-nebula/60', !isLogin);
+    document.getElementById('tab-register').classList.toggle('text-nebula/60', isLogin);
+}
+
+async function handleRegister() {
+    const name = document.getElementById('reg-name').value.trim();
+    const email = document.getElementById('reg-email').value.trim();
+    const password = document.getElementById('reg-password').value;
+    const terms = document.getElementById('reg-terms').checked;
+    const msgEl = document.getElementById('reg-msg');
+    
+    if (!name || !email || !password) { showMsg(msgEl, 'Rellena todos los campos', 'error'); return; }
+    if (!terms) { showMsg(msgEl, 'Debes aceptar los términos', 'error'); return; }
+    if (password.length < 8) { showMsg(msgEl, 'La contraseña debe tener al menos 8 caracteres', 'error'); return; }
+    
+    try {
+        const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
+        await userCredential.user.updateProfile({ displayName: name });
+        showMsg(msgEl, '¡Cuenta creada con éxito!', 'success');
+        setTimeout(() => { closeAuth(); }, 1500);
+    } catch(e) { 
+        showMsg(msgEl, e.message || 'Error al registrar', 'error'); 
+    }
+}
+
+async function handleLogin() {
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    const msgEl = document.getElementById('login-msg');
+    
+    if (!email || !password) { showMsg(msgEl, 'Introduce email y contraseña', 'error'); return; }
+    
+    try {
+        await firebase.auth().signInWithEmailAndPassword(email, password);
+        showMsg(msgEl, '¡Bienvenido!', 'success');
+        setTimeout(() => { closeAuth(); }, 1200);
+    } catch(e) { 
+        showMsg(msgEl, e.message || 'Error al iniciar sesión', 'error'); 
+    }
+}
+
+async function handleGoogleLogin() {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    try {
+        await firebase.auth().signInWithPopup(provider);
+        closeAuth();
+        // The onAuthStateChanged listener will handle redirection or UI updates
+        window.location.href = '02-upload-wizard.html';
+    } catch (e) {
+        const msgEl = document.getElementById('tab-login').classList.contains('active') ? 
+                      document.getElementById('login-msg') : document.getElementById('reg-msg');
+        showMsg(msgEl, e.message || 'Error con Google Sign-in', 'error');
+    }
+}
+
+function handleLogout() {
+    firebase.auth().signOut();
+}
+
+function updateUserUI(user) {
+    document.getElementById('user-logged-out').style.display = user ? 'none' : 'flex';
+    document.getElementById('user-logged-in').style.display = user ? 'flex' : 'none';
+    if (user) {
+        document.getElementById('user-greeting').textContent = `Hola, ${user.displayName || user.email.split('@')[0]} 👋`;
+    }
+}
+
+firebase.auth().onAuthStateChanged(async user => {
+    updateUserUI(user);
+    if (user) {
+        // Update UI Initials
+        const initials = (user.displayName || user.email || 'U').charAt(0).toUpperCase();
+        const initialsEl = document.getElementById('user-initials');
+        if (initialsEl) initialsEl.textContent = initials;
+
+        // Save token for API calls
+        const token = await user.getIdToken();
+        localStorage.setItem('rr_token', token);
+        
+        // Sync user data to Firestore
+        syncUserToFirestore(user);
+        
+        // Check Admin
+        const db = firebase.firestore();
+        try {
+            const doc = await db.collection('users').doc(user.uid).get();
+            if (doc.exists && doc.data().isAdmin) {
+                document.getElementById('admin-link-container').classList.remove('hidden');
+            }
+        } catch (e) {
+            console.error("Admin check error:", e);
+        }
+    } else {
+        localStorage.removeItem('rr_token');
+        document.getElementById('admin-link-container').classList.add('hidden');
+    }
+});
+
+async function syncUserToFirestore(user) {
+    const db = firebase.firestore();
+    const userRef = db.collection('users').doc(user.uid);
+    
+    try {
+        const doc = await userRef.get();
+        if (!doc.exists) {
+            await userRef.set({
+                displayName: user.displayName || '',
+                email: user.email,
+                phone: user.phoneNumber || '',
+                location: '',
+                isAdmin: false,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        }
+    } catch (e) {
+        console.error("Error syncing user to Firestore:", e);
+    }
+}
+
+function showMsg(el, text, type) {
+    el.textContent = text;
+    el.className = `text-center text-sm mt-1 ${type === 'success' ? 'text-green-400' : 'text-red-400'}`;
+    el.classList.remove('hidden');
+}
+</script>
+</body>
+</html>

@@ -1,283 +1,694 @@
 <!DOCTYPE html>
-
-<html class="dark" lang="es"><head>
+<html class="dark" lang="es">
+<head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>RenderRoom - Paso 1: Sube tu Foto</title>
+<title>RenderRoom - Crea tu Diseño</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 <script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#f0a400",
-                        "background-light": "#f8f7f5",
-                        "background-dark": "#0D1117",
-                        "surface-dark": "#161B22",
-                        "border-dark": "#484F58",
-                        "muted-text": "#8B949E",
-                    },
-                    fontFamily: {
-                        "display": ["Inter", "sans-serif"]
-                    },
-                    borderRadius: {
-                        "DEFAULT": "0.5rem",
-                        "lg": "1rem",
-                        "xl": "1.5rem",
-                        "full": "9999px"
-                    },
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: {
+                    "primary": "#f0a400",
+                    "background-dark": "#0D1117",
+                    "surface-dark": "#161B22",
+                    "border-dark": "#30363D",
+                    "muted-text": "#8B949E",
                 },
+                fontFamily: { "display": ["Inter", "sans-serif"] },
             },
-        }
-    </script>
-</head>
-<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
-<div class="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden">
-<div class="layout-container flex h-full grow flex-col">
-<!-- Top Navigation Bar -->
-<header class="flex items-center justify-between border-b border-border-dark px-10 py-4 sticky top-0 bg-background-dark/80 backdrop-blur-md z-50">
-<div class="flex items-center gap-3">
-<div class="size-8 text-primary">
-<svg fill="currentColor" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-<path d="M44 11.2727C44 14.0109 39.8386 16.3957 33.69 17.6364C39.8386 18.877 44 21.2618 44 24C44 26.7382 39.8386 29.123 33.69 30.3636C39.8386 31.6043 44 33.9891 44 36.7273C44 40.7439 35.0457 44 24 44C12.9543 44 4 40.7439 4 36.7273C4 33.9891 8.16144 31.6043 14.31 30.3636C8.16144 29.123 4 26.7382 4 24C4 21.2618 8.16144 18.877 14.31 17.6364C8.16144 16.3957 4 14.0109 4 11.2727C4 7.25611 12.9543 4 24 4C35.0457 4 44 7.25611 44 11.2727Z"></path>
-</svg>
-</div>
-<h2 class="text-xl font-black tracking-tight">RenderRoom</h2>
-</div>
-<div class="flex items-center gap-10">
-<nav class="hidden md:flex items-center gap-8">
-<a href="01-landing-page.html" class="text-sm font-medium hover:text-primary transition-colors">Inicio</a>
-<div class="flex flex-col items-center">
-<span class="text-primary text-xs font-bold uppercase tracking-wider">Paso 1</span>
-<span class="text-sm font-semibold">Sube tu Foto</span>
-</div>
-<div class="w-12 h-[2px] bg-border-dark"></div>
-<a href="04-pago-bizum.html" class="flex flex-col items-center opacity-50 hover:opacity-80 transition-opacity">
-<span class="text-muted-text text-xs font-bold uppercase tracking-wider">Paso 2</span>
-<span class="text-sm font-semibold">Elige Estilo</span>
-</a>
-<div class="w-12 h-[2px] bg-border-dark"></div>
-<a href="04-pago-bizum.html" class="flex flex-col items-center opacity-50 hover:opacity-80 transition-opacity">
-<span class="text-muted-text text-xs font-bold uppercase tracking-wider">Paso 3</span>
-<span class="text-sm font-semibold">Confirma y Paga</span>
-</a>
-</nav>
-<div class="bg-primary/10 border border-primary/20 rounded-full p-1">
-<div class="size-8 rounded-full bg-cover bg-center" data-alt="Avatar de usuario" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAv2jvQtkEBSlbsIZxQg9x6DxHsVLfzjrM7e4ZKNQMylSQ3MNs-cr1qgBBErLHJh50h9qkdPKLtM-5NFdQlMUqVJ_yc8b28Pbt_koUvr6batQJ13Do7E5il9faDELMaKngLQKrczeakY91rHqHyzt7yUYeC4RG50hU4O8VLhjFj18XDu3RmS4hWJ2G5C42Gmt4LQKzbEHcJ7Vn1Ws3UE1hDY_DxZ7dzyVrmNlHuqLqmwZj-mf8Vou7MbDHxEs1FzGgQQwPJ7TwQqQSh')"></div>
-</div>
-</div>
-</header>
-<main class="flex-1 flex flex-col items-center justify-start py-12 px-6 max-w-5xl mx-auto w-full">
-<!-- Progress Indicator Mobile -->
-<div class="w-full mb-8 space-y-3 md:hidden">
-<div class="flex justify-between items-end">
-<p class="text-primary font-bold">Paso 1: Sube tu Foto</p>
-<p class="text-muted-text text-sm">33% completado</p>
-</div>
-<div class="h-2 w-full bg-surface-dark rounded-full overflow-hidden">
-<div class="h-full bg-primary w-1/3"></div>
-</div>
-</div>
-<!-- Main Content Step 1 -->
-<div class="w-full flex flex-col items-center text-center mb-12">
-<h1 class="text-4xl md:text-5xl font-black tracking-tighter mb-4 text-slate-100">Sube una foto de tu habitación</h1>
-<p class="text-muted-text text-lg max-w-2xl">Para obtener el mejor renderizado, asegúrate de que la habitación esté bien iluminada y se vea el mayor espacio posible.</p>
-</div>
-<!-- Upload Zone -->
-<div class="w-full bg-surface-dark rounded-xl border-2 border-dashed border-border-dark p-12 flex flex-col items-center justify-center gap-6 hover:border-primary/50 transition-colors group cursor-pointer relative overflow-hidden">
-<div class="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-<div class="size-20 rounded-full bg-primary/20 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
-<span class="material-symbols-outlined !text-5xl">photo_camera</span>
-</div>
-<div class="space-y-2 text-center relative z-10">
-<h3 class="text-xl font-bold">Arrastra tu imagen aquí</h3>
-<p class="text-muted-text">O haz clic para seleccionar un archivo desde tu dispositivo</p>
-<p class="text-xs text-muted-text/60 mt-2">Formatos aceptados: JPG, PNG, WEBP (Máx. 10MB)</p>
-</div>
-<button class="bg-primary hover:bg-primary/90 text-background-dark font-bold py-3 px-8 rounded-lg shadow-lg shadow-primary/20 transition-all relative z-10">
-                        Seleccionar archivo
-                    </button>
-</div>
-
-<!-- AI Prompt Input -->
-<div class="w-full mt-8 bg-surface-dark rounded-xl border border-border-dark p-6">
-    <h3 class="text-xl font-bold mb-4">Describe la habitación de tus sueños</h3>
-    <textarea id="prompt-input" class="w-full bg-background-dark/50 border border-border-dark rounded-lg p-4 text-slate-100 placeholder-muted-text focus:ring-primary focus:border-primary" rows="4" placeholder="Ej: Una habitación moderna, minimalista con luz natural, paredes blancas y plantas..."></textarea>
-    
-    <div class="mt-4 flex flex-col sm:flex-row gap-4 items-center justify-between">
-        <button id="btn-generate" class="bg-primary hover:bg-primary/90 text-background-dark font-bold py-3 px-8 rounded-lg shadow-lg shadow-primary/20 transition-all w-full sm:w-auto flex items-center justify-center gap-2">
-            <span class="material-symbols-outlined">auto_awesome</span> Simular Pago y Generar
-        </button>
-    </div>
-    
-    <div id="result-container" class="mt-6 p-4 rounded-lg hidden bg-background-dark border border-border-dark">
-        <h4 class="font-bold text-primary mb-2" id="result-title">Resultado</h4>
-        <p id="result-text" class="text-slate-300"></p>
-    </div>
-</div>
-
-<!-- Tips Cards -->
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12 w-full">
-<div class="bg-surface-dark p-6 rounded-xl border border-border-dark flex items-start gap-4">
-<span class="material-symbols-outlined text-primary">light_mode</span>
-<div>
-<h4 class="font-bold text-sm">Buena iluminación</h4>
-<p class="text-xs text-muted-text mt-1">Enciende las luces o abre las cortinas para captar detalles.</p>
-</div>
-</div>
-<div class="bg-surface-dark p-6 rounded-xl border border-border-dark flex items-start gap-4">
-<span class="material-symbols-outlined text-primary">straighten</span>
-<div>
-<h4 class="font-bold text-sm">Ángulo amplio</h4>
-<p class="text-xs text-muted-text mt-1">Toma la foto desde una esquina para mostrar todo el espacio.</p>
-</div>
-</div>
-<div class="bg-surface-dark p-6 rounded-xl border border-border-dark flex items-start gap-4">
-<span class="material-symbols-outlined text-primary">person_off</span>
-<div>
-<h4 class="font-bold text-sm">Sin distracciones</h4>
-<p class="text-xs text-muted-text mt-1">Evita que salgan personas, mascotas u objetos en movimiento.</p>
-</div>
-</div>
-</div>
-<!-- Step 2 Teaser -->
-<div class="w-full mt-24 border-t border-border-dark pt-12">
-<div class="flex justify-between items-end mb-8">
-<div>
-<h2 class="text-2xl font-bold">Paso 2: Elige tu Estilo</h2>
-<p class="text-muted-text">Personaliza el look final de tu habitación</p>
-</div>
-<span class="text-primary font-bold text-sm">Próximo paso</span>
-</div>
-<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 opacity-50 grayscale hover:grayscale-0 transition-all cursor-not-allowed">
-<div class="space-y-2">
-<div class="aspect-square bg-surface-dark rounded-lg overflow-hidden border border-border-dark shadow-sm">
-<div class="w-full h-full bg-cover bg-center" data-alt="Estilo moderno de interior" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCeD0jph8zKQ1yU-xPc9xOlRAfGHYuQqGRPpz1lxowg2_VHpwHrkDwQpQmnUI-j_Xt__rUCnoS4rltEBnnKQSEX6BtXuPsTA8GQ0YgaGo_kHF16t4G_LquFNWy6a0aZTjxhTH7SiKlANz-JiwucCl5UtIQ43wUr4xZLWK5tlU5kDUoi89YQg7j_y34_6gtXjqe2ntF8is3rxS1o74e0UsGolbIpBIL85Pt1EvIMgB68AghrTwH5a7wZdNb_ReCV0Vp1xbSXaSZU0YkR')"></div>
-</div>
-<p class="text-center text-xs font-bold">Moderno</p>
-</div>
-<div class="space-y-2">
-<div class="aspect-square bg-surface-dark rounded-lg overflow-hidden border border-border-dark shadow-sm">
-<div class="w-full h-full bg-cover bg-center" data-alt="Estilo nórdico de interior" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCfrHfWtmToGg9YE3TKWdI7m2dvlldUoO7KOzn0vNZ_lh3oKPigYkWrcFWokGoOyA5ZhLI8aXnDiqIgDN2j8g9v2CdgF24nKi4Fie3HL93OIbpHWW6kkr2RvuOJgFA5jxSdwSATBLhyQcw2GRxura3cELhdkcgxzLSAj1wvNBm1PQ4nJG44L-KNmJJXelXVatVU2sM6i66k9Dg9IXnEfMMepWG_pUa4dSJ4N0FEa3sEYDtp1kiKnD38fymwbOqWteljmgaymCcguLZ-')"></div>
-</div>
-<p class="text-center text-xs font-bold">Nórdico</p>
-</div>
-<div class="space-y-2">
-<div class="aspect-square bg-surface-dark rounded-lg overflow-hidden border border-border-dark shadow-sm">
-<div class="w-full h-full bg-cover bg-center" data-alt="Estilo industrial de interior" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDbnSBo09PLlYq-m8tkTThdITdXW18xNL3_Bezg09pRGd3CQYFcD9ayzN6yoleZDdAuU715IG_KOVnMs6u8wcJ-SfAJXysUQGrG3PbWsu5N4ycIllZRZAxVbnzssuop5IhRd8eiC3fozSmTvnf9HDnszE29dAZYeJcxKdd_V3EKgeQ1_xdQDYorhUxT-VJZNrZYvbKm8gboXDvftla3F45aUe5d6xxorcNGSsh_e7brUa5EPwA_s9fqT5Xgz-KtEMAhop2tahDPP2wj')"></div>
-</div>
-<p class="text-center text-xs font-bold">Industrial</p>
-</div>
-<div class="space-y-2">
-<div class="aspect-square bg-surface-dark rounded-lg overflow-hidden border border-border-dark shadow-sm">
-<div class="w-full h-full bg-cover bg-center" data-alt="Estilo minimalista de interior" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAKoYAX31IeOBw0iQVNMFQnzKJsTzHDEVcFDJTmYN7DdUxZckDvVJgZKFTgSNovhbELCgwPBuAIMN1mu0P90-xO07jp6sZ32KZBwcrzqldr-ZRFQjCgiohAGmNO2xozuQdYvHscydxsMTEPaQx-SIVTUqg8r25F3zpXHuSiJCDd76rIEadSls50jr5Tg1nZWYOjw0K1KOqfPuqoa0hEvTYI62MuAFy88FKXD8jQOPMA57aBnOgDfHP6PRIbD2wRDMzAoJT33G1pEld5')"></div>
-</div>
-<p class="text-center text-xs font-bold">Minimalista</p>
-</div>
-<div class="space-y-2">
-<div class="aspect-square bg-surface-dark rounded-lg overflow-hidden border border-border-dark shadow-sm">
-<div class="w-full h-full bg-cover bg-center" data-alt="Estilo rústico de interior" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCH9CiGpN4jRdFokgGbL0hCn7_C54CSQ-XDPI23aYWhVPsbSDOCa6mpL265WkYq73afA0OLvScdAbpT8WUmvJTmkBxFApkqUI2vekEH6H0kMZ-8TeVTo0-QNJDfzcoGmCV_qj8ixjNqPgouvTEKPKUQsGRtWTtcqnSjbhnHtVKDAAw1Eh7_KnC0VvnqRg2DLd-lUoEZ4TqbZbyuZAE29YCoF6eCzRfllR-lttChdVVzTrgIvQaK2cR-LChWCv__hcEegmdPkX119rBA')"></div>
-</div>
-<p class="text-center text-xs font-bold">Rústico</p>
-</div>
-<div class="space-y-2">
-<div class="aspect-square bg-surface-dark rounded-lg overflow-hidden border border-border-dark shadow-sm">
-<div class="w-full h-full bg-cover bg-center" data-alt="Estilo bohemio de interior" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBT9WjvXbKujhpaFydJOD2z1Wzcfy91UZoRKXW5Cf1HjLZ1qe1fZofn6PU1LMoIg7zHIZnMH6ENS0nuS67cJgySCmzPkOiCqzD6SSWfiOAFGiHwPWnYPLNXzmlz8ahGXf3BJdHti9Nz3XMqrN1gN7mlvXlwDy-xLoq6q24-IizbXMN1t5iUpX27PvK8Ep6e4NHMRMOvBfApgGViR5JYg3Ul6MuJT30Dg_SRl5iZSHp05fRDk8NGTVcMWt3uoBLd5XbrxeqZQAfRUCF8')"></div>
-</div>
-<p class="text-center text-xs font-bold">Bohemio</p>
-</div>
-</div>
-</div>
-<!-- Step 3 Teaser -->
-<div class="w-full mt-16 flex flex-col md:flex-row items-center gap-8 bg-primary/5 rounded-2xl p-8 border border-primary/20">
-<div class="flex-1">
-<h3 class="text-xl font-bold mb-2">Resumen del servicio</h3>
-<p class="text-muted-text">Renderizado AI de alta fidelidad, exportación 4K y 3 variaciones de iluminación.</p>
-</div>
-<div class="flex flex-col items-center md:items-end gap-3">
-<div class="flex items-baseline gap-1">
-<span class="text-4xl font-black text-primary">2,50€</span>
-<span class="text-muted-text">/ foto</span>
-</div>
-<button class="bg-surface-dark border border-border-dark text-slate-300 font-bold py-2 px-6 rounded-lg flex items-center gap-2 cursor-not-allowed opacity-50">
-<span class="material-symbols-outlined text-sm">credit_card</span>
-                            Pagar con tarjeta
-                        </button>
-</div>
-</div>
-</main>
-<!-- Footer Controls -->
-<footer class="sticky bottom-0 bg-background-dark/90 backdrop-blur-xl border-t border-border-dark p-6">
-<div class="max-w-5xl mx-auto flex justify-between items-center w-full">
-<button class="text-muted-text hover:text-slate-100 font-bold px-6 py-2 transition-colors" onclick="window.location.href='01-landing-page.html'">
-                        Volver
-                    </button>
-<div class="flex items-center gap-4">
-<p class="text-muted-text text-sm hidden md:block">Sube una foto para continuar</p>
-<a href="04-pago-bizum.html" class="bg-primary hover:bg-primary/90 text-background-dark font-bold py-3 px-10 rounded-xl border border-primary/30 transition-all">
-                            Continuar
-                        </a>
-</div>
-</div>
-</footer>
-</div>
-</div>
-<script>
-    document.getElementById('btn-generate').addEventListener('click', async () => {
-        const promptText = document.getElementById('prompt-input').value;
-        const resultContainer = document.getElementById('result-container');
-        const resultContent = document.getElementById('result-text');
-        const resultTitle = document.getElementById('result-title');
-        
-        if (!promptText) {
-            alert("Por favor, introduce una descripción para tu habitación.");
-            return;
-        }
-
-        resultContainer.classList.remove('hidden');
-        resultTitle.innerText = "Simulando pago...";
-        resultContent.innerText = "Procesando pago de 1 EUR...";
-
-        try {
-            const payRes = await fetch('/api/simulate-payment', { method: 'POST' });
-            const payData = await payRes.json();
-            
-            if (!payRes.ok || !payData.success) {
-                resultTitle.innerText = "Error en el pago";
-                resultTitle.className = "font-bold text-red-500 mb-2";
-                resultContent.innerText = "Payment required to generate the final render. " + (payData.message || "");
-                return;
-            }
-
-            resultTitle.innerText = "Pago exitoso. Generando render final...";
-            resultTitle.className = "font-bold text-green-500 mb-2";
-            resultContent.innerText = "Conectando con Vertex AI...";
-
-            const aiRes = await fetch('/api/generate-image', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt: promptText })
-            });
-            const aiData = await aiRes.json();
-            
-            if (aiRes.ok) {
-                resultTitle.innerText = "Wow! Aquí tienes el nuevo diseño real:";
-                resultTitle.className = "font-bold text-primary mb-2 text-xl";
-                resultContent.innerHTML = `<img src="data:image/png;base64,${aiData.image_base64}" alt="Generated Room" class="w-full rounded-lg shadow-xl shadow-primary/10 border-2 border-primary/20 aspect-square object-cover" />`;
-            } else {
-                resultTitle.innerText = "Error generando la imagen";
-                resultTitle.className = "font-bold text-red-500 mb-2";
-                resultContent.innerText = aiData.error || "Error desconocido";
-            }
-        } catch (err) {
-            resultTitle.innerText = "Error de red";
-            resultTitle.className = "font-bold text-red-500 mb-2";
-            resultContent.innerText = err.message;
-        }
-    });
+        },
+    }
 </script>
-</body></html>
+<style>
+    .glass { background: rgba(22,27,34,0.85); backdrop-filter: blur(16px); }
+    .style-card { transition: all .25s; border: 2px solid transparent; cursor: pointer; }
+    .style-card:hover { border-color: rgba(240,164,0,.4); transform: translateY(-2px); }
+    .style-card.selected { border-color: #f0a400; box-shadow: 0 0 20px rgba(240,164,0,.3); }
+    .upload-zone { border: 2px dashed #30363D; transition: all .25s; }
+    .upload-zone.dragover { border-color: #f0a400; background: rgba(240,164,0,.05); }
+    .upload-zone.has-image { border-style: solid; border-color: #f0a400; }
+    .progress-step { transition: all .3s; }
+    .progress-step.active .step-num { background: #f0a400; color: #0D1117; }
+    .progress-step.done .step-num { background: #22c55e; color: #fff; }
+    .progress-step.active .step-label { color: #f0a400; }
+    .spin { animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .fade-in { animation: fadeIn .5s ease; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+    .proposal-section { border-left: 3px solid #f0a400; padding-left: 1rem; }
+</style>
+</head>
+<body class="bg-background-dark font-display text-slate-100 min-h-screen">
+
+<!-- NAV -->
+<header class="glass sticky top-0 z-50 border-b border-border-dark flex items-center justify-between px-6 md:px-10 py-4">
+    <a href="01-landing-page.html" class="flex items-center gap-3">
+        <div class="size-8 bg-gradient-to-br from-primary to-orange-600 rounded-lg flex items-center justify-center text-background-dark">
+            <span class="material-symbols-outlined text-sm font-bold">deployed_code</span>
+        </div>
+        <h2 class="text-xl font-black tracking-tight">Render<span class="text-primary">Room</span></h2>
+    </a>
+    <!-- Steps progress -->
+    <div class="hidden md:flex items-center gap-2">
+        <div id="step-indicator-1" class="progress-step active flex items-center gap-2">
+            <div class="step-num size-7 rounded-full bg-surface-dark border border-border-dark flex items-center justify-center text-xs font-bold">1</div>
+            <span class="step-label text-sm font-semibold text-muted-text">Foto</span>
+        </div>
+        <div class="w-8 h-px bg-border-dark"></div>
+        <div id="step-indicator-2" class="progress-step flex items-center gap-2">
+            <div class="step-num size-7 rounded-full bg-surface-dark border border-border-dark flex items-center justify-center text-xs font-bold">2</div>
+            <span class="step-label text-sm font-semibold text-muted-text">Estilo</span>
+        </div>
+        <div class="w-8 h-px bg-border-dark"></div>
+        <div id="step-indicator-3" class="progress-step flex items-center gap-2">
+            <div class="step-num size-7 rounded-full bg-surface-dark border border-border-dark flex items-center justify-center text-xs font-bold">3</div>
+            <span class="step-label text-sm font-semibold text-muted-text">Generar</span>
+        </div>
+    </div>
+    <div class="flex items-center gap-4">
+        <div id="admin-link-container" class="hidden">
+            <a href="admin-dashboard.html" class="text-primary hover:text-primary/80 transition-colors">
+                <span class="material-symbols-outlined">admin_panel_settings</span>
+            </a>
+        </div>
+        <a href="03-dashboard.html" class="text-sm text-muted-text hover:text-primary transition-colors font-medium">Mis Renders</a>
+        <a href="06-perfil-usuario.html" class="flex items-center gap-3">
+            <div id="user-initials" class="w-8 h-8 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-primary font-bold text-xs">
+                U
+            </div>
+        </a>
+    </div>
+</header>
+
+<main class="max-w-4xl mx-auto px-6 py-10 space-y-10">
+
+    <!-- ══════════════ STEP 1: UPLOAD ══════════════ -->
+    <section id="section-upload">
+        <div class="mb-6">
+            <span class="text-primary text-xs font-bold uppercase tracking-widest">Paso 1</span>
+            <h1 class="text-3xl font-black mt-1">Sube tu foto</h1>
+            <p class="text-muted-text mt-1">Nuestra IA analizará tu habitación y generará un diseño personalizado</p>
+        </div>
+
+        <!-- Drop Zone -->
+        <div id="upload-zone" class="upload-zone rounded-2xl p-8 flex flex-col items-center justify-center gap-4 text-center cursor-pointer relative min-h-[300px]">
+            <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp" multiple class="hidden"/>
+            <!-- Placeholder state -->
+            <div id="upload-placeholder">
+                <div class="size-20 rounded-full bg-primary/10 flex items-center justify-center text-primary mx-auto mb-4">
+                    <span class="material-symbols-outlined text-5xl">add_photo_alternate</span>
+                </div>
+                <h3 class="text-xl font-bold mb-1">Sube fotos de tu habitación</h3>
+                <p class="text-muted-text text-sm">Arrastra hasta 3 imágenes o haz clic aquí</p>
+                <p class="text-xs text-muted-text/60 mt-2">Varios ángulos ayudan a Gemini a entender mejor el espacio</p>
+            </div>
+            <!-- Preview state (hidden) -->
+            <div id="upload-preview" class="hidden w-full">
+                <div id="preview-grid" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <!-- Previews will be injected here -->
+                </div>
+                <button id="change-photo-btn" class="text-xs text-muted-text hover:text-primary transition-colors underline">Cambiar fotos</button>
+            </div>
+        </div>
+
+        <!-- Analysis Panel -->
+        <div id="analysis-panel" class="hidden mt-6 bg-surface-dark rounded-xl border border-border-dark p-6 fade-in">
+            <div id="analysis-loading" class="flex items-center gap-3 text-primary">
+                <svg class="spin size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                <span class="text-sm font-semibold">Analizando tu habitación con Gemini Vision…</span>
+            </div>
+            <div id="analysis-result" class="hidden">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="material-symbols-outlined text-primary">home_search</span>
+                    <h3 class="font-bold text-primary">Análisis de tu habitación</h3>
+                </div>
+                <div id="analysis-text" class="text-slate-300 text-sm leading-relaxed whitespace-pre-line max-h-48 overflow-y-auto pr-1"></div>
+            </div>
+            <div id="analysis-error" class="hidden text-orange-400 text-sm">
+                <span class="material-symbols-outlined text-sm mr-1">warning</span>
+                <span id="analysis-error-text"></span> — puedes continuar igualmente con tu descripción manual.
+            </div>
+        </div>
+
+        <!-- Manual description -->
+        <div id="prompt-section" class="mt-6 bg-surface-dark rounded-xl border border-border-dark p-6">
+            <h3 class="font-bold mb-3">¿Qué imaginas para tu habitación?</h3>
+            <textarea id="prompt-input" rows="3" placeholder="Ej: Quiero un espacio luminoso, acogedor, con toques de naturaleza y colores tierra…" class="w-full bg-background-dark/60 border border-border-dark rounded-lg p-3 text-sm text-slate-200 placeholder-muted-text focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"></textarea>
+        </div>
+
+        <div class="mt-4 flex justify-end">
+            <button id="btn-to-style" disabled class="bg-primary/30 text-primary/50 font-bold py-3 px-8 rounded-xl transition-all cursor-not-allowed" onclick="goToStep2()">
+                Elegir estilo →
+            </button>
+        </div>
+    </section>
+
+    <!-- ══════════════ STEP 2: STYLE ══════════════ -->
+    <section id="section-style" class="hidden">
+        <div class="mb-6">
+            <span class="text-primary text-xs font-bold uppercase tracking-widest">Paso 2</span>
+            <h2 class="text-3xl font-black mt-1">Elige tu estilo</h2>
+            <p class="text-muted-text mt-1">Selecciona el look que quieres para tu espacio</p>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <!-- Moderno -->
+            <div class="style-card bg-surface-dark rounded-xl overflow-hidden" data-style="moderno" onclick="selectStyle(this)">
+                <div class="aspect-video bg-cover bg-center" style="background-image:url('https://lh3.googleusercontent.com/aida-public/AB6AXuCeD0jph8zKQ1yU-xPc9xOlRAfGHYuQqGRPpz1lxowg2_VHpwHrkDwQpQmnUI-j_Xt__rUCnoS4rltEBnnKQSEX6BtXuPsTA8GQ0YgaGo_kHF16t4G_LquFNWy6a0aZTjxhTH7SiKlANz-JiwucCl5UtIQ43wUr4xZLWK5tlU5kDUoi89YQg7j_y34_6gtXjqe2ntF8is3rxS1o74e0UsGolbIpBIL85Pt1EvIMgB68AghrTwH5a7wZdNb_ReCV0Vp1xbSXaSZU0YkR')"></div>
+                <div class="p-3">
+                    <p class="font-bold text-sm">Moderno</p>
+                    <p class="text-xs text-muted-text mt-0.5">Líneas limpias, tonos neutros</p>
+                    <a href="08-estilo-moderno.html" target="_blank" class="text-xs text-primary hover:underline mt-1 block" onclick="event.stopPropagation()">Ver más →</a>
+                </div>
+            </div>
+            <!-- Nórdico -->
+            <div class="style-card bg-surface-dark rounded-xl overflow-hidden" data-style="nordico" onclick="selectStyle(this)">
+                <div class="aspect-video bg-cover bg-center" style="background-image:url('https://lh3.googleusercontent.com/aida-public/AB6AXuCfrHfWtmToGg9YE3TKWdI7m2dvlldUoO7KOzn0vNZ_lh3oKPigYkWrcFWokGoOyA5ZhLI8aXnDiqIgDN2j8g9v2CdgF24nKi4Fie3HL93OIbpHWW6kkr2RvuOJgFA5jxSdwSATBLhyQcw2GRxura3cELhdkcgxzLSAj1wvNBm1PQ4nJG44L-KNmJJXelXVatVU2sM6i66k9Dg9IXnEfMMepWG_pUa4dSJ4N0FEa3sEYDtp1kiKnD38fymwbOqWteljmgaymCcguLZ-')"></div>
+                <div class="p-3">
+                    <p class="font-bold text-sm">Nórdico</p>
+                    <p class="text-xs text-muted-text mt-0.5">Madera, calidez, hygge</p>
+                    <a href="09-estilo-nordico.html" target="_blank" class="text-xs text-primary hover:underline mt-1 block" onclick="event.stopPropagation()">Ver más →</a>
+                </div>
+            </div>
+            <!-- Industrial -->
+            <div class="style-card bg-surface-dark rounded-xl overflow-hidden" data-style="industrial" onclick="selectStyle(this)">
+                <div class="aspect-video bg-cover bg-center" style="background-image:url('https://lh3.googleusercontent.com/aida-public/AB6AXuDbnSBo09PLlYq-m8tkTThdITdXW18xNL3_Bezg09pRGd3CQYFcD9ayzN6yoleZDdAuU715IG_74mS3YFxYlFNOvPAWaT1e2GtK-S1bzWlrSqpJFX4jMHVOxD0wr8MPTC5LF8p9GJc_ILSFkAdS-tOlnJG6J-qy0B7bGSqJ-0VqSbNIzaK29VPHmODHwI5e0h8YwDWHG71c3SuWOfqq')"></div>
+                <div class="p-3">
+                    <p class="font-bold text-sm">Industrial</p>
+                    <p class="text-xs text-muted-text mt-0.5">Ladrillo, metal, loft</p>
+                    <a href="10-estilo-industrial.html" target="_blank" class="text-xs text-primary hover:underline mt-1 block" onclick="event.stopPropagation()">Ver más →</a>
+                </div>
+            </div>
+            <!-- Minimalista -->
+            <div class="style-card bg-surface-dark rounded-xl overflow-hidden" data-style="minimalista" onclick="selectStyle(this)">
+                <div class="aspect-video bg-cover bg-center" style="background-image:url('https://lh3.googleusercontent.com/aida-public/AB6AXuAKoYAX31IeOBw0iQVNMFQnzKJsTzHDEVcFDJTmYN7DdUxZckDvVJgZKFTgSNovhbELCgwPBuAIMN1mu0P90-xO07jp6sZ32KZBwcrzqldr-ZRFQjCgiohAGmNO2xozuQdYvHscydxsMTEPaQx-SIVTUqg8r25F3zpXHuSiJCDd76rIEadSls50jr5Tg1nZWYOjw0K1KOqfPuqoa0hEvTYI62MuAFy88FKXD8jQOPMA57aBnOgDfHP6PRIbD2wRDMzAoJT33G1pEld5')"></div>
+                <div class="p-3">
+                    <p class="font-bold text-sm">Minimalista</p>
+                    <p class="text-xs text-muted-text mt-0.5">Lo esencial, espacio y calma</p>
+                    <a href="11-estilo-minimalista.html" target="_blank" class="text-xs text-primary hover:underline mt-1 block" onclick="event.stopPropagation()">Ver más →</a>
+                </div>
+            </div>
+            <!-- Rústico -->
+            <div class="style-card bg-surface-dark rounded-xl overflow-hidden" data-style="rustico" onclick="selectStyle(this)">
+                <div class="aspect-video bg-cover bg-center" style="background-image:url('https://lh3.googleusercontent.com/aida-public/AB6AXuCH9CiGpN4jRdFokgGbL0hCn7_C54CSQ-XDPI23aYWhVPsbSDOCa6mpL265WkYq73afA0OLvScdAbpT8WUmvJTmkBxFApkqUI2vekEH6H0kMZ-8TeVTo0-QNJDfzcoGmCV_qj8ixjNqPgouvTEKPKUQsGRtWTtcqnSjbhnHtVKDAAw1Eh7_KnC0VvnqRg2DLd-lUoEZ4TqbZbyuZAE29YCoF6eCzRfllR-lttChdVVzTrgIvQaK2cR-LChWCv__hcEegmdPkX119rBA')"></div>
+                <div class="p-3">
+                    <p class="font-bold text-sm">Rústico</p>
+                    <p class="text-xs text-muted-text mt-0.5">Cabaña, madera, piedra</p>
+                    <a href="12-estilo-rustico.html" target="_blank" class="text-xs text-primary hover:underline mt-1 block" onclick="event.stopPropagation()">Ver más →</a>
+                </div>
+            </div>
+            <!-- Bohemio -->
+            <div class="style-card bg-surface-dark rounded-xl overflow-hidden" data-style="bohemio" onclick="selectStyle(this)">
+                <div class="aspect-video bg-cover bg-center" style="background-image:url('https://lh3.googleusercontent.com/aida-public/AB6AXuBT9WjvXbKujhpaFydJOD2z1Wzcfy91UZoRKXW5Cf1HjLZ1qe1fZofn6PU1LMoIg7zHIZnMH6ENS0nuS67cJgySCmzPkOiCqzD6SSWfiOAFGiHwPWnYPLNXzmlz8ahGXf3BJdHti9Nz3XMqrN1gN7mlvXlwDy-xLoq6q24-IizbXMN1t5iUpX27PvK8Ep6e4NHMRMOvBfApgGViR5JYg3Ul6MuJT30Dg_SRl5iZSHp05fRDk8NGTVcMWt3uoBLd5XbrxeqZQAfRUCF8')"></div>
+                <div class="p-3">
+                    <p class="font-bold text-sm">Bohemio</p>
+                    <p class="text-xs text-muted-text mt-0.5">Ecléctico, texturas, color</p>
+                    <a href="13-estilo-bohemio.html" target="_blank" class="text-xs text-primary hover:underline mt-1 block" onclick="event.stopPropagation()">Ver más →</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-6 flex justify-between">
+            <button onclick="goToStep1()" class="text-muted-text hover:text-slate-100 font-semibold py-2 px-4 transition-colors">← Volver</button>
+            <button id="btn-to-generate" disabled class="bg-primary/30 text-primary/50 font-bold py-3 px-8 rounded-xl transition-all cursor-not-allowed" onclick="goToStep3()">
+                Continuar →
+            </button>
+        </div>
+    </section>
+
+    <!-- ══════════════ STEP 3: GENERATE ══════════════ -->
+    <section id="section-generate" class="hidden">
+        <div class="mb-6">
+            <span class="text-primary text-xs font-bold uppercase tracking-widest">Paso 3</span>
+            <h2 class="text-3xl font-black mt-1">Genera tu render</h2>
+            <p class="text-muted-text mt-1">Revisión final y generación con IA</p>
+        </div>
+
+        <!-- Summary before generating -->
+        <div id="generate-summary" class="bg-surface-dark rounded-xl border border-border-dark p-6 mb-6 space-y-4">
+            <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-primary">photo_camera</span>
+                <div>
+                    <p class="text-xs text-muted-text">Tus fotos</p>
+                    <div id="summary-photos" class="flex gap-2 mt-1">
+                        <!-- Summary thumbnails injected here -->
+                    </div>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-primary">style</span>
+                <div>
+                    <p class="text-xs text-muted-text">Estilo elegido</p>
+                    <p id="summary-style" class="font-bold text-sm capitalize mt-0.5"></p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-primary">chat</span>
+                <div>
+                    <p class="text-xs text-muted-text">Tu descripción</p>
+                    <p id="summary-prompt" class="text-sm text-slate-300 mt-0.5 italic"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pricing -->
+        <div class="bg-primary/5 border border-primary/20 rounded-xl p-5 flex items-center justify-between mb-6">
+            <div>
+                <p class="font-bold">Render IA · Alta Fidelidad</p>
+                <p class="text-xs text-muted-text">4K · Análisis Gemini · Entrega inmediata</p>
+            </div>
+            <span class="text-3xl font-black text-primary">2,50€</span>
+        </div>
+
+        <button id="btn-generate" class="w-full bg-gradient-to-r from-primary to-orange-500 hover:opacity-90 text-background-dark font-black py-4 rounded-xl text-lg transition-all flex items-center justify-center gap-2" onclick="generateRender()">
+            <span class="material-symbols-outlined">auto_awesome</span> Pagar y Generar Render
+        </button>
+
+        <div class="mt-4 flex justify-start">
+            <button onclick="goToStep2()" class="text-muted-text hover:text-slate-100 font-semibold py-2 px-4 transition-colors">← Volver</button>
+        </div>
+
+        <!-- Generation Progress -->
+        <div id="gen-progress" class="hidden mt-8 space-y-4 fade-in">
+            <div id="gen-step-pay" class="flex items-center gap-3 text-slate-400">
+                <div class="spin-wrap size-5 flex items-center justify-center">
+                    <svg id="spin-pay" class="spin size-5 text-primary hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                    <span id="check-pay" class="material-symbols-outlined text-green-500 hidden text-sm">check_circle</span>
+                </div>
+                <span id="label-pay" class="text-sm">Procesando pago…</span>
+            </div>
+            <div id="gen-step-ai" class="flex items-center gap-3 text-slate-400">
+                <div class="size-5 flex items-center justify-center">
+                    <svg id="spin-ai" class="spin size-5 text-primary hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                    <span id="check-ai" class="material-symbols-outlined text-green-500 hidden text-sm">check_circle</span>
+                </div>
+                <span id="label-ai" class="text-sm">Generando render con Vertex AI Imagen…</span>
+            </div>
+        </div>
+
+        <!-- RESULT PANEL -->
+        <div id="result-panel" class="hidden mt-10 fade-in space-y-8">
+            <!-- Generated image -->
+            <div class="text-center">
+                <h2 class="text-2xl font-black text-primary mb-4">🎨 Tu render está listo</h2>
+                <img id="result-image" src="" alt="Render generado" class="w-full rounded-2xl border-2 border-primary/30 shadow-2xl shadow-primary/10"/>
+                <a id="download-btn" class="mt-4 inline-flex items-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 font-semibold py-2 px-6 rounded-xl transition-all text-sm" download="render-habitacion.png">
+                    <span class="material-symbols-outlined text-sm">download</span> Descargar render
+                </a>
+            </div>
+
+            <!-- Proposal -->
+            <div class="bg-surface-dark rounded-2xl border border-border-dark p-8 space-y-6">
+                <h3 class="text-xl font-black text-slate-100 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">description</span>
+                    Propuesta de Diseño Completa
+                </h3>
+
+                <!-- Room analysis -->
+                <div class="proposal-section fade-in" id="prop-analysis-wrap">
+                    <h4 class="font-bold text-sm uppercase tracking-wider text-muted-text mb-2">🏠 Análisis de tu habitación (Gemini Vision)</h4>
+                    <p id="prop-analysis" class="text-slate-300 text-sm leading-relaxed whitespace-pre-line"></p>
+                </div>
+
+                <!-- Style description -->
+                <div class="proposal-section fade-in">
+                    <h4 class="font-bold text-sm uppercase tracking-wider text-muted-text mb-2">🎨 Estilo aplicado: <span id="prop-style-name" class="text-primary capitalize"></span></h4>
+                    <p id="prop-style-desc" class="text-slate-300 text-sm leading-relaxed"></p>
+                </div>
+
+                <!-- What changes were made -->
+                <div class="proposal-section fade-in">
+                    <h4 class="font-bold text-sm uppercase tracking-wider text-muted-text mb-2">✨ Cambios propuestos en el render</h4>
+                    <ul id="prop-changes" class="text-slate-300 text-sm space-y-1.5 list-none">
+                    </ul>
+                </div>
+
+                <!-- Full prompt used -->
+                <div class="bg-background-dark/60 rounded-xl p-4">
+                    <h4 class="font-bold text-xs uppercase tracking-wider text-muted-text mb-2">Prompt enviado a Vertex AI Imagen</h4>
+                    <p id="prop-prompt" class="text-xs text-slate-500 leading-relaxed font-mono"></p>
+                </div>
+            </div>
+
+            <div class="flex gap-4">
+                <button onclick="goToStep1()" class="flex-1 border border-border-dark hover:border-primary/40 text-muted-text hover:text-primary font-semibold py-3 rounded-xl transition-all">
+                    Nuevo render
+                </button>
+                <a href="03-dashboard.html" class="flex-1 bg-surface-dark hover:bg-border-dark border border-border-dark font-semibold py-3 rounded-xl transition-all text-center">
+                    Ver mis renders
+                </a>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<script>
+// ── Firebase Config ─────────────────────────────
+const firebaseConfig = {
+  projectId: "gen-lang-client-0426824151",
+  appId: "1:124806819551:web:1c90d1154b458fa064036a",
+  storageBucket: "gen-lang-client-0426824151.firebasestorage.app",
+  apiKey: "AIzaSyDj99qdmDt4GiVeRkvCSfTOSDw3uqD-_Ew",
+  authDomain: "gen-lang-client-0426824151.firebaseapp.com",
+  messagingSenderId: "124806819551"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+firebase.auth().onAuthStateChanged(async user => {
+    if (!user) {
+        window.location.href = '01-landing-page.html';
+    } else {
+        // Update UI
+        const initials = (user.displayName || user.email || 'U').charAt(0).toUpperCase();
+        document.getElementById('user-initials').textContent = initials;
+
+        // Check Admin
+        try {
+            const doc = await db.collection('users').doc(user.uid).get();
+            if (doc.exists && doc.data().isAdmin) {
+                document.getElementById('admin-link-container').classList.remove('hidden');
+            }
+        } catch (e) {
+            console.error("Admin check error:", e);
+        }
+
+        user.getIdToken().then(token => localStorage.setItem('rr_token', token));
+    }
+});
+
+function getAuthHeaders() {
+    const token = localStorage.getItem('rr_token');
+    return token ? { 'Authorization': `Bearer ${token}` } : {};
+}
+
+// ── State ──────────────────────────────────────────────────────
+let state = {
+    imagesBase64: [], // Store up to 3 images
+    roomData: null,   // Store JSON analysis
+    selectedStyle: null,
+    currentStep: 1,
+};
+
+// ── Upload Zone ────────────────────────────────────────────────
+const uploadZone = document.getElementById('upload-zone');
+const fileInput = document.getElementById('file-input');
+const uploadPlaceholder = document.getElementById('upload-placeholder');
+const uploadPreview = document.getElementById('upload-preview');
+const previewGrid = document.getElementById('preview-grid');
+const btnToStyle = document.getElementById('btn-to-style');
+const analysisPanel = document.getElementById('analysis-panel');
+
+uploadZone.addEventListener('click', (e) => {
+    if (e.target.id === 'change-photo-btn') return;
+    fileInput.click();
+});
+document.getElementById('change-photo-btn').addEventListener('click', () => {
+    resetUpload();
+    fileInput.click();
+});
+
+uploadZone.addEventListener('dragover', (e) => { e.preventDefault(); uploadZone.classList.add('dragover'); });
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+uploadZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadZone.classList.remove('dragover');
+    const files = Array.from(e.dataTransfer.files).slice(0, 3);
+    if (files.length > 0) handleFiles(files);
+});
+
+fileInput.addEventListener('change', () => {
+    const files = Array.from(fileInput.files).slice(0, 3);
+    if (files.length > 0) handleFiles(files);
+});
+
+function resetUpload() {
+    state.imagesBase64 = [];
+    state.roomData = null;
+    uploadPlaceholder.classList.remove('hidden');
+    uploadPreview.classList.add('hidden');
+    uploadZone.classList.remove('has-image');
+    analysisPanel.classList.add('hidden');
+    setBtnEnabled(btnToStyle, false);
+    fileInput.value = '';
+    previewGrid.innerHTML = '';
+}
+
+async function handleFiles(files) {
+    state.imagesBase64 = [];
+    previewGrid.innerHTML = '';
+    
+    for (const file of files) {
+        if (file.size > 10 * 1024 * 1024) { alert(`El archivo ${file.name} supera los 10 MB`); continue; }
+        
+        const dataUrl = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target.result);
+            reader.readAsDataURL(file);
+        });
+
+        // Add to state
+        state.imagesBase64.push(dataUrl.split(',')[1]);
+
+        // Add to preview grid
+        const img = document.createElement('img');
+        img.src = dataUrl;
+        img.className = "max-h-48 rounded-xl object-cover shadow-md mx-auto";
+        previewGrid.appendChild(img);
+    }
+
+    if (state.imagesBase64.length > 0) {
+        uploadPlaceholder.classList.add('hidden');
+        uploadPreview.classList.remove('hidden');
+        uploadZone.classList.add('has-image');
+        await analyzeImage();
+    }
+}
+
+async function analyzeImage() {
+    analysisPanel.classList.remove('hidden');
+    document.getElementById('analysis-loading').classList.remove('hidden');
+    document.getElementById('analysis-result').classList.add('hidden');
+    document.getElementById('analysis-error').classList.add('hidden');
+
+    try {
+        const res = await fetch('/api/analyze-image', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                ...getAuthHeaders()
+            },
+            body: JSON.stringify({ images_base64: state.imagesBase64 })
+        });
+        const data = await res.json();
+        document.getElementById('analysis-loading').classList.add('hidden');
+        if (res.ok && data.detailed_description_es) {
+            state.roomData = data;
+            document.getElementById('analysis-text').textContent = data.detailed_description_es;
+            document.getElementById('analysis-result').classList.remove('hidden');
+        } else {
+            document.getElementById('analysis-error-text').textContent = data.error || 'Error del servicio';
+            document.getElementById('analysis-error').classList.remove('hidden');
+        }
+    } catch (err) {
+        document.getElementById('analysis-loading').classList.add('hidden');
+        document.getElementById('analysis-error-text').textContent = 'Sin conexión al servidor';
+        document.getElementById('analysis-error').classList.remove('hidden');
+    }
+    setBtnEnabled(btnToStyle, true);
+}
+
+// ── Style selector ─────────────────────────────────────────────
+function selectStyle(card) {
+    document.querySelectorAll('.style-card').forEach(c => c.classList.remove('selected'));
+    card.classList.add('selected');
+    state.selectedStyle = card.dataset.style;
+    setBtnEnabled(document.getElementById('btn-to-generate'), true);
+}
+
+// Pre-select style from URL param
+const urlStyle = new URLSearchParams(location.search).get('style');
+if (urlStyle) {
+    const preCard = document.querySelector(`.style-card[data-style="${urlStyle}"]`);
+    if (preCard) selectStyle(preCard);
+}
+
+// ── Navigation ─────────────────────────────────────────────────
+function setBtnEnabled(btn, on) {
+    if (on) {
+        btn.disabled = false;
+        btn.classList.remove('bg-primary/30','text-primary/50','cursor-not-allowed');
+        btn.classList.add('bg-primary','text-background-dark','hover:bg-primary/90','cursor-pointer');
+    } else {
+        btn.disabled = true;
+        btn.classList.add('bg-primary/30','text-primary/50','cursor-not-allowed');
+        btn.classList.remove('bg-primary','text-background-dark','hover:bg-primary/90','cursor-pointer');
+    }
+}
+
+function goToStep1() {
+    showSection('section-upload');
+    setActiveStep(1);
+}
+function goToStep2() {
+    if (state.imagesBase64.length === 0) { alert('Por favor, sube al menos una foto.'); return; }
+    showSection('section-style');
+    setActiveStep(2);
+}
+function goToStep3() {
+    if (!state.selectedStyle) { alert('Por favor, elige un estilo.'); return; }
+    // Populate summary
+    const summaryGrid = document.getElementById('summary-photos');
+    summaryGrid.innerHTML = '';
+    state.imagesBase64.forEach(imgB64 => {
+        const img = document.createElement('img');
+        img.src = `data:image/jpeg;base64,${imgB64}`;
+        img.className = "h-16 w-16 rounded-lg object-cover";
+        summaryGrid.appendChild(img);
+    });
+    document.getElementById('summary-style').textContent = state.selectedStyle.charAt(0).toUpperCase() + state.selectedStyle.slice(1);
+    document.getElementById('summary-prompt').textContent = document.getElementById('prompt-input').value || '(sin descripción adicional)';
+    showSection('section-generate');
+    setActiveStep(3);
+}
+
+function showSection(id) {
+    ['section-upload','section-style','section-generate'].forEach(s => {
+        document.getElementById(s).classList.add('hidden');
+    });
+    document.getElementById(id).classList.remove('hidden');
+}
+
+function setActiveStep(n) {
+    state.currentStep = n;
+    [1,2,3].forEach(i => {
+        const el = document.getElementById(`step-indicator-${i}`);
+        el.classList.remove('active','done');
+        if (i < n) el.classList.add('done');
+        else if (i === n) el.classList.add('active');
+    });
+}
+
+// ── Generate ───────────────────────────────────────────────────
+async function generateRender() {
+    const btn = document.getElementById('btn-generate');
+    btn.disabled = true;
+    btn.innerHTML = '<svg class="spin size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> Procesando…';
+
+    const progressPanel = document.getElementById('gen-progress');
+    progressPanel.classList.remove('hidden');
+
+    // Step 1: payment
+    document.getElementById('spin-pay').classList.remove('hidden');
+    document.getElementById('label-pay').classList.add('text-primary');
+    try {
+        await fetch('/api/simulate-payment', { method: 'POST' });
+    } catch(e) {}
+    document.getElementById('spin-pay').classList.add('hidden');
+    document.getElementById('check-pay').classList.remove('hidden');
+    document.getElementById('label-pay').classList.remove('text-primary');
+    document.getElementById('label-pay').classList.add('text-green-500');
+
+    // Step 2: generate
+    document.getElementById('spin-ai').classList.remove('hidden');
+    document.getElementById('label-ai').classList.add('text-primary');
+    const prompt = document.getElementById('prompt-input').value || 'Una habitación bella y acogedora';
+
+    try {
+        const res = await fetch('/api/generate-image', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                ...getAuthHeaders()
+            },
+            body: JSON.stringify({
+                prompt,
+                room_data: state.roomData,
+                style: state.selectedStyle,
+                image_base64: state.imagesBase64[0]
+            })
+        });
+        const data = await res.json();
+
+        document.getElementById('spin-ai').classList.add('hidden');
+        document.getElementById('check-ai').classList.remove('hidden');
+        document.getElementById('label-ai').classList.remove('text-primary');
+        document.getElementById('label-ai').classList.add('text-green-500');
+
+        if (!res.ok) throw new Error(data.error || 'Error generando imagen');
+
+        showResult(data, prompt);
+    } catch(err) {
+        btn.disabled = false;
+        btn.innerHTML = '<span class="material-symbols-outlined">auto_awesome</span> Reintentar';
+        alert('Error: ' + err.message);
+    }
+}
+
+function showResult(data, userPrompt) {
+    const imgSrc = `data:image/png;base64,${data.image_base64}`;
+    document.getElementById('result-image').src = imgSrc;
+    document.getElementById('download-btn').href = imgSrc;
+    document.getElementById('result-panel').classList.remove('hidden');
+
+    // Proposal panel
+    const desc = state.roomData ? state.roomData.detailed_description_es : '';
+    if (desc) {
+        document.getElementById('prop-analysis').textContent = desc;
+        document.getElementById('prop-analysis-wrap').classList.remove('hidden');
+    } else {
+        document.getElementById('prop-analysis-wrap').classList.add('hidden');
+    }
+
+    const styleName = state.selectedStyle || 'moderno';
+    document.getElementById('prop-style-name').textContent = styleName;
+    document.getElementById('prop-style-desc').textContent = data.style_description || '';
+
+    // Build proposed changes list
+    const changesList = document.getElementById('prop-changes');
+    changesList.innerHTML = '';
+    const changes = buildChangesList(state.selectedStyle, desc, userPrompt);
+    changes.forEach(c => {
+        const li = document.createElement('li');
+        li.className = 'flex items-start gap-2';
+        li.innerHTML = `<span class="material-symbols-outlined text-primary text-sm mt-0.5">arrow_forward</span><span>${c}</span>`;
+        changesList.appendChild(li);
+    });
+
+    document.getElementById('prop-prompt').textContent = data.full_prompt || '';
+
+    // Scroll to result
+    setTimeout(() => document.getElementById('result-panel').scrollIntoView({ behavior: 'smooth' }), 200);
+}
+
+const STYLE_CHANGES = {
+    moderno: ['Paleta de colores neutros: blanco, gris y beige','Muebles de líneas rectas con patas de metal lacado','Iluminación empotrada + lámparas de diseño contemporáneo','Eliminación del exceso de ornamentación','Materiales: hormigón pulido, vidrio, acero'],
+    nordico: ['Tonos cálidos de madera natural en suelo y muebles','Textiles acogedores: cojines de lana, alfombra de pelo','Iluminación suave y difusa con bombillas cálidas','Plantas de interior como elemento decorativo clave','Paleta blanco-beige con toques de gris y madera clara'],
+    industrial: ['Paredes de ladrillo visto o efecto hormigón','Tuberías y vigas de metal a la vista','Iluminación con bombillas Edison y pantallas metálicas','Mobiliario robusto de madera oscura y metal','Paleta de grises, negros y tonos oxidados'],
+    minimalista: ['Reducción drástica de elementos decorativos','Un solo color dominante con acentos monocromáticos','Almacenaje oculto para mantener superficies despejadas','Muebles de formas simples y funcionales','Protagonismo del vacío y la luz natural'],
+    rustico: ['Vigas de madera en el techo','Suelo de piedra natural o tarima envejecida','Muebles artesanales o de madera maciza recuperada','Chimenea o estufa como elemento central','Textiles de lino, yute y lana en tonos terrosos'],
+    bohemio: ['Capas de textiles coloridos: tapices, cojines, alfombras','Muebles vintage mezclados con piezas artesanales','Gran cantidad de plantas tropicales','Iluminación cálida con farolillos y guirnaldas','Paleta ecléctica: ocre, terracota, verde esmeralda, índigo'],
+};
+
+function buildChangesList(style, analysis, prompt) {
+    const base = STYLE_CHANGES[style] || STYLE_CHANGES.moderno;
+    const extras = [];
+    if (analysis) {
+        if (/poca luz|oscur/i.test(analysis)) extras.push('Incorporación de espejos para ampliar luminosidad');
+        if (/pequeñ/i.test(analysis)) extras.push('Muebles multifuncionales para optimizar el espacio reducido');
+        if (/desordenada|cluttered/i.test(analysis)) extras.push('Sistema de organización y almacenaje integrado');
+    }
+    return [...base, ...extras].slice(0, 7);
+}
+</script>
+</body>
+</html>

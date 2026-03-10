@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html class="dark" lang="es">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>RenderRoom Admin Panel</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#e49f0c",
+                        "background-dark": "#0D1117",
+                        "surface-dark": "#161b22",
+                    },
+                    fontFamily: { "display": ["Inter", "sans-serif"] },
+                },
+            },
+        }
+    </script>
+    <style>
+        .glass-nav { background: rgba(13, 17, 23, 0.8); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(228, 159, 12, 0.1); }
+        .stat-card { background: linear-gradient(135deg, #1c2128 0%, #161b22 100%); border: 1px solid rgba(255,255,255,0.05); }
+    </style>
+</head>
+<body class="bg-background-dark font-display text-slate-100 min-h-screen">
+    <div id="loading-overlay" class="fixed inset-0 z-[100] bg-background-dark flex flex-col items-center justify-center">
+        <div class="size-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+        <p class="mt-4 text-primary font-bold animate-pulse">Verificando acceso de administrador...</p>
+    </div>
+
+    <!-- Top Navigation -->
+    <nav class="fixed top-0 w-full z-50 glass-nav">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-3xl">admin_panel_settings</span>
+                <h1 class="text-xl font-bold tracking-tight text-slate-100">Render<span class="text-primary">Room</span> <span class="text-xs uppercase bg-primary/20 text-primary px-2 py-0.5 rounded ml-2">Admin</span></h1>
+            </div>
+            <div class="flex items-center gap-6">
+                <a class="text-sm font-medium hover:text-primary transition-colors" href="01-landing-page.html">Ir a la Web</a>
+                <button onclick="firebase.auth().signOut()" class="text-xs text-slate-400 hover:text-primary transition-colors">Cerrar Sesión</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-6 pt-24 pb-12">
+        <header class="mb-10">
+            <h2 class="text-3xl font-extrabold">Panel de Control</h2>
+            <p class="text-slate-500">Visualiza el estado global de la plataforma y gestiona usuarios.</p>
+        </header>
+
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            <div class="stat-card p-6 rounded-2xl">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="p-3 bg-blue-500/10 text-blue-500 rounded-xl">
+                        <span class="material-symbols-outlined">group</span>
+                    </div>
+                </div>
+                <p class="text-slate-500 text-sm font-bold uppercase tracking-wider">Total Usuarios</p>
+                <h3 id="stat-total-users" class="text-3xl font-black mt-1">Cargando...</h3>
+            </div>
+            <div class="stat-card p-6 rounded-2xl">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="p-3 bg-primary/10 text-primary rounded-xl">
+                        <span class="material-symbols-outlined">render_output</span>
+                    </div>
+                </div>
+                <p class="text-slate-500 text-sm font-bold uppercase tracking-wider">Renders Generados</p>
+                <h3 id="stat-total-renders" class="text-3xl font-black mt-1">Cargando...</h3>
+            </div>
+            <div class="stat-card p-6 rounded-2xl">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="p-3 bg-green-500/10 text-green-500 rounded-xl">
+                        <span class="material-symbols-outlined">payments</span>
+                    </div>
+                </div>
+                <p class="text-slate-500 text-sm font-bold uppercase tracking-wider">Ingresos Est.</p>
+                <h3 id="stat-total-revenue" class="text-3xl font-black mt-1">Cargando...</h3>
+            </div>
+            <div class="stat-card p-6 rounded-2xl border-primary/20">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="p-3 bg-accent-violet/10 text-8b5cf6 rounded-xl">
+                        <span class="material-symbols-outlined">monitoring</span>
+                    </div>
+                </div>
+                <p class="text-slate-500 text-sm font-bold uppercase tracking-wider">Conversión</p>
+                <h3 id="stat-conversion" class="text-3xl font-black mt-1">--%</h3>
+            </div>
+        </div>
+
+        <!-- Users Table -->
+        <section class="bg-surface-dark rounded-2xl border border-white/5 overflow-hidden shadow-2xl">
+            <div class="p-6 border-b border-white/5 flex justify-between items-center">
+                <h3 class="text-xl font-bold flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">manage_accounts</span>
+                    Usuarios Registrados
+                </h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="text-xs font-bold text-slate-500 uppercase tracking-widest border-b border-white/5">
+                            <th class="px-6 py-4">Usuario</th>
+                            <th class="px-6 py-4">Email</th>
+                            <th class="px-6 py-4">Ubicación</th>
+                            <th class="px-6 py-4">Rol</th>
+                            <th class="px-6 py-4 text-right">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="user-table-body" class="divide-y divide-white/5">
+                        <!-- Users will be loaded here -->
+                        <tr>
+                            <td colspan="5" class="px-6 py-10 text-center text-slate-500">Cargando base de datos de usuarios...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <footer class="max-w-7xl mx-auto px-6 py-12 text-center text-slate-600 border-t border-white/5 mt-12">
+        <p>© 2024 RenderRoom Admin System v1.0.0</p>
+    </footer>
+
+    <script>
+    // ── Firebase Config ─────────────────────────────
+    const firebaseConfig = {
+      projectId: "gen-lang-client-0426824151",
+      appId: "1:124806819551:web:1c90d1154b458fa064036a",
+      storageBucket: "gen-lang-client-0426824151.firebasestorage.app",
+      apiKey: "AIzaSyDj99qdmDt4GiVeRkvCSfTOSDw3uqD-_Ew",
+      authDomain: "gen-lang-client-0426824151.firebaseapp.com",
+      messagingSenderId: "124806819551"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    firebase.auth().onAuthStateChanged(async user => {
+        if (!user) {
+            window.location.href = '01-landing-page.html';
+            return;
+        }
+        
+        // Verify Admin Status
+        try {
+            const doc = await db.collection('users').doc(user.uid).get();
+            if (doc.exists && doc.data().isAdmin) {
+                document.getElementById('loading-overlay').classList.add('hidden');
+                loadStats();
+                loadUsers();
+            } else {
+                alert('Acceso Denegado: Se requiere privilegios de administrador.');
+                window.location.href = '01-landing-page.html';
+            }
+        } catch (e) {
+            console.error("Auth check failed:", e);
+            window.location.href = '01-landing-page.html';
+        }
+    });
+
+    async function loadStats() {
+        try {
+            const userSnap = await db.collection('users').get();
+            const renderSnap = await db.collection('renders').get();
+            
+            document.getElementById('stat-total-users').textContent = userSnap.size;
+            document.getElementById('stat-total-renders').textContent = renderSnap.size;
+            document.getElementById('stat-total-revenue').textContent = (renderSnap.size * 2.5).toFixed(2) + '€';
+            
+            const conversion = userSnap.size > 0 ? ((renderSnap.size / userSnap.size) * 100).toFixed(1) : 0;
+            document.getElementById('stat-conversion').textContent = conversion + '%';
+        } catch (e) {
+            console.error("Error loading stats:", e);
+        }
+    }
+
+    async function loadUsers() {
+        const tableBody = document.getElementById('user-table-body');
+        try {
+            const snapshot = await db.collection('users').orderBy('createdAt', 'desc').get();
+            tableBody.innerHTML = '';
+            
+            snapshot.forEach(doc => {
+                const user = doc.data();
+                const isAdmin = user.isAdmin || false;
+                tableBody.innerHTML += `
+                    <tr class="hover:bg-white/5 transition-colors">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="size-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xs">
+                                    ${(user.displayName || user.email).charAt(0).toUpperCase()}
+                                </div>
+                                <span class="font-semibold">${user.displayName || 'Sin nombre'}</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-slate-400 text-sm">${user.email}</td>
+                        <td class="px-6 py-4 text-slate-400 text-sm">${user.location || 'N/A'}</td>
+                        <td class="px-6 py-4">
+                            <span class="px-2 py-1 ${isAdmin ? 'bg-primary/20 text-primary' : 'bg-slate-500/20 text-slate-500'} text-[10px] font-bold uppercase rounded">
+                                ${isAdmin ? 'Admin' : 'Usuario'}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <button class="p-2 hover:text-primary transition-colors">
+                                <span class="material-symbols-outlined text-lg">edit</span>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        } catch (e) {
+            console.error("Error loading users:", e);
+            tableBody.innerHTML = '<tr><td colspan="5" class="px-6 py-10 text-center text-red-500">Error al cargar usuarios. Verifica los permisos de Firestore.</td></tr>';
+        }
+    }
+    </script>
+</body>
+</html>

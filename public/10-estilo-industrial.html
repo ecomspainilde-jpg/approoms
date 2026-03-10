@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html class="dark" lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Estilo Industrial · RenderRoom</title>
+<meta name="description" content="Estilo Industrial: ladrillo visto, metal y loft urbano. Diseña tu habitación con RenderRoom."/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>tailwind.config={darkMode:"class",theme:{extend:{colors:{"primary":"#f0a400","background-dark":"#0D1117","surface-dark":"#161B22","border-dark":"#30363D","muted-text":"#8B949E"},fontFamily:{display:["Inter","sans-serif"]}}}}</script>
+<style>.glass{background:rgba(22,27,34,.85);backdrop-filter:blur(16px)}.amber-glow{box-shadow:0 0 24px rgba(240,164,0,.25)}.char-chip{display:inline-flex;align-items:center;gap:6px;background:rgba(240,164,0,.08);border:1px solid rgba(240,164,0,.2);border-radius:9999px;padding:4px 14px;font-size:.8rem;font-weight:600;color:#f0a400}.gallery-img{transition:transform .4s}.gallery-img:hover{transform:scale(1.04)}</style>
+</head>
+<body class="bg-background-dark font-display text-slate-100 min-h-screen">
+<header class="glass sticky top-0 z-50 border-b border-border-dark flex items-center justify-between px-6 md:px-10 py-4">
+    <a href="01-landing-page.html" class="flex items-center gap-3"><div class="size-8 bg-gradient-to-br from-primary to-orange-600 rounded-lg flex items-center justify-center text-background-dark"><span class="material-symbols-outlined text-sm">deployed_code</span></div><h2 class="text-xl font-black tracking-tight">Render<span class="text-primary">Room</span></h2></a>
+    <div class="flex items-center gap-6"><a href="01-landing-page.html#galeria" class="text-sm text-muted-text hover:text-primary transition-colors hidden md:block">← Galería</a><a href="02-upload-wizard.html?style=industrial" class="bg-primary hover:bg-primary/90 text-background-dark px-5 py-2 rounded-xl font-bold text-sm transition-all amber-glow">Renderizar en este estilo</a></div>
+</header>
+<main>
+    <section class="relative overflow-hidden">
+        <div class="aspect-[21/8] w-full bg-cover bg-center relative" style="background-image:url('https://lh3.googleusercontent.com/aida-public/AB6AXuATikHqmuLZezQLfCydfw0_YkgCObP9NFHal9C0rKAw4LXu4Y90TF14gRjlhXi1y-Lp5TOf7xOBA5mkvXIuc2rXHXF5jL0Kr6MP-jbyA24QU4yzL35U-tcyDtA8M2H_dO_-WMdfOJzP9FWVwTEv-CfGguNvScXjrUIsQeGhCe-ktCwQmiC6KiG3yWhXnQHhlaFUzHbtlQlFOYv_qSqC8moqacIAEYmtWtktXRGEvKMsqfGSAUvwzhCo7pGYkNj-yDIazydC8KjMAWfU')">
+            <div class="absolute inset-0 bg-gradient-to-t from-background-dark via-background-dark/40 to-transparent"></div>
+            <div class="absolute bottom-0 left-0 right-0 p-8 md:p-16">
+                <span class="text-primary text-xs uppercase tracking-widest font-bold">Estilo de Interiorismo</span>
+                <h1 class="text-5xl md:text-7xl font-black mt-2 tracking-tight">Industrial</h1>
+                <p class="text-slate-300 text-lg md:text-xl mt-3 max-w-xl">Loft urbano y crudo. Ladrillo visto, vigas de acero y la belleza bruta de los materiales en su estado más auténtico.</p>
+            </div>
+        </div>
+    </section>
+    <section class="max-w-5xl mx-auto px-6 py-16 space-y-12">
+        <div>
+            <h2 class="text-2xl font-black mb-6">Características del estilo</h2>
+            <div class="flex flex-wrap gap-2 mb-8">
+                <span class="char-chip"><span class="material-symbols-outlined text-sm">foundation</span>Ladrillo visto</span>
+                <span class="char-chip"><span class="material-symbols-outlined text-sm">hardware</span>Metal y acero</span>
+                <span class="char-chip"><span class="material-symbols-outlined text-sm">lightbulb</span>Bombillas Edison</span>
+                <span class="char-chip"><span class="material-symbols-outlined text-sm">warehouse</span>Estilo loft</span>
+                <span class="char-chip"><span class="material-symbols-outlined text-sm">category</span>Madera oscura</span>
+            </div>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="bg-surface-dark rounded-2xl border border-border-dark p-6 space-y-4">
+                    <h3 class="font-bold flex items-center gap-2"><span class="material-symbols-outlined text-primary text-xl">palette</span> Paleta de Colores</h3>
+                    <div class="flex gap-3">
+                        <div class="flex-1 h-12 rounded-lg" style="background:#2C2C2C"></div>
+                        <div class="flex-1 h-12 rounded-lg" style="background:#5C4033"></div>
+                        <div class="flex-1 h-12 rounded-lg" style="background:#7A6455"></div>
+                        <div class="flex-1 h-12 rounded-lg" style="background:#9E9E9E"></div>
+                        <div class="flex-1 h-12 rounded-lg" style="background:#B5451B"></div>
+                    </div>
+                    <p class="text-muted-text text-sm">Carbón, marrón tabaco, gris piedra y rojo óxido como acento clave.</p>
+                </div>
+                <div class="bg-surface-dark rounded-2xl border border-border-dark p-6 space-y-3">
+                    <h3 class="font-bold flex items-center gap-2"><span class="material-symbols-outlined text-primary text-xl">chair</span> Mobiliario Clave</h3>
+                    <ul class="text-sm text-slate-300 space-y-2">
+                        <li class="flex items-center gap-2"><span class="material-symbols-outlined text-primary text-sm">arrow_forward</span>Mesas con estructura de hierro y sobre de madera</li>
+                        <li class="flex items-center gap-2"><span class="material-symbols-outlined text-primary text-sm">arrow_forward</span>Sillas tipo Tolix o bancos de hierro fundido</li>
+                        <li class="flex items-center gap-2"><span class="material-symbols-outlined text-primary text-sm">arrow_forward</span>Estanterías de tubo de fontanería + tablones</li>
+                        <li class="flex items-center gap-2"><span class="material-symbols-outlined text-primary text-sm">arrow_forward</span>Sofás de cuero envejecido o capitoné</li>
+                    </ul>
+                </div>
+                <div class="bg-surface-dark rounded-2xl border border-border-dark p-6 space-y-3">
+                    <h3 class="font-bold flex items-center gap-2"><span class="material-symbols-outlined text-primary text-xl">light_mode</span> Iluminación</h3>
+                    <ul class="text-sm text-slate-300 space-y-2">
+                        <li class="flex items-center gap-2"><span class="material-symbols-outlined text-primary text-sm">arrow_forward</span>Colgantes de bombilla Edison desnuda</li>
+                        <li class="flex items-center gap-2"><span class="material-symbols-outlined text-primary text-sm">arrow_forward</span>Pantallas metálicas esmaltadas en negro</li>
+                        <li class="flex items-center gap-2"><span class="material-symbols-outlined text-primary text-sm">arrow_forward</span>Apliques de pared con brazo articulado</li>
+                        <li class="flex items-center gap-2"><span class="material-symbols-outlined text-primary text-sm">arrow_forward</span>Luz cálida y puntual para crear zonas de ambiente</li>
+                    </ul>
+                </div>
+                <div class="bg-surface-dark rounded-2xl border border-border-dark p-6 space-y-3">
+                    <h3 class="font-bold flex items-center gap-2"><span class="material-symbols-outlined text-primary text-xl">texture</span> Materiales y Acabados</h3>
+                    <ul class="text-sm text-slate-300 space-y-2">
+                        <li class="flex items-center gap-2"><span class="material-symbols-outlined text-primary text-sm">arrow_forward</span>Paredes de ladrillo visto o cemento pulido</li>
+                        <li class="flex items-center gap-2"><span class="material-symbols-outlined text-primary text-sm">arrow_forward</span>Techos con vigas o tuberías a la vista</li>
+                        <li class="flex items-center gap-2"><span class="material-symbols-outlined text-primary text-sm">arrow_forward</span>Suelo de madera envejecida o microcemento</li>
+                        <li class="flex items-center gap-2"><span class="material-symbols-outlined text-primary text-sm">arrow_forward</span>Ventanas de acero tipo Crittall</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div>
+            <h2 class="text-2xl font-black mb-6">Galería de ejemplos</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="col-span-2 row-span-2 rounded-2xl overflow-hidden border border-border-dark">
+                    <img class="gallery-img w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuATikHqmuLZezQLfCydfw0_YkgCObP9NFHal9C0rKAw4LXu4Y90TF14gRjlhXi1y-Lp5TOf7xOBA5mkvXIuc2rXHXF5jL0Kr6MP-jbyA24QU4yzL35U-tcyDtA8M2H_dO_-WMdfOJzP9FWVwTEv-CfGguNvScXjrUIsQeGhCe-ktCwQmiC6KiG3yWhXnQHhlaFUzHbtlQlFOYv_qSqC8moqacIAEYmtWtktXRGEvKMsqfGSAUvwzhCo7pGYkNj-yDIazydC8KjMAWfU" alt="Loft industrial"/>
+                </div>
+                <div class="rounded-2xl overflow-hidden border border-border-dark aspect-square"><img class="gallery-img w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDbnSBo09PLlYq-m8tkTThdITdXW18xNL3_Bezg09pRGd3CQYFcD9ayzN6yoleZDdAuU715IG_74mS3YFxYlFNOvPAWaT1e2GtK-S1bzWlrSqpJFX4jMHVOxD0wr8MPTC5LF8p9GJc_ILSFkAdS-tOlnJG6J-qy0B7bGSqJ-0VqSbNIzaK29VPHmODHwI5e0h8YwDWHG71c3SuWOfqq" alt="Comedor industrial"/></div>
+                <div class="rounded-2xl overflow-hidden border border-border-dark aspect-square"><img class="gallery-img w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDQWUpjKgOEYra8zmJWr2VCifCD-lUnq5hV_HGRMF2wRJdcDMZbtfzFp6m-8aotXqBKz4Jlw4lAu7USRZGkusVadQ_y4fxtiJ8HNQlrzWAquhNvLCyUEXRQr_HKoEjr9LpJrDoURbfpQ0J9pprzJyX9ALY19d6wVKcZCnZ5OVXL6pp68YRSSsENKTY72t1HCeELB7MAZ1ANhhubCP6eIzb_kId0zPn2GaGEM63eEBvnZRYq4y86XsSEneUZBUbycGRHleBuCaqyNYAi" alt="Detalle industrial"/></div>
+                <div class="rounded-2xl overflow-hidden border border-border-dark aspect-square"><img class="gallery-img w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBA1qYdoHIRPRAQsKae6k7Y6QTrc5ZlH5k9Ip-dFL6BEJE0IVyM7viZlXseMXtFnEn6wVpkq0S82ZwtyasLdiRjZr1orkSlp_ONsWMYuqOJ99JVt20otdA5sAUxSnDPaLjWXQ80fHst_0rjote5mgjkXaKdyNYdUsg1_Q3L4mJ_B4KBnxj39bfctroxrticbBpUF1H3zVrLdW92gJweHw7zqyfuZWgReFKsOJIMpeCX3dV0kBvjKdKFJzzbZfBDGFzriUrWbGyOAaV8" alt="Dormitorio industrial"/></div>
+                <div class="rounded-2xl overflow-hidden border border-border-dark aspect-square"><img class="gallery-img w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCwXLOCIuSfGX6G4h_TYK6rawpZwSbp4IFxZc2ed8YS4-pJlNj6290wvsPBgKK4qxIeD0qGksvjGB-TKIdc09Kf7mJBqKqXl2rKjQg08CksFtE2ISjsMFrwUAhXqYdMFkUlEulBSz0Vy2a8N7JMFyoys5yxxT86RbtLVX4tAMx8Pd6kKbyOxVNRiFUePpkLilQehUSkq4F91MSztiSB7ya2kQVe1tfRyotZWzPBRwr0bncL3vtmvfJdiyeNQlNf-_38dtd3-7pHHTAV" alt="Cocina industrial"/></div>
+            </div>
+        </div>
+    </section>
+    <section class="bg-primary/5 border-t border-primary/20 py-16">
+        <div class="max-w-3xl mx-auto px-6 text-center">
+            <h2 class="text-3xl font-black mb-3">¿Te gusta el estilo Industrial?</h2>
+            <p class="text-muted-text mb-8">Transforma tu habitación en un auténtico loft urbano con nuestra IA.</p>
+            <a href="02-upload-wizard.html?style=industrial" class="inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-background-dark font-black py-4 px-10 rounded-2xl text-lg transition-all amber-glow"><span class="material-symbols-outlined">upload_file</span> Renderizar mi habitación en estilo Industrial</a>
+            <p class="mt-4 text-xs text-muted-text">Solo 2,50 € · Resultado en menos de 30 segundos</p>
+        </div>
+    </section>
+</main>
+<footer class="border-t border-white/5 py-8 text-center"><p class="text-slate-600 text-xs">© 2024 RenderRoom AI · <a href="01-landing-page.html" class="hover:text-primary transition-colors">Inicio</a></p></footer>
+</body>
+</html>
