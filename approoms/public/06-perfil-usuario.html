@@ -1,360 +1,449 @@
 <!DOCTYPE html>
-<html class="dark" lang="es">
+<html lang="es" class="dark">
 <head>
-    <meta charset="utf-8"/>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>RenderRoom User Profile Settings</title>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Settings | RenderRoom AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-    <script id="tailwind-config">
+    <script>
         tailwind.config = {
-            darkMode: "class",
+            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
-                        "primary": "#e49f0c",
-                        "accent-violet": "#8b5cf6",
-                        "background-light": "#f8f7f5",
-                        "background-dark": "#0D1117",
-                        "surface-dark": "#161b22",
+                        primary: '#f0a400',
+                        'primary-hover': '#d4940a',
+                        'background-dark': '#0D1117',
+                        charcoal: '#161B22',
+                        nebula: '#C9D1D9',
+                        muted: '#8b949e',
                     },
-                    fontFamily: { "display": ["Inter", "sans-serif"] },
-                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
-                },
-            },
+                    borderRadius: {
+                        'xl': '1rem',
+                    }
+                }
+            }
         }
     </script>
     <style>
-        .glass-nav { background: rgba(13, 17, 23, 0.8); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(228, 159, 12, 0.1); }
-        .profile-gradient { background: linear-gradient(135deg, #161b22 0%, #0D1117 100%); border-bottom: 1px solid rgba(228, 159, 12, 0.15); }
+        :root {
+            --primary: #f0a400;
+            --background-dark: #0D1117;
+            --charcoal: #161B22;
+            --nebula: #C9D1D9;
+            --muted: #8b949e;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-dark);
+            color: var(--nebula);
+        }
+
+        .glass-nav {
+            background: #0D1117;
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .input-field {
+            background-color: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .input-field:focus {
+            border-color: var(--primary);
+            background-color: rgba(255, 255, 255, 0.04);
+            outline: none;
+            box-shadow: 0 0 0 1px var(--primary);
+        }
+
+        .sidebar-link.active {
+            background-color: rgba(240, 164, 0, 0.1);
+            color: var(--primary);
+        }
     </style>
 </head>
-<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
-    <!-- Top Navigation -->
-    <nav class="fixed top-0 w-full z-50 glass-nav">
-        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-2">
-                <span class="material-symbols-outlined text-primary text-3xl">deployed_code</span>
-                <h1 class="text-xl font-bold tracking-tight text-slate-100">Render<span class="text-primary">Room</span></h1>
+<body>
+    <div class="min-h-screen bg-background-dark flex overflow-hidden">
+        <!-- Sidebar -->
+        <aside class="hidden lg:flex w-72 flex-col glass-nav sticky top-0 h-screen">
+            <div class="p-8">
+                <a href="01-landing-page.html" class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                        <iconify-icon icon="lucide:wand-2" class="text-background-dark text-xl font-bold"></iconify-icon>
+                    </div>
+                    <span class="text-lg font-black tracking-tighter text-white uppercase">RenderRoom</span>
+                </a>
             </div>
-            <div class="hidden md:flex items-center gap-8">
-                <a class="text-sm font-medium hover:text-primary transition-colors" href="01-landing-page.html">Inicio</a>
-                <a class="text-sm font-medium hover:text-primary transition-colors" href="02-upload-wizard.html">Nuevo Render</a>
-                <a class="text-sm font-medium hover:text-primary transition-colors" href="03-dashboard.html">Mis Renders</a>
-                <a id="admin-link" class="text-sm font-medium text-primary hidden hover:underline transition-colors" href="admin-dashboard.html">Admin</a>
-            </div>
-            <div class="flex items-center gap-4">
-                <button class="p-2 rounded-lg hover:bg-white/10 transition-colors">
-                    <span class="material-symbols-outlined text-slate-400">notifications</span>
-                </button>
-                <div class="h-10 w-10 rounded-full border-2 border-primary overflow-hidden">
-                    <img id="nav-profile-img" class="w-full h-full object-cover" alt="User profile picture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB7NllOaVYjtYFTeGnTokZe5-lw0PAFfbI8NUqLR7c5Ep7HACjfDinxkfgKyC2PDliU_vFqp_mizszhdG-a6ZGaPJoMytTHTRTYmsZO-Gq-w5UhKWIZ0GNeVVYQYG_KObaQnl5Nd5x-yb-q79YvX3IAsTSaNASInKJeoFtgL8WTEuteJ-3hVH8SceCYwiQo2KFohHvsX7wPywWMNN4Nqz1ktCdQ2xKATYCxu66y2GsPJtRiP1A6d_gRVaWw2MG7D9T8-uaPDPH75wxC"/>
-                </div>
-                <button onclick="firebase.auth().signOut()" class="text-xs text-slate-400 hover:text-primary transition-colors">Salir</button>
-            </div>
-        </div>
-    </nav>
 
-    <!-- Profile Header Section -->
-    <header class="pt-16 profile-gradient">
-        <div class="max-w-7xl mx-auto px-6 py-12">
-            <div class="flex flex-col md:flex-row items-center md:items-end gap-8">
-                <div class="relative">
-                    <div class="w-32 h-32 rounded-full border-4 border-primary p-1 bg-background-dark shadow-2xl shadow-primary/20">
-                        <img id="profile-avatar-img" class="w-full h-full rounded-full object-cover" alt="Large profile avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBDjGylHy9MVJYWH4RRsWCEiYEyGiQJG8cuLwxBvHrAx9iauBN8KusDo8HEZuHLEPj9eSFwIG0RHaC5pj8SmadkRM6MHpcrUWTUOdbFMM7vemsyuZ2pDWVK5R0Iiy8CwKtKfOSXtTJoCXh7TAmoRTLR8xenys5729Vfx5-EjFHUCcYpoNQiiFGTbhj_04zv77sMqNyaCuDS1xPAw50VHITlNBi3845Yjqzg3ngC3a6nNQqouQeWEALH1YqLBgVHicWQFbLChxRrjutr"/>
+            <nav class="flex-1 px-4 space-y-1">
+                <div class="px-4 py-2 text-[10px] font-bold text-muted uppercase tracking-widest mb-2">Menu</div>
+                <a href="01-landing-page.html" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 transition-colors text-sm font-medium">
+                    <iconify-icon icon="lucide:layout-grid" class="text-xl"></iconify-icon>
+                    <span>Discover</span>
+                </a>
+                <a href="02-upload-wizard.html" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 transition-colors text-sm font-medium">
+                    <iconify-icon icon="lucide:sparkles" class="text-xl"></iconify-icon>
+                    <span>Generate</span>
+                </a>
+                <a href="03-dashboard.html" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 transition-colors text-sm font-medium">
+                    <iconify-icon icon="lucide:clock" class="text-xl"></iconify-icon>
+                    <span>My Renders</span>
+                </a>
+
+                <div class="pt-8 px-4 py-2 text-[10px] font-bold text-muted uppercase tracking-widest mb-2">Settings</div>
+                <a href="06-perfil-usuario.html" class="sidebar-link active flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-sm font-medium">
+                    <iconify-icon icon="lucide:user" class="text-xl"></iconify-icon>
+                    <span>Personal Profile</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 transition-colors text-sm font-medium">
+                    <iconify-icon icon="lucide:credit-card" class="text-xl"></iconify-icon>
+                    <span>Billing & Credits</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 transition-colors text-sm font-medium">
+                    <iconify-icon icon="lucide:shield" class="text-xl"></iconify-icon>
+                    <span>Security</span>
+                </a>
+            </nav>
+
+            <div class="p-6">
+                <div class="bg-charcoal/50 rounded-2xl p-4 border border-white/5">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+                            <iconify-icon icon="lucide:zap" class="text-lg"></iconify-icon>
+                        </div>
+                        <span class="text-xs font-bold text-white" id="credits-display">12 Credits left</span>
                     </div>
-                    <button class="absolute bottom-1 right-1 bg-primary text-background-dark p-1.5 rounded-full shadow-lg">
-                        <span class="material-symbols-outlined text-sm font-bold">edit</span>
-                    </button>
-                </div>
-                <div class="flex-1 text-center md:text-left">
-                    <div class="flex items-center justify-center md:justify-start gap-3 mb-2">
-                        <h2 id="user-header-name" class="text-3xl font-bold text-slate-100 italic">Cargando...</h2>
-                        <span class="px-3 py-1 bg-primary/20 text-primary text-xs font-bold rounded-full border border-primary/30 uppercase tracking-wider">Premium</span>
-                    </div>
-                    <p class="text-slate-400 flex items-center justify-center md:justify-start gap-2">
-                        <span class="material-symbols-outlined text-sm">calendar_today</span>
-                        Miembro desde Enero 2024
-                    </p>
-                </div>
-                <div class="grid grid-cols-3 gap-4 w-full md:w-auto">
-                    <div class="bg-surface-dark border border-white/5 rounded-xl p-4 text-center min-w-[120px]">
-                        <p id="stats-renders" class="text-2xl font-bold text-slate-100">0</p>
-                        <p class="text-xs text-slate-500 uppercase font-semibold">Renders</p>
-                    </div>
-                    <div class="bg-surface-dark border border-white/5 rounded-xl p-4 text-center min-w-[120px]">
-                        <p id="stats-favs" class="text-2xl font-bold text-slate-100">0</p>
-                        <p class="text-xs text-slate-500 uppercase font-semibold">Favoritos</p>
-                    </div>
-                    <div class="bg-surface-dark border border-white/5 rounded-xl p-4 text-center min-w-[120px]">
-                        <p id="stats-spent" class="text-2xl font-bold text-slate-100">0€</p>
-                        <p class="text-xs text-slate-500 uppercase font-semibold">Gastados</p>
-                    </div>
+                    <button onclick="window.location.href='04-pago-bizum.html'" class="w-full py-2 bg-primary text-background-dark text-xs font-black rounded-lg hover:scale-[1.02] transition-transform">REFILL</button>
                 </div>
             </div>
-        </div>
-    </header>
+        </aside>
 
-    <!-- Main Content Tabs & Grid -->
-    <main class="max-w-7xl mx-auto px-6 py-8">
-        <div class="flex gap-8 mb-8 border-b border-white/5">
-            <button class="pb-4 border-b-2 border-primary text-primary font-bold text-sm">Información Personal</button>
-            <button class="pb-4 border-b-2 border-transparent text-slate-500 hover:text-slate-300 font-bold text-sm">Seguridad</button>
-            <button class="pb-4 border-b-2 border-transparent text-slate-500 hover:text-slate-300 font-bold text-sm">Facturación</button>
-            <button class="pb-4 border-b-2 border-transparent text-slate-500 hover:text-slate-300 font-bold text-sm">API Keys</button>
-        </div>
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <!-- Left Column: Personal Info & Payments -->
-            <div class="lg:col-span-7 space-y-8">
-                <!-- Personal Info Card -->
-                <section class="bg-surface-dark rounded-xl border border-white/5 overflow-hidden">
-                    <div class="p-6 border-b border-white/5 flex justify-between items-center">
-                        <h3 class="text-lg font-bold flex items-center gap-2">
-                            <span class="material-symbols-outlined text-primary">person</span>
-                            Datos Personales
-                        </h3>
-                        <button id="save-profile-btn" onclick="saveProfile()" class="text-sm text-primary font-semibold hover:underline">Guardar cambios</button>
-                    </div>
-                    <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="space-y-2">
-                            <label class="text-xs font-bold text-slate-500 uppercase">Nombre Completo</label>
-                            <input id="profile-name-input" class="w-full bg-background-dark border-white/10 rounded-lg focus:border-primary focus:ring-primary text-slate-200" type="text" value=""/>
+        <!-- Main Content -->
+        <main class="flex-1 h-screen overflow-y-auto bg-[#0D1117]">
+            <!-- Top bar (Mobile) -->
+            <header class="lg:hidden h-16 border-b border-white/5 px-6 flex items-center justify-between bg-background-dark sticky top-0 z-30">
+                <div class="flex items-center gap-2">
+                    <iconify-icon icon="lucide:menu" class="text-2xl"></iconify-icon>
+                </div>
+                <span class="font-black text-sm uppercase tracking-tighter">RenderRoom</span>
+                <div class="w-8 h-8 rounded-full bg-charcoal"></div>
+            </header>
+
+            <div class="max-w-5xl mx-auto py-12 px-8 lg:px-16">
+                <!-- Profile Header -->
+                <header class="flex flex-col md:flex-row items-start md:items-center gap-8 pb-12 border-b border-white/5 mb-12">
+                    <div class="relative group">
+                        <div class="w-24 h-24 rounded-full overflow-hidden border-4 border-charcoal bg-charcoal ring-1 ring-white/10">
+                            <img id="profile-avatar-img" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="Avatar" class="w-full h-full object-cover">
                         </div>
-                        <div class="space-y-2">
-                            <label class="text-xs font-bold text-slate-500 uppercase">Correo Electrónico</label>
-                            <input id="profile-email-input" class="w-full bg-background-dark border-white/10 rounded-lg focus:border-primary focus:ring-primary text-slate-200 opacity-50" type="email" value="" readonly/>
-                        </div>
-                        <div class="space-y-2">
-                            <label class="text-xs font-bold text-slate-500 uppercase">Teléfono</label>
-                            <input id="profile-phone-input" class="w-full bg-background-dark border-white/10 rounded-lg focus:border-primary focus:ring-primary text-slate-200" type="text" value=""/>
-                        </div>
-                        <div class="space-y-2">
-                            <label class="text-xs font-bold text-slate-500 uppercase">Ubicación</label>
-                            <input id="profile-location-input" class="w-full bg-background-dark border-white/10 rounded-lg focus:border-primary focus:ring-primary text-slate-200" type="text" value=""/>
-                        </div>
-                    </div>
-                </section>
-                <!-- Payment Methods Card -->
-                <section class="bg-surface-dark rounded-xl border border-white/5 overflow-hidden">
-                    <div class="p-6 border-b border-white/5">
-                        <h3 class="text-lg font-bold flex items-center gap-2">
-                            <span class="material-symbols-outlined text-primary">payments</span>
-                            Métodos de Pago
-                        </h3>
-                    </div>
-                    <div class="p-6">
-                        <div class="flex items-center justify-between p-4 bg-background-dark rounded-xl border border-primary/20">
-                            <div class="flex items-center gap-4">
-                                <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                                    <span class="material-symbols-outlined text-primary">smartphone</span>
-                                </div>
-                                <div>
-                                    <p class="font-bold text-slate-200">Bizum Directo</p>
-                                    <p class="text-sm text-slate-500">Activado para pagos rápidos</p>
-                                </div>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <span class="material-symbols-outlined text-green-500 text-sm">verified</span>
-                                <span class="text-xs font-bold text-green-500 uppercase">Verificado</span>
-                            </div>
-                        </div>
-                        <button class="w-full mt-4 py-3 border border-dashed border-white/20 rounded-xl text-slate-500 text-sm font-semibold hover:border-primary hover:text-primary transition-all">
-                            + Añadir nuevo método
+                        <button class="absolute bottom-0 right-0 bg-primary text-background-dark w-8 h-8 rounded-full flex items-center justify-center shadow-lg border-2 border-background-dark hover:scale-110 transition-transform">
+                            <iconify-icon icon="lucide:camera" class="text-sm"></iconify-icon>
                         </button>
                     </div>
-                </section>
-            </div>
-            <!-- Right Column: Preferences & Activity -->
-            <div class="lg:col-span-5 space-y-8">
-                <!-- Preferences Card -->
-                <section class="bg-surface-dark rounded-xl border border-white/5 overflow-hidden">
-                    <div class="p-6 border-b border-white/5">
-                        <h3 class="text-lg font-bold flex items-center gap-2">
-                            <span class="material-symbols-outlined text-accent-violet">settings_input_component</span>
-                            Preferencias de Diseño
-                        </h3>
-                    </div>
-                    <div class="p-6 space-y-6">
-                        <div class="space-y-3">
-                            <label class="text-xs font-bold text-slate-500 uppercase">Estilo Predeterminado</label>
-                            <div class="flex flex-wrap gap-2">
-                                <button class="px-4 py-2 rounded-full border border-white/10 text-sm hover:border-primary transition-colors">Moderno</button>
-                                <button class="px-4 py-2 rounded-full border border-primary bg-primary/10 text-primary text-sm font-bold">Nórdico</button>
-                                <button class="px-4 py-2 rounded-full border border-white/10 text-sm hover:border-primary transition-colors">Industrial</button>
-                                <button class="px-4 py-2 rounded-full border border-white/10 text-sm hover:border-primary transition-colors">Minimalista</button>
+                    
+                    <div class="flex-1 space-y-4">
+                        <div>
+                            <div class="flex items-center gap-3">
+                                <h1 id="user-name-display" class="text-2xl font-bold text-white">Cargando...</h1>
+                                <span class="px-2 py-0.5 bg-primary/10 text-primary text-[9px] font-black uppercase tracking-widest rounded border border-primary/20">PRO</span>
                             </div>
+                            <p id="user-email-display" class="text-muted text-sm mt-1">Cargando...</p>
                         </div>
-                        <div class="flex items-center justify-between py-2">
+                        
+                        <div class="flex items-center gap-8">
                             <div>
-                                <p class="text-sm font-bold text-slate-200">Alta Resolución (4K)</p>
-                                <p class="text-xs text-slate-500">Renderizado premium habilitado</p>
+                                <div id="stats-renders" class="text-lg font-bold text-white">0</div>
+                                <div class="text-[10px] text-muted font-bold uppercase tracking-wider">Renders</div>
                             </div>
-                            <div class="relative inline-flex items-center cursor-pointer">
-                                <input checked="" class="sr-only peer" type="checkbox"/>
-                                <div class="w-11 h-6 bg-white/10 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                            <div class="w-px h-8 bg-white/5"></div>
+                            <div>
+                                <div id="stats-favs" class="text-lg font-bold text-white">0</div>
+                                <div class="text-[10px] text-muted font-bold uppercase tracking-wider">Favorites</div>
+                            </div>
+                            <div class="w-px h-8 bg-white/5"></div>
+                            <div>
+                                <div id="stats-spent" class="text-lg font-bold text-white">€0</div>
+                                <div class="text-[10px] text-muted font-bold uppercase tracking-wider">Spent</div>
                             </div>
                         </div>
                     </div>
-                </section>
-                <!-- Activity Card -->
-                <section class="bg-surface-dark rounded-xl border border-white/5 overflow-hidden">
-                    <div class="p-6 border-b border-white/5">
-                        <h3 class="text-lg font-bold flex items-center gap-2">
-                            <span class="material-symbols-outlined text-accent-violet">history</span>
-                            Actividad Reciente
-                        </h3>
-                    </div>
-                    <div id="activity-list" class="divide-y divide-white/5">
-                        <div class="p-4 text-center text-slate-500 text-sm">Cargando actividad...</div>
-                    </div>
-                </section>
-            </div>
-        </div>
 
-        <!-- Danger Zone -->
-        <section class="mt-12 mb-20 p-6 rounded-xl border border-red-500/20 bg-red-500/5 flex flex-col md:flex-row items-center justify-between gap-6">
-            <div>
-                <h3 class="text-lg font-bold text-red-500">Zona de Peligro</h3>
-                <p class="text-sm text-slate-500">Una vez eliminada la cuenta, no hay vuelta atrás. Tus créditos y renders se perderán.</p>
-            </div>
-            <button onclick="deleteAccount()" class="px-6 py-2.5 bg-transparent border border-red-500 text-red-500 rounded-lg font-bold text-sm hover:bg-red-500 hover:text-white transition-all">
-                Eliminar mi cuenta
-            </button>
-        </section>
-    </main>
+                    <div class="flex gap-3">
+                        <button onclick="handleSignOut()" class="px-4 py-2 rounded-xl border border-red-500/20 text-red-400 text-xs font-bold hover:bg-red-500/5 transition-all">Sign Out</button>
+                    </div>
+                </header>
 
-    <footer class="max-w-7xl mx-auto px-6 py-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-slate-500 text-sm">
-        <p>© 2024 RenderRoom AI Service. Todos los derechos reservados.</p>
-        <div class="flex gap-6">
-            <a class="hover:text-primary" href="terminos.html">Términos</a>
-            <a class="hover:text-primary" href="privacidad.html">Privacidad</a>
-            <a class="hover:text-primary" href="privacidad.html">Cookies</a>
-        </div>
-    </footer>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-16">
+                    <!-- Account Form -->
+                    <div class="lg:col-span-2 space-y-12">
+                        <section>
+                            <h2 class="text-sm font-bold text-white mb-6 uppercase tracking-widest">Account Details</h2>
+                            <form onsubmit="saveProfile(event)" class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                                <div class="space-y-2">
+                                    <label class="text-[10px] font-bold text-muted uppercase tracking-widest">First Name</label>
+                                    <input id="profile-name-input" type="text" class="w-full input-field rounded-xl px-4 py-3 text-sm text-white">
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="text-[10px] font-bold text-muted uppercase tracking-widest">Last Name</label>
+                                    <input id="profile-lastname-input" type="text" class="w-full input-field rounded-xl px-4 py-3 text-sm text-white">
+                                </div>
+                                <div class="space-y-2 md:col-span-2">
+                                    <label class="text-[10px] font-bold text-muted uppercase tracking-widest">Email Address</label>
+                                    <input id="profile-email-input" type="email" class="w-full input-field rounded-xl px-4 py-3 text-sm text-white opacity-50" readonly>
+                                </div>
+                                <div class="space-y-2 md:col-span-2">
+                                    <label class="text-[10px] font-bold text-muted uppercase tracking-widest">Phone</label>
+                                    <input id="profile-phone-input" type="tel" class="w-full input-field rounded-xl px-4 py-3 text-sm text-white">
+                                </div>
+                                <div class="space-y-2 md:col-span-2">
+                                    <label class="text-[10px] font-bold text-muted uppercase tracking-widest">Location</label>
+                                    <input id="profile-location-input" type="text" class="w-full input-field rounded-xl px-4 py-3 text-sm text-white">
+                                </div>
+                                <div class="md:col-span-2 pt-2">
+                                    <button type="submit" class="bg-white text-background-dark font-black px-8 py-3 rounded-xl hover:bg-primary hover:text-background-dark transition-all text-xs uppercase tracking-widest">
+                                        Update Profile
+                                    </button>
+                                </div>
+                            </form>
+                        </section>
+
+                        <section>
+                            <h2 class="text-sm font-bold text-white mb-6 uppercase tracking-widest">Preferences</h2>
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between p-4 rounded-xl border border-white/5 hover:bg-white/[0.02] transition-colors">
+                                    <div>
+                                        <div class="text-sm font-bold text-white">Email Notifications</div>
+                                        <div class="text-xs text-muted">Get updates about your renders and new styles</div>
+                                    </div>
+                                    <div class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" value="" class="sr-only peer" id="toggle-email" checked>
+                                        <div class="w-9 h-5 bg-charcoal border border-white/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between p-4 rounded-xl border border-white/5 hover:bg-white/[0.02] transition-colors">
+                                    <div>
+                                        <div class="text-sm font-bold text-white">Public Profile</div>
+                                        <div class="text-xs text-muted">Allow others to see your generated designs</div>
+                                    </div>
+                                    <div class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" value="" class="sr-only peer" id="toggle-public">
+                                        <div class="w-9 h-5 bg-charcoal border border-white/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between p-4 rounded-xl border border-white/5 hover:bg-white/[0.02] transition-colors">
+                                    <div>
+                                        <div class="text-sm font-bold text-white">High Resolution (4K)</div>
+                                        <div class="text-xs text-muted">Enable premium 4K rendering</div>
+                                    </div>
+                                    <div class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" value="" class="sr-only peer" id="toggle-4k">
+                                        <div class="w-9 h-5 bg-charcoal border border-white/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+
+                    <!-- Secondary Column -->
+                    <div class="space-y-12">
+                        <section>
+                            <h2 class="text-sm font-bold text-white mb-6 uppercase tracking-widest">Payment Method</h2>
+                            <div class="p-6 rounded-2xl bg-charcoal border border-white/10">
+                                <div class="flex justify-between items-start mb-6">
+                                    <iconify-icon icon="logos:visa" class="text-3xl"></iconify-icon>
+                                    <span class="text-[10px] font-bold text-primary uppercase tracking-widest">Primary</span>
+                                </div>
+                                <div class="text-white font-mono tracking-widest mb-1">•••• 4242</div>
+                                <div class="text-xs text-muted mb-6">Expires 12/26</div>
+                                <div class="flex gap-4">
+                                    <button class="text-[10px] font-black uppercase text-muted hover:text-white transition-colors">Edit</button>
+                                    <button onclick="window.location.href='04-pago-bizum.html'" class="text-[10px] font-black uppercase text-primary">Replace</button>
+                                </div>
+                            </div>
+                            <button class="w-full mt-4 py-3 border border-dashed border-white/20 rounded-xl text-muted text-xs font-bold hover:border-primary hover:text-primary transition-all">
+                                + Add new method
+                            </button>
+                        </section>
+
+                        <section>
+                            <h2 class="text-sm font-bold text-white mb-6 uppercase tracking-widest">Quick Help</h2>
+                            <div class="space-y-3">
+                                <a href="07-consejos-decoracion.html" class="flex items-center justify-between p-4 rounded-xl bg-white/[0.02] border border-white/5 hover:border-primary/20 transition-all group">
+                                    <div class="flex items-center gap-3">
+                                        <iconify-icon icon="lucide:help-circle" class="text-lg text-primary"></iconify-icon>
+                                        <span class="text-xs font-bold">Help Center</span>
+                                    </div>
+                                    <iconify-icon icon="lucide:chevron-right" class="text-muted group-hover:translate-x-1 transition-transform"></iconify-icon>
+                                </a>
+                                <a href="#" class="flex items-center justify-between p-4 rounded-xl bg-white/[0.02] border border-white/5 hover:border-primary/20 transition-all group">
+                                    <div class="flex items-center gap-3">
+                                        <iconify-icon icon="lucide:message-square" class="text-lg text-primary"></iconify-icon>
+                                        <span class="text-xs font-bold">Contact Support</span>
+                                    </div>
+                                    <iconify-icon icon="lucide:chevron-right" class="text-muted group-hover:translate-x-1 transition-transform"></iconify-icon>
+                                </a>
+                                <a href="terminos.html" class="flex items-center justify-between p-4 rounded-xl bg-white/[0.02] border border-white/5 hover:border-primary/20 transition-all group">
+                                    <div class="flex items-center gap-3">
+                                        <iconify-icon icon="lucide:file-text" class="text-lg text-primary"></iconify-icon>
+                                        <span class="text-xs font-bold">Terms & Privacy</span>
+                                    </div>
+                                    <iconify-icon icon="lucide:chevron-right" class="text-muted group-hover:translate-x-1 transition-transform"></iconify-icon>
+                                </a>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
 
     <script>
-    // ── Firebase Config ─────────────────────────────
-    const firebaseConfig = {
-      projectId: "gen-lang-client-0426824151",
-      appId: "1:124806819551:web:1c90d1154b458fa064036a",
-      storageBucket: "gen-lang-client-0426824151.firebasestorage.app",
-      apiKey: "AIzaSyDj99qdmDt4GiVeRkvCSfTOSDw3uqD-_Ew",
-      authDomain: "gen-lang-client-0426824151.firebaseapp.com",
-      messagingSenderId: "124806819551"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-
-    let currentUser = null;
-
-    firebase.auth().onAuthStateChanged(async user => {
-        if (user) {
-            currentUser = user;
-            loadUserProfile(user.uid);
-            loadActivity(user.uid);
-        } else {
-            window.location.href = '01-landing-page.html';
-        }
-    });
-
-    async function loadUserProfile(uid) {
-        try {
-            const doc = await db.collection('users').doc(uid).get();
-            if (doc.exists) {
-                const data = doc.data();
-                document.getElementById('profile-name-input').value = data.displayName || currentUser.displayName || '';
-                document.getElementById('profile-email-input').value = data.email || currentUser.email || '';
-                document.getElementById('profile-phone-input').value = data.phone || '';
-                document.getElementById('profile-location-input').value = data.location || '';
-                
-                document.getElementById('user-header-name').textContent = data.displayName || currentUser.displayName || 'Usuario';
-                
-                if (data.isAdmin) {
-                    document.getElementById('admin-link').classList.remove('hidden');
-                }
-            }
-        } catch (e) {
-            console.error("Error loading profile:", e);
-        }
-    }
-
-    async function loadActivity(uid) {
-        const activityList = document.getElementById('activity-list');
-        try {
-            const snapshot = await db.collection('renders')
-                .where('userId', '==', uid)
-                .orderBy('createdAt', 'desc')
-                .limit(5)
-                .get();
-
-            if (snapshot.empty) {
-                activityList.innerHTML = '<div class="p-4 text-center text-slate-500 text-sm">No hay actividad reciente</div>';
-                return;
-            }
-
-            activityList.innerHTML = '';
-            snapshot.forEach(doc => {
-                const render = doc.data();
-                const date = render.createdAt ? render.createdAt.toDate().toLocaleDateString() : 'Reciente';
-                activityList.innerHTML += `
-                    <div class="p-4 flex items-center gap-4 hover:bg-white/5 transition-colors">
-                        <div class="w-10 h-10 rounded-lg bg-background-dark overflow-hidden flex-shrink-0">
-                            <img class="w-full h-full object-cover opacity-80" src="${render.outputImage || ''}" alt="Render thumbnail">
-                        </div>
-                        <div class="flex-1">
-                            <p class="text-sm font-semibold text-slate-200">${render.style || 'Habitación'}</p>
-                            <p class="text-xs text-slate-500">${date}</p>
-                        </div>
-                        <div class="h-2 w-2 rounded-full bg-green-500 shadow-lg shadow-green-500/20"></div>
-                    </div>
-                `;
-            });
-            // Update stats
-            document.getElementById('stats-renders').textContent = snapshot.size;
-        } catch (e) {
-            console.error("Error loading activity:", e);
-            activityList.innerHTML = '<div class="p-4 text-center text-red-500 text-sm">Error al cargar actividad</div>';
-        }
-    }
-
-    async function saveProfile() {
-        if (!currentUser) return;
-        
-        const saveBtn = document.getElementById('save-profile-btn');
-        const originalText = saveBtn.textContent;
-        saveBtn.textContent = 'Guardando...';
-        saveBtn.disabled = true;
-
-        const updatedData = {
-            displayName: document.getElementById('profile-name-input').value.trim(),
-            phone: document.getElementById('profile-phone-input').value.trim(),
-            location: document.getElementById('profile-location-input').value.trim(),
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyDYP20guLUPV2z6TzFvL9HZ5-d9S40U6k",
+            authDomain: "renderroom-ai.firebaseapp.com",
+            projectId: "renderroom-ai",
+            storageBucket: "renderroom-ai.appspot.com",
+            messagingSenderId: "625375753886",
+            appId: "1:625375753886:web:a8e1c2e5e2f0c9c9a8e1c2"
         };
 
-        try {
-            await db.collection('users').doc(currentUser.uid).update(updatedData);
-            await currentUser.updateProfile({ displayName: updatedData.displayName });
-            document.getElementById('user-header-name').textContent = updatedData.displayName;
-            alert('Perfil actualizado con éxito');
-        } catch (e) {
-            console.error("Error saving profile:", e);
-            alert('Error al guardar el perfil');
-        } finally {
-            saveBtn.textContent = originalText;
-            saveBtn.disabled = false;
-        }
-    }
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        let currentUser = null;
 
-    function deleteAccount() {
-        if (confirm('¿Estás seguro de que quieres eliminar tu cuenta? Esta acción no se puede deshacer.')) {
-            alert('Esta funcionalidad requiere re-autenticación por motivos de seguridad. Por favor, contacta con soporte.');
+        // Auth state listener
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) {
+                window.location.href = '01-landing-page.html';
+                return;
+            }
+            currentUser = user;
+            await loadUserData();
+            await loadUserStats();
+        });
+
+        async function loadUserData() {
+            if (!currentUser) return;
+            
+            try {
+                const userDoc = await db.collection('users').doc(currentUser.uid).get();
+                const userData = userDoc.exists ? userDoc.data() : {};
+                
+                // Update profile header
+                document.getElementById('profile-avatar-img').src = currentUser.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser.uid}`;
+                document.getElementById('user-name-display').textContent = userData.displayName || currentUser.displayName || currentUser.email?.split('@')[0] || 'Usuario';
+                document.getElementById('user-email-display').textContent = `${currentUser.email} • Member since ${getMemberSince()}`;
+                
+                // Update form fields
+                const nameParts = (userData.displayName || currentUser.displayName || '').split(' ');
+                document.getElementById('profile-name-input').value = nameParts[0] || '';
+                document.getElementById('profile-lastname-input').value = nameParts.slice(1).join(' ') || '';
+                document.getElementById('profile-email-input').value = currentUser.email || '';
+                document.getElementById('profile-phone-input').value = userData.phone || '';
+                document.getElementById('profile-location-input').value = userData.location || '';
+                
+                // Update credits display
+                const credits = userData.credits || 0;
+                document.getElementById('credits-display').textContent = `${credits} Credits left`;
+            } catch (e) {
+                console.error("Error loading user data:", e);
+            }
         }
-    }
+
+        async function loadUserStats() {
+            if (!currentUser) return;
+            
+            try {
+                // Get renders count
+                const rendersSnapshot = await db.collection('renders').where('userId', '==', currentUser.uid).get();
+                const rendersCount = rendersSnapshot.size;
+                document.getElementById('stats-renders').textContent = rendersCount;
+                
+                // Get favorites count (assuming there's a favorites collection)
+                let favsCount = 0;
+                try {
+                    const favsSnapshot = await db.collection('favorites').where('userId', '==', currentUser.uid).get();
+                    favsCount = favsSnapshot.size;
+                } catch (e) {
+                    // Collection might not exist
+                }
+                document.getElementById('stats-favs').textContent = favsCount;
+                
+                // Calculate total spent (assuming 2.50€ per render)
+                const spent = rendersCount * 2.50;
+                document.getElementById('stats-spent').textContent = `€${spent.toFixed(0)}`;
+            } catch (e) {
+                console.error("Error loading stats:", e);
+            }
+        }
+
+        function getMemberSince() {
+            if (currentUser?.metadata?.creationTime) {
+                const date = new Date(currentUser.metadata.creationTime);
+                const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                return `${months[date.getMonth()]} ${date.getFullYear()}`;
+            }
+            return 'recently';
+        }
+
+        async function saveProfile(event) {
+            event.preventDefault();
+            if (!currentUser) return;
+            
+            const saveBtn = event.target.querySelector('button[type="submit"]');
+            const originalText = saveBtn.textContent;
+            saveBtn.textContent = 'Saving...';
+            saveBtn.disabled = true;
+
+            const firstName = document.getElementById('profile-name-input').value.trim();
+            const lastName = document.getElementById('profile-lastname-input').value.trim();
+            const fullName = [firstName, lastName].filter(Boolean).join(' ');
+
+            const updatedData = {
+                displayName: fullName,
+                phone: document.getElementById('profile-phone-input').value.trim(),
+                location: document.getElementById('profile-location-input').value.trim(),
+            };
+
+            try {
+                await db.collection('users').doc(currentUser.uid).set(updatedData, { merge: true });
+                if (fullName) {
+                    await currentUser.updateProfile({ displayName: fullName });
+                }
+                document.getElementById('user-name-display').textContent = fullName || currentUser.email.split('@')[0];
+                saveBtn.textContent = 'Saved!';
+                setTimeout(() => {
+                    saveBtn.textContent = originalText;
+                    saveBtn.disabled = false;
+                }, 2000);
+            } catch (e) {
+                console.error("Error saving profile:", e);
+                saveBtn.textContent = 'Error';
+                setTimeout(() => {
+                    saveBtn.textContent = originalText;
+                    saveBtn.disabled = false;
+                }, 2000);
+            }
+        }
+
+        function handleSignOut() {
+            if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
+                auth.signOut().then(() => {
+                    window.location.href = '01-landing-page.html';
+                });
+            }
+        }
     </script>
 </body>
 </html>
