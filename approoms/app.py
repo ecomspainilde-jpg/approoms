@@ -7,7 +7,11 @@ from datetime import timezone
 from flask import Flask, request, jsonify, send_from_directory
 import vertexai
 from vertexai.preview import vision_models
-from vertexai.preview.vision_models import ImageGenerationModel, Image as VisionImage, ReferenceImage
+from vertexai.preview.vision_models import (
+    ImageGenerationModel,
+    Image as VisionImage,
+    ReferenceImage,
+)
 from vertexai.generative_models import GenerativeModel, Part, Image as VertexImage
 import firebase_admin
 from firebase_admin import credentials, auth, firestore, storage
@@ -17,20 +21,23 @@ app = Flask(__name__, static_folder="public", static_url_path="")
 # Initialize Vertex AI
 project_id = os.environ.get("GCP_PROJECT_ID", "gen-lang-client-0426824151")
 location = os.environ.get("GCP_LOCATION", "us-central1")
-storage_bucket = os.environ.get("FIREBASE_STORAGE_BUCKET", f"{project_id}.firebasestorage.app")
+storage_bucket = os.environ.get(
+    "FIREBASE_STORAGE_BUCKET", f"{project_id}.firebasestorage.app"
+)
 
 try:
     vertexai.init(project=project_id, location=location)
 except Exception as e:
-    print(f"Warning: Could not initialize Vertex AI for project {project_id} in {location}:", e)
+    print(
+        f"Warning: Could not initialize Vertex AI for project {project_id} in {location}:",
+        e,
+    )
 
 # Initialize Firebase Admin
 try:
     if not firebase_admin._apps:
         # Default credentials should work in Cloud Run
-        firebase_admin.initialize_app(options={
-            'storage_bucket': storage_bucket
-        })
+        firebase_admin.initialize_app(options={"storage_bucket": storage_bucket})
     db = firestore.client()
     bucket = storage.bucket()
 except Exception as e:
@@ -50,9 +57,9 @@ STYLE_DESCRIPTIONS = {
 
 
 def analyze_room_image(images_base64: list) -> dict:
-    """Use Gemini 2.0 Flash Lite to analyze one or more uploaded room images and return structured JSON."""
+    """Use Gemini 2.5 Flash to analyze one or more uploaded room images and return structured JSON."""
     try:
-        model = GenerativeModel("gemini-2.0-flash-lite")
+        model = GenerativeModel("gemini-2.5-flash")
         parts = []
         for img_b64 in images_base64:
             image_bytes = base64.b64decode(img_b64)
@@ -76,7 +83,7 @@ Be extremely accurate with window and door placements. If multiple images are pr
 
         parts.append(Part.from_text(analysis_prompt))
         response = model.generate_content(parts)
-        
+
         # Clean response text in case of markdown formatting
         resp_text = response.text.strip()
         if resp_text.startswith("```json"):
@@ -84,7 +91,7 @@ Be extremely accurate with window and door placements. If multiple images are pr
         if resp_text.endswith("```"):
             resp_text = resp_text[:-3]
         resp_text = resp_text.strip()
-        
+
         analysis_data = json.loads(resp_text)
         return {"success": True, "data": analysis_data}
     except Exception as e:
@@ -92,26 +99,33 @@ Be extremely accurate with window and door placements. If multiple images are pr
         return {"success": False, "error": str(e)}
 
 
-def generate_room_render(prompt: str, room_data: dict = None, style: str = "moderno", base_image_b64: str = None) -> dict:
-    """Generate a room render with structural preservation. 
+def generate_room_render(
+    prompt: str,
+    room_data: dict = None,
+    style: str = "moderno",
+    base_image_b64: str = None,
+) -> dict:
+    """Generate a room render with structural preservation.
     Uses Imagen 4.0 Fast for text-to-image, and Imagen 3.0 for image-to-image (editing).
     """
     try:
-        # Model Selection: Imagen 4.0 Fast doesn't support edit_image (inpainting/structural)
+        # Model Selection: Imagen 4.0 Generate for text-to-image, Imagen 3.0 for image-to-image
         if base_image_b64:
             model_name = "imagen-3.0-capability-001"
         else:
-            model_name = "imagen-4.0-fast-generate-001"
-            
+            model_name = "imagen-4.0-generate-001"
+
         model = ImageGenerationModel.from_pretrained(model_name)
 
-        style_desc = STYLE_DESCRIPTIONS.get(style.lower(), STYLE_DESCRIPTIONS["moderno"])
+        style_desc = STYLE_DESCRIPTIONS.get(
+            style.lower(), STYLE_DESCRIPTIONS["moderno"]
+        )
 
         if room_data:
             # Construct a highly structured English prompt
             arch_seed = room_data.get("imagen_prompt_seed_en", "")
             arch_details = room_data.get("architecture_en", "")
-            
+
             full_prompt = (
                 f"Professional interior design render in {style} style. "
                 f"**ARCHITECTURAL PRESERVATION [MANDATORY]**: {arch_details}. {arch_seed}. "
@@ -137,14 +151,16 @@ def generate_room_render(prompt: str, room_data: dict = None, style: str = "mode
         if base_image_b64:
             # Use image-to-image (supported by Imagen 3.0)
             base_image = VisionImage(image_bytes=base64.b64decode(base_image_b64))
-            
+
             # Using generate_images with ReferenceImage for structural preservation
             # This is the standard way to do mask-free structural editing in Imagen 3
             images = model.generate_images(
                 **generate_kwargs,
                 reference_images=[
-                    ReferenceImage(image=base_image, reference_id=1, reference_type="structural")
-                ]
+                    ReferenceImage(
+                        image=base_image, reference_id=1, reference_type="structural"
+                    )
+                ],
             )
         else:
             # Standard Text-to-Image (Imagen 4.0 Fast)
@@ -167,6 +183,7 @@ def generate_room_render(prompt: str, room_data: dict = None, style: str = "mode
 
 # ── Routes ──────────────────────────────────────────────────────────────────
 
+
 @app.route("/")
 def index():
     return send_from_directory("public", "index.html")
@@ -179,8 +196,6 @@ def serve_static(path):
     return send_from_directory("public", "index.html")
 
 
-
-
 @app.route("/api/analyze-image", methods=["POST"])
 def api_analyze_image():
     """Analyze uploaded room image(s) using Gemini Vision and return structured JSON."""
@@ -188,10 +203,10 @@ def api_analyze_image():
     # Handle both single image (legacy) and multiple images
     image_b64 = data.get("image_base64")
     images_b64 = data.get("images_base64", [])
-    
+
     if image_b64:
         images_b64 = [image_b64]
-        
+
     if not images_b64:
         return jsonify({"error": "No images provided"}), 400
 
@@ -235,15 +250,17 @@ def api_generate_image():
     result = generate_room_render(prompt, room_data, style, image_base64)
     if result.get("success"):
         image_b64 = result["image_base64"]
-        
+
         # Check Firebase Storage
         if not bucket:
-            return jsonify({
-                "image_base64": image_b64,
-                "warning": "Firebase Storage not initialized. Image not saved.",
-                "full_prompt": result["full_prompt"],
-                "style_description": result["style_description"],
-            })
+            return jsonify(
+                {
+                    "image_base64": image_b64,
+                    "warning": "Firebase Storage not initialized. Image not saved.",
+                    "full_prompt": result["full_prompt"],
+                    "style_description": result["style_description"],
+                }
+            )
 
         try:
             # Save to Firebase Storage (private, not public)
@@ -269,15 +286,15 @@ def api_generate_image():
                     "room_type": room_type,
                     "approx_size": room_size,
                     "imageUrl": filename,
-                    "inputImageUrl": None, # Will be set if we upload the input image
+                    "inputImageUrl": None,  # Will be set if we upload the input image
                     "createdAt": datetime.now(timezone.utc),
                     "roomData": room_data,
                     "fullPrompt": result["full_prompt"],
                     "price": 2.50,
                     "currency": "EUR",
-                    "status": "completed"
+                    "status": "completed",
                 }
-                
+
                 # If we have the base image, we could theoretically save it too
                 # For now, we'll just mark that we processed this render successfully
                 doc_ref = db.collection("renders").document(image_id)
@@ -292,24 +309,28 @@ def api_generate_image():
                     "currency": "EUR",
                     "timestamp": datetime.now(timezone.utc),
                     "renderId": image_id,
-                    "method": "simulated_bizum"
+                    "method": "simulated_bizum",
                 }
                 db.collection("purchases").add(purchase_doc)
 
-            return jsonify({
-                "image_id": image_id,
-                "image_base64": image_b64,
-                "full_prompt": result["full_prompt"],
-                "style_description": result["style_description"],
-            })
+            return jsonify(
+                {
+                    "image_id": image_id,
+                    "image_base64": image_b64,
+                    "full_prompt": result["full_prompt"],
+                    "style_description": result["style_description"],
+                }
+            )
         except Exception as e:
             print("Error saving to Firebase:", e)
-            return jsonify({
-                "image_base64": image_b64,
-                "warning": f"Error saving to Firebase: {str(e)}",
-                "full_prompt": result["full_prompt"],
-                "style_description": result["style_description"],
-            })
+            return jsonify(
+                {
+                    "image_base64": image_b64,
+                    "warning": f"Error saving to Firebase: {str(e)}",
+                    "full_prompt": result["full_prompt"],
+                    "style_description": result["style_description"],
+                }
+            )
     else:
         return jsonify({"error": result.get("error", "Unknown error")}), 500
 
@@ -320,12 +341,17 @@ def get_my_renders():
     user = verify_token()
     if not user:
         return jsonify({"error": "Unauthorized"}), 401
-    
+
     if not db:
         return jsonify({"error": "Firestore not initialized"}), 500
 
     try:
-        renders = db.collection("renders").where("userId", "==", user["uid"]).order_by("createdAt", direction=firestore.Query.DESCENDING).stream()
+        renders = (
+            db.collection("renders")
+            .where("userId", "==", user["uid"])
+            .order_by("createdAt", direction=firestore.Query.DESCENDING)
+            .stream()
+        )
         result = []
         for doc in renders:
             r = doc.to_dict()
