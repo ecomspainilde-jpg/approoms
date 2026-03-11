@@ -1,31 +1,33 @@
 ---
-page: faq
+page: pricing
 ---
-A FAQ (Frequently Asked Questions) page for RenderRoom interior design AI service.
+Página de precios detallada para RenderRoom, con paquetes de compra integrados con Stripe.
 
 **DESIGN SYSTEM (REQUIRED):**
-When creating this screen, follow these design principles:
-- Atmosphere: "Oasis tecnológico cálido y aspiracional con estética nocturna premium"
-- Button Shapes: "Esquinas generosamente redondeadas" (no "rounded-lg" or "12px")
-- Shadows: "Sombras difusas con glow ámbar cálido en hover" (no "shadow-lg")
-- Spacing: "Respiración dramática" y "espacio cinematográfico entre secciones"
+# Design System: RenderRoom - Renders de Habitaciones por 2,50€
 
-Use these color references:
-- Primary CTA: "Ámbar Dorado Brillante (#F0A500)"
-- Backgrounds: "Noche Profunda (#0D1117)" or "Carbón Suave (#161B22)"
-- Text: "Blanco Lunar (#E6EDF3)" or "Plata Nebulosa (#8B949E)"
-- AI Accent: "Violeta Eléctrico Profundo (#7C3AED)"
+**Project ID:** 10149300038889827122
+
+## 1. Visual Theme & Atmosphere
+RenderRoom encarna un oasis tecnológico cálido y aspiracional.
+- Fondo oscuro cinematográfico (Noche Profunda) con toques dorados cálidos (Ámbar Dorado Brillante).
+- Glassmorphism, tarjetas con bordes suaves de 16px.
+- Botones grandes y accesibles.
+
+## 2. Color Palette
+- Noche Profunda (#0D1117)
+- Carbón Suave (#161B22)
+- Obsidiana Cálida (#1C2333)
+- Ámbar Dorado Brillante (#F0A500) para llamadas a la acción (CTA) y precios destacados.
+- Blanco Lunar (#E6EDF3) para texto
+- Plata Nebulosa (#8B949E) para texto secundario
 
 **Page Structure:**
-1. Header with logo and navigation (Home, Dashboard, FAQ, Profile)
-2. Hero section with title "¿Preguntas Frecuentes?" and subtitle about the service
-3. Search bar to filter FAQ questions
-4. Accordion-style FAQ categories:
-   - General (how it works, pricing, turnaround time)
-   - Technical (image requirements, supported styles, file formats)
-   - Billing (payment methods, refunds, invoices)
-   - Account (login issues, profile management)
-5. CTA section: "Still have questions? Contact us" with email link
-6. Footer with links to Terms, Privacy
-
-The page should have a glassmorphism search bar, smooth accordion animations, and consistent dark premium styling matching the rest of the RenderRoom app.
+1. Navegación superior clásica.
+2. Hero header grande: "Nuestros Paquetes. Obtén más por tu inversión", "Desde 2,50€ el render individual hasta descuentos para profesionales".
+3. Grilla de tarjetas de precios (3 columnas grandes interactivas):
+   - Tarjeta "Básico": 2,50€, 1 Render, CTA secundario de "Comprar".
+   - Tarjeta "Pro": Prominente (escala mayor o glow ámbar), 10,00€, 5 Renders (Sale a 2€ cada uno), CTA primario gigante de color ámbar. Badge: "El más popular". Ahorro: 2,50€.
+   - Tarjeta "Agencia": 30,00€, 20 Renders (Sale a 1,50€ cada uno), CTA secundario oscuro. Destinado a profesionales.
+4. Sección debajo de Cards: Logos de métodos de pago soportados ("Mastercard", "Visa", "Google Pay", "Apple Pay", "Revolut").
+5. Footer estándar.

@@ -23,6 +23,12 @@
       "y": 0,
       "width": 1440,
       "height": 3200
+    },
+    "admin_dashboard": {
+      "id": "a8271f3418a74de8b7ed03a6d61509a4",
+      "sourceScreen": "projects/10149300038889827122/screens/a8271f3418a74de8b7ed03a6d61509a4",
+      "width": 780,
+      "height": 2730
     }
   },
   "metadata": {
