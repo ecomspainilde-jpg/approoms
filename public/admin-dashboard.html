@@ -44,7 +44,13 @@
                 <span class="material-symbols-outlined text-primary text-3xl">admin_panel_settings</span>
                 <h1 class="text-xl font-bold tracking-tight text-slate-100">Render<span class="text-primary">Room</span> <span class="text-xs uppercase bg-primary/20 text-primary px-2 py-0.5 rounded ml-2">Admin</span></h1>
             </div>
-            <div class="flex items-center gap-6">
+            <div class="flex items-center gap-4">
+                <div class="hidden md:flex items-center gap-4">
+                    <button onclick="switchTab('overview')" class="text-sm font-medium hover:text-primary transition-colors" id="tab-overview">Resumen</button>
+                    <button onclick="switchTab('users')" class="text-sm font-medium hover:text-primary transition-colors" id="tab-users">Usuarios</button>
+                    <button onclick="switchTab('pricing')" class="text-sm font-medium hover:text-primary transition-colors text-primary" id="tab-pricing">Precios</button>
+                    <button onclick="switchTab('history')" class="text-sm font-medium hover:text-primary transition-colors" id="tab-history">Historial</button>
+                </div>
                 <a class="text-sm font-medium hover:text-primary transition-colors" href="01-landing-page.html">Ir a la Web</a>
                 <button onclick="firebase.auth().signOut()" class="text-xs text-slate-400 hover:text-primary transition-colors">Cerrar Sesión</button>
             </div>
@@ -98,7 +104,7 @@
         </div>
 
         <!-- Users Table -->
-        <section class="bg-surface-dark rounded-2xl border border-white/5 overflow-hidden shadow-2xl">
+        <section id="section-users" class="bg-surface-dark rounded-2xl border border-white/5 overflow-hidden shadow-2xl">
             <div class="p-6 border-b border-white/5 flex justify-between items-center">
                 <h3 class="text-xl font-bold flex items-center gap-2">
                     <span class="material-symbols-outlined text-primary">manage_accounts</span>
@@ -120,6 +126,87 @@
                         <!-- Users will be loaded here -->
                         <tr>
                             <td colspan="5" class="px-6 py-10 text-center text-slate-500">Cargando base de datos de usuarios...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Pricing Management -->
+        <section id="section-pricing" class="bg-surface-dark rounded-2xl border border-white/5 overflow-hidden shadow-2xl mb-12" style="display:none;">
+            <div class="p-6 border-b border-white/5">
+                <h3 class="text-xl font-bold flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">sell</span>
+                    Gestión de Precios
+                </h3>
+                <p class="text-slate-500 text-sm mt-1">Modifica los precios de los renders y packs de créditos.</p>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Render Price -->
+                    <div class="p-6 bg-background-dark rounded-xl border border-white/5">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="text-lg font-bold text-white">Precio por Render</h4>
+                            <span class="px-3 py-1 bg-primary/10 text-primary text-xs font-bold rounded-full">ACTIVO</span>
+                        </div>
+                        <p class="text-slate-500 text-sm mb-4">Precio actual por cada render de habitación.</p>
+                        <div class="flex items-center gap-4">
+                            <div class="relative flex-1">
+                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">€</span>
+                                <input type="number" id="price-render" step="0.01" min="0" class="w-full bg-surface-dark border border-white/10 rounded-xl pl-8 pr-4 py-3 text-white font-bold text-xl focus:border-primary focus:outline-none" placeholder="2.50">
+                            </div>
+                            <button onclick="updatePrice('render')" class="px-6 py-3 bg-primary text-background-dark font-bold rounded-xl hover:scale-105 transition-transform">
+                                Guardar
+                            </button>
+                        </div>
+                        <p id="render-price-status" class="text-xs mt-3"></p>
+                    </div>
+
+                    <!-- Credits Price -->
+                    <div class="p-6 bg-background-dark rounded-xl border border-white/5">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="text-lg font-bold text-white">Pack de Créditos</h4>
+                            <span class="px-3 py-1 bg-green-500/10 text-green-500 text-xs font-bold rounded-full">PACK</span>
+                        </div>
+                        <p class="text-slate-500 text-sm mb-4">Precio por pack de créditos (10 créditos).</p>
+                        <div class="flex items-center gap-4">
+                            <div class="relative flex-1">
+                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">€</span>
+                                <input type="number" id="price-credits" step="0.01" min="0" class="w-full bg-surface-dark border border-white/10 rounded-xl pl-8 pr-4 py-3 text-white font-bold text-xl focus:border-primary focus:outline-none" placeholder="10.00">
+                            </div>
+                            <button onclick="updatePrice('credits')" class="px-6 py-3 bg-primary text-background-dark font-bold rounded-xl hover:scale-105 transition-transform">
+                                Guardar
+                            </button>
+                        </div>
+                        <p id="credits-price-status" class="text-xs mt-3"></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Price History -->
+        <section id="section-history" class="bg-surface-dark rounded-2xl border border-white/5 overflow-hidden shadow-2xl mb-12" style="display:none;">
+            <div class="p-6 border-b border-white/5 flex justify-between items-center">
+                <h3 class="text-xl font-bold flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">history</span>
+                    Historial de Cambios de Precio
+                </h3>
+                <button onclick="loadPriceHistory()" class="text-sm text-primary hover:underline">Actualizar</button>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="text-xs font-bold text-slate-500 uppercase tracking-widest border-b border-white/5">
+                            <th class="px-6 py-4">Fecha</th>
+                            <th class="px-6 py-4">Producto</th>
+                            <th class="px-6 py-4">Precio Anterior</th>
+                            <th class="px-6 py-4">Nuevo Precio</th>
+                            <th class="px-6 py-4">Cambiado Por</th>
+                        </tr>
+                    </thead>
+                    <tbody id="price-history-body" class="divide-y divide-white/5">
+                        <tr>
+                            <td colspan="5" class="px-6 py-10 text-center text-slate-500">Cargando historial...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -240,6 +327,149 @@
         } catch (e) {
             console.error("Error loading users:", e);
             tableBody.innerHTML = '<tr><td colspan="5" class="px-6 py-10 text-center text-red-500">Error al cargar usuarios. Verifica los permisos de Firestore.</td></tr>';
+        }
+    }
+
+    // Tab switching
+    function switchTab(tab) {
+        // Hide all sections
+        document.getElementById('section-users').style.display = 'none';
+        document.getElementById('section-pricing').style.display = 'none';
+        document.getElementById('section-history').style.display = 'none';
+        
+        // Reset tab buttons
+        document.getElementById('tab-overview').classList.remove('text-primary');
+        document.getElementById('tab-users').classList.remove('text-primary');
+        document.getElementById('tab-pricing').classList.remove('text-primary');
+        document.getElementById('tab-history').classList.remove('text-primary');
+        
+        // Show selected section
+        if (tab === 'overview') {
+            document.getElementById('section-users').style.display = 'block';
+            document.getElementById('tab-overview').classList.add('text-primary');
+        } else if (tab === 'users') {
+            document.getElementById('section-users').style.display = 'block';
+            document.getElementById('tab-users').classList.add('text-primary');
+        } else if (tab === 'pricing') {
+            document.getElementById('section-pricing').style.display = 'block';
+            document.getElementById('tab-pricing').classList.add('text-primary');
+            loadPrices();
+        } else if (tab === 'history') {
+            document.getElementById('section-history').style.display = 'block';
+            document.getElementById('tab-history').classList.add('text-primary');
+            loadPriceHistory();
+        }
+    }
+
+    // Load current prices from Firebase
+    async function loadPrices() {
+        try {
+            const renderDoc = await db.collection('pricing').doc('render').get();
+            const creditsDoc = await db.collection('pricing').doc('credits').get();
+            
+            if (renderDoc.exists) {
+                document.getElementById('price-render').value = renderDoc.data().price;
+            } else {
+                document.getElementById('price-render').value = '2.50';
+            }
+            
+            if (creditsDoc.exists) {
+                document.getElementById('price-credits').value = creditsDoc.data().price;
+            } else {
+                document.getElementById('price-credits').value = '10.00';
+            }
+        } catch (e) {
+            console.error("Error loading prices:", e);
+            document.getElementById('price-render').value = '2.50';
+            document.getElementById('price-credits').value = '10.00';
+        }
+    }
+
+    // Update price in Firebase
+    async function updatePrice(docId) {
+        const inputId = docId === 'render' ? 'price-render' : 'price-credits';
+        const statusId = docId === 'render' ? 'render-price-status' : 'credits-price-status';
+        const newPrice = parseFloat(document.getElementById(inputId).value);
+        
+        if (isNaN(newPrice) || newPrice < 0) {
+            document.getElementById(statusId).textContent = 'Precio inválido';
+            document.getElementById(statusId).className = 'text-xs mt-3 text-red-500';
+            return;
+        }
+        
+        const btn = document.querySelector(`button[onclick="updatePrice('${docId}')"]`);
+        const originalText = btn.textContent;
+        btn.textContent = 'Guardando...';
+        btn.disabled = true;
+        
+        try {
+            // Get old price for history
+            const oldDoc = await db.collection('pricing').doc(docId).get();
+            const oldPrice = oldDoc.exists ? oldDoc.data().price : null;
+            
+            // Update price
+            await db.collection('pricing').doc(docId).set({
+                price: newPrice,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                updatedBy: firebase.auth().currentUser.uid
+            });
+            
+            // Record in price history
+            await db.collection('priceHistory').add({
+                pricingId: docId,
+                oldPrice: oldPrice,
+                newPrice: newPrice,
+                changedBy: firebase.auth().currentUser.uid,
+                changedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            
+            document.getElementById(statusId).textContent = '¡Precio actualizado!';
+            document.getElementById(statusId).className = 'text-xs mt-3 text-green-500';
+        } catch (e) {
+            console.error("Error updating price:", e);
+            document.getElementById(statusId).textContent = 'Error al guardar: ' + e.message;
+            document.getElementById(statusId).className = 'text-xs mt-3 text-red-500';
+        } finally {
+            btn.textContent = originalText;
+            btn.disabled = false;
+        }
+    }
+
+    // Load price history
+    async function loadPriceHistory() {
+        const tbody = document.getElementById('price-history-body');
+        tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-10 text-center text-slate-500">Cargando historial...</td></tr>';
+        
+        try {
+            const snapshot = await db.collection('priceHistory')
+                .orderBy('changedAt', 'desc')
+                .limit(50)
+                .get();
+            
+            if (snapshot.empty) {
+                tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-10 text-center text-slate-500">No hay historial de precios.</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = '';
+            for (const doc of snapshot.docs) {
+                const h = doc.data();
+                const date = h.changedAt ? new Date(h.changedAt.toDate()).toLocaleString() : 'N/A';
+                const productName = h.pricingId === 'render' ? 'Render' : 'Credits Pack';
+                
+                tbody.innerHTML += `
+                    <tr class="hover:bg-white/5 transition-colors">
+                        <td class="px-6 py-4 text-slate-400 text-sm">${date}</td>
+                        <td class="px-6 py-4 font-bold">${productName}</td>
+                        <td class="px-6 py-4 text-slate-400">€${h.oldPrice || 'N/A'}</td>
+                        <td class="px-6 py-4 text-primary font-bold">€${h.newPrice}</td>
+                        <td class="px-6 py-4 text-slate-500 text-xs">${h.changedBy ? h.changedBy.substring(0, 8) + '...' : 'Sistema'}</td>
+                    </tr>
+                `;
+            }
+        } catch (e) {
+            console.error("Error loading price history:", e);
+            tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-10 text-center text-red-500">Error al cargar historial: ' + e.message + '</td></tr>';
         }
     }
     </script>

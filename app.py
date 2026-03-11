@@ -46,6 +46,32 @@ except Exception as e:
     bucket = None
 
 
+def get_render_price():
+    """Get the current render price from Firebase, fallback to default"""
+    if not db:
+        return 2.50
+    try:
+        doc = db.collection("pricing").document("render").get()
+        if doc.exists:
+            return doc.to_dict().get("price", 2.50)
+    except Exception as e:
+        print("Error fetching price:", e)
+    return 2.50
+
+
+def get_credits_price():
+    """Get the current credits price from Firebase, fallback to default"""
+    if not db:
+        return 10.00
+    try:
+        doc = db.collection("pricing").document("credits").get()
+        if doc.exists:
+            return doc.to_dict().get("price", 10.00)
+    except Exception as e:
+        print("Error fetching credits price:", e)
+    return 10.00
+
+
 STYLE_DESCRIPTIONS = {
     "moderno": "Modern style: sleek contemporary furniture, neutral palette (white, gray, beige, black accent), clean lines, minimal clutter, hidden storage solutions, Statement lighting pieces, open space, large artwork, geometric patterns, glass and metal accents, sophisticated and timeless atmosphere.",
     "nordico": "Scandinavian style: light oak furniture, white/cream/warm gray palette, cozy textiles (wool, linen, sheepskin), hygge lighting (warm pendant lamps, candles, fairy lights), minimal clutter, natural plants in simple pots, functional storage solutions, clean lines, relaxed yet sophisticated hygge atmosphere.",
@@ -290,7 +316,7 @@ def api_generate_image():
                     "createdAt": datetime.now(timezone.utc),
                     "roomData": room_data,
                     "fullPrompt": result["full_prompt"],
-                    "price": 2.50,
+                    "price": get_render_price(),
                     "currency": "EUR",
                     "status": "completed",
                 }
@@ -305,7 +331,7 @@ def api_generate_image():
                     "userId": user["uid"],
                     "email": user.get("email", "unknown"),
                     "productId": f"render_{style}",
-                    "amount": 2.50,
+                    "amount": get_render_price(),
                     "currency": "EUR",
                     "timestamp": datetime.now(timezone.utc),
                     "renderId": image_id,
@@ -370,6 +396,211 @@ def get_my_renders():
 def api_simulate_payment():
     print("Pre-production payment simulation...")
     return jsonify({"success": True, "message": "Payment successful!"})
+
+
+# ============ ADMIN API ENDPOINTS ============
+
+
+def verify_admin():
+    """Verify if the user is an admin."""
+    user = verify_token()
+    if not user:
+        return None
+    # Check custom claims for admin role
+    try:
+        auth = firebase_admin.auth()
+        claims = auth.get_user(user["uid"]).custom_claims
+        if claims and claims.get("admin") == True:
+            return user
+    except Exception as e:
+        print("Error checking admin claims:", e)
+    return None
+
+
+@app.route("/api/admin/users", methods=["GET"])
+def admin_get_users():
+    """Get all users (admin only)."""
+    admin = verify_admin()
+    if not admin:
+        return jsonify({"error": "Unauthorized - Admin access required"}), 403
+
+    if not db:
+        return jsonify({"error": "Firestore not initialized"}), 500
+
+    try:
+        users = []
+        # Get all user documents from users collection
+        docs = db.collection("users").stream()
+        for doc in docs:
+            u = doc.to_dict()
+            u["id"] = doc.id
+            users.append(u)
+        return jsonify(users)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/admin/renders", methods=["GET"])
+def admin_get_renders():
+    """Get all renders (admin only)."""
+    admin = verify_admin()
+    if not admin:
+        return jsonify({"error": "Unauthorized - Admin access required"}), 403
+
+    if not db:
+        return jsonify({"error": "Firestore not initialized"}), 500
+
+    try:
+        limit = request.args.get("limit", 100, type=int)
+        renders = []
+        docs = (
+            db.collection("renders")
+            .order_by("createdAt", direction=firestore.Query.DESCENDING)
+            .limit(limit)
+            .stream()
+        )
+        for doc in docs:
+            r = doc.to_dict()
+            r["id"] = doc.id
+            if "createdAt" in r and r["createdAt"]:
+                r["createdAt"] = r["createdAt"].isoformat()
+            renders.append(r)
+        return jsonify(renders)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/admin/stats", methods=["GET"])
+def admin_get_stats():
+    """Get platform statistics (admin only)."""
+    admin = verify_admin()
+    if not admin:
+        return jsonify({"error": "Unauthorized - Admin access required"}), 403
+
+    if not db:
+        return jsonify({"error": "Firestore not initialized"}), 500
+
+    try:
+        # Get counts
+        users_count = sum(1 for _ in db.collection("users").stream())
+        renders_count = sum(1 for _ in db.collection("renders").stream())
+
+        # Calculate total revenue from purchases
+        total_revenue = 0
+        for doc in db.collection("purchases").stream():
+            p = doc.to_dict()
+            total_revenue += p.get("amount", 0)
+
+        return jsonify(
+            {
+                "totalUsers": users_count,
+                "totalRenders": renders_count,
+                "totalRevenue": total_revenue,
+            }
+        )
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/admin/pricing", methods=["GET"])
+def admin_get_pricing():
+    """Get current pricing (public endpoint)."""
+    if not db:
+        return jsonify({"error": "Firestore not initialized"}), 500
+
+    try:
+        pricing = {}
+        docs = db.collection("pricing").stream()
+        for doc in docs:
+            pricing[doc.id] = doc.to_dict()
+
+        # Return defaults if not set
+        if "render" not in pricing:
+            pricing["render"] = {"price": 2.50, "description": "Single render"}
+        if "credits" not in pricing:
+            pricing["credits"] = {"price": 10.00, "description": "Credits pack"}
+
+        return jsonify(pricing)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/admin/pricing", methods=["POST"])
+def admin_update_pricing():
+    """Update pricing (admin only)."""
+    admin = verify_admin()
+    if not admin:
+        return jsonify({"error": "Unauthorized - Admin access required"}), 403
+
+    if not db:
+        return jsonify({"error": "Firestore not initialized"}), 500
+
+    try:
+        data = request.json
+        doc_id = data.get("id")
+        new_price = data.get("price")
+
+        if not doc_id or new_price is None:
+            return jsonify({"error": "Missing id or price"}), 400
+
+        # Get old price for history
+        old_price = None
+        old_doc = db.collection("pricing").document(doc_id).get()
+        if old_doc.exists:
+            old_price = old_doc.to_dict().get("price")
+
+        # Update price
+        db.collection("pricing").document(doc_id).set(
+            {
+                "price": float(new_price),
+                "updatedAt": datetime.now(timezone.utc),
+                "updatedBy": admin["uid"],
+            }
+        )
+
+        # Record price history
+        db.collection("priceHistory").add(
+            {
+                "pricingId": doc_id,
+                "oldPrice": old_price,
+                "newPrice": float(new_price),
+                "changedBy": admin["uid"],
+                "changedAt": datetime.now(timezone.utc),
+            }
+        )
+
+        return jsonify({"success": True, "message": f"Price updated to {new_price}"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/admin/pricing/history", methods=["GET"])
+def admin_get_price_history():
+    """Get price change history (admin only)."""
+    admin = verify_admin()
+    if not admin:
+        return jsonify({"error": "Unauthorized - Admin access required"}), 403
+
+    if not db:
+        return jsonify({"error": "Firestore not initialized"}), 500
+
+    try:
+        history = []
+        docs = (
+            db.collection("priceHistory")
+            .order_by("changedAt", direction=firestore.Query.DESCENDING)
+            .limit(50)
+            .stream()
+        )
+        for doc in docs:
+            h = doc.to_dict()
+            h["id"] = doc.id
+            if "changedAt" in h and h["changedAt"]:
+                h["changedAt"] = h["changedAt"].isoformat()
+            history.append(h)
+        return jsonify(history)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 if __name__ == "__main__":

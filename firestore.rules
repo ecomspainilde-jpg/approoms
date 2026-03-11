@@ -6,17 +6,32 @@ service cloud.firestore {
     // Users collection - users can read/write their own document
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
+      // Admins can read all users
+      allow list: if request.auth != null && request.auth.token.admin == true;
     }
     
     // Renders collection - users can read their own renders, create new ones, delete their own
     match /renders/{renderId} {
       allow read, delete: if request.auth != null && request.auth.uid == resource.data.userId;
       allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+      // Admins can read all renders
+      allow list: if request.auth != null;
     }
     
-    // Allow listing user's own renders only (Firestore enforces this via query filters)
-    match /renders {
-      allow list: if request.auth != null && request.query.limit <= 100;
+    // Pricing - anyone can read, only admins can write
+    match /pricing/{docId} {
+      allow read: if true;
+      allow write: if request.auth != null && request.auth.token.admin == true;
+    }
+    
+    // Price history - only admins can read/write
+    match /priceHistory/{docId} {
+      allow read, write: if request.auth != null && request.auth.token.admin == true;
+    }
+    
+    // Admin stats
+    match /stats/{docId} {
+      allow read: if request.auth != null && request.auth.token.admin == true;
     }
   }
 }
