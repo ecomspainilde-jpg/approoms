@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html class="dark" lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Salón 2025: Material Drenching y Formas Orgánicas - RenderRoom</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#f0a400",
+            "background-dark": "#0D1117",
+            "charcoal": "#161B22",
+            "nebula": "#C9D1D9"
+          },
+          fontFamily: { "display": ["Inter", "sans-serif"] },
+        },
+      },
+    }
+  </script>
+</head>
+<body class="bg-background-dark font-display text-nebula min-h-screen">
+  <nav class="sticky top-0 z-50 glass border-b border-white/10 px-6 py-4">
+    <div class="max-w-4xl mx-auto flex items-center justify-between">
+      <a href="01-landing-page.html" class="flex items-center gap-3">
+        <div class="size-8 bg-gradient-to-br from-primary to-orange-600 rounded-lg flex items-center justify-center text-background-dark">
+          <span class="material-symbols-outlined text-sm">deployed_code</span>
+        </div>
+        <h2 class="text-xl font-black tracking-tight">Render<span class="text-primary">Room</span></h2>
+      </a>
+      <div class="flex items-center gap-4">
+        <a href="01-landing-page.html" class="text-sm font-medium hover:text-primary transition-colors">Inicio</a>
+        <a href="07-consejos-decoracion.html" class="text-sm font-medium text-primary hover:text-primary/80 transition-colors">Blog</a>
+        <a href="02-upload-wizard.html" class="bg-primary hover:bg-primary/90 text-background-dark px-4 py-2 rounded-lg font-bold text-sm transition-all">Renderiza Ya</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="max-w-4xl mx-auto px-6 py-12">
+    <a href="07-consejos-decoracion.html" class="inline-flex items-center gap-2 text-primary/70 hover:text-primary transition-colors mb-8">
+      <span class="material-symbols-outlined text-sm">arrow_back</span>
+      Volver al blog
+    </a>
+
+    <span class="inline-block bg-primary/20 text-primary px-4 py-1 rounded-full text-sm font-semibold mb-4">Salón</span>
+    <h1 class="text-4xl md:text-5xl font-black mb-6 leading-tight">Salón 2025: Material Drenching y Formas Orgánicas</h1>
+    
+    <div class="flex items-center gap-4 text-nebula/60 text-sm mb-8 pb-8 border-b border-white/10">
+      <span>Por RenderRoom Team</span>
+      <span>·</span>
+      <span>Mar 2026</span>
+      <span>·</span>
+      <span>5 min de lectura</span>
+    </div>
+
+    <img src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=1200" alt="Salón 2025" class="w-full h-96 object-cover rounded-2xl mb-12"/>
+
+    <article prose-invert prose-amber max-w class="prose-none">
+      <p class="text-xl text-nebula/80 leading-relaxed mb-8">
+        El salón en 2025 se transforma en un santuario de calma y sofisticación. La tendencia del "Material Drenching" llega con fuerza, bathed房间 en un solo color o material que unifica el espacio.
+      </p>
+
+      <h2 class="text-2xl font-bold text-primary mb-4 mt-8">El Color Stone Fruit Chic</h2>
+      <p class="text-nebula/80 leading-relaxed mb-4">
+        Los tonos dominante este año incluyen melocotón suave, lavanda desaturada y verde salvia. No son colores llamativos, sino matices que transmiten serenidad y sofisticación contemporánea.
+      </p>
+
+      <h2 class="text-2xl font-bold text-primary mb-4 mt-8">Sofás de Formas Orgánicas</h2>
+      <p class="text-nebula/80 leading-relaxed mb-4">
+        Adiós a los sofás rectangulares. 2025 abraza los brazos redondeados, los respaldos curveados y las piezas que invitan al abrazo. El confort se convierte en protagonista sin renunciar a la elegancia.
+      </p>
+
+      <h2 class="text-2xl font-bold text-primary mb-4 mt-8">Cómo Aplicarlo</h2>
+      <ul class="list-disc list-inside text-nebula/80 space-y-2 mb-8">
+        <li>Pinta las paredes y el techo del mismo color</li>
+        <li>Elige un sofá de curvas suaves</li>
+        <li>Añade textiles en tonos neutros</li>
+        <li>Minimiza los accesorios</li>
+      </ul>
+
+      <div class="bg-gradient-to-r from-primary/20 to-violet-600/20 rounded-2xl p-8 my-12 border border-primary/20">
+        <h3 class="text-xl font-bold text-primary mb-4">🎨 Prueba este estilo en tu salón</h3>
+        <p class="text-nebula/80 mb-6">Sube una foto de tu salón y sorpréndete con el resultado. Solo 2,50€.</p>
+        <a href="02-upload-wizard.html" class="inline-flex items-center gap-2 bg-primary hover:bg-primary/90 text-background-dark font-black py-4 px-8 rounded-xl transition-all">
+          <span class="material-symbols-outlined">upload_file</span>
+          Renderizar mi salón
+        </a>
+      </div>
+    </article>
+  </main>
+
+  <footer class="border-t border-white/10 py-8 text-center">
+    <p class="text-nebula/50 text-sm">© 2026 RenderRoom · <a href="terminos.html" class="hover:text-primary">Términos</a> · <a href="privacidad.html" class="hover:text-primary">Privacidad</a></p>
+  </footer>
+
+  <style>
+    .glass { background: rgba(22,27,34,0.8); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+  </style>
+</body>
+</html>

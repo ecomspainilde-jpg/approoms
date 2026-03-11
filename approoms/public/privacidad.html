@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html class="dark" lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Política de Privacidad - RenderRoom</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#f0a400",
+            "background-light": "#f8f7f5",
+            "background-dark": "#0D1117",
+            "charcoal": "#161B22",
+            "nebula": "#C9D1D9"
+          },
+          fontFamily: { "display": ["Inter", "sans-serif"] },
+        },
+      },
+    }
+  </script>
+</head>
+<body class="bg-background-dark font-display text-nebula min-h-screen">
+  <nav class="sticky top-0 z-50 glass border-b border-white/10 px-6 py-4">
+    <div class="max-w-4xl mx-auto flex items-center justify-between">
+      <a href="01-landing-page.html" class="flex items-center gap-3">
+        <div class="size-8 bg-gradient-to-br from-primary to-orange-600 rounded-lg flex items-center justify-center text-background-dark">
+          <span class="material-symbols-outlined text-sm">deployed_code</span>
+        </div>
+        <h2 class="text-xl font-black tracking-tight">Render<span class="text-primary">Room</span></h2>
+      </a>
+      <a href="01-landing-page.html" class="text-sm font-medium hover:text-primary transition-colors flex items-center gap-2">
+        <span class="material-symbols-outlined text-sm">arrow_back</span>
+        Volver al inicio
+      </a>
+    </div>
+  </nav>
+
+  <main class="max-w-4xl mx-auto px-6 py-16">
+    <h1 class="text-4xl font-black mb-8">Política de Privacidad</h1>
+    
+    <div class="prose prose-invert prose-amber max-w-none space-y-8">
+      <section>
+        <h2 class="text-2xl font-bold text-primary mb-4">1. Información que Recopilamos</h2>
+        <p class="text-nebula/80 leading-relaxed">
+          Recopilamos información que proporcionas directamente: dirección de email (para autenticación), 
+          fotografías de habitaciones, y preferencias de estilo. También recopilamos datos de uso anónimos para mejorar el servicio.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="text-2xl font-bold text-primary mb-4">2. Cómo Usamos tu Información</h2>
+        <ul class="list-disc list-inside text-nebula/80 mt-4 space-y-2">
+          <li>Procesar tus solicitudes de renderizado</li>
+          <li>Personalizar la experiencia de usuario</li>
+          <li>Enviar comunicaciones sobre el servicio</li>
+          <li>Mejorar y optimizar nuestra plataforma</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 class="text-2xl font-bold text-primary mb-4">3. Almacenamiento y Seguridad</h2>
+        <p class="text-nebula/80 leading-relaxed">
+          Tus fotografías y renders se almacenan en Firebase Cloud Storage de forma segura. 
+          Implementamos medidas de seguridad técnicas y organizativas para proteger tus datos.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="text-2xl font-bold text-primary mb-4">4. Compartir Información</h2>
+        <p class="text-nebula/80 leading-relaxed">
+          No vendemos tus datos personales. Compartimos información únicamente con:
+          Proveedores de servicios (Google Cloud, Firebase) necesarios para operar el servicio, 
+          y cuando sea requerido por ley.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="text-2xl font-bold text-primary mb-4">5. Tus Derechos</h2>
+        <p class="text-nebula/80 leading-relaxed">
+          Tienes derecho a: acceder a tus datos, corregirlos, eliminarlos, o solicitar una copia. 
+          Para ejercer estos derechos, contacta en <a href="mailto:privacidad@renderroom.app" class="text-primary hover:underline">privacidad@renderroom.app</a>
+        </p>
+      </section>
+
+      <section>
+        <h2 class="text-2xl font-bold text-primary mb-4">6. Cookies</h2>
+        <p class="text-nebula/80 leading-relaxed">
+          Utilizamos cookies esenciales para el funcionamiento de la aplicación. 
+          No utilizamos cookies de terceros con fines publicitarios.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="text-2xl font-bold text-primary mb-4">7. Cambios en esta Política</h2>
+        <p class="text-nebula/80 leading-relaxed">
+          Podemos actualizar esta política ocasionalmente. Te notificaremos de cambios significativos 
+          a través de la aplicación o por email.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="text-2xl font-bold text-primary mb-4">8. Contacto</h2>
+        <p class="text-nebula/80 leading-relaxed">
+          Para preguntas sobre privacidad, contacta en <a href="mailto:privacidad@renderroom.app" class="text-primary hover:underline">privacidad@renderroom.app</a>
+        </p>
+      </section>
+    </div>
+  </main>
+
+  <footer class="border-t border-white/10 py-8 text-center">
+    <p class="text-nebula/50 text-sm">© 2024 RenderRoom AI · <a href="01-landing-page.html" class="hover:text-primary transition-colors">Inicio</a></p>
+  </footer>
+
+  <style>
+    .glass { background: rgba(22,27,34,0.8); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+  </style>
+</body>
+</html>

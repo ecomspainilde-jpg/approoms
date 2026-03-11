@@ -1,0 +1,31 @@
+{
+  "name": "projects/10149300038889827122",
+  "projectId": "10149300038889827122",
+  "title": "RenderRoom - Interior Design Renders",
+  "visibility": "PRIVATE",
+  "createTime": "2026-03-03T17:00:00.000000Z",
+  "updateTime": "2026-03-11T15:00:00.000000Z",
+  "projectType": "PROJECT_DESIGN",
+  "origin": "STITCH",
+  "deviceType": "DESKTOP",
+  "designTheme": {
+    "colorMode": "DARK",
+    "font": "INTER",
+    "roundness": "ROUND_EIGHT",
+    "customColor": "#f0a400",
+    "saturation": 3
+  },
+  "screens": {
+    "index": {
+      "id": "index_screen_id",
+      "sourceScreen": "projects/10149300038889827122/screens/index_screen_id",
+      "x": 0,
+      "y": 0,
+      "width": 1440,
+      "height": 3200
+    }
+  },
+  "metadata": {
+    "userRole": "OWNER"
+  }
+}
