@@ -10,7 +10,7 @@ from vertexai.preview import vision_models
 from vertexai.preview.vision_models import (
     ImageGenerationModel,
     Image as VisionImage,
-    ReferenceImage,
+    RawReferenceImage,
 )
 from vertexai.generative_models import GenerativeModel, Part, Image as VertexImage
 import firebase_admin
@@ -149,16 +149,16 @@ def generate_room_render(
         }
 
         if base_image_b64:
-            # Use image-to-image (supported by Imagen 3.0)
+            # Use image-to-image with raw reference for structural preservation
             base_image = VisionImage(image_bytes=base64.b64decode(base_image_b64))
 
-            # Using generate_images with ReferenceImage for structural preservation
-            # This is the standard way to do mask-free structural editing in Imagen 3
+            # Using RawReferenceImage for structural reference
             images = model.generate_images(
                 **generate_kwargs,
                 reference_images=[
-                    ReferenceImage(
-                        image=base_image, reference_id=1, reference_type="structural"
+                    RawReferenceImage(
+                        reference_id=1,
+                        image=base_image,
                     )
                 ],
             )
