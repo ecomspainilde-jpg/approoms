@@ -317,17 +317,37 @@
         };
 
         // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
+        try {
+            firebase.initializeApp(firebaseConfig);
+        } catch(e) {
+            console.error("Firebase init error:", e);
+        }
         const auth = firebase.auth();
         const db = firebase.firestore();
         let currentUser = null;
 
         // Auth state listener
+        // Don't redirect until we've confirmed auth state
+        let initialAuthCheckDone = false;
+        
         auth.onAuthStateChanged(async (user) => {
+            console.log("Auth state changed:", user ? "user logged in" : "no user", "initial check:", initialAuthCheckDone);
+            
+            // Skip the initial null state - wait for auth to fully initialize
+            if (!initialAuthCheckDone) {
+                initialAuthCheckDone = true;
+                if (!user) {
+                    console.log("Waiting for auth to initialize...");
+                    return; // Don't redirect yet, wait for next callback
+                }
+            }
+            
             if (!user) {
+                console.log("No user, redirecting to login...");
                 window.location.href = '01-landing-page.html';
                 return;
             }
+            
             currentUser = user;
             await loadUserData();
             await loadUserStats();
