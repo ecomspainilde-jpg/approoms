@@ -10,7 +10,6 @@ from vertexai.preview import vision_models
 from vertexai.preview.vision_models import (
     ImageGenerationModel,
     Image as VisionImage,
-    RawReferenceImage,
 )
 from vertexai.generative_models import GenerativeModel, Part, Image as VertexImage
 import firebase_admin
@@ -135,33 +134,25 @@ def generate_room_render(
     base_image_b64: str = None,
 ) -> dict:
     """Generate a room render with structural preservation.
-    Uses Imagen 4.0 Fast for text-to-image, and Imagen 3.0 for image-to-image (editing).
+    Uses Imagen 4.0 for text-to-image.
+    When a base image is provided, tries edit_image() first (imagen-3.0-capability-001),
+    then falls back to enriched text-to-image generation.
     """
     try:
-        # Model Selection: Imagen 4.0 Generate for text-to-image, Imagen 3.0 for image-to-image
-        if base_image_b64:
-            model_name = "imagen-3.0-capability-001"
-        else:
-            model_name = "imagen-4.0-generate-001"
-
-        model = ImageGenerationModel.from_pretrained(model_name)
-
         style_desc = STYLE_DESCRIPTIONS.get(
             style.lower(), STYLE_DESCRIPTIONS["moderno"]
         )
 
         if room_data:
-            # Construct a highly structured English prompt
             arch_seed = room_data.get("imagen_prompt_seed_en", "")
             arch_details = room_data.get("architecture_en", "")
-
             full_prompt = (
                 f"Professional interior design render in {style} style. "
-                f"**ARCHITECTURAL PRESERVATION [MANDATORY]**: {arch_details}. {arch_seed}. "
+                f"ARCHITECTURAL PRESERVATION: {arch_details}. {arch_seed}. "
                 f"Maintain EXACT layout of ALL windows, doors, and walls. "
-                f"**INTERIOR DESIGN TRANSFORMATION**: Apply {style} style characteristics: {style_desc}. "
-                f"**CLIENT BRIEF**: {prompt}. "
-                f"Ultra-high resolution, 8K, photorealistic, cinematic lighting, interior design magazine photography style, crisp textures."
+                f"Apply {style} style: {style_desc}. "
+                f"Client brief: {prompt}. "
+                f"Ultra-high resolution, photorealistic, cinematic lighting, interior design magazine photography."
             )
         else:
             full_prompt = (
@@ -171,29 +162,31 @@ def generate_room_render(
                 f"High resolution, photorealistic, interior design photography."
             )
 
-        generate_kwargs = {
-            "prompt": full_prompt,
-            "number_of_images": 1,
-            "language": "en",
-        }
+        images = None
 
         if base_image_b64:
-            # Use image-to-image with raw reference for structural preservation
-            base_image = VisionImage(image_bytes=base64.b64decode(base_image_b64))
+            # Try edit_image() on imagen-3.0-capability-001 for image-to-image editing
+            try:
+                edit_model = ImageGenerationModel.from_pretrained("imagen-3.0-capability-001")
+                base_image = VisionImage(image_bytes=base64.b64decode(base_image_b64))
+                images = edit_model.edit_image(
+                    base_image=base_image,
+                    prompt=full_prompt,
+                    number_of_images=1,
+                )
+                print("Image-to-image edit successful with imagen-3.0-capability-001")
+            except Exception as edit_err:
+                print(f"edit_image failed ({edit_err}), falling back to text-to-image")
+                images = None
 
-            # Using RawReferenceImage for structural reference
-            images = model.generate_images(
-                **generate_kwargs,
-                reference_images=[
-                    RawReferenceImage(
-                        reference_id=1,
-                        image=base_image,
-                    )
-                ],
+        if not images:
+            # Standard Text-to-Image with Imagen 4.0
+            t2i_model = ImageGenerationModel.from_pretrained("imagen-4.0-generate-001")
+            images = t2i_model.generate_images(
+                prompt=full_prompt,
+                number_of_images=1,
+                language="en",
             )
-        else:
-            # Standard Text-to-Image (Imagen 4.0 Fast)
-            images = model.generate_images(**generate_kwargs)
 
         if not images:
             raise Exception("No images generated")
@@ -523,8 +516,8 @@ def verify_admin():
         return None
     # Check custom claims for admin role
     try:
-        auth = firebase_admin.auth()
-        claims = auth.get_user(user["uid"]).custom_claims
+        user_record = auth.get_user(user["uid"])
+        claims = user_record.custom_claims
         if claims and claims.get("admin") == True:
             return user
     except Exception as e:
