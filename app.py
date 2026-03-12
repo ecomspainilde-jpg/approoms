@@ -167,6 +167,7 @@ def generate_room_render(
         if base_image_b64:
             # Try edit_image() on imagen-3.0-capability-001 for image-to-image editing
             try:
+                print("Attempting image editing with imagen-3.0-capability-001...")
                 edit_model = ImageGenerationModel.from_pretrained("imagen-3.0-capability-001")
                 base_image = VisionImage(image_bytes=base64.b64decode(base_image_b64))
                 images = edit_model.edit_image(
@@ -174,19 +175,25 @@ def generate_room_render(
                     prompt=full_prompt,
                     number_of_images=1,
                 )
-                print("Image-to-image edit successful with imagen-3.0-capability-001")
+                if images:
+                    print("Image-to-image edit successful with imagen-3.0-capability-001")
+                else:
+                    print("No images returned from edit_image, falling back to text-to-image")
             except Exception as edit_err:
                 print(f"edit_image failed ({edit_err}), falling back to text-to-image")
                 images = None
 
         if not images:
             # Standard Text-to-Image with Imagen 4.0
+            print("Generating new image with imagen-4.0-generate-001...")
             t2i_model = ImageGenerationModel.from_pretrained("imagen-4.0-generate-001")
             images = t2i_model.generate_images(
                 prompt=full_prompt,
                 number_of_images=1,
                 language="en",
             )
+            if images:
+                print("Text-to-image generation successful with imagen-4.0-generate-001")
 
         if not images:
             raise Exception("No images generated")
@@ -260,6 +267,29 @@ def api_generate_image():
     if not user:
         return jsonify({"error": "Unauthorized"}), 401
 
+    if not db:
+        return jsonify({"error": "Firestore not initialized"}), 500
+
+    # ── Credit Check ──
+    user_ref = db.collection("users").document(user["uid"])
+    user_doc = user_ref.get()
+    
+    if not user_doc.exists:
+        # Create user if not exists with 0 credits
+        user_ref.set({
+            "email": user.get("email"),
+            "credits": 0,
+            "totalGenerations": 0,
+            "createdAt": datetime.datetime.now(timezone.utc)
+        })
+        return jsonify({"error": "No tienes créditos suficientes.", "needsCredits": True}), 402
+    
+    user_data = user_doc.to_dict()
+    current_credits = user_data.get("credits", 0)
+    
+    if current_credits < 1:
+        return jsonify({"error": "No tienes créditos suficientes.", "needsCredits": True}), 402
+
     data = request.json
     prompt = data.get("prompt", "")
     room_data = data.get("room_data", {})
@@ -271,6 +301,12 @@ def api_generate_image():
 
     result = generate_room_render(prompt, room_data, style, image_base64)
     if result.get("success"):
+        # ── Deduct Credit ──
+        user_ref.update({
+            "credits": firestore.Increment(-1),
+            "totalGenerations": firestore.Increment(1)
+        })
+
         image_b64 = result["image_base64"]
 
         # Check Firebase Storage

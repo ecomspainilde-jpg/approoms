@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "skills": {
+    "stripe-integration": {
+      "source": "wshobson/agents",
+      "sourceType": "github",
+      "computedHash": "bc5d0d76d6640f534371039426425284176955816a026fa1e0142c9bd160de50"
+    }
+  }
+}

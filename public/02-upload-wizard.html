@@ -715,23 +715,21 @@ async function generateRender() {
     const errBoxOld = document.getElementById('gen-error-box');
     if (errBoxOld) errBoxOld.remove();
 
-    // Step 1: payment simulation
+    // Reset progress UI
+    document.getElementById('check-pay').classList.add('hidden');
     document.getElementById('spin-pay').classList.remove('hidden');
     document.getElementById('label-pay').classList.add('text-primary');
-    try { await fetch('/api/simulate-payment', { method: 'POST' }); } catch(e) {}
-    document.getElementById('spin-pay').classList.add('hidden');
-    document.getElementById('check-pay').classList.remove('hidden');
-    document.getElementById('label-pay').classList.remove('text-primary');
-    document.getElementById('label-pay').classList.add('text-green-500');
+    document.getElementById('label-pay').classList.remove('text-green-500');
+    
+    document.getElementById('check-ai').classList.add('hidden');
+    document.getElementById('spin-ai').classList.add('hidden');
+    document.getElementById('label-ai').classList.remove('text-primary','text-green-500');
 
-    // Step 2: generate using the PRIMARY photo
-    document.getElementById('spin-ai').classList.remove('hidden');
-    document.getElementById('label-ai').classList.add('text-primary');
     const prompt = document.getElementById('prompt-input').value || 'Una habitación bella y acogedora';
     const primaryImageB64 = state.imagesBase64[state.primaryIndex] || state.imagesBase64[0] || null;
 
     try {
-        // Always refresh token before generation to avoid 401
+        // Step 1: Real credit check via generation attempt
         const currentUser = firebase.auth().currentUser;
         if (currentUser) {
             const freshToken = await currentUser.getIdToken(true);
@@ -751,17 +749,50 @@ async function generateRender() {
                 image_base64: primaryImageB64
             })
         });
+        
         const data = await res.json();
 
-        document.getElementById('spin-ai').classList.add('hidden');
-        document.getElementById('check-ai').classList.remove('hidden');
-        document.getElementById('label-ai').classList.remove('text-primary');
-        document.getElementById('label-ai').classList.add('text-green-500');
+        if (res.status === 402) {
+            // Out of credits
+            document.getElementById('spin-pay').classList.add('hidden');
+            document.getElementById('label-pay').textContent = 'Pago Requerido';
+            document.getElementById('label-pay').classList.replace('text-primary', 'text-amber-500');
+            
+            btn.disabled = false;
+            btn.innerHTML = '<span class="material-symbols-outlined">payments</span> Comprar Créditos';
+            btn.onclick = () => window.open('modal-compra.html', 'Purchase', 'width=1000,height=800');
+            
+            const errBox = document.createElement('div');
+            errBox.id = 'gen-error-box';
+            errBox.className = 'mt-4 bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 text-amber-400 text-sm flex items-start gap-2 fade-in';
+            errBox.innerHTML = `<span class="material-symbols-outlined text-sm mt-0.5 flex-shrink-0">toll</span><div><strong>No tienes créditos suficientes:</strong><br>Necesitas al menos 1 crédito para generar este render. <a href="modal-compra.html" target="_blank" class="underline font-bold">Haz clic aquí para añadir créditos.</a></div>`;
+            progressPanel.after(errBox);
+            return;
+        }
 
         if (!res.ok) throw new Error(data.error || 'Error generando imagen');
 
-        showResult(data, prompt);
+        // Success flow
+        document.getElementById('spin-pay').classList.add('hidden');
+        document.getElementById('check-pay').classList.remove('hidden');
+        document.getElementById('label-pay').classList.replace('text-primary', 'text-green-500');
+        
+        document.getElementById('spin-ai').classList.remove('hidden');
+        document.getElementById('label-ai').classList.add('text-primary');
+
+        // In a real app, the AI part is already done by the time /api/generate-image returns.
+        // We just simulate the feeling of it finishing for the UI steps.
+        setTimeout(() => {
+            document.getElementById('spin-ai').classList.add('hidden');
+            document.getElementById('check-ai').classList.remove('hidden');
+            document.getElementById('label-ai').classList.replace('text-primary', 'text-green-500');
+            showResult(data, prompt);
+            btn.disabled = false;
+            btn.innerHTML = '<span class="material-symbols-outlined">auto_awesome</span> Generar Otro';
+        }, 1500);
+
     } catch(err) {
+        document.getElementById('spin-pay').classList.add('hidden');
         document.getElementById('spin-ai').classList.add('hidden');
         btn.disabled = false;
         btn.innerHTML = '<span class="material-symbols-outlined">auto_awesome</span> Reintentar';
