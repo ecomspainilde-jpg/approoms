@@ -47,6 +47,12 @@
       "sourceScreen": "projects/10149300038889827122/screens/b8999ef0080e46378a99068cb75d1987",
       "width": 2560,
       "height": 2438
+    },
+    "quick_purchase_modal": {
+      "id": "321f3b2d71b34d499a6f04bc2a10fe6a",
+      "sourceScreen": "projects/10149300038889827122/screens/321f3b2d71b34d499a6f04bc2a10fe6a",
+      "width": 2560,
+      "height": 2048
     }
   },
   "metadata": {
