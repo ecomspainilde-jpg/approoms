@@ -306,29 +306,39 @@
     </div>
 
     <script>
-        // Firebase Config
+        // Firebase Config — proyecto correcto gen-lang-client-0426824151
         const firebaseConfig = {
-            apiKey: "AIzaSyDYP20guLUPV2z6TzFvL9HZ5-d9S40U6k",
-            authDomain: "renderroom-ai.firebaseapp.com",
-            projectId: "renderroom-ai",
-            storageBucket: "renderroom-ai.appspot.com",
-            messagingSenderId: "625375753886",
-            appId: "1:625375753886:web:a8e1c2e5e2f0c9c9a8e1c2"
+            apiKey: "AIzaSyDj99qdmDt4GiVeRkvCSfTOSDw3uqD-_Ew",
+            authDomain: "gen-lang-client-0426824151.firebaseapp.com",
+            projectId: "gen-lang-client-0426824151",
+            storageBucket: "gen-lang-client-0426824151.firebasestorage.app",
+            messagingSenderId: "124806819551",
+            appId: "1:124806819551:web:1c90d1154b458fa064036a"
         };
 
         // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
+        try {
+            firebase.initializeApp(firebaseConfig);
+        } catch(e) {
+            // Already initialized
+        }
         const auth = firebase.auth();
         const db = firebase.firestore();
         let currentUser = null;
 
         // Auth state listener
         auth.onAuthStateChanged(async (user) => {
-            if (!user) {
-                window.location.href = '01-landing-page.html';
+            if (user === null) {
+                setTimeout(() => {
+                    if (!firebase.auth().currentUser) {
+                        window.location.href = '01-landing-page.html';
+                    }
+                }, 800);
                 return;
             }
             currentUser = user;
+            const token = await user.getIdToken(true);
+            localStorage.setItem('rr_token', token);
             await loadUserData();
             await loadUserStats();
         });
@@ -365,22 +375,17 @@
             if (!currentUser) return;
             
             try {
-                // Get renders count
                 const rendersSnapshot = await db.collection('renders').where('userId', '==', currentUser.uid).get();
                 const rendersCount = rendersSnapshot.size;
                 document.getElementById('stats-renders').textContent = rendersCount;
                 
-                // Get favorites count (assuming there's a favorites collection)
                 let favsCount = 0;
                 try {
                     const favsSnapshot = await db.collection('favorites').where('userId', '==', currentUser.uid).get();
                     favsCount = favsSnapshot.size;
-                } catch (e) {
-                    // Collection might not exist
-                }
+                } catch (e) { /* Collection might not exist */ }
                 document.getElementById('stats-favs').textContent = favsCount;
                 
-                // Calculate total spent (assuming 2.50€ per render)
                 const spent = rendersCount * 2.50;
                 document.getElementById('stats-spent').textContent = `€${spent.toFixed(0)}`;
             } catch (e) {
@@ -414,31 +419,26 @@
                 displayName: fullName,
                 phone: document.getElementById('profile-phone-input').value.trim(),
                 location: document.getElementById('profile-location-input').value.trim(),
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
             };
 
             try {
                 await db.collection('users').doc(currentUser.uid).set(updatedData, { merge: true });
-                if (fullName) {
-                    await currentUser.updateProfile({ displayName: fullName });
-                }
+                if (fullName) await currentUser.updateProfile({ displayName: fullName });
                 document.getElementById('user-name-display').textContent = fullName || currentUser.email.split('@')[0];
                 saveBtn.textContent = 'Saved!';
-                setTimeout(() => {
-                    saveBtn.textContent = originalText;
-                    saveBtn.disabled = false;
-                }, 2000);
+                setTimeout(() => { saveBtn.textContent = originalText; saveBtn.disabled = false; }, 2000);
             } catch (e) {
                 console.error("Error saving profile:", e);
                 saveBtn.textContent = 'Error';
-                setTimeout(() => {
-                    saveBtn.textContent = originalText;
-                    saveBtn.disabled = false;
-                }, 2000);
+                setTimeout(() => { saveBtn.textContent = originalText; saveBtn.disabled = false; }, 2000);
             }
         }
 
         function handleSignOut() {
             if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
+                localStorage.removeItem('rr_token');
+                sessionStorage.removeItem('disclaimer_accepted');
                 auth.signOut().then(() => {
                     window.location.href = '01-landing-page.html';
                 });

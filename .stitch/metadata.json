@@ -41,6 +41,12 @@
       "sourceScreen": "projects/10149300038889827122/screens/cceb0004f27d4682aa9707f7418e7d07",
       "width": 2560,
       "height": 2564
+    },
+    "credit_history": {
+      "id": "b8999ef0080e46378a99068cb75d1987",
+      "sourceScreen": "projects/10149300038889827122/screens/b8999ef0080e46378a99068cb75d1987",
+      "width": 2560,
+      "height": 2438
     }
   },
   "metadata": {

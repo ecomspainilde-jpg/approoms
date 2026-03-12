@@ -1,19 +1,19 @@
 ---
-page: credit_history
+page: quick_purchase_modal
 ---
-Pestaña de historial de créditos y transacciones en la página de perfil de usuario para RenderRoom.
+Modal de compra rápida de créditos para RenderRoom. Se muestra superpuesto cuando el usuario quiere comprar más créditos sin salir de su pantalla actual.
 
 **DESIGN SYSTEM (REQUIRED):**
-Tema oscuro y aspiracional. Fondo Noche Profunda (#0D1117). Superficies en Carbón Suave (#161B22). Acento Ámbar Dorado Brillante (#F0A500). Tipografía Inter, texto Blanco Lunar (#E6EDF3) y secundario Plata Nebulosa (#8B949E). Tarjetas con glassmorphism sutil, bordes 16px redondeados, sombras ámbar en hover.
+Tema oscuro y aspiracional. Fondo overlay semi-transparente oscuro sobre la página. El modal en Carbón Suave (#161B22) con borde glassmorphism sutil y glow ámbar exterior. Acento Ámbar Dorado Brillante (#F0A500). Tipografía Inter, texto Blanco Lunar (#E6EDF3) y secundario Plata Nebulosa (#8B949E). Bordes 16px redondeados extragrandes en el modal.
 
 **Page Structure:**
-1. Navegación superior sticky con glassmorphism y logo ámbar "RenderRoom".
-2. Encabezado de sección: ícono de billetera ámbar + título "Mis Créditos & Transacciones".
-3. Tarjeta KPI grande centrada con:
-   - "Créditos disponibles: 4" en super-grande ámbar
-   - Barra de progreso animada ámbar
-   - Botón secundario "Comprar más créditos" bordeado en ámbar
-4. Tabla/Lista de transacciones con glassmorphism, filas alternadas en Carbón Suave y Obsidiana:
-   - Columnas: Fecha, Concepto, Créditos (+/-), Importe (€), Estado (badge verde "Completado" o rojo "Error")
-   - Filas de ejemplo: "Paquete Pro · 5 renders", "Render #001", "Render #002"
-5. Footer minimal oscuro.
+Modal centrado en overlay oscuro translúcido:
+1. Header del modal: título "Añadir créditos" con ícono ámbar de moneda, botón X de cierre en esquina.
+2. Selector de paquetes en 3 mini-tarjetas horizontales clickables (radio-button visual):
+   - "1 Render — 2,50€" con radio-input
+   - "5 Renders — 10,00€" (pre-seleccionado, borde ámbar brillante) badge "El más popular"
+   - "20 Renders — 30,00€" badge "Para profesionales"
+3. Resumen: "Total a pagar: 10,00€" en grande con ámbar + "5 créditos se añadirán a tu cuenta"
+4. Sección de métodos de pago: fila de pequeños logos: Visa, Mastercard, Google Pay, Apple Pay, PayPal, Revolut
+5. Botón CTA gigante de ancho completo: gradiente ámbar "Pagar con Stripe →"
+6. Texto pequeño inferior: "🔒 Pago seguro. Puedes cancelar en cualquier momento."
