@@ -177,6 +177,7 @@
                     </div>
 
                     <div class="flex gap-3">
+                        <button onclick="switchAccount()" class="px-4 py-2 rounded-xl border border-primary/20 text-primary text-xs font-bold hover:bg-primary/5 transition-all">Cambiar cuenta</button>
                         <button onclick="handleSignOut()" class="px-4 py-2 rounded-xl border border-red-500/20 text-red-400 text-xs font-bold hover:bg-red-500/5 transition-all">Sign Out</button>
                     </div>
                 </header>
@@ -332,49 +333,42 @@
     </div>
 
     <script>
-        // Firebase Config
+        // Firebase Config — mismo proyecto que el resto de la app
         const firebaseConfig = {
-            apiKey: "AIzaSyDYP20guLUPV2z6TzFvL9HZ5-d9S40U6k",
-            authDomain: "renderroom-ai.firebaseapp.com",
-            projectId: "renderroom-ai",
-            storageBucket: "renderroom-ai.appspot.com",
-            messagingSenderId: "625375753886",
-            appId: "1:625375753886:web:a8e1c2e5e2f0c9c9a8e1c2"
+            apiKey: "AIzaSyDj99qdmDt4GiVeRkvCSfTOSDw3uqD-_Ew",
+            authDomain: "gen-lang-client-0426824151.firebaseapp.com",
+            projectId: "gen-lang-client-0426824151",
+            storageBucket: "gen-lang-client-0426824151.firebasestorage.app",
+            messagingSenderId: "124806819551",
+            appId: "1:124806819551:web:1c90d1154b458fa064036a"
         };
 
         // Initialize Firebase
         try {
             firebase.initializeApp(firebaseConfig);
         } catch(e) {
-            console.error("Firebase init error:", e);
+            // Already initialized (shared across pages)
         }
         const auth = firebase.auth();
         const db = firebase.firestore();
         let currentUser = null;
 
         // Auth state listener
-        // Don't redirect until we've confirmed auth state
-        let initialAuthCheckDone = false;
-        
         auth.onAuthStateChanged(async (user) => {
-            console.log("Auth state changed:", user ? "user logged in" : "no user", "initial check:", initialAuthCheckDone);
-            
-            // Skip the initial null state - wait for auth to fully initialize
-            if (!initialAuthCheckDone) {
-                initialAuthCheckDone = true;
-                if (!user) {
-                    console.log("Waiting for auth to initialize...");
-                    return; // Don't redirect yet, wait for next callback
-                }
-            }
-            
-            if (!user) {
-                console.log("No user, redirecting to login...");
-                window.location.href = '01-landing-page.html';
+            if (user === null) {
+                // User is definitively logged out — redirect to login
+                // Use a timeout to avoid race with the initial SDK load
+                setTimeout(() => {
+                    if (!firebase.auth().currentUser) {
+                        window.location.href = '01-landing-page.html';
+                    }
+                }, 800);
                 return;
             }
-            
             currentUser = user;
+            // Refresh and persist token
+            const token = await user.getIdToken(true);
+            localStorage.setItem('rr_token', token);
             await loadUserData();
             await loadUserStats();
         });
@@ -513,9 +507,25 @@
 
         function handleSignOut() {
             if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
+                localStorage.removeItem('rr_token');
+                sessionStorage.removeItem('disclaimer_accepted');
                 auth.signOut().then(() => {
                     window.location.href = '01-landing-page.html';
                 });
+            }
+        }
+
+        // Switch account: sign out and force account picker
+        async function switchAccount() {
+            localStorage.removeItem('rr_token');
+            await auth.signOut();
+            const provider = new firebase.auth.GoogleAuthProvider();
+            provider.setCustomParameters({ prompt: 'select_account' });
+            try {
+                await auth.signInWithPopup(provider);
+                window.location.reload();
+            } catch(e) {
+                window.location.href = '01-landing-page.html';
             }
         }
 

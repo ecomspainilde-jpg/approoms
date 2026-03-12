@@ -162,12 +162,15 @@
                     </a>
                 </div>
                 <span id="user-greeting" class="text-sm text-nebula/70 hidden md:block"></span>
-                <a href="06-perfil-usuario.html" class="flex items-center gap-2 group">
+                <a href="06-perfil-usuario.html" class="flex items-center gap-2 group" title="Ver perfil">
                     <div id="user-initials" class="w-8 h-8 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-primary font-bold text-xs group-hover:bg-primary/30 transition-colors">
                         U
                     </div>
                 </a>
-                <button onclick="handleLogout()" class="text-[10px] text-nebula/40 hover:text-primary transition-colors border border-white/5 px-2 py-1 rounded">Salir</button>
+                <div class="flex flex-col gap-0.5">
+                    <button onclick="handleLogout()" class="text-[10px] text-nebula/40 hover:text-red-400 transition-colors border border-white/5 hover:border-red-500/30 px-2 py-1 rounded leading-tight">Salir</button>
+                    <button onclick="switchAccount()" class="text-[9px] text-nebula/30 hover:text-primary transition-colors leading-tight">Cambiar cuenta</button>
+                </div>
                 <a href="02-upload-wizard.html" class="bg-primary hover:bg-primary/90 text-background-dark px-5 py-2 rounded-xl text-sm font-bold tracking-wide transition-all hover:scale-105 amber-glow">Renderiza Ahora</a>
             </div>
         </div>
@@ -508,20 +511,38 @@ async function handleLogin() {
 
 async function handleGoogleLogin() {
     const provider = new firebase.auth.GoogleAuthProvider();
+    // Force account selection so the user can pick a different account
+    provider.setCustomParameters({ prompt: 'select_account' });
     try {
         await firebase.auth().signInWithPopup(provider);
         closeAuth();
-        // The onAuthStateChanged listener will handle redirection or UI updates
         window.location.href = '02-upload-wizard.html';
     } catch (e) {
+        // If popup was blocked, fall back to redirect
+        if (e.code === 'auth/popup-blocked' || e.code === 'auth/popup-closed-by-user') {
+            try {
+                await firebase.auth().signInWithRedirect(provider);
+            } catch(e2) { /* redirect initiated */ }
+            return;
+        }
         const msgEl = document.getElementById('tab-login').classList.contains('active') ? 
                       document.getElementById('login-msg') : document.getElementById('reg-msg');
         showMsg(msgEl, e.message || 'Error con Google Sign-in', 'error');
     }
 }
 
-function handleLogout() {
-    firebase.auth().signOut();
+async function handleLogout() {
+    localStorage.removeItem('rr_token');
+    sessionStorage.removeItem('disclaimer_accepted');
+    await firebase.auth().signOut();
+    window.location.href = '01-landing-page.html';
+}
+
+// Allow switching to a different account
+async function switchAccount() {
+    localStorage.removeItem('rr_token');
+    await firebase.auth().signOut();
+    openAuth('login');
 }
 
 function updateUserUI(user) {
