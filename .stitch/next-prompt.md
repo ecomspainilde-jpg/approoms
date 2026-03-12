@@ -1,33 +1,19 @@
 ---
-page: pricing
+page: credit_history
 ---
-Página de precios detallada para RenderRoom, con paquetes de compra integrados con Stripe.
+Pestaña de historial de créditos y transacciones en la página de perfil de usuario para RenderRoom.
 
 **DESIGN SYSTEM (REQUIRED):**
-# Design System: RenderRoom - Renders de Habitaciones por 2,50€
-
-**Project ID:** 10149300038889827122
-
-## 1. Visual Theme & Atmosphere
-RenderRoom encarna un oasis tecnológico cálido y aspiracional.
-- Fondo oscuro cinematográfico (Noche Profunda) con toques dorados cálidos (Ámbar Dorado Brillante).
-- Glassmorphism, tarjetas con bordes suaves de 16px.
-- Botones grandes y accesibles.
-
-## 2. Color Palette
-- Noche Profunda (#0D1117)
-- Carbón Suave (#161B22)
-- Obsidiana Cálida (#1C2333)
-- Ámbar Dorado Brillante (#F0A500) para llamadas a la acción (CTA) y precios destacados.
-- Blanco Lunar (#E6EDF3) para texto
-- Plata Nebulosa (#8B949E) para texto secundario
+Tema oscuro y aspiracional. Fondo Noche Profunda (#0D1117). Superficies en Carbón Suave (#161B22). Acento Ámbar Dorado Brillante (#F0A500). Tipografía Inter, texto Blanco Lunar (#E6EDF3) y secundario Plata Nebulosa (#8B949E). Tarjetas con glassmorphism sutil, bordes 16px redondeados, sombras ámbar en hover.
 
 **Page Structure:**
-1. Navegación superior clásica.
-2. Hero header grande: "Nuestros Paquetes. Obtén más por tu inversión", "Desde 2,50€ el render individual hasta descuentos para profesionales".
-3. Grilla de tarjetas de precios (3 columnas grandes interactivas):
-   - Tarjeta "Básico": 2,50€, 1 Render, CTA secundario de "Comprar".
-   - Tarjeta "Pro": Prominente (escala mayor o glow ámbar), 10,00€, 5 Renders (Sale a 2€ cada uno), CTA primario gigante de color ámbar. Badge: "El más popular". Ahorro: 2,50€.
-   - Tarjeta "Agencia": 30,00€, 20 Renders (Sale a 1,50€ cada uno), CTA secundario oscuro. Destinado a profesionales.
-4. Sección debajo de Cards: Logos de métodos de pago soportados ("Mastercard", "Visa", "Google Pay", "Apple Pay", "Revolut").
-5. Footer estándar.
+1. Navegación superior sticky con glassmorphism y logo ámbar "RenderRoom".
+2. Encabezado de sección: ícono de billetera ámbar + título "Mis Créditos & Transacciones".
+3. Tarjeta KPI grande centrada con:
+   - "Créditos disponibles: 4" en super-grande ámbar
+   - Barra de progreso animada ámbar
+   - Botón secundario "Comprar más créditos" bordeado en ámbar
+4. Tabla/Lista de transacciones con glassmorphism, filas alternadas en Carbón Suave y Obsidiana:
+   - Columnas: Fecha, Concepto, Créditos (+/-), Importe (€), Estado (badge verde "Completado" o rojo "Error")
+   - Filas de ejemplo: "Paquete Pro · 5 renders", "Render #001", "Render #002"
+5. Footer minimal oscuro.

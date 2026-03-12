@@ -2,3 +2,4 @@ Flask==3.0.2
 google-cloud-aiplatform==1.140.0
 gunicorn==21.2.0
 firebase-admin==6.4.0
+stripe==8.7.0

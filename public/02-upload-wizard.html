@@ -45,9 +45,64 @@
     .fade-in { animation: fadeIn .5s ease; }
     @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
     .proposal-section { border-left: 3px solid #f0a400; padding-left: 1rem; }
+    /* Photo selector */
+    .photo-thumb { position: relative; cursor: pointer; border-radius: 0.75rem; overflow: hidden; border: 2px solid transparent; transition: all .2s; }
+    .photo-thumb:hover { border-color: rgba(240,164,0,.4); }
+    .photo-thumb.primary { border-color: #f0a400; box-shadow: 0 0 16px rgba(240,164,0,.35); }
+    .photo-thumb .primary-badge { display: none; position: absolute; top: 6px; left: 6px; background: #f0a400; color: #0D1117; font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 999px; letter-spacing:.04em; }
+    .photo-thumb.primary .primary-badge { display: block; }
+    .photo-thumb .select-hint { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,.7)); text-align:center; padding: 10px 4px 6px; font-size: 10px; color: #ccc; opacity:0; transition:.2s; }
+    .photo-thumb:hover .select-hint { opacity:1; }
+    /* Disclaimer modal */
+    #disclaimer-modal { position:fixed; inset:0; background:rgba(0,0,0,.75); z-index:999; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(4px); }
+    #disclaimer-box { background:#161B22; border:1px solid #30363D; border-radius:1.25rem; max-width:520px; width:90%; padding:2rem; box-shadow:0 25px 60px rgba(0,0,0,.6); }
 </style>
 </head>
 <body class="bg-background-dark font-display text-slate-100 min-h-screen">
+
+<!-- ══════════════ DISCLAIMER MODAL ══════════════ -->
+<div id="disclaimer-modal">
+    <div id="disclaimer-box" class="fade-in">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+                <span class="material-symbols-outlined">privacy_tip</span>
+            </div>
+            <div>
+                <h2 class="font-black text-lg">Aviso sobre tus fotos</h2>
+                <p class="text-xs text-muted-text">Lee antes de continuar</p>
+            </div>
+        </div>
+        <div class="space-y-3 text-sm text-slate-300 leading-relaxed mb-6">
+            <p>Al subir imágenes a RenderRoom, confirmas que:</p>
+            <ul class="space-y-2 text-sm">
+                <li class="flex items-start gap-2">
+                    <span class="material-symbols-outlined text-primary text-sm mt-0.5 flex-shrink-0">check_circle</span>
+                    <span>Las fotografías son de tu propiedad o tienes autorización expresa del propietario para utilizarlas.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                    <span class="material-symbols-outlined text-primary text-sm mt-0.5 flex-shrink-0">check_circle</span>
+                    <span>Las imágenes no contienen datos personales identificables de terceros sin su consentimiento (<a href="privacidad.html" class="text-primary underline" target="_blank">RGPD</a>).</span>
+                </li>
+                <li class="flex items-start gap-2">
+                    <span class="material-symbols-outlined text-primary text-sm mt-0.5 flex-shrink-0">check_circle</span>
+                    <span>El contenido es apto para todos los públicos y no infringe derechos de autor de terceros.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                    <span class="material-symbols-outlined text-primary text-sm mt-0.5 flex-shrink-0">check_circle</span>
+                    <span>Las imágenes se usarán exclusivamente para la generación del render solicitado y no serán compartidas públicamente sin tu permiso.</span>
+                </li>
+            </ul>
+            <p class="text-xs text-muted-text border-t border-border-dark pt-3">Conforme a nuestra <a href="privacidad.html" class="text-primary underline" target="_blank">Política de Privacidad</a> y <a href="terminos.html" class="text-primary underline" target="_blank">Términos de Uso</a>. El tratamiento de datos está amparado por el RGPD (UE) 2016/679.</p>
+        </div>
+        <div class="flex items-center gap-3 mb-4">
+            <input type="checkbox" id="disclaimer-check" class="w-4 h-4 accent-primary rounded cursor-pointer">
+            <label for="disclaimer-check" class="text-sm cursor-pointer select-none">He leído y acepto los términos de uso de imágenes</label>
+        </div>
+        <button id="disclaimer-confirm" disabled onclick="acceptDisclaimer()" class="w-full bg-primary/30 text-primary/50 font-bold py-3 rounded-xl transition-all cursor-not-allowed">
+            Continuar →
+        </button>
+    </div>
+</div>
 
 <!-- NAV -->
 <header class="glass sticky top-0 z-50 border-b border-border-dark flex items-center justify-between px-6 md:px-10 py-4">
@@ -101,7 +156,7 @@
 
         <!-- Drop Zone -->
         <div id="upload-zone" class="upload-zone rounded-2xl p-8 flex flex-col items-center justify-center gap-4 text-center cursor-pointer relative min-h-[300px]">
-            <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp" multiple class="hidden"/>
+            <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp" multiple aria-label="Subir fotos de la habitación" class="hidden"/>
             <!-- Placeholder state -->
             <div id="upload-placeholder">
                 <div class="size-20 rounded-full bg-primary/10 flex items-center justify-center text-primary mx-auto mb-4">
@@ -113,6 +168,10 @@
             </div>
             <!-- Preview state (hidden) -->
             <div id="upload-preview" class="hidden w-full">
+                <p class="text-xs text-muted-text mb-3 flex items-center gap-1">
+                    <span class="material-symbols-outlined text-primary text-sm">touch_app</span>
+                    Toca una foto para marcarla como <strong class="text-primary ml-1">foto principal</strong> para el render
+                </p>
                 <div id="preview-grid" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                     <!-- Previews will be injected here -->
                 </div>
@@ -352,7 +411,7 @@
 </main>
 
 <script>
-// ── Firebase Config ─────────────────────────────
+// ── Firebase Config ──────────────────────────────────────────────
 const firebaseConfig = {
   projectId: "gen-lang-client-0426824151",
   appId: "1:124806819551:web:1c90d1154b458fa064036a",
@@ -391,9 +450,35 @@ function getAuthHeaders() {
     return token ? { 'Authorization': `Bearer ${token}` } : {};
 }
 
+// ── Disclaimer Modal ───────────────────────────────────────
+const disclaimerModal = document.getElementById('disclaimer-modal');
+const disclaimerCheck = document.getElementById('disclaimer-check');
+const disclaimerConfirm = document.getElementById('disclaimer-confirm');
+if (!sessionStorage.getItem('disclaimer_accepted')) {
+    disclaimerModal.style.display = 'flex';
+} else {
+    disclaimerModal.style.display = 'none';
+}
+disclaimerCheck.addEventListener('change', () => {
+    if (disclaimerCheck.checked) {
+        disclaimerConfirm.disabled = false;
+        disclaimerConfirm.classList.remove('bg-primary/30','text-primary/50','cursor-not-allowed');
+        disclaimerConfirm.classList.add('bg-primary','text-background-dark','hover:bg-primary/90','cursor-pointer');
+    } else {
+        disclaimerConfirm.disabled = true;
+        disclaimerConfirm.classList.add('bg-primary/30','text-primary/50','cursor-not-allowed');
+        disclaimerConfirm.classList.remove('bg-primary','text-background-dark','hover:bg-primary/90','cursor-pointer');
+    }
+});
+function acceptDisclaimer() {
+    sessionStorage.setItem('disclaimer_accepted', '1');
+    disclaimerModal.style.display = 'none';
+}
+
 // ── State ──────────────────────────────────────────────────────
 let state = {
     imagesBase64: [], // Store up to 3 images
+    primaryIndex: 0,  // Index of the main photo for the render
     roomData: null,   // Store JSON analysis
     selectedStyle: null,
     currentStep: 1,
@@ -409,7 +494,7 @@ const btnToStyle = document.getElementById('btn-to-style');
 const analysisPanel = document.getElementById('analysis-panel');
 
 uploadZone.addEventListener('click', (e) => {
-    if (e.target.id === 'change-photo-btn') return;
+    if (e.target.id === 'change-photo-btn' || e.target.closest('.photo-thumb')) return;
     fileInput.click();
 });
 document.getElementById('change-photo-btn').addEventListener('click', () => {
@@ -433,6 +518,7 @@ fileInput.addEventListener('change', () => {
 
 function resetUpload() {
     state.imagesBase64 = [];
+    state.primaryIndex = 0;
     state.roomData = null;
     uploadPlaceholder.classList.remove('hidden');
     uploadPreview.classList.add('hidden');
@@ -445,25 +531,33 @@ function resetUpload() {
 
 async function handleFiles(files) {
     state.imagesBase64 = [];
+    state.primaryIndex = 0;
     previewGrid.innerHTML = '';
-    
-    for (const file of files) {
+
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
         if (file.size > 10 * 1024 * 1024) { alert(`El archivo ${file.name} supera los 10 MB`); continue; }
-        
+
         const dataUrl = await new Promise((resolve) => {
             const reader = new FileReader();
             reader.onload = (e) => resolve(e.target.result);
             reader.readAsDataURL(file);
         });
 
-        // Add to state
+        const idx = state.imagesBase64.length;
         state.imagesBase64.push(dataUrl.split(',')[1]);
 
-        // Add to preview grid
-        const img = document.createElement('img');
-        img.src = dataUrl;
-        img.className = "max-h-48 rounded-xl object-cover shadow-md mx-auto";
-        previewGrid.appendChild(img);
+        // Build photo-thumb with primary selector
+        const thumb = document.createElement('div');
+        thumb.className = 'photo-thumb' + (idx === 0 ? ' primary' : '');
+        thumb.dataset.idx = idx;
+        thumb.innerHTML = `
+            <img src="${dataUrl}" class="w-full h-40 object-cover" alt="Foto ${idx + 1}">
+            <span class="primary-badge">★ Principal</span>
+            <span class="select-hint">Usar como principal</span>
+        `;
+        thumb.addEventListener('click', () => setPrimaryPhoto(idx));
+        previewGrid.appendChild(thumb);
     }
 
     if (state.imagesBase64.length > 0) {
@@ -472,6 +566,13 @@ async function handleFiles(files) {
         uploadZone.classList.add('has-image');
         await analyzeImage();
     }
+}
+
+function setPrimaryPhoto(idx) {
+    state.primaryIndex = idx;
+    document.querySelectorAll('.photo-thumb').forEach(t => t.classList.remove('primary'));
+    const selected = previewGrid.querySelector(`.photo-thumb[data-idx="${idx}"]`);
+    if (selected) selected.classList.add('primary');
 }
 
 async function analyzeImage() {
@@ -483,7 +584,7 @@ async function analyzeImage() {
     try {
         const res = await fetch('/api/analyze-image', {
             method: 'POST',
-            headers: { 
+            headers: {
                 'Content-Type': 'application/json',
                 ...getAuthHeaders()
             },
@@ -562,11 +663,21 @@ function goToStep3() {
     // Populate summary
     const summaryGrid = document.getElementById('summary-photos');
     summaryGrid.innerHTML = '';
-    state.imagesBase64.forEach(imgB64 => {
+    state.imagesBase64.forEach((imgB64, idx) => {
+        const wrap = document.createElement('div');
+        wrap.className = 'relative';
         const img = document.createElement('img');
         img.src = `data:image/jpeg;base64,${imgB64}`;
         img.className = "h-16 w-16 rounded-lg object-cover";
-        summaryGrid.appendChild(img);
+        img.alt = `Foto ${idx + 1}`;
+        wrap.appendChild(img);
+        if (idx === state.primaryIndex) {
+            const badge = document.createElement('span');
+            badge.className = 'absolute -top-1 -right-1 bg-primary text-background-dark text-[8px] font-black px-1.5 py-0.5 rounded-full';
+            badge.textContent = '★';
+            wrap.appendChild(badge);
+        }
+        summaryGrid.appendChild(wrap);
     });
     document.getElementById('summary-style').textContent = state.selectedStyle.charAt(0).toUpperCase() + state.selectedStyle.slice(1);
     const roomInfo = state.roomData ? `${state.roomData.room_type} (${state.roomData.approx_size})` : '';
@@ -601,27 +712,35 @@ async function generateRender() {
 
     const progressPanel = document.getElementById('gen-progress');
     progressPanel.classList.remove('hidden');
+    const errBoxOld = document.getElementById('gen-error-box');
+    if (errBoxOld) errBoxOld.remove();
 
-    // Step 1: payment
+    // Step 1: payment simulation
     document.getElementById('spin-pay').classList.remove('hidden');
     document.getElementById('label-pay').classList.add('text-primary');
-    try {
-        await fetch('/api/simulate-payment', { method: 'POST' });
-    } catch(e) {}
+    try { await fetch('/api/simulate-payment', { method: 'POST' }); } catch(e) {}
     document.getElementById('spin-pay').classList.add('hidden');
     document.getElementById('check-pay').classList.remove('hidden');
     document.getElementById('label-pay').classList.remove('text-primary');
     document.getElementById('label-pay').classList.add('text-green-500');
 
-    // Step 2: generate
+    // Step 2: generate using the PRIMARY photo
     document.getElementById('spin-ai').classList.remove('hidden');
     document.getElementById('label-ai').classList.add('text-primary');
     const prompt = document.getElementById('prompt-input').value || 'Una habitación bella y acogedora';
+    const primaryImageB64 = state.imagesBase64[state.primaryIndex] || state.imagesBase64[0] || null;
 
     try {
+        // Always refresh token before generation to avoid 401
+        const currentUser = firebase.auth().currentUser;
+        if (currentUser) {
+            const freshToken = await currentUser.getIdToken(true);
+            localStorage.setItem('rr_token', freshToken);
+        }
+
         const res = await fetch('/api/generate-image', {
             method: 'POST',
-            headers: { 
+            headers: {
                 'Content-Type': 'application/json',
                 ...getAuthHeaders()
             },
@@ -629,7 +748,7 @@ async function generateRender() {
                 prompt,
                 room_data: state.roomData,
                 style: state.selectedStyle,
-                image_base64: state.imagesBase64[0]
+                image_base64: primaryImageB64
             })
         });
         const data = await res.json();
@@ -643,13 +762,21 @@ async function generateRender() {
 
         showResult(data, prompt);
     } catch(err) {
+        document.getElementById('spin-ai').classList.add('hidden');
         btn.disabled = false;
         btn.innerHTML = '<span class="material-symbols-outlined">auto_awesome</span> Reintentar';
-        alert('Error: ' + err.message);
+        const errBox = document.createElement('div');
+        errBox.id = 'gen-error-box';
+        errBox.className = 'mt-4 bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-red-400 text-sm flex items-start gap-2 fade-in';
+        errBox.innerHTML = `<span class="material-symbols-outlined text-sm mt-0.5 flex-shrink-0">error</span><div><strong>Error al generar:</strong><br>${err.message}</div>`;
+        progressPanel.after(errBox);
     }
 }
 
 function showResult(data, userPrompt) {
+    const errBoxOld = document.getElementById('gen-error-box');
+    if (errBoxOld) errBoxOld.remove();
+
     const imgSrc = `data:image/png;base64,${data.image_base64}`;
     document.getElementById('result-image').src = imgSrc;
     document.getElementById('download-btn').href = imgSrc;

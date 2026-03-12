@@ -15,8 +15,11 @@ from vertexai.preview.vision_models import (
 from vertexai.generative_models import GenerativeModel, Part, Image as VertexImage
 import firebase_admin
 from firebase_admin import credentials, auth, firestore, storage
+import stripe
 
 app = Flask(__name__, static_folder="public", static_url_path="")
+stripe.api_key = os.environ.get("STRIPE_SECRET_KEY", "sk_test_placeholder")
+webhook_secret = os.environ.get("STRIPE_WEBHOOK_SECRET", "whsec_placeholder")
 
 # Initialize Vertex AI
 project_id = os.environ.get("GCP_PROJECT_ID", "gen-lang-client-0426824151")
@@ -313,7 +316,7 @@ def api_generate_image():
                     "approx_size": room_size,
                     "imageUrl": filename,
                     "inputImageUrl": None,  # Will be set if we upload the input image
-                    "createdAt": datetime.now(timezone.utc),
+                    "createdAt": datetime.datetime.now(timezone.utc),
                     "roomData": room_data,
                     "fullPrompt": result["full_prompt"],
                     "price": get_render_price(),
@@ -333,7 +336,7 @@ def api_generate_image():
                     "productId": f"render_{style}",
                     "amount": get_render_price(),
                     "currency": "EUR",
-                    "timestamp": datetime.now(timezone.utc),
+                    "timestamp": datetime.datetime.now(timezone.utc),
                     "renderId": image_id,
                     "method": "simulated_bizum",
                 }
@@ -397,6 +400,118 @@ def api_simulate_payment():
     print("Pre-production payment simulation...")
     return jsonify({"success": True, "message": "Payment successful!"})
 
+
+@app.route("/api/checkout", methods=["POST"])
+def api_checkout():
+    user = verify_token()
+    if not user:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    if not db:
+        return jsonify({"error": "Firestore not initialized"}), 500
+
+    data = request.json
+    package_id = data.get("packageId")
+    if not package_id:
+        return jsonify({"error": "Missing packageId"}), 400
+
+    try:
+        # Check package price in Firestore
+        pkg_doc = db.collection("packages").document(package_id).get()
+        if not pkg_doc.exists:
+            return jsonify({"error": "Package not found"}), 404
+        
+        pkg_data = pkg_doc.to_dict()
+        if not pkg_data.get("isActive", True):
+            return jsonify({"error": "Package is not active"}), 400
+
+        price = pkg_data.get("price", 0)  # in cents
+        currency = pkg_data.get("currency", "eur")
+        name = pkg_data.get("name", "Credits Package")
+        credits_amount = pkg_data.get("creditsAmount", 0)
+
+        session = stripe.checkout.Session.create(
+            payment_method_types=['card', 'paypal', 'ideal'],
+            line_items=[{
+                'price_data': {
+                    'currency': currency,
+                    'product_data': {
+                        'name': name,
+                    },
+                    'unit_amount': price,
+                },
+                'quantity': 1,
+            }],
+            mode='payment',
+            success_url=request.host_url + '05-gracias.html?session_id={CHECKOUT_SESSION_ID}',
+            cancel_url=request.host_url + '04-pago-bizum.html',
+            metadata={
+                'userId': user['uid'],
+                'packageId': package_id,
+                'creditsAmount': credits_amount
+            }
+        )
+
+        return jsonify({'url': session.url})
+    except Exception as e:
+        print("Error creating checkout session:", e)
+        return jsonify({"error": str(e)}), 500
+
+
+@firestore.transactional
+def add_credits_txn(transaction, user_ref, credits_amount, amount_paid):
+    user_doc = user_ref.get(transaction=transaction)
+    if user_doc.exists:
+        data = user_doc.to_dict()
+        new_credits = data.get("credits", 0) + credits_amount
+        new_purchases = data.get("totalPurchases", 0) + amount_paid
+        transaction.update(user_ref, {
+            "credits": new_credits,
+            "totalPurchases": new_purchases
+        })
+    else:
+        transaction.set(user_ref, {
+            "credits": credits_amount,
+            "totalPurchases": amount_paid,
+            "totalGenerations": 0
+        })
+
+
+@app.route("/api/webhook", methods=["POST"])
+def stripe_webhook():
+    payload = request.data
+    sig_header = request.headers.get('Stripe-Signature')
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, webhook_secret
+        )
+    except ValueError as e:
+        return jsonify({'error': 'Invalid payload'}), 400
+    except stripe.error.SignatureVerificationError as e:
+        return jsonify({'error': 'Invalid signature'}), 400
+
+    if event['type'] == 'checkout.session.completed':
+        session = event['data']['object']
+        
+        user_id = session.get('metadata', {}).get('userId')
+        package_id = session.get('metadata', {}).get('packageId')
+        credits_amount = int(session.get('metadata', {}).get('creditsAmount', 0))
+        amount_paid = session.get('amount_total', 0)
+        
+        if db and user_id:
+            db.collection("transactions").document(session['id']).set({
+                "userId": user_id,
+                "packageId": package_id,
+                "amountPaid": amount_paid,
+                "status": "completed",
+                "createdAt": datetime.datetime.now(timezone.utc),
+            })
+            
+            user_ref = db.collection("users").document(user_id)
+            add_credits_txn(db.transaction(), user_ref, credits_amount, amount_paid)
+
+    return jsonify({'status': 'success'})
 
 # ============ ADMIN API ENDPOINTS ============
 
@@ -553,7 +668,7 @@ def admin_update_pricing():
         db.collection("pricing").document(doc_id).set(
             {
                 "price": float(new_price),
-                "updatedAt": datetime.now(timezone.utc),
+                "updatedAt": datetime.datetime.now(timezone.utc),
                 "updatedBy": admin["uid"],
             }
         )
@@ -565,7 +680,7 @@ def admin_update_pricing():
                 "oldPrice": old_price,
                 "newPrice": float(new_price),
                 "changedBy": admin["uid"],
-                "changedAt": datetime.now(timezone.utc),
+                "changedAt": datetime.datetime.now(timezone.utc),
             }
         )
 

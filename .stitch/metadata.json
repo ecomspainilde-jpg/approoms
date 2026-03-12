@@ -29,6 +29,18 @@
       "sourceScreen": "projects/10149300038889827122/screens/a8271f3418a74de8b7ed03a6d61509a4",
       "width": 780,
       "height": 2730
+    },
+    "pricing": {
+      "id": "29ddc77d2dc440438a366d7103f6dd10",
+      "sourceScreen": "projects/10149300038889827122/screens/29ddc77d2dc440438a366d7103f6dd10",
+      "width": 2560,
+      "height": 3168
+    },
+    "checkout_success": {
+      "id": "cceb0004f27d4682aa9707f7418e7d07",
+      "sourceScreen": "projects/10149300038889827122/screens/cceb0004f27d4682aa9707f7418e7d07",
+      "width": 2560,
+      "height": 2564
     }
   },
   "metadata": {
