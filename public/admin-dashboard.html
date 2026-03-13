@@ -220,6 +220,41 @@
         </section>
     </main>
 
+    <!-- Edit User Modal -->
+    <div id="edit-user-modal" class="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center hidden">
+        <div class="bg-surface-dark w-full max-w-md p-8 rounded-2xl border border-white/10 shadow-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold">Editar Usuario</h3>
+                <button onclick="closeEditModal()" class="text-slate-400 hover:text-white">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            
+            <form id="edit-user-form" onsubmit="handleUserUpdate(event)">
+                <input type="hidden" id="edit-uid">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Nombre</label>
+                        <input type="text" id="edit-name" class="w-full bg-background-dark border border-white/10 rounded-xl px-4 py-3 focus:border-primary outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Créditos</label>
+                        <input type="number" id="edit-credits" class="w-full bg-background-dark border border-white/10 rounded-xl px-4 py-3 focus:border-primary outline-none">
+                    </div>
+                    <div class="flex items-center gap-3 p-3 bg-white/5 rounded-xl">
+                        <input type="checkbox" id="edit-is-admin" class="size-5 rounded border-white/10 text-primary focus:ring-primary bg-background-dark">
+                        <label for="edit-is-admin" class="text-sm font-medium">Privilegios de Administrador</label>
+                    </div>
+                </div>
+                
+                <div class="mt-8 flex gap-3">
+                    <button type="button" onclick="closeEditModal()" class="flex-1 px-6 py-3 bg-white/5 hover:bg-white/10 font-bold rounded-xl transition-all">Cancelar</button>
+                    <button type="submit" id="save-user-btn" class="flex-1 px-6 py-3 bg-primary text-background-dark font-bold rounded-xl hover:scale-105 transition-transform">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <footer class="max-w-7xl mx-auto px-6 py-12 text-center text-slate-600 border-t border-white/5 mt-12">
         <p>© 2024 RenderRoom Admin System v1.0.0</p>
     </footer>
@@ -318,12 +353,13 @@
             snapshot.forEach(async doc => {
                 const user = doc.data();
                 const isAdmin = user.isAdmin || false;
+                const uid = doc.id;
                 
                 // Get latest render for this user
                 let lastRenderInfo = 'Ninguno';
                 try {
                     const rSnap = await db.collection('renders')
-                                        .where('userId', '==', doc.id)
+                                        .where('userId', '==', uid)
                                         .orderBy('createdAt', 'desc')
                                         .limit(1)
                                         .get();
@@ -351,7 +387,7 @@
                             </span>
                         </td>
                         <td class="px-6 py-4 text-right">
-                            <button class="p-2 hover:text-primary transition-colors">
+                            <button onclick="openEditModal('${uid}', '${user.displayName || ''}', ${user.credits || 0}, ${isAdmin})" class="p-2 hover:text-primary transition-colors">
                                 <span class="material-symbols-outlined text-lg">edit</span>
                             </button>
                         </td>
@@ -361,6 +397,62 @@
         } catch (e) {
             console.error("Error loading users:", e);
             tableBody.innerHTML = '<tr><td colspan="5" class="px-6 py-10 text-center text-red-500">Error al cargar usuarios. Verifica los permisos de Firestore.</td></tr>';
+        }
+    }
+
+    // Modal logic
+    function openEditModal(uid, name, credits, isAdmin) {
+        document.getElementById('edit-uid').value = uid;
+        document.getElementById('edit-name').value = name;
+        document.getElementById('edit-credits').value = credits;
+        document.getElementById('edit-is-admin').checked = isAdmin;
+        document.getElementById('edit-user-modal').classList.remove('hidden');
+    }
+
+    function closeEditModal() {
+        document.getElementById('edit-user-modal').classList.add('hidden');
+    }
+
+    async function handleUserUpdate(event) {
+        event.preventDefault();
+        const uid = document.getElementById('edit-uid').value;
+        const name = document.getElementById('edit-name').value;
+        const credits = parseInt(document.getElementById('edit-credits').value);
+        const isAdmin = document.getElementById('edit-is-admin').checked;
+        
+        const saveBtn = document.getElementById('save-user-btn');
+        const originalText = saveBtn.textContent;
+        saveBtn.textContent = 'Guardando...';
+        saveBtn.disabled = true;
+        
+        try {
+            const idToken = await firebase.auth().currentUser.getIdToken();
+            const response = await fetch(`/api/admin/users/${uid}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`
+                },
+                body: JSON.stringify({
+                    displayName: name,
+                    credits: credits,
+                    isAdmin: isAdmin
+                })
+            });
+            
+            const result = await response.json();
+            if (response.ok) {
+                closeEditModal();
+                loadUsers(); // Refresh list
+            } else {
+                alert('Error: ' + result.error);
+            }
+        } catch (e) {
+            console.error("Error updating user:", e);
+            alert('Error de conexión: ' + e.message);
+        } finally {
+            saveBtn.textContent = originalText;
+            saveBtn.disabled = false;
         }
     }
 

@@ -99,10 +99,14 @@ import google.generativeai as genai
 genai.configure(api_key=os.environ.get("GOOGLE_API_KEY", os.environ.get("GEMINI_API_KEY", "")))
 
 def analyze_room_image(images_base64: list) -> dict:
-    """RoomChic Engine: 3D Triangulation and Perspective Analysis."""
-    models_to_try = ["gemini-flash-latest", "gemini-2.5-flash", "gemini-1.5-flash-latest"]
+    """RoomChic Engine: 3D Triangulation and Perspective Analysis using Gemini 2.0."""
+    models_to_try = ["gemini-2.0-flash-exp", "gemini-1.5-pro-002", "gemini-1.5-flash-002"]
     
     contents = []
+    # Add a global persona prompt at the beginning
+    system_instruction = "You are the RoomChic Architectural AI, specialized in 3D space reconstruction from multiple 2D angles."
+    contents.append(system_instruction)
+
     for i, img_b64 in enumerate(images_base64):
         # La Imagen 0 es la Maestra (Perspectiva), las otras son memoria de profundidad
         role = "PRIMARY MASTER IMAGE (Perspective Source)" if i == 0 else f"DEPTH REFERENCE {i} (Blind Spots & Context)"
@@ -112,11 +116,11 @@ def analyze_room_image(images_base64: list) -> dict:
             "data": base64.b64decode(img_b64)
         })
 
-    analysis_prompt = """You are the RoomChic Architectural AI. 
-Use all provided images to perform PERSPECTIVE TRIANGULATION:
+    analysis_prompt = """Use all provided images to perform PERSPECTIVE TRIANGULATION:
 1. Use DEPTH REFERENCES to understand what is behind furniture or in blind spots of the MASTER IMAGE.
 2. Identify the 'Untouchable Structure': walls, windows, doors, floor, and ceiling.
 3. Estimate real-world dimensions by cross-referencing standard objects across all angles.
+4. Detect the current style and potential improvements.
 
 Return ONLY a valid JSON object:
 {
@@ -126,7 +130,7 @@ Return ONLY a valid JSON object:
   "inventory_en": "List 5-8 main objects detected across all photos.",
   "blind_spot_data": "Details from context images not visible in master.",
   "detailed_description_es": "Descripción profesional confirmando que hemos triangulado el espacio correctamente.",
-  "imagen_prompt_seed_en": "STRUCTURAL_LOCK: Keywords to ensure 100% geometric fidelity to MASTER IMAGE."
+  "imagen_prompt_seed_en": "STRUCTURAL_LOCK: Specific geometric description to ensure 100% fidelity to MASTER IMAGE perspective."
 }"""
     contents.append(analysis_prompt)
 
@@ -135,12 +139,16 @@ Return ONLY a valid JSON object:
             model = genai.GenerativeModel(model_name)
             response = model.generate_content(contents)
             resp_text = response.text.strip()
+            # Clean JSON markdown if present
             if resp_text.startswith("```json"): resp_text = resp_text[7:]
+            if resp_text.startswith("```"): resp_text = resp_text[3:]
             if resp_text.endswith("```"): resp_text = resp_text[:-3]
+            
             return {"success": True, "data": json.loads(resp_text.strip())}
-        except Exception:
+        except Exception as e:
+            print(f"Error with model {model_name}: {e}")
             continue
-    return {"success": False, "error": "Fallo en motor RoomChic"}
+    return {"success": False, "error": "Fallo en motor RoomChic (Gemini 2.0/1.5)"}
 
 def generate_room_render(
     prompt: str,
@@ -148,41 +156,44 @@ def generate_room_render(
     style: str = "moderno",
     base_image_b64: str = None,
 ) -> dict:
-    """RoomChic Render: Surgical transformation with mandatory structural preservation."""
+    """RoomChic Render: Surgical transformation with mandatory structural preservation using Imagen 3."""
     try:
         style_desc = STYLE_DESCRIPTIONS.get(style.lower(), STYLE_DESCRIPTIONS["moderno"])
         arch = room_data.get("architecture_en", "") if room_data else ""
         seed = room_data.get("imagen_prompt_seed_en", "")
         
-        # INSTRUCCIÓN CRÍTICA DE ROOMCHIC
+        # INSTRUCCIÓN CRÍTICA DE ROOMCHIC - Refined for Imagen 3
         full_prompt = (
-            f"Keep the basic architectural structure (walls, windows, floor) but replace furniture and decor. "
-            f"STRICT PERSPECTIVE MATCH: Do not alter the room geometry of the base image. "
-            f"Scale guidance: {room_data.get('dimensions_est', 'standard')}. "
-            f"Architecture: {arch}. {seed}. "
-            f"Style: {style_desc}. Client: {prompt}. "
-            f"Photorealistic 4K render, cinematic lighting."
+            f"Professional interior design photography, {style_desc}. "
+            f"Keep the basic architectural structure: {arch}. "
+            f"PERSPECTIVE MATCH: {seed}. "
+            f"Maintain exactly the same camera angle, window positions, and wall layout as the original. "
+            f"Client request: {prompt}. "
+            f"Photorealistic 8K, architectural digest style, cinematic lighting, ultra-detailed textures."
         )
 
         images = None
         if base_image_b64:
             try:
-                # Usamos Nano Banana 2 (Gemini 3.1 Flash Image) para máxima fidelidad
-                model = ImageGenerationModel.from_pretrained("gemini-3.1-flash-image-preview")
+                # Imagen 3.0 supports image-to-image with mask or edit
+                # Note: edit_image is powerful for structural preservation
+                model = ImageGenerationModel.from_pretrained("imagen-3.0-generate-001")
                 base_img = VisionImage(image_bytes=base64.b64decode(base_image_b64))
                 images = model.edit_image(
                     base_image=base_img,
                     prompt=full_prompt,
                     number_of_images=1,
-                    guidance_scale=95, # Fidelidad máxima
+                    guidance_scale=100, # High guidance for prompt adherence
                 )
-            except Exception:
+            except Exception as e:
+                print(f"Imagen Edit Error: {e}")
                 images = None
 
         if not images:
-            t2i_model = ImageGenerationModel.from_pretrained("imagen-4.0-generate-001")
+            # Fallback to Text-to-Image if edit fails
+            t2i_model = ImageGenerationModel.from_pretrained("imagen-3.0-generate-001")
             images = t2i_model.generate_images(
-                prompt=f"ABSOLUTE STRUCTURAL PRESERVATION. {full_prompt}",
+                prompt=f"ABSOLUTE STRUCTURAL PRESERVATION OF ARCHITECTURE. {full_prompt}",
                 number_of_images=1,
             )
 
@@ -193,7 +204,7 @@ def generate_room_render(
             "style_description": style_desc
         }
     except Exception as e:
-        return {"success": False, "error": str(e)}
+        return {"success": False, "error": f"Render error: {str(e)}"}
 
 
 # ── Routes ──────────────────────────────────────────────────────────────────
@@ -576,6 +587,32 @@ def admin_get_users():
             u["id"] = doc.id
             users.append(u)
         return jsonify(users)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/admin/users/<uid>", methods=["PATCH"])
+def admin_update_user(uid):
+    """Update user data (admin only)."""
+    admin = verify_admin()
+    if not admin:
+        return jsonify({"error": "Unauthorized - Admin access required"}), 403
+
+    if not db:
+        return jsonify({"error": "Firestore not initialized"}), 500
+
+    try:
+        data = request.json
+        # Only allow updating specific fields for safety
+        allowed_fields = ["credits", "isAdmin", "displayName"]
+        update_data = {k: v for k, v in data.items() if k in allowed_fields}
+        
+        if not update_data:
+            return jsonify({"error": "No valid fields to update"}), 400
+
+        db.collection("users").document(uid).update(update_data)
+        
+        return jsonify({"success": True, "message": f"User {uid} updated successfully"})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
