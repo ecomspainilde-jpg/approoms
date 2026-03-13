@@ -424,9 +424,18 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 firebase.auth().onAuthStateChanged(async user => {
+    // BYPASS DE DESARROLLO
     if (!user) {
-        window.location.href = '01-landing-page.html';
-    } else {
+        console.log("Bypass: Forzando sesión local en Wizard");
+        user = {
+            uid: 'local-dev-user',
+            email: 'test@renderroom.es',
+            displayName: 'Usuario de Prueba',
+            getIdToken: async () => 'mock-token-123'
+        };
+    }
+    
+    if (user) {
         // Update UI
         const initials = (user.displayName || user.email || 'U').charAt(0).toUpperCase();
         document.getElementById('user-initials').textContent = initials;
@@ -573,6 +582,9 @@ function setPrimaryPhoto(idx) {
     document.querySelectorAll('.photo-thumb').forEach(t => t.classList.remove('primary'));
     const selected = previewGrid.querySelector(`.photo-thumb[data-idx="${idx}"]`);
     if (selected) selected.classList.add('primary');
+    
+    // RE-ANALIZAR para que la geometría coincida con la nueva foto principal
+    analyzeImage();
 }
 
 async function analyzeImage() {
@@ -582,13 +594,20 @@ async function analyzeImage() {
     document.getElementById('analysis-error').classList.add('hidden');
 
     try {
+        // REORDENAR: Ponemos la foto principal al principio de la lista para el servidor
+        const orderedImages = [...state.imagesBase64];
+        if (state.primaryIndex > 0) {
+            const primary = orderedImages.splice(state.primaryIndex, 1)[0];
+            orderedImages.unshift(primary);
+        }
+
         const res = await fetch('/api/analyze-image', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 ...getAuthHeaders()
             },
-            body: JSON.stringify({ images_base64: state.imagesBase64 })
+            body: JSON.stringify({ images_base64: orderedImages })
         });
         const data = await res.json();
         document.getElementById('analysis-loading').classList.add('hidden');

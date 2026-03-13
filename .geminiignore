@@ -1,0 +1,34 @@
+# Entornos virtuales y dependencias
+.venv/
+venv/
+env/
+node_modules/
+
+# Cachés y compilados
+__pycache__/
+*.pyc
+.ruff_cache/
+.pytest_cache/
+
+# Carpetas de otros agentes/herramientas de IA que ensucian el contexto
+.agent/
+.agents/
+.claude/
+.commandcode/
+.factory/
+.junie/
+.qwen/
+.vibe/
+.windsurf/
+.zencoder/
+.superdesign/
+.stitch/
+
+# Control de versiones y editores
+.git/
+.vscode/
+.idea/
+
+# Archivos de SO
+.DS_Store
+Thumbs.db

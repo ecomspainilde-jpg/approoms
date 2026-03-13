@@ -5,6 +5,11 @@ import datetime
 import json
 from datetime import timezone
 from flask import Flask, request, jsonify, send_from_directory
+from dotenv import load_dotenv
+
+# Load environment variables from .env
+load_dotenv()
+
 import vertexai
 from vertexai.preview import vision_models
 from vertexai.preview.vision_models import (
@@ -38,12 +43,16 @@ except Exception as e:
 # Initialize Firebase Admin
 try:
     if not firebase_admin._apps:
-        # Default credentials should work in Cloud Run
-        firebase_admin.initialize_app(options={"storage_bucket": storage_bucket})
+        # Pass project_id explicitly for local development
+        firebase_admin.initialize_app(options={
+            "projectId": project_id,
+            "storageBucket": storage_bucket
+        })
     db = firestore.client()
     bucket = storage.bucket()
+    print(f"Firebase initialized successfully for project: {project_id}")
 except Exception as e:
-    print("Error initializing Firebase Admin:", e)
+    print(f"Error initializing Firebase Admin for project {project_id}:", e)
     db = None
     bucket = None
 
@@ -84,48 +93,54 @@ STYLE_DESCRIPTIONS = {
 }
 
 
+import google.generativeai as genai
+
+# Configure Google Generative AI (AI Studio)
+genai.configure(api_key=os.environ.get("GOOGLE_API_KEY", os.environ.get("GEMINI_API_KEY", "")))
+
 def analyze_room_image(images_base64: list) -> dict:
-    """Use Gemini 2.5 Flash to analyze one or more uploaded room images and return structured JSON."""
-    try:
-        model = GenerativeModel("gemini-2.5-flash")
-        parts = []
-        for img_b64 in images_base64:
-            image_bytes = base64.b64decode(img_b64)
-            vertex_image = VertexImage.from_bytes(image_bytes)
-            parts.append(Part.from_image(vertex_image))
+    """RoomChic Engine: 3D Triangulation and Perspective Analysis."""
+    models_to_try = ["gemini-flash-latest", "gemini-2.5-flash", "gemini-1.5-flash-latest"]
+    
+    contents = []
+    for i, img_b64 in enumerate(images_base64):
+        # La Imagen 0 es la Maestra (Perspectiva), las otras son memoria de profundidad
+        role = "PRIMARY MASTER IMAGE (Perspective Source)" if i == 0 else f"DEPTH REFERENCE {i} (Blind Spots & Context)"
+        contents.append(f"ROLE: {role}")
+        contents.append({
+            "mime_type": "image/png",
+            "data": base64.b64decode(img_b64)
+        })
 
-        analysis_prompt = """Identify all architectural and structural details in these room images for high-fidelity interior design rendering.
-Return ONLY a valid JSON object with the following structure:
+    analysis_prompt = """You are the RoomChic Architectural AI. 
+Use all provided images to perform PERSPECTIVE TRIANGULATION:
+1. Use DEPTH REFERENCES to understand what is behind furniture or in blind spots of the MASTER IMAGE.
+2. Identify the 'Untouchable Structure': walls, windows, doors, floor, and ceiling.
+3. Estimate real-world dimensions by cross-referencing standard objects across all angles.
+
+Return ONLY a valid JSON object:
 {
-  "architecture_en": "Precise description of walls, windows (position/size), doors, ceiling type, and built-in elements.",
-  "lighting_en": "Light sources, direction, and ambient quality.",
-  "materials_en": "Existing textures (wood, concrete, paint, tile).",
-  "layout_en": "Spatial arrangement and depth context.",
-  "furniture_en": "Summary of existing furniture and their placement.",
-  "room_type": "The type of room (e.g., bedroom, living room, office, etc.).",
-  "approx_size": "Estimated size/dimensions description (e.g., small, spacious, 15m2).",
-  "detailed_description_es": "Descripción profesional y detallada en español para el cliente.",
-  "imagen_prompt_seed_en": "A comma-separated list of architectural keywords to preserve the room's geometry."
-}
-Be extremely accurate with window and door placements. If multiple images are provided, synthesize them into one coherent spatial description."""
+  "room_type": "Confirmed room type.",
+  "architecture_en": "List of untouchable architectural anchors (walls, windows, layout).",
+  "dimensions_est": "Estimated metric size (e.g. 3.5x4.5m).",
+  "inventory_en": "List 5-8 main objects detected across all photos.",
+  "blind_spot_data": "Details from context images not visible in master.",
+  "detailed_description_es": "Descripción profesional confirmando que hemos triangulado el espacio correctamente.",
+  "imagen_prompt_seed_en": "STRUCTURAL_LOCK: Keywords to ensure 100% geometric fidelity to MASTER IMAGE."
+}"""
+    contents.append(analysis_prompt)
 
-        parts.append(Part.from_text(analysis_prompt))
-        response = model.generate_content(parts)
-
-        # Clean response text in case of markdown formatting
-        resp_text = response.text.strip()
-        if resp_text.startswith("```json"):
-            resp_text = resp_text[7:]
-        if resp_text.endswith("```"):
-            resp_text = resp_text[:-3]
-        resp_text = resp_text.strip()
-
-        analysis_data = json.loads(resp_text)
-        return {"success": True, "data": analysis_data}
-    except Exception as e:
-        print("Error analyzing image:", e)
-        return {"success": False, "error": str(e)}
-
+    for model_name in models_to_try:
+        try:
+            model = genai.GenerativeModel(model_name)
+            response = model.generate_content(contents)
+            resp_text = response.text.strip()
+            if resp_text.startswith("```json"): resp_text = resp_text[7:]
+            if resp_text.endswith("```"): resp_text = resp_text[:-3]
+            return {"success": True, "data": json.loads(resp_text.strip())}
+        except Exception:
+            continue
+    return {"success": False, "error": "Fallo en motor RoomChic"}
 
 def generate_room_render(
     prompt: str,
@@ -133,80 +148,51 @@ def generate_room_render(
     style: str = "moderno",
     base_image_b64: str = None,
 ) -> dict:
-    """Generate a room render with structural preservation.
-    Uses Imagen 4.0 for text-to-image.
-    When a base image is provided, tries edit_image() first (imagen-3.0-capability-001),
-    then falls back to enriched text-to-image generation.
-    """
+    """RoomChic Render: Surgical transformation with mandatory structural preservation."""
     try:
-        style_desc = STYLE_DESCRIPTIONS.get(
-            style.lower(), STYLE_DESCRIPTIONS["moderno"]
+        style_desc = STYLE_DESCRIPTIONS.get(style.lower(), STYLE_DESCRIPTIONS["moderno"])
+        arch = room_data.get("architecture_en", "") if room_data else ""
+        seed = room_data.get("imagen_prompt_seed_en", "")
+        
+        # INSTRUCCIÓN CRÍTICA DE ROOMCHIC
+        full_prompt = (
+            f"Keep the basic architectural structure (walls, windows, floor) but replace furniture and decor. "
+            f"STRICT PERSPECTIVE MATCH: Do not alter the room geometry of the base image. "
+            f"Scale guidance: {room_data.get('dimensions_est', 'standard')}. "
+            f"Architecture: {arch}. {seed}. "
+            f"Style: {style_desc}. Client: {prompt}. "
+            f"Photorealistic 4K render, cinematic lighting."
         )
 
-        if room_data:
-            arch_seed = room_data.get("imagen_prompt_seed_en", "")
-            arch_details = room_data.get("architecture_en", "")
-            full_prompt = (
-                f"Professional interior design render in {style} style. "
-                f"ARCHITECTURAL PRESERVATION: {arch_details}. {arch_seed}. "
-                f"Maintain EXACT layout of ALL windows, doors, and walls. "
-                f"Apply {style} style: {style_desc}. "
-                f"Client brief: {prompt}. "
-                f"Ultra-high resolution, photorealistic, cinematic lighting, interior design magazine photography."
-            )
-        else:
-            full_prompt = (
-                f"Professional interior design render, {style} style. "
-                f"Style: {style_desc}. "
-                f"Design brief: {prompt}. "
-                f"High resolution, photorealistic, interior design photography."
-            )
-
         images = None
-
         if base_image_b64:
-            # Try edit_image() on imagen-3.0-capability-001 for image-to-image editing
             try:
-                print("Attempting image editing with imagen-3.0-capability-001...")
-                edit_model = ImageGenerationModel.from_pretrained("imagen-3.0-capability-001")
-                base_image = VisionImage(image_bytes=base64.b64decode(base_image_b64))
-                images = edit_model.edit_image(
-                    base_image=base_image,
+                # Usamos Nano Banana 2 (Gemini 3.1 Flash Image) para máxima fidelidad
+                model = ImageGenerationModel.from_pretrained("gemini-3.1-flash-image-preview")
+                base_img = VisionImage(image_bytes=base64.b64decode(base_image_b64))
+                images = model.edit_image(
+                    base_image=base_img,
                     prompt=full_prompt,
                     number_of_images=1,
+                    guidance_scale=95, # Fidelidad máxima
                 )
-                if images:
-                    print("Image-to-image edit successful with imagen-3.0-capability-001")
-                else:
-                    print("No images returned from edit_image, falling back to text-to-image")
-            except Exception as edit_err:
-                print(f"edit_image failed ({edit_err}), falling back to text-to-image")
+            except Exception:
                 images = None
 
         if not images:
-            # Standard Text-to-Image with Imagen 4.0
-            print("Generating new image with imagen-4.0-generate-001...")
             t2i_model = ImageGenerationModel.from_pretrained("imagen-4.0-generate-001")
             images = t2i_model.generate_images(
-                prompt=full_prompt,
+                prompt=f"ABSOLUTE STRUCTURAL PRESERVATION. {full_prompt}",
                 number_of_images=1,
-                language="en",
             )
-            if images:
-                print("Text-to-image generation successful with imagen-4.0-generate-001")
 
-        if not images:
-            raise Exception("No images generated")
-
-        b64_image = base64.b64encode(images[0]._image_bytes).decode("utf-8")
         return {
-            "success": True,
-            "image_base64": b64_image,
+            "success": True, 
+            "image_base64": base64.b64encode(images[0]._image_bytes).decode("utf-8"),
             "full_prompt": full_prompt,
-            "style_description": style_desc,
+            "style_description": style_desc
         }
     except Exception as e:
-        print("Error generating image:", e)
         return {"success": False, "error": str(e)}
 
 
@@ -247,15 +233,25 @@ def api_analyze_image():
 
 
 def verify_token():
-    """Verify Firebase ID Token from Authorization header."""
+    """Verify Firebase ID Token or return a mock user if DEBUG_MODE is active."""
     auth_header = request.headers.get("Authorization")
+    
+    # Soporte para Modo Desarrollo (solo si se activa en .env)
+    if os.environ.get("DEBUG_MODE", "False").lower() == "true":
+        if not auth_header or not auth_header.startswith("Bearer "):
+            print("Mode DEBUG: Usando bypass de usuario local")
+            return {"uid": "local-dev-user", "email": "test@renderroom.es"}
+
     if not auth_header or not auth_header.startswith("Bearer "):
         return None
+    
     token = auth_header.split("Bearer ")[1]
     try:
         decoded_token = auth.verify_id_token(token)
         return decoded_token
     except Exception as e:
+        if os.environ.get("DEBUG_MODE", "False").lower() == "true":
+            return {"uid": "local-dev-user", "email": "test@renderroom.es"}
         print("Token verification failed:", e)
         return None
 

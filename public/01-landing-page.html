@@ -1,6 +1,19 @@
 <!DOCTYPE html>
 <html class="dark" lang="es">
 <head>
+<script>
+    // BYPASS DE AUTENTICACIÓN PARA DESARROLLO
+    (function() {
+        const mockUser = {
+            uid: 'local-dev-user',
+            email: 'test@renderroom.es',
+            displayName: 'Usuario de Prueba'
+        };
+        localStorage.setItem('user', JSON.stringify(mockUser));
+        console.log("Sesión de prueba inyectada correctamente.");
+    })();
+</script>
+
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>RenderRoom AI - Transforma tu Habitación con IA</title>
@@ -554,6 +567,17 @@ function updateUserUI(user) {
 }
 
 firebase.auth().onAuthStateChanged(async user => {
+    // BYPASS DE DESARROLLO
+    if (!user) {
+        console.log("Bypass: Forzando sesión local en Landing");
+        user = {
+            uid: 'local-dev-user',
+            email: 'test@renderroom.es',
+            displayName: 'Usuario de Prueba',
+            getIdToken: async () => 'mock-token-123'
+        };
+    }
+    
     updateUserUI(user);
     if (user) {
         // Update UI Initials
