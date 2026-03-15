@@ -99,22 +99,22 @@ import google.generativeai as genai
 genai.configure(api_key=os.environ.get("GOOGLE_API_KEY", os.environ.get("GEMINI_API_KEY", "")))
 
 def analyze_room_image(images_base64: list) -> dict:
-    """RoomChic Engine: 3D Triangulation and Perspective Analysis using Gemini 2.0."""
+    """RoomChic Engine: 3D Triangulation and Perspective Analysis using Gemini via Vertex AI."""
     models_to_try = ["gemini-2.0-flash-exp", "gemini-1.5-pro-002", "gemini-1.5-flash-002"]
     
+    # We use vertexai.generative_models directly
     contents = []
-    # Add a global persona prompt at the beginning
-    system_instruction = "You are the RoomChic Architectural AI, specialized in 3D space reconstruction from multiple 2D angles."
-    contents.append(system_instruction)
+    contents.append("You are the RoomChic Architectural AI, specialized in 3D space reconstruction from multiple 2D angles.")
 
     for i, img_b64 in enumerate(images_base64):
-        # La Imagen 0 es la Maestra (Perspectiva), las otras son memoria de profundidad
         role = "PRIMARY MASTER IMAGE (Perspective Source)" if i == 0 else f"DEPTH REFERENCE {i} (Blind Spots & Context)"
         contents.append(f"ROLE: {role}")
-        contents.append({
-            "mime_type": "image/png",
-            "data": base64.b64decode(img_b64)
-        })
+        try:
+            # Vertex AI GenerativeModel expects Part or Image
+            image_part = Part.from_data(data=base64.b64decode(img_b64), mime_type="image/png")
+            contents.append(image_part)
+        except Exception as e:
+            print(f"Error decoding image {i}: {str(e)[:100]}")
 
     analysis_prompt = """Use all provided images to perform PERSPECTIVE TRIANGULATION:
 1. Use DEPTH REFERENCES to understand what is behind furniture or in blind spots of the MASTER IMAGE.
@@ -136,19 +136,24 @@ Return ONLY a valid JSON object:
 
     for model_name in models_to_try:
         try:
-            model = genai.GenerativeModel(model_name)
+            # Use Vertex AI Model
+            model = GenerativeModel(model_name)
             response = model.generate_content(contents)
             resp_text = response.text.strip()
+            
             # Clean JSON markdown if present
             if resp_text.startswith("```json"): resp_text = resp_text[7:]
-            if resp_text.startswith("```"): resp_text = resp_text[3:]
+            elif resp_text.startswith("```"): resp_text = resp_text[3:]
             if resp_text.endswith("```"): resp_text = resp_text[:-3]
             
             return {"success": True, "data": json.loads(resp_text.strip())}
         except Exception as e:
-            print(f"Error with model {model_name}: {e}")
+            error_msg = str(e)
+            if len(error_msg) > 500:
+                error_msg = error_msg[:500] + "... [TRUNCATED]"
+            print(f"Error with Vertex model {model_name}: {error_msg}")
             continue
-    return {"success": False, "error": "Fallo en motor RoomChic (Gemini 2.0/1.5)"}
+    return {"success": False, "error": "Fallo en motor RoomChic (Vertex AI Gemini)"}
 
 def generate_room_render(
     prompt: str,
@@ -244,15 +249,9 @@ def api_analyze_image():
 
 
 def verify_token():
-    """Verify Firebase ID Token or return a mock user if DEBUG_MODE is active."""
+    """Verify Firebase ID Token."""
     auth_header = request.headers.get("Authorization")
     
-    # Soporte para Modo Desarrollo (solo si se activa en .env)
-    if os.environ.get("DEBUG_MODE", "False").lower() == "true":
-        if not auth_header or not auth_header.startswith("Bearer "):
-            print("Mode DEBUG: Usando bypass de usuario local")
-            return {"uid": "local-dev-user", "email": "test@renderroom.es"}
-
     if not auth_header or not auth_header.startswith("Bearer "):
         return None
     
@@ -261,8 +260,6 @@ def verify_token():
         decoded_token = auth.verify_id_token(token)
         return decoded_token
     except Exception as e:
-        if os.environ.get("DEBUG_MODE", "False").lower() == "true":
-            return {"uid": "local-dev-user", "email": "test@renderroom.es"}
         print("Token verification failed:", e)
         return None
 

@@ -28,6 +28,9 @@ service-account*.json
 *.swp
 *.swo
 
+# Gradle
+.gradle/
+
 # OS files
 .DS_Store
 Thumbs.db

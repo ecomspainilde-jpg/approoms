@@ -24,7 +24,7 @@ En el Paso 1 (`Upload Wizard`), visualizarás una zona para subir/arrastrar tu f
 
 ## 4. Obtener Resultados del Render
 
-- Tras unos segundos de espera para que la IA procese la llamada a Vertex AI `gemini-1.5-pro-001`, se desplegará una respuesta.
+- Tras unos segundos de espera para que la IA procese la llamada a Vertex AI `gemini-2.0-flash-exp` e `imagen-3.0-generate-001`, se desplegará una respuesta.
 - Bajo la misma pestaña de "Resultados", obtendrás la descripción final de tu habitación directamente traída de Vertex AI ("Final render of the improved room interior").
 - Esta se mostrará fluidamente en tu pantalla sin cambiar ninguna otra interfaz de Google Stitch.
 

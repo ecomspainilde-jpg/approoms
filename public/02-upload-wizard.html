@@ -424,17 +424,6 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 firebase.auth().onAuthStateChanged(async user => {
-    // BYPASS DE DESARROLLO
-    if (!user) {
-        console.log("Bypass: Forzando sesión local en Wizard");
-        user = {
-            uid: 'local-dev-user',
-            email: 'test@renderroom.es',
-            displayName: 'Usuario de Prueba',
-            getIdToken: async () => 'mock-token-123'
-        };
-    }
-    
     if (user) {
         // Update UI
         const initials = (user.displayName || user.email || 'U').charAt(0).toUpperCase();
