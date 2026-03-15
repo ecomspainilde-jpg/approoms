@@ -355,7 +355,16 @@ def api_generate_image():
             )
 
         try:
-            # Save to Firebase Storage (private, not public)
+            # Save Input Image to Firebase Storage if provided
+            input_image_filename = None
+            if image_base64:
+                input_image_id = f"{str(uuid.uuid4())}_input"
+                input_image_filename = f"uploads/{user['uid']}/{input_image_id}.png"
+                input_blob = bucket.blob(input_image_filename)
+                input_data = base64.b64decode(image_base64)
+                input_blob.upload_from_string(input_data, content_type="image/png")
+
+            # Save Generated Render to Firebase Storage
             image_id = str(uuid.uuid4())
             filename = f"renders/{user['uid']}/{image_id}.png"
             blob = bucket.blob(filename)
@@ -378,7 +387,7 @@ def api_generate_image():
                     "room_type": room_type,
                     "approx_size": room_size,
                     "imageUrl": filename,
-                    "inputImageUrl": None,  # Will be set if we upload the input image
+                    "inputImageUrl": input_image_filename,
                     "createdAt": datetime.datetime.now(timezone.utc),
                     "roomData": room_data,
                     "fullPrompt": result["full_prompt"],

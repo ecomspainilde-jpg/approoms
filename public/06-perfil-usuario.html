@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Account Settings | RenderRoom AI</title>
+    <title>Perfil de Usuario | RenderRoom AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
-    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -18,322 +17,220 @@
                 extend: {
                     colors: {
                         primary: '#f0a400',
-                        'primary-hover': '#d4940a',
-                        'background-dark': '#0D1117',
-                        charcoal: '#161B22',
-                        nebula: '#C9D1D9',
-                        muted: '#8b949e',
+                        secondary: '#ffcc00',
+                        dark: '#0a0a0c',
+                        card: '#121217',
+                        accent: '#2a2a35'
                     },
-                    borderRadius: {
-                        'xl': '1rem',
+                    fontFamily: {
+                        outfit: ['Outfit', 'sans-serif'],
                     }
                 }
             }
         }
     </script>
     <style>
-        :root {
-            --primary: #f0a400;
-            --background-dark: #0D1117;
-            --charcoal: #161B22;
-            --nebula: #C9D1D9;
-            --muted: #8b949e;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--background-dark);
-            color: var(--nebula);
-        }
-
-        .glass-nav {
-            background: #0D1117;
-            border-right: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .input-field {
-            background-color: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .input-field:focus {
-            border-color: var(--primary);
-            background-color: rgba(255, 255, 255, 0.04);
-            outline: none;
-            box-shadow: 0 0 0 1px var(--primary);
-        }
-
-        .sidebar-link.active {
-            background-color: rgba(240, 164, 0, 0.1);
-            color: var(--primary);
-        }
+        body { font-family: 'Outfit', sans-serif; background-color: #0a0a0c; color: #e1e1e6; }
+        .glass { background: rgba(18, 18, 23, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .active-nav { background: rgba(240, 164, 0, 0.1); border-left: 3px solid #f0a400; color: #f0a400; }
+        .premium-shadow { box-shadow: 0 0 30px rgba(0, 0, 0, 0.5); }
+        .hover-lift { transition: transform 0.3s cubic-bezier(0.2, 0, 0.2, 1); }
+        .hover-lift:hover { transform: translateY(-5px); }
+        .gallery-overlay { background: linear-gradient(0deg, rgba(0,0,0,0.8) 0%, transparent 100%); }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0a0a0c; }
+        ::-webkit-scrollbar-thumb { background: #1a1a20; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #2a2a35; }
     </style>
 </head>
-<body>
-    <div class="min-h-screen bg-background-dark flex overflow-hidden">
-        <!-- Sidebar -->
-        <aside class="hidden lg:flex w-72 flex-col glass-nav sticky top-0 h-screen">
-            <div class="p-8">
+<body class="min-h-screen bg-dark">
+    <!-- Layout Wrapper -->
+    <div class="flex flex-col lg:flex-row min-h-screen">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="w-full lg:w-72 glass lg:h-screen lg:fixed left-0 top-0 z-50 flex flex-col border-r border-white/5">
+            <div class="p-8 flex items-center justify-between lg:justify-start gap-4">
                 <a href="01-landing-page.html" class="flex items-center gap-3">
-                    <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                        <iconify-icon icon="lucide:wand-2" class="text-background-dark text-xl font-bold"></iconify-icon>
+                    <div class="p-2 bg-primary rounded-xl shadow-lg shadow-primary/20">
+                        <iconify-icon icon="lucide:sparkles" class="text-dark text-2xl"></iconify-icon>
                     </div>
-                    <span class="text-lg font-black tracking-tighter text-white uppercase">RenderRoom</span>
+                    <span class="text-xl font-black tracking-tighter uppercase text-white">RenderRoom</span>
                 </a>
+                <button class="lg:hidden text-white">
+                    <iconify-icon icon="lucide:menu" class="text-3xl"></iconify-icon>
+                </button>
             </div>
 
-            <nav class="flex-1 px-4 space-y-1">
-                <div class="px-4 py-2 text-[10px] font-bold text-muted uppercase tracking-widest mb-2">Menu</div>
-                <a href="01-landing-page.html" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 transition-colors text-sm font-medium">
-                    <iconify-icon icon="lucide:layout-grid" class="text-xl"></iconify-icon>
-                    <span>Discover</span>
+            <nav class="flex-1 px-4 space-y-2 mt-4">
+                <p class="px-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">Navegación</p>
+                <a href="02-upload-wizard.html" class="flex items-center gap-4 px-4 py-3.5 rounded-2xl hover:bg-white/5 transition-all text-sm group">
+                    <iconify-icon icon="lucide:plus-circle" class="text-xl group-hover:text-primary transition-colors"></iconify-icon>
+                    <span>Nuevo Proyecto</span>
                 </a>
-                <a href="02-upload-wizard.html" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 transition-colors text-sm font-medium">
-                    <iconify-icon icon="lucide:sparkles" class="text-xl"></iconify-icon>
-                    <span>Generate</span>
+                <a href="03-dashboard.html" class="flex items-center gap-4 px-4 py-3.5 rounded-2xl hover:bg-white/5 transition-all text-sm group">
+                    <iconify-icon icon="lucide:layout" class="text-xl group-hover:text-primary transition-colors"></iconify-icon>
+                    <span>Mis Renders</span>
                 </a>
-                <a href="03-dashboard.html" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 transition-colors text-sm font-medium">
-                    <iconify-icon icon="lucide:clock" class="text-xl"></iconify-icon>
-                    <span>My Renders</span>
-                </a>
-
-                <div class="pt-8 px-4 py-2 text-[10px] font-bold text-muted uppercase tracking-widest mb-2">Settings</div>
-                <a href="06-perfil-usuario.html" class="sidebar-link active flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-sm font-medium">
+                <a href="06-perfil-usuario.html" class="flex items-center gap-4 px-4 py-3.5 rounded-2xl active-nav text-sm transition-all">
                     <iconify-icon icon="lucide:user" class="text-xl"></iconify-icon>
-                    <span>Personal Profile</span>
+                    <span>Perfil Personal</span>
                 </a>
-                <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 transition-colors text-sm font-medium">
-                    <iconify-icon icon="lucide:credit-card" class="text-xl"></iconify-icon>
-                    <span>Billing & Credits</span>
-                </a>
-                <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 transition-colors text-sm font-medium">
-                    <iconify-icon icon="lucide:shield" class="text-xl"></iconify-icon>
-                    <span>Security</span>
+                <a href="creditos.html" class="flex items-center gap-4 px-4 py-3.5 rounded-2xl hover:bg-white/5 transition-all text-sm group">
+                    <iconify-icon icon="lucide:credit-card" class="text-xl group-hover:text-primary transition-colors"></iconify-icon>
+                    <span>Créditos y Facturación</span>
                 </a>
             </nav>
 
             <div class="p-6">
-                <div class="bg-charcoal/50 rounded-2xl p-4 border border-white/5">
-                    <div class="flex items-center gap-3 mb-3">
-                        <div class="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary">
-                            <iconify-icon icon="lucide:zap" class="text-lg"></iconify-icon>
-                        </div>
-                        <span class="text-xs font-bold text-white" id="credits-display">12 Credits left</span>
+                <div class="bg-card/80 p-5 rounded-2xl border border-white/5 ring-1 ring-white/5">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-medium text-gray-400">Balance</span>
+                        <iconify-icon icon="lucide:zap" class="text-primary"></iconify-icon>
                     </div>
-                    <button onclick="window.location.href='04-pago-bizum.html'" class="w-full py-2 bg-primary text-background-dark text-xs font-black rounded-lg hover:scale-[1.02] transition-transform">REFILL</button>
+                    <div class="text-2xl font-bold text-white mb-4" id="credits-balance">-- <span class="text-xs text-gray-500 font-normal">créditos</span></div>
+                    <button onclick="window.location.href='creditos.html'" class="w-full py-3 bg-primary text-black text-xs font-black uppercase tracking-wider rounded-xl hover:scale-[1.02] transition-transform">Recargar</button>
                 </div>
             </div>
         </aside>
 
-        <!-- Main Content -->
-        <main class="flex-1 h-screen overflow-y-auto bg-[#0D1117]">
-            <!-- Top bar (Mobile) -->
-            <header class="lg:hidden h-16 border-b border-white/5 px-6 flex items-center justify-between bg-background-dark sticky top-0 z-30">
-                <div class="flex items-center gap-2">
-                    <iconify-icon icon="lucide:menu" class="text-2xl"></iconify-icon>
+        <!-- Main Content Area -->
+        <main class="flex-1 lg:ml-72 p-6 lg:p-12 relative">
+            
+            <!-- Welcome Header -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
+                <div>
+                    <h1 class="text-3xl lg:text-5xl font-black text-white mb-2" id="welcome-text">Hola, <span class="text-primary" id="user-display-name">...</span></h1>
+                    <p class="text-gray-400 text-lg">Bienvenido a tu centro de control creativo.</p>
                 </div>
-                <span class="font-black text-sm uppercase tracking-tighter">RenderRoom</span>
-                <div class="w-8 h-8 rounded-full bg-charcoal"></div>
-            </header>
+                <div class="flex gap-4">
+                    <button onclick="handleSignOut()" class="p-3 bg-card hover:bg-red-500/10 text-gray-400 hover:text-red-400 border border-white/5 rounded-2xl transition-all" title="Cerrar Sesión">
+                        <iconify-icon icon="lucide:log-out" class="text-xl"></iconify-icon>
+                    </button>
+                    <button class="px-6 py-3 bg-white text-black font-black text-sm uppercase rounded-2xl hover:bg-primary transition-all">Editar Perfil</button>
+                </div>
+            </div>
 
-            <div class="max-w-5xl mx-auto py-12 px-8 lg:px-16">
-                <!-- Profile Header -->
-                <header class="flex flex-col md:flex-row items-start md:items-center gap-8 pb-12 border-b border-white/5 mb-12">
-                    <div class="relative group">
-                        <div class="w-24 h-24 rounded-full overflow-hidden border-4 border-charcoal bg-charcoal ring-1 ring-white/10">
-                            <img id="profile-avatar-img" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="Avatar" class="w-full h-full object-cover">
-                        </div>
-                        <button class="absolute bottom-0 right-0 bg-primary text-background-dark w-8 h-8 rounded-full flex items-center justify-center shadow-lg border-2 border-background-dark hover:scale-110 transition-transform">
-                            <iconify-icon icon="lucide:camera" class="text-sm"></iconify-icon>
-                        </button>
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                <div class="glass p-8 rounded-[2rem] border-white/5 flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-xs font-bold uppercase tracking-widest mb-2">Renders Creados</p>
+                        <h3 class="text-4xl font-black text-white" id="stat-renders">--</h3>
                     </div>
-                    
-                    <div class="flex-1 space-y-4">
-                        <div>
-                            <div class="flex items-center gap-3">
-                                <h1 id="user-name-display" class="text-2xl font-bold text-white">Cargando...</h1>
-                                <span class="px-2 py-0.5 bg-primary/10 text-primary text-[9px] font-black uppercase tracking-widest rounded border border-primary/20">PRO</span>
-                            </div>
-                            <p id="user-email-display" class="text-muted text-sm mt-1">Cargando...</p>
-                        </div>
-                        
-                        <div class="flex items-center gap-8">
-                            <div>
-                                <div id="stats-renders" class="text-lg font-bold text-white">0</div>
-                                <div class="text-[10px] text-muted font-bold uppercase tracking-wider">Renders</div>
-                            </div>
-                            <div class="w-px h-8 bg-white/5"></div>
-                            <div>
-                                <div id="stats-favs" class="text-lg font-bold text-white">0</div>
-                                <div class="text-[10px] text-muted font-bold uppercase tracking-wider">Favorites</div>
-                            </div>
-                            <div class="w-px h-8 bg-white/5"></div>
-                            <div>
-                                <div id="stats-spent" class="text-lg font-bold text-white">€0</div>
-                                <div class="text-[10px] text-muted font-bold uppercase tracking-wider">Spent</div>
-                            </div>
-                        </div>
+                    <div class="w-14 h-14 bg-blue-500/10 rounded-2xl flex items-center justify-center border border-blue-500/20">
+                        <iconify-icon icon="lucide:image" class="text-blue-400 text-2xl"></iconify-icon>
                     </div>
-
-                    <div class="flex gap-3">
-                        <button onclick="switchAccount()" class="px-4 py-2 rounded-xl border border-primary/20 text-primary text-xs font-bold hover:bg-primary/5 transition-all">Cambiar cuenta</button>
-                        <button onclick="handleSignOut()" class="px-4 py-2 rounded-xl border border-red-500/20 text-red-400 text-xs font-bold hover:bg-red-500/5 transition-all">Sign Out</button>
+                </div>
+                <div class="glass p-8 rounded-[2rem] border-white/5 flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-xs font-bold uppercase tracking-widest mb-2">Favoritos</p>
+                        <h3 class="text-4xl font-black text-white" id="stat-favs">0</h3>
                     </div>
-                </header>
-
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-16">
-                    <!-- Account Form -->
-                    <div class="lg:col-span-2 space-y-12">
-                        <section>
-                            <h2 class="text-sm font-bold text-white mb-6 uppercase tracking-widest">Account Details</h2>
-                            <form onsubmit="saveProfile(event)" class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                                <div class="space-y-2">
-                                    <label class="text-[10px] font-bold text-muted uppercase tracking-widest">First Name</label>
-                                    <input id="profile-name-input" type="text" class="w-full input-field rounded-xl px-4 py-3 text-sm text-white">
-                                </div>
-                                <div class="space-y-2">
-                                    <label class="text-[10px] font-bold text-muted uppercase tracking-widest">Last Name</label>
-                                    <input id="profile-lastname-input" type="text" class="w-full input-field rounded-xl px-4 py-3 text-sm text-white">
-                                </div>
-                                <div class="space-y-2 md:col-span-2">
-                                    <label class="text-[10px] font-bold text-muted uppercase tracking-widest">Email Address</label>
-                                    <input id="profile-email-input" type="email" class="w-full input-field rounded-xl px-4 py-3 text-sm text-white opacity-50" readonly>
-                                </div>
-                                <div class="space-y-2">
-                                    <label class="text-[10px] font-bold text-muted uppercase tracking-widest">Phone</label>
-                                    <input id="profile-phone-input" type="tel" class="w-full input-field rounded-xl px-4 py-3 text-sm text-white">
-                                </div>
-                                <div class="space-y-2">
-                                    <label class="text-[10px] font-bold text-muted uppercase tracking-widest">Date of Birth</label>
-                                    <input id="profile-birthdate-input" type="date" class="w-full input-field rounded-xl px-4 py-3 text-sm text-white">
-                                </div>
-                                <div class="space-y-2">
-                                    <label class="text-[10px] font-bold text-muted uppercase tracking-widest">Gender</label>
-                                    <select id="profile-gender-input" class="w-full input-field rounded-xl px-4 py-3 text-sm text-white appearance-none cursor-pointer">
-                                        <option value="">Select...</option>
-                                        <option value="male">Male</option>
-                                        <option value="female">Female</option>
-                                        <option value="other">Other</option>
-                                        <option value="prefer-not">Prefer not to say</option>
-                                    </select>
-                                </div>
-                                <div class="space-y-2 md:col-span-2">
-                                    <label class="text-[10px] font-bold text-muted uppercase tracking-widest">Location</label>
-                                    <input id="profile-location-input" type="text" class="w-full input-field rounded-xl px-4 py-3 text-sm text-white" placeholder="City, Country">
-                                </div>
-                                <div class="space-y-2 md:col-span-2">
-                                    <label class="text-[10px] font-bold text-muted uppercase tracking-widest">Bio</label>
-                                    <textarea id="profile-bio-input" rows="3" class="w-full input-field rounded-xl px-4 py-3 text-sm text-white resize-none" placeholder="Tell us about yourself..."></textarea>
-                                </div>
-                                <div class="space-y-2">
-                                    <label class="text-[10px] font-bold text-muted uppercase tracking-widest">Instagram</label>
-                                    <input id="profile-instagram-input" type="text" class="w-full input-field rounded-xl px-4 py-3 text-sm text-white" placeholder="@username">
-                                </div>
-                                <div class="space-y-2">
-                                    <label class="text-[10px] font-bold text-muted uppercase tracking-widest">Twitter/X</label>
-                                    <input id="profile-twitter-input" type="text" class="w-full input-field rounded-xl px-4 py-3 text-sm text-white" placeholder="@username">
-                                </div>
-                                <div class="md:col-span-2 pt-2">
-                                    <button type="submit" class="bg-white text-background-dark font-black px-8 py-3 rounded-xl hover:bg-primary hover:text-background-dark transition-all text-xs uppercase tracking-widest">
-                                        Update Profile
-                                    </button>
-                                </div>
-                            </form>
-                        </section>
-
-                        <section>
-                            <h2 class="text-sm font-bold text-white mb-6 uppercase tracking-widest">Preferences</h2>
-                            <div class="space-y-4">
-                                <div class="flex items-center justify-between p-4 rounded-xl border border-white/5 hover:bg-white/[0.02] transition-colors">
-                                    <div>
-                                        <div class="text-sm font-bold text-white">Email Notifications</div>
-                                        <div class="text-xs text-muted">Get updates about your renders and new styles</div>
-                                    </div>
-                                    <div class="relative inline-flex items-center cursor-pointer">
-                                        <input type="checkbox" value="" class="sr-only peer" id="toggle-email" checked>
-                                        <div class="w-9 h-5 bg-charcoal border border-white/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
-                                    </div>
-                                </div>
-                                <div class="flex items-center justify-between p-4 rounded-xl border border-white/5 hover:bg-white/[0.02] transition-colors">
-                                    <div>
-                                        <div class="text-sm font-bold text-white">Public Profile</div>
-                                        <div class="text-xs text-muted">Allow others to see your generated designs</div>
-                                    </div>
-                                    <div class="relative inline-flex items-center cursor-pointer">
-                                        <input type="checkbox" value="" class="sr-only peer" id="toggle-public">
-                                        <div class="w-9 h-5 bg-charcoal border border-white/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
-                                    </div>
-                                </div>
-                                <div class="flex items-center justify-between p-4 rounded-xl border border-white/5 hover:bg-white/[0.02] transition-colors">
-                                    <div>
-                                        <div class="text-sm font-bold text-white">High Resolution (4K)</div>
-                                        <div class="text-xs text-muted">Enable premium 4K rendering</div>
-                                    </div>
-                                    <div class="relative inline-flex items-center cursor-pointer">
-                                        <input type="checkbox" value="" class="sr-only peer" id="toggle-4k">
-                                        <div class="w-9 h-5 bg-charcoal border border-white/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </section>
+                    <div class="w-14 h-14 bg-red-500/10 rounded-2xl flex items-center justify-center border border-red-500/20">
+                        <iconify-icon icon="lucide:heart" class="text-red-400 text-2xl"></iconify-icon>
                     </div>
-
-                    <!-- Secondary Column -->
-                    <div class="space-y-12">
-                        <section>
-                            <h2 class="text-sm font-bold text-white mb-6 uppercase tracking-widest">Payment Method</h2>
-                            <div class="p-6 rounded-2xl bg-charcoal border border-white/10">
-                                <div class="flex justify-between items-start mb-6">
-                                    <iconify-icon icon="logos:visa" class="text-3xl"></iconify-icon>
-                                    <span class="text-[10px] font-bold text-primary uppercase tracking-widest">Primary</span>
-                                </div>
-                                <div class="text-white font-mono tracking-widest mb-1">•••• 4242</div>
-                                <div class="text-xs text-muted mb-6">Expires 12/26</div>
-                                <div class="flex gap-4">
-                                    <button class="text-[10px] font-black uppercase text-muted hover:text-white transition-colors">Edit</button>
-                                    <button onclick="window.location.href='04-pago-bizum.html'" class="text-[10px] font-black uppercase text-primary">Replace</button>
-                                </div>
-                            </div>
-                            <button class="w-full mt-4 py-3 border border-dashed border-white/20 rounded-xl text-muted text-xs font-bold hover:border-primary hover:text-primary transition-all">
-                                + Add new method
-                            </button>
-                        </section>
-
-                        <section>
-                            <h2 class="text-sm font-bold text-white mb-6 uppercase tracking-widest">Quick Help</h2>
-                            <div class="space-y-3">
-                                <a href="07-consejos-decoracion.html" class="flex items-center justify-between p-4 rounded-xl bg-white/[0.02] border border-white/5 hover:border-primary/20 transition-all group">
-                                    <div class="flex items-center gap-3">
-                                        <iconify-icon icon="lucide:help-circle" class="text-lg text-primary"></iconify-icon>
-                                        <span class="text-xs font-bold">Help Center</span>
-                                    </div>
-                                    <iconify-icon icon="lucide:chevron-right" class="text-muted group-hover:translate-x-1 transition-transform"></iconify-icon>
-                                </a>
-                                <a href="#" class="flex items-center justify-between p-4 rounded-xl bg-white/[0.02] border border-white/5 hover:border-primary/20 transition-all group">
-                                    <div class="flex items-center gap-3">
-                                        <iconify-icon icon="lucide:message-square" class="text-lg text-primary"></iconify-icon>
-                                        <span class="text-xs font-bold">Contact Support</span>
-                                    </div>
-                                    <iconify-icon icon="lucide:chevron-right" class="text-muted group-hover:translate-x-1 transition-transform"></iconify-icon>
-                                </a>
-                                <a href="terminos.html" class="flex items-center justify-between p-4 rounded-xl bg-white/[0.02] border border-white/5 hover:border-primary/20 transition-all group">
-                                    <div class="flex items-center gap-3">
-                                        <iconify-icon icon="lucide:file-text" class="text-lg text-primary"></iconify-icon>
-                                        <span class="text-xs font-bold">Terms & Privacy</span>
-                                    </div>
-                                    <iconify-icon icon="lucide:chevron-right" class="text-muted group-hover:translate-x-1 transition-transform"></iconify-icon>
-                                </a>
-                            </div>
-                        </section>
+                </div>
+                <div class="glass p-8 rounded-[2rem] border-white/5 flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-xs font-bold uppercase tracking-widest mb-2">Total Invertido</p>
+                        <h3 class="text-4xl font-black text-white" id="stat-spent">--€</h3>
+                    </div>
+                    <div class="w-14 h-14 bg-green-500/10 rounded-2xl flex items-center justify-center border border-green-500/20">
+                        <iconify-icon icon="lucide:credit-card" class="text-green-400 text-2xl"></iconify-icon>
                     </div>
                 </div>
             </div>
+
+            <!-- Tabs Navigation -->
+            <div class="flex border-b border-white/5 mb-10 overflow-x-auto">
+                <button onclick="switchTab('renders')" id="tab-renders" class="px-8 py-5 text-sm font-bold text-primary border-b-2 border-primary">Mis Renders</button>
+                <button onclick="switchTab('originales')" id="tab-originales" class="px-8 py-5 text-sm font-bold text-gray-500 hover:text-white transition-colors">Fotos Usadas</button>
+                <button onclick="switchTab('config')" id="tab-config" class="px-8 py-5 text-sm font-bold text-gray-500 hover:text-white transition-colors">Configuración</button>
+            </div>
+
+            <!-- Gallery Sections -->
+            <div id="section-renders" class="tab-content transition-all duration-300">
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8" id="renders-gallery">
+                    <!-- Loading State -->
+                    <div class="col-span-full py-32 flex flex-col items-center justify-center text-gray-500">
+                        <div class="animate-spin mb-4"><iconify-icon icon="lucide:loader-2" class="text-4xl text-primary"></iconify-icon></div>
+                        <p class="text-lg">Cargando tus obras maestras...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="section-originales" class="tab-content hidden transition-all duration-300">
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8" id="originales-gallery">
+                    <!-- Loaded via JS -->
+                </div>
+            </div>
+
+            <!-- Profile Settings Form -->
+            <div id="section-config" class="tab-content hidden transition-all duration-300">
+                <div class="glass p-10 lg:p-14 rounded-[3rem] max-w-4xl mx-auto">
+                    <h2 class="text-2xl font-black text-white mb-10 flex items-center gap-4">
+                        <iconify-icon icon="lucide:settings" class="text-primary"></iconify-icon>
+                        Ajustes de Perfil
+                    </h2>
+                    <form onsubmit="saveProfile(event)" class="space-y-8">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div class="space-y-3">
+                                <label class="text-xs font-bold text-gray-500 uppercase tracking-widest px-1">Nombre</label>
+                                <input type="text" id="profile-name" class="w-full bg-accent/30 border border-white/5 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-primary/50 text-white outline-none transition-all" placeholder="Tu nombre">
+                            </div>
+                            <div class="space-y-3">
+                                <label class="text-xs font-bold text-gray-500 uppercase tracking-widest px-1">Apellidos</label>
+                                <input type="text" id="profile-lastname" class="w-full bg-accent/30 border border-white/5 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-primary/50 text-white outline-none transition-all" placeholder="Tus apellidos">
+                            </div>
+                        </div>
+                        <div class="space-y-3">
+                            <label class="text-xs font-bold text-gray-500 uppercase tracking-widest px-1">Correo Electrónico</label>
+                            <input type="email" id="profile-email" readonly class="w-full bg-accent/20 border border-white/5 rounded-2xl px-6 py-4 text-gray-500 cursor-not-allowed outline-none">
+                        </div>
+                        <div class="space-y-3">
+                            <label class="text-xs font-bold text-gray-500 uppercase tracking-widest px-1">Biografía</label>
+                            <textarea id="profile-bio" rows="4" class="w-full bg-accent/30 border border-white/5 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-primary/50 text-white outline-none transition-all resize-none" placeholder="Cuéntanos un poco sobre ti..."></textarea>
+                        </div>
+                        <div class="pt-6">
+                            <button type="submit" id="save-btn" class="w-full md:w-auto px-12 py-5 bg-white text-black font-black uppercase tracking-widest rounded-2xl hover:bg-primary transition-all shadow-xl shadow-black/20">
+                                Guardar Cambios
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
         </main>
     </div>
 
+    <!-- Viewer Modal -->
+    <div id="viewer-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4 bg-black/95">
+        <button onclick="closeViewer()" class="absolute top-8 right-8 text-white p-4 hover:bg-white/10 rounded-full transition-all">
+            <iconify-icon icon="lucide:x" class="text-3xl"></iconify-icon>
+        </button>
+        <div class="max-w-6xl w-full flex flex-col md:flex-row gap-8">
+            <div class="flex-1 bg-black rounded-3xl overflow-hidden shadow-2xl ring-1 ring-white/10">
+                <img id="modal-img" src="" class="w-full h-full object-contain">
+            </div>
+            <div class="w-full md:w-80 space-y-8 py-8 px-4">
+                <div>
+                    <h3 id="modal-title" class="text-3xl font-black text-white mb-2">---</h3>
+                    <p id="modal-date" class="text-gray-500 font-medium tracking-wide">---</p>
+                </div>
+                <div class="p-6 bg-accent/40 rounded-3xl border border-white/5 ring-1 ring-white/5">
+                    <p class="text-[10px] font-black uppercase tracking-widest text-primary mb-3">Prompt Original</p>
+                    <p id="modal-prompt" class="text-sm text-gray-300 italic leading-relaxed">---</p>
+                </div>
+                <div class="flex flex-col gap-4">
+                    <a id="modal-download" href="" download class="w-full py-5 bg-white text-black text-center font-black uppercase rounded-2xl hover:bg-primary transition-all">Descargar HD</a>
+                    <button id="modal-share" class="w-full py-5 bg-accent/40 text-white font-black uppercase rounded-2xl hover:bg-accent transition-all">Compartir</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // Firebase Config — mismo proyecto que el resto de la app
+        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyDj99qdmDt4GiVeRkvCSfTOSDw3uqD-_Ew",
             authDomain: "gen-lang-client-0426824151.firebaseapp.com",
@@ -343,215 +240,172 @@
             appId: "1:124806819551:web:1c90d1154b458fa064036a"
         };
 
-        // Initialize Firebase
         try {
             firebase.initializeApp(firebaseConfig);
-        } catch(e) {
-            // Already initialized (shared across pages)
-        }
+        } catch(e) {}
+        
         const auth = firebase.auth();
         const db = firebase.firestore();
-        let currentUser = null;
+        let userRenders = [];
 
-        // Auth state listener
         auth.onAuthStateChanged(async (user) => {
-            if (user === null) {
-                // User is definitively logged out — redirect to login
-                // Use a timeout to avoid race with the initial SDK load
-                setTimeout(() => {
-                    if (!firebase.auth().currentUser) {
-                        window.location.href = '01-landing-page.html';
-                    }
-                }, 800);
+            if (!user) {
+                window.location.href = '01-landing-page.html';
                 return;
             }
-            currentUser = user;
-            // Refresh and persist token
-            const token = await user.getIdToken(true);
-            localStorage.setItem('rr_token', token);
-            await loadUserData();
-            await loadUserStats();
+            document.getElementById('user-display-name').textContent = user.displayName?.split(' ')[0] || 'Creativo';
+            await loadUserData(user);
+            await loadRenders(user);
         });
 
-        async function loadUserData() {
-            if (!currentUser) return;
+        async function loadUserData(user) {
+            const doc = await db.collection('users').doc(user.uid).get();
+            const data = doc.exists ? doc.data() : {};
             
+            document.getElementById('credits-balance').innerHTML = `${data.credits || 0} <span class="text-xs text-gray-500 font-normal">créditos</span>`;
+            document.getElementById('profile-name').value = data.firstName || '';
+            document.getElementById('profile-lastname').value = data.lastName || '';
+            document.getElementById('profile-email').value = user.email || '';
+            document.getElementById('profile-bio').value = data.bio || '';
+        }
+
+        async function loadRenders(user) {
+            const token = await user.getIdToken();
             try {
-                const userDoc = await db.collection('users').doc(currentUser.uid).get();
-                const userData = userDoc.exists ? userDoc.data() : {};
+                const res = await fetch('/api/my-renders', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                userRenders = await res.json();
                 
-                // Update profile header
-                document.getElementById('profile-avatar-img').src = currentUser.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser.uid}`;
-                document.getElementById('user-name-display').textContent = userData.displayName || currentUser.displayName || currentUser.email?.split('@')[0] || 'Usuario';
-                document.getElementById('user-email-display').textContent = `${currentUser.email} • Member since ${getMemberSince()}`;
+                document.getElementById('stat-renders').textContent = userRenders.length;
+                document.getElementById('stat-spent').textContent = (userRenders.length * 2.50).toFixed(0) + '€';
                 
-                // Update form fields
-                const nameParts = (userData.displayName || currentUser.displayName || '').split(' ');
-                document.getElementById('profile-name-input').value = nameParts[0] || '';
-                document.getElementById('profile-lastname-input').value = nameParts.slice(1).join(' ') || '';
-                document.getElementById('profile-email-input').value = currentUser.email || '';
-                document.getElementById('profile-phone-input').value = userData.phone || '';
-                document.getElementById('profile-location-input').value = userData.location || '';
-                document.getElementById('profile-birthdate-input').value = userData.birthdate || '';
-                document.getElementById('profile-gender-input').value = userData.gender || '';
-                document.getElementById('profile-bio-input').value = userData.bio || '';
-                document.getElementById('profile-instagram-input').value = userData.instagram || '';
-                document.getElementById('profile-twitter-input').value = userData.twitter || '';
-                
-                // Load preferences
-                document.getElementById('toggle-email').checked = userData.emailNotifications !== false;
-                document.getElementById('toggle-public').checked = userData.publicProfile === true;
-                document.getElementById('toggle-4k').checked = userData.highRes4K === true;
-                
-                // Update credits display
-                const credits = userData.credits || 0;
-                document.getElementById('credits-display').textContent = `${credits} Credits left`;
+                renderGalleries();
             } catch (e) {
-                console.error("Error loading user data:", e);
+                console.error("Error loading renders:", e);
             }
         }
 
-        async function loadUserStats() {
-            if (!currentUser) return;
+        function renderGalleries() {
+            const rendersDiv = document.getElementById('renders-gallery');
+            const originalesDiv = document.getElementById('originales-gallery');
             
-            try {
-                // Get renders count
-                const rendersSnapshot = await db.collection('renders').where('userId', '==', currentUser.uid).get();
-                const rendersCount = rendersSnapshot.size;
-                document.getElementById('stats-renders').textContent = rendersCount;
-                
-                // Get favorites count (assuming there's a favorites collection)
-                let favsCount = 0;
-                try {
-                    const favsSnapshot = await db.collection('favorites').where('userId', '==', currentUser.uid).get();
-                    favsCount = favsSnapshot.size;
-                } catch (e) {
-                    // Collection might not exist
-                }
-                document.getElementById('stats-favs').textContent = favsCount;
-                
-                // Calculate total spent (assuming 2.50€ per render)
-                const spent = rendersCount * 2.50;
-                document.getElementById('stats-spent').textContent = `€${spent.toFixed(0)}`;
-            } catch (e) {
-                console.error("Error loading stats:", e);
-            }
-        }
-
-        function getMemberSince() {
-            if (currentUser?.metadata?.creationTime) {
-                const date = new Date(currentUser.metadata.creationTime);
-                const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                return `${months[date.getMonth()]} ${date.getFullYear()}`;
-            }
-            return 'recently';
-        }
-
-        async function saveProfile(event) {
-            event.preventDefault();
-            if (!currentUser) return;
+            rendersDiv.innerHTML = userRenders.length ? '' : '<div class="col-span-full py-20 text-center text-gray-600">No has creado ningún render todavía.</div>';
+            originalesDiv.innerHTML = userRenders.filter(r => r.inputImageUrl).length ? '' : '<div class="col-span-full py-20 text-center text-gray-600">No hay fotos originales guardadas.</div>';
             
-            const saveBtn = event.target.querySelector('button[type="submit"]');
-            const originalText = saveBtn.textContent;
-            saveBtn.textContent = 'Saving...';
-            saveBtn.disabled = true;
+            userRenders.forEach(render => {
+                // Render Gallery
+                const renderCard = createCard(
+                    `https://storage.googleapis.com/${firebaseConfig.storageBucket}/${render.imageUrl}`,
+                    render.style,
+                    render.createdAt,
+                    render
+                );
+                rendersDiv.appendChild(renderCard);
+                
+                // Original Photos Gallery
+                if (render.inputImageUrl) {
+                    const originalCard = createCard(
+                        `https://storage.googleapis.com/${firebaseConfig.storageBucket}/${render.inputImageUrl}`,
+                        "Foto Original",
+                        render.createdAt,
+                        render,
+                        true
+                    );
+                    originalesDiv.appendChild(originalCard);
+                }
+            });
+        }
 
-            const firstName = document.getElementById('profile-name-input').value.trim();
-            const lastName = document.getElementById('profile-lastname-input').value.trim();
-            const fullName = [firstName, lastName].filter(Boolean).join(' ');
+        function createCard(url, title, date, fullData, isOriginal = false) {
+            const div = document.createElement('div');
+            div.className = 'group relative aspect-[4/5] rounded-[2rem] overflow-hidden bg-accent/20 border border-white/5 hover-lift cursor-pointer premium-shadow';
+            
+            const displayDate = new Date(date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+            
+            div.innerHTML = `
+                <img src="${url}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                <div class="absolute inset-0 gallery-overlay opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-8">
+                    <span class="text-primary text-xs font-black uppercase tracking-[0.2em] mb-2">${isOriginal ? 'ORIGINAL' : 'RENDER'}</span>
+                    <h4 class="text-white text-2xl font-black mb-1">${title}</h4>
+                    <p class="text-gray-400 text-sm font-medium">${displayDate}</p>
+                </div>
+            `;
+            
+            div.onclick = () => openViewer(url, title, displayDate, fullData.prompt);
+            return div;
+        }
 
-            const updatedData = {
-                // Basic info
-                displayName: fullName,
-                firstName: firstName,
-                lastName: lastName,
-                phone: document.getElementById('profile-phone-input').value.trim(),
-                location: document.getElementById('profile-location-input').value.trim(),
-                birthdate: document.getElementById('profile-birthdate-input').value,
-                gender: document.getElementById('profile-gender-input').value,
-                bio: document.getElementById('profile-bio-input').value.trim(),
-                
-                // Social
-                instagram: document.getElementById('profile-instagram-input').value.trim(),
-                twitter: document.getElementById('profile-twitter-input').value.trim(),
-                
-                // Preferences
-                emailNotifications: document.getElementById('toggle-email').checked,
-                publicProfile: document.getElementById('toggle-public').checked,
-                highRes4K: document.getElementById('toggle-4k').checked,
-                
-                // Metadata
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-            };
+        function openViewer(url, title, date, prompt) {
+            document.getElementById('modal-img').src = url;
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-date').textContent = date;
+            document.getElementById('modal-prompt').textContent = prompt || 'Sin descripción';
+            document.getElementById('modal-download').href = url;
+            document.getElementById('viewer-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeViewer() {
+            document.getElementById('viewer-modal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+            document.getElementById(`section-${tab}`).classList.remove('hidden');
+            
+            document.querySelectorAll('[id^="tab-"]').forEach(t => {
+                t.classList.remove('text-primary', 'border-primary', 'border-b-2');
+                t.classList.add('text-gray-500');
+            });
+            
+            const activeTab = document.getElementById(`tab-${tab}`);
+            activeTab.classList.add('text-primary', 'border-primary', 'border-b-2');
+            activeTab.classList.remove('text-gray-500');
+        }
+
+        async function saveProfile(e) {
+            e.preventDefault();
+            const btn = document.getElementById('save-btn');
+            const originalText = btn.textContent;
+            btn.textContent = 'Guardando...';
+            btn.disabled = true;
+
+            const user = auth.currentUser;
+            const firstName = document.getElementById('profile-name').value;
+            const lastName = document.getElementById('profile-lastname').value;
 
             try {
-                await db.collection('users').doc(currentUser.uid).set(updatedData, { merge: true });
-                if (fullName) {
-                    await currentUser.updateProfile({ displayName: fullName });
-                }
-                document.getElementById('user-name-display').textContent = fullName || currentUser.email.split('@')[0];
-                saveBtn.textContent = 'Saved!';
+                await db.collection('users').doc(user.uid).set({
+                    firstName,
+                    lastName,
+                    displayName: `${firstName} ${lastName}`.trim(),
+                    bio: document.getElementById('profile-bio').value
+                }, { merge: true });
+                
+                await user.updateProfile({ displayName: `${firstName} ${lastName}`.trim() });
+                
+                btn.textContent = '¡Guardado!';
                 setTimeout(() => {
-                    saveBtn.textContent = originalText;
-                    saveBtn.disabled = false;
+                    btn.textContent = originalText;
+                    btn.disabled = false;
                 }, 2000);
             } catch (e) {
-                console.error("Error saving profile:", e);
-                saveBtn.textContent = 'Error';
-                setTimeout(() => {
-                    saveBtn.textContent = originalText;
-                    saveBtn.disabled = false;
-                }, 2000);
+                console.error(e);
+                btn.textContent = 'Error';
+                btn.disabled = false;
             }
         }
 
         function handleSignOut() {
-            if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
-                localStorage.removeItem('rr_token');
-                sessionStorage.removeItem('disclaimer_accepted');
+            if (confirm('¿Cerrar sesión en RenderRoom?')) {
                 auth.signOut().then(() => {
+                    localStorage.removeItem('rr_token');
                     window.location.href = '01-landing-page.html';
                 });
             }
         }
-
-        // Switch account: sign out and force account picker
-        async function switchAccount() {
-            localStorage.removeItem('rr_token');
-            await auth.signOut();
-            const provider = new firebase.auth.GoogleAuthProvider();
-            provider.setCustomParameters({ prompt: 'select_account' });
-            try {
-                await auth.signInWithPopup(provider);
-                window.location.reload();
-            } catch(e) {
-                window.location.href = '01-landing-page.html';
-            }
-        }
-
-        // Save preferences immediately when toggles change
-        async function savePreferences() {
-            if (!currentUser) return;
-            
-            const prefsData = {
-                emailNotifications: document.getElementById('toggle-email').checked,
-                publicProfile: document.getElementById('toggle-public').checked,
-                highRes4K: document.getElementById('toggle-4k').checked,
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-            };
-
-            try {
-                await db.collection('users').doc(currentUser.uid).set(prefsData, { merge: true });
-                console.log("Preferences saved!");
-            } catch (e) {
-                console.error("Error saving preferences:", e);
-            }
-        }
-
-        // Add event listeners to toggles
-        document.getElementById('toggle-email').addEventListener('change', savePreferences);
-        document.getElementById('toggle-public').addEventListener('change', savePreferences);
-        document.getElementById('toggle-4k').addEventListener('change', savePreferences);
     </script>
 </body>
 </html>
