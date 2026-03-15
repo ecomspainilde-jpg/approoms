@@ -160,54 +160,85 @@ def generate_room_render(
     style: str = "moderno",
     base_image_b64: str = None,
 ) -> dict:
-    """RoomChic Render: Surgical transformation with mandatory structural preservation using Imagen 3."""
+    """RoomChic Render: Surgical transformation using Gemini 3.1 Flash Image (Nano Banana 2)."""
+    import time
+    max_retries = 3
+    
     try:
         style_desc = STYLE_DESCRIPTIONS.get(style.lower(), STYLE_DESCRIPTIONS["moderno"])
         arch = room_data.get("architecture_en", "") if room_data else ""
         seed = room_data.get("imagen_prompt_seed_en", "")
         
-        # INSTRUCCIÓN CRÍTICA DE ROOMCHIC - Refined for Imagen 3
-        full_prompt = (
-            f"Professional interior design photography, {style_desc}. "
-            f"Keep the basic architectural structure: {arch}. "
-            f"PERSPECTIVE MATCH: {seed}. "
-            f"Maintain exactly the same camera angle, window positions, and wall layout as the original. "
-            f"Client request: {prompt}. "
-            f"Photorealistic 8K, architectural digest style, cinematic lighting, ultra-detailed textures."
+        # Step 1: Theoretical BEFORE description (Conceptual Structural Anchor)
+        # As per user request: Extreme clutter, old furniture, poor lighting.
+        structural_prompt = (
+            "Professional architectural photography, wide-angle lens. "
+            "SCENE CONTEXT: Extreme clutter, ancient worn-out furniture, dim poor lighting, scratched floors. "
+            f"STRUCTURAL ANCHOR: {arch}. Perspective lock: {seed}. "
         )
 
-        images = None
+        # Step 2: AFTER transformation (The actual generation)
+        # As per user request: Luxury finishes, ambient lighting, contemporary design.
+        transformation_prompt = (
+            f"HIGH-END TRANSFORMATION: {style_desc}. "
+            "REPLACE ALL MATERIALS with luxury finishes, implement professional ambient lighting, contemporary upscale design. "
+            f"USER REQUEST: {prompt}. "
+            "CRITICAL CONSTRAINTS: ABSOLUTE PERSPECTIVE LOCK. Maintain 100% of the original camera angle, "
+            "window/door positions, and structural layout. 8K photorealistic, interior design magazine quality."
+        )
+
+        model = genai.GenerativeModel('gemini-3.1-flash-image-preview')
+        
+        # Build the multiturn-like content for image-to-image
+        # Nano Banana 2 uses the base image as context
+        contents = []
         if base_image_b64:
-            try:
-                # Imagen 3.0 supports image-to-image with mask or edit
-                # Note: edit_image is powerful for structural preservation
-                model = ImageGenerationModel.from_pretrained("imagen-3.0-generate-001")
-                base_img = VisionImage(image_bytes=base64.b64decode(base_image_b64))
-                images = model.edit_image(
-                    base_image=base_img,
-                    prompt=full_prompt,
-                    number_of_images=1,
-                    guidance_scale=100, # High guidance for prompt adherence
-                )
-            except Exception as e:
-                print(f"Imagen Edit Error: {e}")
-                images = None
+            contents.append({"mime_type": "image/jpeg", "data": base64.b64decode(base_image_b64)})
+        
+        contents.append(f"ORIGINAL STATE DESCRIPTION: {structural_prompt}")
+        contents.append(f"FINAL TRANSFORMATION INSTRUCTION: {transformation_prompt}")
 
-        if not images:
-            # Fallback to Text-to-Image if edit fails
-            t2i_model = ImageGenerationModel.from_pretrained("imagen-3.0-generate-001")
-            images = t2i_model.generate_images(
-                prompt=f"ABSOLUTE STRUCTURAL PRESERVATION OF ARCHITECTURE. {full_prompt}",
-                number_of_images=1,
-            )
-
-        return {
-            "success": True, 
-            "image_base64": base64.b64encode(images[0]._image_bytes).decode("utf-8"),
-            "full_prompt": full_prompt,
-            "style_description": style_desc
+        image_config = {
+            "aspect_ratio": "16:9",
+            "image_size": "1K"
         }
+
+        for attempt in range(max_retries):
+            try:
+                # Assuming the SDK supports passing image_config in generation_config or as a separate param
+                # Note: Exact parameter naming might vary slightly depending on SDK version
+                response = model.generate_content(
+                    contents,
+                    generation_config={
+                        "image_config": image_config
+                    }
+                )
+                
+                # Extract the generated image. Most genai models return the image in the response parts
+                generated_img_b64 = None
+                for part in response.candidates[0].content.parts:
+                    if part.inline_data:
+                        generated_img_b64 = base64.b64encode(part.inline_data.data).decode("utf-8")
+                        break
+                
+                if not generated_img_b64:
+                    raise Exception("Model returned successfully but no image data was found in response.")
+
+                return {
+                    "success": True, 
+                    "image_base64": generated_img_b64,
+                    "full_prompt": transformation_prompt,
+                    "style_description": style_desc
+                }
+            except Exception as retry_e:
+                print(f"Generation Attempt {attempt + 1} failed: {retry_e}")
+                if attempt < max_retries - 1:
+                    time.sleep(2 ** attempt) # Exponential backoff
+                else:
+                    raise retry_e
+
     except Exception as e:
+        print(f"Nano Banana 2 Render Error: {str(e)}")
         return {"success": False, "error": f"Render error: {str(e)}"}
 
 
