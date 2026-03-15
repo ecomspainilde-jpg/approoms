@@ -101,15 +101,15 @@
 <p id="pending-renders-count" class="text-2xl font-bold text-lunar-white">0</p>
 </div>
 </div>
-<div class="glass p-6 rounded-xl flex items-center gap-4">
-<div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-<span class="material-symbols-outlined text-primary">payments</span>
-</div>
-<div>
-<p class="text-nebula-silver text-sm uppercase tracking-wider font-semibold">Precio por Render</p>
-<p class="text-2xl font-bold text-lunar-white">2,50€</p>
-</div>
-</div>
+<a href="creditos.html" class="glass p-6 rounded-xl flex items-center gap-4 hover:bg-white/5 transition-all amber-glow">
+    <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+        <span class="material-symbols-outlined text-primary">payments</span>
+    </div>
+    <div>
+        <p class="text-nebula-silver text-sm uppercase tracking-wider font-semibold">Mis Créditos</p>
+        <p id="user-credits-count" class="text-2xl font-bold text-lunar-white">...</p>
+    </div>
+</a>
 </div>
 </div>
 <!-- Filter Bar -->
@@ -159,8 +159,8 @@
 <div class="flex gap-8 text-sm text-nebula-silver">
   <a class="hover:text-primary transition-colors" href="terminos.html">Términos</a>
   <a class="hover:text-primary transition-colors" href="privacidad.html">Privacidad</a>
-  <a class="hover:text-primary transition-colors" href="mailto:soporte@renderroom.app">Soporte</a>
-  <a class="hover:text-primary transition-colors" href="#">API</a>
+  <a class="hover:text-primary transition-colors" href="creditos.html">Créditos</a>
+  <button onclick="logout()" class="hover:text-red-400 transition-colors">Cerrar Sesión</button>
 </div>
 <p class="text-nebula-silver text-xs">© 2024 RenderRoom AI. Todos los derechos reservados.</p>
 </div>
@@ -186,22 +186,35 @@ firebase.auth().onAuthStateChanged(async user => {
         const initials = (user.displayName || user.email || 'U').charAt(0).toUpperCase();
         document.getElementById('user-initials').textContent = initials;
         
-        // Check Admin
+        // Load Credits & User Info
         try {
             const doc = await db.collection('users').doc(user.uid).get();
-            if (doc.exists && doc.data().isAdmin) {
-                document.getElementById('admin-link-container').classList.remove('hidden');
+            if (doc.exists) {
+                const data = doc.data();
+                if (data.isAdmin) {
+                    document.getElementById('admin-link-container').classList.remove('hidden');
+                }
+                const creditEl = document.getElementById('user-credits-count');
+                if (creditEl) creditEl.textContent = data.credits || 0;
             }
         } catch (e) {
-            console.error("Admin check error:", e);
+            console.error("Firestore user data error:", e);
         }
 
         user.getIdToken().then(token => {
             localStorage.setItem('rr_token', token);
             loadRenders();
         });
+    } else {
+        window.location.href = '01-landing-page.html';
     }
 });
+
+function logout() {
+    firebase.auth().signOut().then(() => {
+        window.location.href = '01-landing-page.html';
+    });
+}
 
 async function loadRenders() {
     const grid = document.getElementById('renders-grid');

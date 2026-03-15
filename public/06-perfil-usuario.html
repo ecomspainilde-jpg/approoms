@@ -82,6 +82,10 @@
             </nav>
 
             <div class="p-6">
+                <button onclick="switchTab('config')" class="bg-primary hover:bg-primary/90 text-dark px-10 py-5 rounded-2xl font-black text-lg transition-all transform hover:scale-105 shadow-xl shadow-primary/20 flex items-center justify-center gap-3 mb-6">
+                    <span class="material-symbols-outlined">edit</span>
+                    Editar mi perfil
+                </button>
                 <div class="bg-card/80 p-5 rounded-2xl border border-white/5 ring-1 ring-white/5">
                     <div class="flex items-center justify-between mb-3">
                         <span class="text-xs font-medium text-gray-400">Balance</span>
@@ -106,7 +110,7 @@
                     <button onclick="handleSignOut()" class="p-3 bg-card hover:bg-red-500/10 text-gray-400 hover:text-red-400 border border-white/5 rounded-2xl transition-all" title="Cerrar Sesión">
                         <iconify-icon icon="lucide:log-out" class="text-xl"></iconify-icon>
                     </button>
-                    <button class="px-6 py-3 bg-white text-black font-black text-sm uppercase rounded-2xl hover:bg-primary transition-all">Editar Perfil</button>
+                    <button onclick="switchTab('config')" class="px-6 py-3 bg-white text-black font-black text-sm uppercase rounded-2xl hover:bg-primary transition-all">Editar Perfil</button>
                 </div>
             </div>
 

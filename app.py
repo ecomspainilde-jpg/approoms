@@ -4,23 +4,32 @@ import uuid
 import datetime
 import json
 from datetime import timezone
-from flask import Flask, request, jsonify, send_from_directory
-from dotenv import load_dotenv
 from typing import List, Dict, Any, Optional, Union
+from flask import Flask, request, jsonify, send_from_directory  # type: ignore
+from dotenv import load_dotenv  # type: ignore
+
+def safe_truncate(text: Any, limit: int = 500) -> str:
+    """Safely truncate text to avoid massive log payloads."""
+    if text is None:
+        return ""
+    text_val = f"{text}"
+    if len(text_val) <= limit:
+        return text_val
+    return text_val[0:limit] + "... [TRUNCATED]"  # type: ignore
 
 # Load environment variables from .env
 load_dotenv()
 
-import vertexai
-from vertexai.preview import vision_models
-from vertexai.preview.vision_models import (
+import vertexai  # type: ignore
+from vertexai.preview import vision_models  # type: ignore
+from vertexai.preview.vision_models import (  # type: ignore
     ImageGenerationModel,
     Image as VisionImage,
 )
-from vertexai.generative_models import GenerativeModel, Part, Image as VertexImage
-import firebase_admin
-from firebase_admin import credentials, auth, firestore, storage
-import stripe
+from vertexai.generative_models import GenerativeModel, Part, Image as VertexImage  # type: ignore
+import firebase_admin  # type: ignore
+from firebase_admin import credentials, auth, firestore, storage  # type: ignore
+import stripe  # type: ignore
 
 app = Flask(__name__, static_folder="public", static_url_path="")
 stripe.api_key = os.environ.get("STRIPE_SECRET_KEY", "sk_test_placeholder")
@@ -108,7 +117,7 @@ def analyze_room_image(images_base64: list) -> dict:
             image_part = Part.from_data(data=base64.b64decode(img_b64), mime_type="image/jpeg")
             contents.append(image_part)
         except Exception as e:
-            print(f"Error decoding image {i}: {str(e)[:100]}")
+            print(f"Error decoding image {i}: {safe_truncate(e, 100)}")
 
     analysis_prompt = """Use all provided images to perform PERSPECTIVE TRIANGULATION:
 1. Use DEPTH REFERENCES to understand what is behind furniture or in blind spots of the MASTER IMAGE.
@@ -141,9 +150,7 @@ Return ONLY a valid JSON object:
             
             return {"success": True, "data": json.loads(resp_text.strip())}
         except Exception as e:
-            error_msg = str(e)
-            if len(error_msg) > 500:
-                error_msg = error_msg[:500] + "... [TRUNCATED]"
+            error_msg = safe_truncate(e, 500)
             print(f"Error with model {model_name}: {error_msg}")
             continue
     return {"success": False, "error": "Fallo en motor RoomChic (Gemini Vertex AI)"}
@@ -216,8 +223,7 @@ def generate_room_render(
                     raise Exception("No images returned from Imagen model.")
                     
             except Exception as retry_e:
-                e_str = str(retry_e)
-                print(f"Generation Attempt {attempt + 1} failed: {e_str[:500]}")
+                print(f"Generation Attempt {attempt + 1} failed: {safe_truncate(retry_e, 500)}")
                 if attempt < max_retries - 1:
                     time.sleep(2 ** attempt)
                 else:
@@ -226,9 +232,8 @@ def generate_room_render(
         return {"success": False, "error": "Maximum retries exceeded."}
 
     except Exception as e:
-        e_str = str(e)
-        print(f"Imagen 3.0 Render Error: {e_str[:500]}")
-        return {"success": False, "error": f"Render error: {e_str[:200]}"}
+        print(f"Imagen 3.0 Render Error: {safe_truncate(e, 500)}")
+        return {"success": False, "error": f"Render error: {safe_truncate(e, 200)}"}
 
 
 # ── Routes ──────────────────────────────────────────────────────────────────
