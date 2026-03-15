@@ -100,9 +100,8 @@ genai.configure(api_key=os.environ.get("GOOGLE_API_KEY", os.environ.get("GEMINI_
 
 def analyze_room_image(images_base64: list) -> dict:
     """RoomChic Engine: 3D Triangulation and Perspective Analysis using Gemini via Vertex AI."""
-    models_to_try = ["gemini-2.0-flash-exp", "gemini-1.5-pro-002", "gemini-1.5-flash-002"]
+    models_to_try = ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash"]
     
-    # We use vertexai.generative_models directly
     contents = []
     contents.append("You are the RoomChic Architectural AI, specialized in 3D space reconstruction from multiple 2D angles.")
 
@@ -110,8 +109,9 @@ def analyze_room_image(images_base64: list) -> dict:
         role = "PRIMARY MASTER IMAGE (Perspective Source)" if i == 0 else f"DEPTH REFERENCE {i} (Blind Spots & Context)"
         contents.append(f"ROLE: {role}")
         try:
-            # Vertex AI GenerativeModel expects Part or Image
-            image_part = Part.from_data(data=base64.b64decode(img_b64), mime_type="image/png")
+            # AI Studio SDK expects a dict with mime_type and data
+            # Assume jpeg for safety, the SDK is flexible
+            image_part = {"mime_type": "image/jpeg", "data": base64.b64decode(img_b64)}
             contents.append(image_part)
         except Exception as e:
             print(f"Error decoding image {i}: {str(e)[:100]}")
@@ -136,8 +136,7 @@ Return ONLY a valid JSON object:
 
     for model_name in models_to_try:
         try:
-            # Use Vertex AI Model
-            model = GenerativeModel(model_name)
+            model = genai.GenerativeModel(model_name)
             response = model.generate_content(contents)
             resp_text = response.text.strip()
             
@@ -151,9 +150,9 @@ Return ONLY a valid JSON object:
             error_msg = str(e)
             if len(error_msg) > 500:
                 error_msg = error_msg[:500] + "... [TRUNCATED]"
-            print(f"Error with Vertex model {model_name}: {error_msg}")
+            print(f"Error with model {model_name}: {error_msg}")
             continue
-    return {"success": False, "error": "Fallo en motor RoomChic (Vertex AI Gemini)"}
+    return {"success": False, "error": "Fallo en motor RoomChic (Gemini AI Studio)"}
 
 def generate_room_render(
     prompt: str,
