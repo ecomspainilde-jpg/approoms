@@ -42,12 +42,15 @@ storage_bucket = os.environ.get(
     "FIREBASE_STORAGE_BUCKET", f"{project_id}.firebasestorage.app"
 )
 
+# ... (GCP config above)
+
 try:
+    # Explicitly use us-central1 for better model availability
     vertexai.init(project=project_id, location=location)
+    print(f"Vertex AI initialized: {project_id} in {location}")
 except Exception as e:
     print(
-        f"Warning: Could not initialize Vertex AI for project {project_id} in {location}:",
-        e,
+        f"Warning: Could not initialize Vertex AI for project {project_id} in {location}: {safe_truncate(e, 200)}"
     )
 
 # Initialize Firebase Admin
@@ -104,10 +107,12 @@ STYLE_DESCRIPTIONS = {
 
 def analyze_room_image(images_base64: list) -> dict:
     """RoomChic Engine: 3D Triangulation and Perspective Analysis using Gemini via Vertex AI."""
-    # Use stable models from GEMINI.md
-    models_to_try = ["gemini-2.0-flash-exp", "gemini-1.5-pro-002"]
+    # Use verified stable models
+    models_to_try = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"]
     
     contents = []
+    # ... (contents setup remains same)
+
     contents.append("You are the RoomChic Architectural AI, specialized in 3D space reconstruction from multiple 2D angles.")
 
     for i, img_b64 in enumerate(images_base64):
