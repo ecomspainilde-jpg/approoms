@@ -6,6 +6,7 @@ import json
 from datetime import timezone
 from flask import Flask, request, jsonify, send_from_directory
 from dotenv import load_dotenv
+from typing import List, Dict, Any, Optional, Union
 
 # Load environment variables from .env
 load_dotenv()
@@ -92,15 +93,10 @@ STYLE_DESCRIPTIONS = {
     "bohemio": "Bohemian eclectic style: layered textiles (macramé, rugs, pillows, curtains), jewel tones mixed with warm neutrals (emerald, burgundy, navy, gold), vintage and repurposed furniture, macramé wall hangings, abundant plants, global decorative accessories, layered rugs, free-spirited and artistic atmosphere with rich textures.",
 }
 
-
-import google.generativeai as genai
-
-# Configure Google Generative AI (AI Studio)
-genai.configure(api_key=os.environ.get("GOOGLE_API_KEY", os.environ.get("GEMINI_API_KEY", "")))
-
 def analyze_room_image(images_base64: list) -> dict:
     """RoomChic Engine: 3D Triangulation and Perspective Analysis using Gemini via Vertex AI."""
-    models_to_try = ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash"]
+    # Use stable models from GEMINI.md
+    models_to_try = ["gemini-2.0-flash-exp", "gemini-1.5-pro-002"]
     
     contents = []
     contents.append("You are the RoomChic Architectural AI, specialized in 3D space reconstruction from multiple 2D angles.")
@@ -109,9 +105,7 @@ def analyze_room_image(images_base64: list) -> dict:
         role = "PRIMARY MASTER IMAGE (Perspective Source)" if i == 0 else f"DEPTH REFERENCE {i} (Blind Spots & Context)"
         contents.append(f"ROLE: {role}")
         try:
-            # AI Studio SDK expects a dict with mime_type and data
-            # Assume jpeg for safety, the SDK is flexible
-            image_part = {"mime_type": "image/jpeg", "data": base64.b64decode(img_b64)}
+            image_part = Part.from_data(data=base64.b64decode(img_b64), mime_type="image/jpeg")
             contents.append(image_part)
         except Exception as e:
             print(f"Error decoding image {i}: {str(e)[:100]}")
@@ -136,7 +130,7 @@ Return ONLY a valid JSON object:
 
     for model_name in models_to_try:
         try:
-            model = genai.GenerativeModel(model_name)
+            model = GenerativeModel(model_name)
             response = model.generate_content(contents)
             resp_text = response.text.strip()
             
@@ -152,25 +146,29 @@ Return ONLY a valid JSON object:
                 error_msg = error_msg[:500] + "... [TRUNCATED]"
             print(f"Error with model {model_name}: {error_msg}")
             continue
-    return {"success": False, "error": "Fallo en motor RoomChic (Gemini AI Studio)"}
+    return {"success": False, "error": "Fallo en motor RoomChic (Gemini Vertex AI)"}
 
 def generate_room_render(
     prompt: str,
-    room_data: dict = None,
+    room_data: Optional[Dict[str, Any]] = None,
     style: str = "moderno",
-    base_image_b64: str = None,
-) -> dict:
-    """RoomChic Render: Surgical transformation using Gemini 3.1 Flash Image (Nano Banana 2)."""
+    base_image_b64: Optional[str] = None,
+) -> Dict[str, Any]:
+    """RoomChic Render: Surgical transformation using Imagen 3.0 via Vertex AI."""
     import time
     max_retries = 3
     
     try:
         style_desc = STYLE_DESCRIPTIONS.get(style.lower(), STYLE_DESCRIPTIONS["moderno"])
-        arch = room_data.get("architecture_en", "") if room_data else ""
-        seed = room_data.get("imagen_prompt_seed_en", "")
+        
+        if room_data:
+            arch = room_data.get("architecture_en", "")
+            seed = room_data.get("imagen_prompt_seed_en", "")
+        else:
+            arch = ""
+            seed = ""
         
         # Step 1: Theoretical BEFORE description (Conceptual Structural Anchor)
-        # As per user request: Extreme clutter, old furniture, poor lighting.
         structural_prompt = (
             "Professional architectural photography, wide-angle lens. "
             "SCENE CONTEXT: Extreme clutter, ancient worn-out furniture, dim poor lighting, scratched floors. "
@@ -178,7 +176,6 @@ def generate_room_render(
         )
 
         # Step 2: AFTER transformation (The actual generation)
-        # As per user request: Luxury finishes, ambient lighting, contemporary design.
         transformation_prompt = (
             f"HIGH-END TRANSFORMATION: {style_desc}. "
             "REPLACE ALL MATERIALS with luxury finishes, implement professional ambient lighting, contemporary upscale design. "
@@ -187,59 +184,51 @@ def generate_room_render(
             "window/door positions, and structural layout. 8K photorealistic, interior design magazine quality."
         )
 
-        model = genai.GenerativeModel('gemini-3.1-flash-image-preview')
+        # Use Vertex AI Imagen 3.0
+        model = ImageGenerationModel.from_pretrained("imagen-3.0-generate-001")
         
-        # Build the multiturn-like content for image-to-image
-        # Nano Banana 2 uses the base image as context
-        contents = []
-        if base_image_b64:
-            contents.append({"mime_type": "image/jpeg", "data": base64.b64decode(base_image_b64)})
-        
-        contents.append(f"ORIGINAL STATE DESCRIPTION: {structural_prompt}")
-        contents.append(f"FINAL TRANSFORMATION INSTRUCTION: {transformation_prompt}")
-
-        image_config = {
-            "aspect_ratio": "16:9",
-            "image_size": "1K"
-        }
+        # Build the final prompt combining everything
+        # We explicitly tell Imagen 3.0 to act as a Gemini-powered engine for high-fidelity interior design.
+        final_prompt = (
+            f"Gemini-powered Architectural Transformation. "
+            f"Original Scene: {structural_prompt} "
+            f"Required Evolution: {transformation_prompt}"
+        )
 
         for attempt in range(max_retries):
             try:
-                # Assuming the SDK supports passing image_config in generation_config or as a separate param
-                # Note: Exact parameter naming might vary slightly depending on SDK version
-                response = model.generate_content(
-                    contents,
-                    generation_config={
-                        "image_config": image_config
-                    }
+                # Imagen 3.0 generation
+                images = model.generate_images(
+                    prompt=final_prompt,
+                    number_of_images=1,
+                    aspect_ratio="16:9"
                 )
                 
-                # Extract the generated image. Most genai models return the image in the response parts
-                generated_img_b64 = None
-                for part in response.candidates[0].content.parts:
-                    if part.inline_data:
-                        generated_img_b64 = base64.b64encode(part.inline_data.data).decode("utf-8")
-                        break
-                
-                if not generated_img_b64:
-                    raise Exception("Model returned successfully but no image data was found in response.")
-
-                return {
-                    "success": True, 
-                    "image_base64": generated_img_b64,
-                    "full_prompt": transformation_prompt,
-                    "style_description": style_desc
-                }
+                if images:
+                    generated_img_b64 = base64.b64encode(images[0]._image_bytes).decode("utf-8")
+                    return {
+                        "success": True, 
+                        "image_base64": generated_img_b64,
+                        "full_prompt": final_prompt,
+                        "style_description": style_desc
+                    }
+                else:
+                    raise Exception("No images returned from Imagen model.")
+                    
             except Exception as retry_e:
-                print(f"Generation Attempt {attempt + 1} failed: {retry_e}")
+                e_str = str(retry_e)
+                print(f"Generation Attempt {attempt + 1} failed: {e_str[:500]}")
                 if attempt < max_retries - 1:
-                    time.sleep(2 ** attempt) # Exponential backoff
+                    time.sleep(2 ** attempt)
                 else:
                     raise retry_e
 
+        return {"success": False, "error": "Maximum retries exceeded."}
+
     except Exception as e:
-        print(f"Nano Banana 2 Render Error: {str(e)}")
-        return {"success": False, "error": f"Render error: {str(e)}"}
+        e_str = str(e)
+        print(f"Imagen 3.0 Render Error: {e_str[:500]}")
+        return {"success": False, "error": f"Render error: {e_str[:200]}"}
 
 
 # ── Routes ──────────────────────────────────────────────────────────────────

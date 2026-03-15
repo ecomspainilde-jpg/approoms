@@ -2,7 +2,7 @@
 
 [![Python](https://img.shields.io/badge/Python-3.14-blue.svg)](https://www.python.org/)
 [![Framework](https://img.shields.io/badge/Framework-Flask-black.svg)](https://flask.palletsprojects.com/)
-[![AI Engine](https://img.shields.io/badge/AI-Gemini%203.1%20%7C%20Imagen%203.0-orange.svg)](https://deepmind.google/technologies/gemini/)
+[![AI Engine](https://img.shields.io/badge/AI-Gemini%202.0%20%7C%20Imagen%203.0-orange.svg)](https://deepmind.google/technologies/gemini/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 **RenderRoom** is a high-fidelity interior design platform that transforms real room photos into professional 4K renders while maintaining absolute architectural integrity.
@@ -23,8 +23,8 @@ Unlike standard AI filters, RenderRoom utilizes the **RoomChic** methodology to 
 ## 🛠️ Tech Stack
 
 *   **Backend**: Flask (Python 3.14)
-*   **AI Vision**: Gemini 3.1 Flash (Ultra-precise architectural analysis)
-*   **Image Generation**: Nano Banana 2 / Imagen 3.0 (Surgical Structural Editing)
+*   **AI Vision**: Gemini 2.0 Flash (Ultra-precise architectural analysis)
+*   **Image Generation**: Imagen 3.0 (Surgical Structural Editing)
 *   **Database & Auth**: Firebase (Firestore, Storage, Auth)
 *   **Payments**: Stripe (Integrated Credit System)
 *   **Frontend**: Modern HTML5/CSS3 with TailwindCSS

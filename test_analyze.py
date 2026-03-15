@@ -9,9 +9,14 @@ vertexai.init(project=PROJECT_ID, location=REGION)
 
 from vertexai.generative_models import GenerativeModel
 
-try:
-    model = GenerativeModel("gemini-1.5-pro-002")
-    response = model.generate_content("Hello! Are you working via Vertex AI in us-central1?")
-    print("Success:", response.text)
-except Exception as e:
-    print("Error:", e)
+models = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"]
+
+for model_name in models:
+    try:
+        print(f"Testing {model_name}...")
+        model = GenerativeModel(model_name)
+        response = model.generate_content("Hello! Are you working via Vertex AI in us-central1?")
+        print(f"Success with {model_name}:", response.text)
+        break
+    except Exception as e:
+        print(f"Error with {model_name}:", str(e)[:200])
