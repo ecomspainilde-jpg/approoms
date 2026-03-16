@@ -214,6 +214,20 @@
                     <h3 class="font-bold text-primary">Análisis de tu habitación</h3>
                 </div>
                 <div id="analysis-text" class="text-slate-300 text-sm leading-relaxed whitespace-pre-line max-h-48 overflow-y-auto pr-1"></div>
+
+                <!-- Image Validation Badge -->
+                <div id="image-validation-panel" class="hidden mt-4 pt-4 border-t border-border-dark">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div id="validation-badge" class="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-black">
+                            <span id="validation-icon" class="material-symbols-outlined text-sm"></span>
+                            <span id="validation-label"></span>
+                            <span id="validation-score" class="ml-1 opacity-70"></span>
+                        </div>
+                        <span class="text-xs text-muted-text">Aptitud para render</span>
+                    </div>
+                    <div id="validation-issues" class="hidden space-y-1.5"></div>
+                    <div id="validation-checks" class="grid grid-cols-3 gap-2 mt-3"></div>
+                </div>
             </div>
             <div id="analysis-error" class="hidden text-orange-400 text-sm">
                 <span class="material-symbols-outlined text-sm mr-1">warning</span>
@@ -784,6 +798,85 @@ async function analyzeImage() {
             `;
             document.getElementById('analysis-text').innerHTML = analysisHtml;
             document.getElementById('analysis-result').classList.remove('hidden');
+
+            // ── Image Validation UI ──────────────────────────────────
+            const v = data.image_validation;
+            if (v) {
+                const score = v.viability_score ?? 100;
+                const ok = v.viability_ok !== false; // default allow if field missing
+                const issues = v.viability_issues_es || [];
+
+                // Badge color
+                const badge = document.getElementById('validation-badge');
+                const icon = document.getElementById('validation-icon');
+                const label = document.getElementById('validation-label');
+                const scoreEl = document.getElementById('validation-score');
+
+                badge.className = 'flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-black';
+                if (score >= 90) {
+                    badge.classList.add('bg-green-500/15', 'text-green-400', 'border', 'border-green-500/30');
+                    icon.textContent = 'check_circle';
+                    label.textContent = 'Perfecta para render';
+                } else if (score >= 70) {
+                    badge.classList.add('bg-primary/15', 'text-primary', 'border', 'border-primary/30');
+                    icon.textContent = 'warning';
+                    label.textContent = 'Válida con advertencias';
+                } else if (score >= 40) {
+                    badge.classList.add('bg-orange-500/15', 'text-orange-400', 'border', 'border-orange-500/30');
+                    icon.textContent = 'report_problem';
+                    label.textContent = 'Calidad baja';
+                } else {
+                    badge.classList.add('bg-red-500/15', 'text-red-400', 'border', 'border-red-500/30');
+                    icon.textContent = 'cancel';
+                    label.textContent = 'No apta para render';
+                }
+                scoreEl.textContent = `(${score}/100)`;
+
+                // Issues list
+                const issuesEl = document.getElementById('validation-issues');
+                if (issues.length > 0) {
+                    issuesEl.innerHTML = issues.map(i =>
+                        `<div class="flex items-start gap-2 text-xs text-orange-300">
+                            <span class="material-symbols-outlined text-sm mt-0.5 flex-shrink-0">info</span>
+                            <span>${i}</span>
+                        </div>`
+                    ).join('');
+                    issuesEl.classList.remove('hidden');
+                } else {
+                    issuesEl.classList.add('hidden');
+                }
+
+                // Mini checks grid
+                const checks = [
+                    { key: 'is_interior_room', label: 'Interior' },
+                    { key: 'has_clear_perspective', label: 'Perspectiva' },
+                    { key: 'is_not_blurry', label: 'Nitidez' },
+                    { key: 'sufficient_coverage', label: 'Cobertura' },
+                    { key: 'no_heavy_distortion', label: 'Sin distorsión' },
+                    { key: 'is_single_room', label: 'Una habitación' },
+                ];
+                document.getElementById('validation-checks').innerHTML = checks.map(c => {
+                    const pass = v[c.key] !== false;
+                    return `<div class="flex items-center gap-1 text-[10px] ${pass ? 'text-green-400' : 'text-red-400'}">
+                        <span class="material-symbols-outlined text-[11px]">${pass ? 'check' : 'close'}</span>
+                        ${c.label}
+                    </div>`;
+                }).join('');
+
+                document.getElementById('image-validation-panel').classList.remove('hidden');
+
+                // Block or allow advancing
+                if (!ok) {
+                    setBtnEnabled(btnToStyle, false);
+                    // Show specific block message
+                    const errorEl = document.getElementById('analysis-error');
+                    const errorText = document.getElementById('analysis-error-text');
+                    errorText.textContent = 'La imagen no es apta para generar un render con el mismo ángulo. Por favor, sube una foto diferente.';
+                    errorEl.classList.remove('hidden');
+                    return; // Don't set btn enabled below
+                }
+            }
+
         } else {
             document.getElementById('analysis-error-text').textContent = data.error || 'Error del servicio';
             document.getElementById('analysis-error').classList.remove('hidden');

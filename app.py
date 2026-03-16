@@ -132,27 +132,60 @@ def analyze_room_image(images_base64: list) -> dict:
         except Exception as e:
             print(f"Error decoding image {i}: {safe_truncate(e, 100)}")
 
-    analysis_prompt = """Use all provided images to perform PERSPECTIVE TRIANGULATION:
+    analysis_prompt = """You are the RoomChic Architectural AI. Your PRIMARY task before any analysis is to validate the image quality for AI-assisted interior design rendering.
+
+## STEP 1 — IMAGE VALIDATION (CRITICAL)
+Evaluate the MASTER IMAGE (first image) against these criteria for angle-preserving render generation:
+- **is_interior_room**: Is this clearly an interior room (not exterior, not abstract)?
+- **has_clear_perspective**: Is there a single, stable camera perspective (not a panorama, collage, or multi-angle crop)?
+- **is_not_blurry**: Is the image reasonably sharp and in focus (not heavily blurred or pixelated)?
+- **sufficient_coverage**: Does the image show enough of the room (floor, walls, at least one architectural anchor visible)?
+- **no_heavy_distortion**: Is the image free of extreme fisheye/wide-angle distortions that would cause AI deformation?
+- **is_single_room**: Does the image show a single contiguous room (not a collage of different rooms)?
+
+Combine these into:
+- **viability_score**: Integer 0-100. 0=completely invalid, 100=perfect for render.
+  - 90-100: Perfect — proceed with analysis
+  - 70-89: Good — minor issues, warn user but proceed
+  - 40-69: Poor — significant issues, warn clearly
+  - 0-39: Invalid — BLOCK render, must upload new photo
+- **viability_issues_es**: List of issue strings in Spanish (empty if no issues). Be specific and actionable.
+- **viability_ok**: boolean — true if score >= 40 and is_interior_room is true.
+
+## STEP 2 — ROOM ANALYSIS (only if viability_ok is true)
+Use all provided images to perform PERSPECTIVE TRIANGULATION:
 1. Use DEPTH REFERENCES to understand what is behind furniture or in blind spots of the MASTER IMAGE.
 2. Identify the 'Untouchable Structure': walls, windows, doors, floor, and ceiling.
 3. Estimate real-world dimensions by cross-referencing standard objects across all angles.
 4. Detect the current style and potential improvements.
 
-Return ONLY a valid JSON object:
+Return ONLY a valid JSON object (all fields required):
 {
-  "room_type": "Confirmed room type.",
-  "architecture_en": "List of untouchable architectural anchors (walls, windows, layout).",
-  "dimensions_est": "Estimated metric size (e.g. 3.5x4.5m).",
-  "inventory_en": "List 5-8 main objects detected across all photos.",
-  "blind_spot_data": "Details from context images not visible in master.",
-  "detailed_description_es": "Descripción profesional confirmando que hemos triangulado el espacio correctamente.",
-  "imagen_prompt_seed_en": "STRUCTURAL_LOCK: Specific geometric description to ensure 100% fidelity to MASTER IMAGE perspective.",
+  "image_validation": {
+    "viability_score": 95,
+    "viability_ok": true,
+    "viability_issues_es": [],
+    "is_interior_room": true,
+    "has_clear_perspective": true,
+    "is_not_blurry": true,
+    "sufficient_coverage": true,
+    "no_heavy_distortion": true,
+    "is_single_room": true
+  },
+  "room_type": "Confirmed room type. Leave empty string if viability_ok is false.",
+  "architecture_en": "List of untouchable architectural anchors (walls, windows, layout). Empty if viability_ok false.",
+  "dimensions_est": "Estimated metric size (e.g. 3.5x4.5m). Empty if viability_ok false.",
+  "inventory_en": "List 5-8 main objects detected across all photos. Empty if viability_ok false.",
+  "blind_spot_data": "Details from context images not visible in master. Empty if viability_ok false.",
+  "detailed_description_es": "Descripción profesional. If not viability_ok, explain specifically why the image cannot be used for rendering.",
+  "imagen_prompt_seed_en": "STRUCTURAL_LOCK: Specific geometric description to ensure 100% fidelity to MASTER IMAGE perspective. Empty if viability_ok false.",
   "recommendations": {
     "add_es": ["Elemento decorativo 1", "Elemento decorativo 2", "Elemento decorativo 3"],
     "remove_es": ["Objeto a quitar 1", "Objeto a quitar 2"]
   }
 }
-Note: Recommendations for 'add_es' and 'remove_es' must be tailored to the detected room type and style, focusing on high-impact changes.
+CRITICAL: Always return valid JSON. Always include image_validation block. If viability_ok is false, fill other fields with empty values or the issue explanation.
+Note: Recommendations are tailored to the detected room type and style, focusing on high-impact changes.
 """
     contents.append(analysis_prompt)
 
