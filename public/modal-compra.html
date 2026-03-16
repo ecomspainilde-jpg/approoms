@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 
 <html class="dark" lang="es"><head>
 <meta charset="utf-8"/>
@@ -229,9 +229,13 @@
     let selectedPkgKey = 'package_15';
     let availablePackages = {};
 
+    // Initialize UI immediately with fallback data (don't wait for async)
+    document.addEventListener('DOMContentLoaded', () => selectPackage(selectedPkgKey));
+
     async function fetchPackages() {
         try {
             const res = await fetch('/api/admin/pricing');
+            if (!res.ok) throw new Error('pricing fetch failed');
             const data = await res.json();
             
             if (data.packages && data.packages.length > 0) {
@@ -288,11 +292,15 @@
             return;
         }
 
+        if (!selectedPkgKey || !availablePackages[selectedPkgKey]) {
+            alert('Por favor, selecciona un paquete primero.');
+            return;
+        }
         try {
             btn.disabled = true;
             btnText.textContent = 'Procesando...';
             
-            const token = await user.getIdToken();
+            const token = await user.getIdToken(true); // force refresh
             const response = await fetch('/api/checkout', {
                 method: 'POST',
                 headers: {
@@ -312,7 +320,7 @@
             }
         } catch (e) {
             console.error(e);
-            alert('Error en la conexión con el servidor');
+            alert('Error en la conexión con el servidor. Por favor, inténtalo de nuevo.');
             btn.disabled = false;
             btnText.textContent = 'Pagar con Stripe';
         }

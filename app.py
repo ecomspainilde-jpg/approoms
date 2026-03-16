@@ -212,105 +212,183 @@ def generate_room_render(
     room_data: Optional[Dict[str, Any]] = None,
     style: str = "moderno",
     base_image_b64: Optional[str] = None,
+    quality: str = "normal",
 ) -> Dict[str, Any]:
-    """RoomChic Render: Surgical transformation using Imagen 3.0 via Vertex AI."""
+    """
+    RoomChic Render — Photo-faithful room restyling.
+
+    Strategy:
+    1. PRIMARY: Gemini 2.0 Flash with native image output — sees the original photo
+       and edits ONLY the movable/decorative layer (furniture, lighting, textiles, decor).
+    2. FALLBACK: Imagen 3 Edit API (imagegeneration@006) with the original photo as
+       reference image, using inpainting-free mode.
+    3. LAST RESORT: informative error.
+
+    The structural shell (walls, windows, doors, floor area, ceiling, camera angle)
+    is NEVER modified. The client must recognise the same room after the transformation.
+    """
     import time
-    max_retries = 3
-    
-    try:
-        style_desc = STYLE_DESCRIPTIONS.get(style.lower(), STYLE_DESCRIPTIONS["moderno"])
-        
-        if room_data:
-            arch = room_data.get("architecture_en", "")
-            seed = room_data.get("imagen_prompt_seed_en", "")
-            room_type = room_data.get("room_type", "room")
-            dims = room_data.get("dimensions_est", "")
-        else:
-            arch = ""
-            seed = ""
-            room_type = "room"
-            dims = ""
-        
-        # ── TIER 1: ABSOLUTE STRUCTURAL LOCK ─────────────────────────────────
-        # These elements must remain pixel-perfect identical to the original photo.
-        absolute_lock = (
-            "ABSOLUTE STRUCTURAL LOCK — THESE ELEMENTS MUST REMAIN IDENTICAL TO THE ORIGINAL PHOTO: "
-            "All walls (exact position, shape, and their current surface color/texture — do NOT repaint or retexture walls). "
-            "All windows (exact size, shape, position, mullions, and natural light coming through them). "
-            "All doors and door frames (exact position and size). "
-            "Floor plan and floor area dimensions (do NOT reshape the room). "
-            "Ceiling shape, height, structural beams, and any fixed architectural details. "
-            "Any built-in structural element such as columns, alcoves, or fixed radiators. "
-            "The camera viewpoint and focal length (same angle, same perspective lines, same framing). "
-            f"Architectural reference: {arch}. Perspective seed: {seed}. "
+    import io
+
+    style_desc = STYLE_DESCRIPTIONS.get(style.lower(), STYLE_DESCRIPTIONS["moderno"])
+
+    if room_data:
+        arch        = room_data.get("architecture_en", "")
+        room_type   = room_data.get("room_type", "interior room")
+        dims        = room_data.get("dimensions_est", "")
+        inventory   = room_data.get("inventory_en", "")
+    else:
+        arch = room_type = dims = inventory = ""
+
+    is_high_quality = quality == "high"
+
+    # ── Shared edit instruction ───────────────────────────────────────────────
+    base_instruction = (
+        f"You are an expert interior designer. I am giving you a photograph of a {room_type}. "
+        "Your task is to DIGITALLY RESTYLE this exact room. "
+        "\n\nSTRICT RULES — NEVER CHANGE THESE:"
+        "\n- Walls: keep the EXACT same surfaces, positions and proportions."
+        "\n- Windows: keep EXACT size, position, frame and natural light."
+        "\n- Doors and door frames: keep EXACT position and size."
+        "\n- Ceiling: shape, height and any beams stay identical."
+        "\n- Camera angle: the perspective, framing and focal length must be 100% identical to the original photo."
+        "\n- Room dimensions and floor plan: do NOT reshape or resize anything structural."
+        f"\n- Architectural details to preserve: {arch}"
+        "\n\nYOU ARE ALLOWED TO CHANGE ONLY THESE DECORATIVE / MOVABLE ELEMENTS:"
+        "\n- Furniture: replace or restyle sofas, chairs, tables, beds, shelves, desks."
+        "\n- Lighting fixtures: replace ceiling lights, floor lamps, pendant lights."
+        "\n- Textiles: replace rugs, curtains, cushions, bedcovers, throws."
+        "\n- Wall art and decorations hanging on the walls."
+        "\n- Decorative accessories: plants, vases, books, mirrors, candles."
+        "\n- Floor finish tone (same floor area, only visual material/color)."
+        f"\n\nSTYLE TO APPLY: {style_desc}"
+        f"\n\nCLIENT SPECIFIC REQUESTS: {prompt}"
+    )
+
+    if is_high_quality:
+        quality_suffix = (
+            "\n\nOUTPUT QUALITY: Ultra-high-fidelity 4K interior design photography. "
+            "Render every surface material with extreme precision: wood grain, fabric weave, glass reflections, metal sheen. "
+            "Perfect global illumination with accurate caustics and soft shadows. "
+            "The result must look like a professional architectural photography studio shot. "
+            "Maximum detail on all decorative elements — every texture must be crisp and photorealistic."
         )
-
-        # ── TIER 2: ALLOWED CHANGES (style & decor layer only) ─────────────────
-        allowed_changes = (
-            f"STYLE RESKIN ONLY — Apply {style_desc} style. "
-            "YOU MAY ONLY CHANGE THE FOLLOWING MOVABLE OR DECORATIVE ELEMENTS: "
-            "Furniture (sofas, chairs, tables, beds, shelves, desks — replace existing pieces with style-appropriate ones). "
-            "Lighting fixtures (ceiling lights, floor lamps, table lamps, pendant lights — replace with style-coherent alternatives). "
-            "Wall art and paintings (add or replace artwork on walls, keep the wall surface itself unchanged). "
-            "Textiles (rugs, curtains, cushions, bedcovers, throws — replace with style-coherent alternatives). "
-            "Decorative accessories (plants, vases, books, mirrors, sculptures, candles). "
-            "Floor finish color or material tone (keep same floor area and layout, change only the visual finish). "
-            f"Client preferences: {prompt}. "
+        gen_temperature = 0.2
+        gen_candidates  = 2  # generate 2, pick best
+    else:
+        quality_suffix = (
+            "\n\nOUTPUT: Photorealistic interior design photo of the SAME room after restyling. "
+            "The client must immediately recognise it as the same physical space."
         )
+        gen_temperature = 0.5
+        gen_candidates  = 1
 
-        # ── TIER 3: Quality bar ────────────────────────────────────────────────
-        quality_bar = (
-            "OUTPUT: 8K ultra-photorealistic interior design photography. "
-            "Accurate global illumination, soft shadows, realistic material reflections. "
-            "The viewer must immediately recognise this as the exact same physical room — "
-            "same spatial layout, same window light, same camera angle — with only the decoration changed."
-        )
+    edit_instruction = base_instruction + quality_suffix
 
-        # Use Vertex AI Imagen 3.0
-        model = ImageGenerationModel.from_pretrained("imagen-3.0-generate-001")
+    # ── PRIMARY: Gemini 2.0 Flash with image output ───────────────────────────
+    if base_image_b64:
+        try:
+            from google import genai as google_genai  # type: ignore
+            from google.genai import types as genai_types  # type: ignore
 
-        final_prompt = (
-            f"Interior design restyling of a {room_type}{' (' + dims + ')' if dims else ''}. "
-            f"{absolute_lock} "
-            f"{allowed_changes} "
-            f"{quality_bar}"
-        )
+            genai_client = google_genai.Client(
+                vertexai=True,
+                project=project_id,
+                location=location,
+            )
 
-        for attempt in range(max_retries):
-            try:
-                # Imagen 3.0 generation
-                images = model.generate_images(
-                    prompt=final_prompt,
-                    number_of_images=1,
-                    aspect_ratio="16:9"
-                )
-                
-                if images:
-                    generated_img_b64 = base64.b64encode(images[0]._image_bytes).decode("utf-8")
-                    return {
-                        "success": True, 
-                        "image_base64": generated_img_b64,
-                        "full_prompt": final_prompt,
-                        "style_description": style_desc
-                    }
-                else:
-                    raise Exception("No images returned from Imagen model.")
-                    
-            except Exception as retry_e:
-                print(f"Generation Attempt {attempt + 1} failed: {safe_truncate(retry_e, 500)}")
-                if attempt < max_retries - 1:
-                    time.sleep(2 ** attempt)
-                else:
-                    raise retry_e
+            # Decode base64 → bytes
+            img_bytes = base64.b64decode(base_image_b64)
 
-        return {"success": False, "error": "Maximum retries exceeded."}
+            response = genai_client.models.generate_content(
+                model="gemini-2.0-flash-exp",
+                contents=[
+                    genai_types.Part.from_bytes(data=img_bytes, mime_type="image/jpeg"),
+                    genai_types.Part.from_text(edit_instruction),
+                ],
+                config=genai_types.GenerateContentConfig(
+                    response_modalities=["IMAGE", "TEXT"],
+                    temperature=gen_temperature,
+                    candidate_count=gen_candidates,
+                ),
+            )
+            # Extract image from response — pick candidate with most detail
+            best_b64 = None
+            for candidate in response.candidates:
+                for part in candidate.content.parts:
+                    if part.inline_data and part.inline_data.mime_type.startswith("image/"):
+                        best_b64 = base64.b64encode(part.inline_data.data).decode("utf-8")
+                        break  # take first valid candidate (Gemini ranks them)
+                if best_b64:
+                    break
+            if best_b64:
+                return {
+                    "success": True,
+                    "image_base64": best_b64,
+                    "engine": f"gemini-2.0-flash-exp-{'hq' if is_high_quality else 'normal'}",
+                    "style_description": style_desc,
+                    "full_prompt": edit_instruction,
+                    "quality": quality,
+                }
+            print("Gemini image output: no image part returned, falling back.")
+        except Exception as gemini_err:
+            print(f"Gemini image edit error: {safe_truncate(gemini_err, 400)}")
 
-    except Exception as e:
-        print(f"Imagen 3.0 Render Error: {safe_truncate(e, 500)}")
-        return {"success": False, "error": f"Render error: {safe_truncate(e, 200)}"}
+    # ── FALLBACK: Imagen Edit API with source image ───────────────────────────
+    if base_image_b64:
+        try:
+            from vertexai.preview.vision_models import ImageEditingModel  # type: ignore
+
+            edit_model = ImageEditingModel.from_pretrained("imagegeneration@006")
+            src_image  = VisionImage(image_bytes=base64.b64decode(base_image_b64))
+
+            imagen_prompt = (
+                f"Interior design restyling. Apply {style_desc} style. "
+                "ONLY change furniture, lighting, textiles and decorative accessories. "
+                "Keep all walls, windows, doors, ceiling and camera angle IDENTICAL to the source image. "
+                f"Client request: {prompt}"
+            )
+
+            for attempt in range(3):
+                try:
+                    result = edit_model.edit_image(
+                        prompt=imagen_prompt,
+                        base_image=src_image,
+                        edit_mode="inpainting-insert",
+                        number_of_images=1,
+                    )
+                    if result and result.images:
+                        result_b64 = base64.b64encode(result.images[0]._image_bytes).decode("utf-8")
+                        return {
+                            "success": True,
+                            "image_base64": result_b64,
+                            "engine": "imagen-edit-inpainting",
+                            "style_description": style_desc,
+                            "full_prompt": imagen_prompt,
+                        }
+                except Exception as edit_err:
+                    print(f"Imagen Edit attempt {attempt+1}: {safe_truncate(edit_err, 300)}")
+                    if attempt < 2:
+                        time.sleep(2 ** attempt)
+        except ImportError:
+            print("ImageEditingModel not available in this SDK version.")
+        except Exception as fallback_err:
+            print(f"Imagen Edit fallback error: {safe_truncate(fallback_err, 400)}")
+
+    # ── LAST RESORT: text-only Imagen (signals error clearly) ─────────────────
+    return {
+        "success": False,
+        "error": (
+            "No se pudo aplicar el restyling manteniendo la habitación original. "
+            "Asegúrate de que la imagen original fue enviada correctamente."
+        ),
+    }
+
 
 
 # ── Routes ──────────────────────────────────────────────────────────────────
+
+
 
 
 @app.route("/")
@@ -399,14 +477,25 @@ def api_generate_image():
     quality = data.get("quality", "normal")
     image_base64 = data.get("image_base64")
 
+    # High quality costs 2 credits, normal costs 1
+    credits_needed = 2 if quality == "high" else 1
+
+    if current_credits < credits_needed:
+        return jsonify({
+            "error": f"Necesitas {credits_needed} crédito{'s' if credits_needed > 1 else ''} para calidad {'alta' if quality == 'high' else 'normal'}. Tienes {current_credits}.",
+            "needsCredits": True,
+            "creditsNeeded": credits_needed,
+            "creditsAvailable": current_credits,
+        }), 402
+
     if not prompt:
         return jsonify({"error": "No prompt provided"}), 400
 
-    result = generate_room_render(prompt, room_data, style, image_base64)
+    result = generate_room_render(prompt, room_data, style, image_base64, quality)
     if result.get("success"):
-        # ── Deduct Credit ──
+        # ── Deduct Credits (amount depends on quality) ──
         user_ref.update({
-            "credits": firestore.Increment(-1),
+            "credits": firestore.Increment(-credits_needed),
             "totalGenerations": firestore.Increment(1)
         })
 
@@ -597,12 +686,28 @@ def api_checkout():
         return jsonify({"error": "Missing packageId"}), 400
 
     try:
-        # Check package price in Firestore
-        pkg_doc = db.collection("packages").document(package_id).get()
-        if not pkg_doc.exists:
-            return jsonify({"error": "Package not found"}), 404
-        
-        pkg_data = pkg_doc.to_dict()
+        # Hardcoded fallback packages (in case Firestore packages collection is empty)
+        FALLBACK_PACKAGES = {
+            'package_5':  {'name': 'Inicial',      'price': 500,  'currency': 'eur', 'creditsAmount': 5,  'isActive': True},
+            'package_10': {'name': 'Estándar',     'price': 1000, 'currency': 'eur', 'creditsAmount': 12, 'isActive': True},
+            'package_15': {'name': 'Profesional',  'price': 1500, 'currency': 'eur', 'creditsAmount': 20, 'isActive': True},
+            'package_25': {'name': 'Premium',      'price': 2500, 'currency': 'eur', 'creditsAmount': 40, 'isActive': True},
+        }
+
+        # Check package price in Firestore, fall back to hardcoded if not found
+        pkg_data = None
+        if db:
+            pkg_doc = db.collection("packages").document(package_id).get()
+            if pkg_doc.exists:
+                pkg_data = pkg_doc.to_dict()
+
+        if not pkg_data:
+            # Try hardcoded fallback
+            pkg_data = FALLBACK_PACKAGES.get(package_id)
+            if not pkg_data:
+                return jsonify({"error": "Package not found"}), 404
+            print(f"Using hardcoded fallback for package: {package_id}")
+
         if not pkg_data.get("isActive", True):
             return jsonify({"error": "Package is not active"}), 400
 

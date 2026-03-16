@@ -405,29 +405,53 @@
             <h3 class="font-bold text-sm uppercase tracking-wider text-muted-text">Calidad del Render</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <!-- Normal Quality -->
-                <div class="quality-card selected bg-surface-dark p-5 rounded-2xl border border-border-dark flex items-center justify-between" onclick="selectQuality('normal')">
-                    <div class="flex items-center gap-4">
-                        <div class="check-mark size-6 border-2 border-border-dark flex items-center justify-center"></div>
-                        <div>
-                            <p class="font-black text-slate-100">Calidad Normal</p>
-                            <p class="text-[10px] text-muted-text">720p · Optimizado · Rápido</p>
+                <div class="quality-card selected bg-surface-dark p-5 rounded-2xl border border-border-dark cursor-pointer transition-all hover:border-primary/40" onclick="selectQuality('normal')">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="flex items-center gap-3">
+                            <div class="check-mark size-6 rounded-md border-2 border-border-dark flex items-center justify-center flex-shrink-0"></div>
+                            <div>
+                                <p class="font-black text-slate-100">Calidad Básica</p>
+                                <p class="text-[10px] text-muted-text">Generación rápida</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-xl font-black text-primary">1</span>
+                            <span class="text-xs text-muted-text block -mt-1">crédito</span>
                         </div>
                     </div>
-                    <span id="price-display-normal" class="text-2xl font-black text-primary">2,50€</span>
+                    <ul class="space-y-1 ml-9">
+                        <li class="text-[11px] text-slate-400 flex items-center gap-1.5"><span class="material-symbols-outlined text-[13px] text-green-400">check</span>Mismo espacio, nuevo estilo</li>
+                        <li class="text-[11px] text-slate-400 flex items-center gap-1.5"><span class="material-symbols-outlined text-[13px] text-green-400">check</span>Resolución estándar</li>
+                        <li class="text-[11px] text-slate-400 flex items-center gap-1.5"><span class="material-symbols-outlined text-[13px] text-green-400">check</span>Resultado en ~30 seg</li>
+                    </ul>
                 </div>
                 <!-- High Quality -->
-                <div class="quality-card bg-surface-dark p-5 rounded-2xl border border-border-dark flex items-center justify-between" onclick="selectQuality('high')">
-                    <div class="flex items-center gap-4">
-                        <div class="check-mark size-6 border-2 border-border-dark flex items-center justify-center"></div>
-                        <div>
-                            <p class="font-black text-slate-100">Alta Fidelidad</p>
-                            <p class="text-[10px] text-muted-text">4K · Realismo Máximo · Gemini Pro</p>
+                <div class="quality-card bg-surface-dark p-5 rounded-2xl border border-primary/20 cursor-pointer transition-all hover:border-primary/60 relative overflow-hidden" onclick="selectQuality('high')">
+                    <div class="absolute top-0 right-0 bg-primary text-background-dark text-[9px] font-black px-2 py-1 rounded-bl-xl">RECOMENDADO</div>
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="flex items-center gap-3">
+                            <div class="check-mark size-6 rounded-md border-2 border-border-dark flex items-center justify-center flex-shrink-0"></div>
+                            <div>
+                                <p class="font-black text-slate-100">Alta Fidelidad</p>
+                                <p class="text-[10px] text-muted-text">4K · Realismo máximo</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-xl font-black text-primary">2</span>
+                            <span class="text-xs text-muted-text block -mt-1">créditos</span>
                         </div>
                     </div>
-                    <span id="price-display-high" class="text-2xl font-black text-primary">5,00€</span>
+                    <ul class="space-y-1 ml-9">
+                        <li class="text-[11px] text-slate-400 flex items-center gap-1.5"><span class="material-symbols-outlined text-[13px] text-green-400">check</span>Todo lo de Básica +</li>
+                        <li class="text-[11px] text-slate-400 flex items-center gap-1.5"><span class="material-symbols-outlined text-[13px] text-primary">check</span>Texturas ultra-detalladas (madera, tela, cristal)</li>
+                        <li class="text-[11px] text-slate-400 flex items-center gap-1.5"><span class="material-symbols-outlined text-[13px] text-primary">check</span>Iluminación global precisa</li>
+                        <li class="text-[11px] text-slate-400 flex items-center gap-1.5"><span class="material-symbols-outlined text-[13px] text-primary">check</span>Calidad estudio fotográfico</li>
+                    </ul>
                 </div>
             </div>
+            <p id="quality-cost-hint" class="text-center text-xs text-muted-text">Selección actual: <span id="quality-cost-label" class="text-primary font-bold">1 crédito (Básica)</span></p>
         </div>
+
 
         <button id="btn-generate" class="w-full bg-gradient-to-r from-primary to-orange-500 hover:opacity-90 text-background-dark font-black py-4 rounded-xl text-lg transition-all flex items-center justify-center gap-2" onclick="generateRender()">
             <span class="material-symbols-outlined">auto_awesome</span> Pagar y Generar Render
@@ -1138,10 +1162,11 @@ async function generatePDF() {
             createdAt: new Date().toISOString()
         };
 
-        const payload = { renderId: state.lastRenderId || null };
-        if (!state.lastRenderId) {
-            payload.renderData = inlineRenderData;
-        }
+        const payload = {
+            renderId: state.lastRenderId || null,
+            // Always send renderData as fallback (used when render is not found in Firestore)
+            renderData: inlineRenderData
+        };
 
         const res = await fetch('/api/generate-pdf', {
             method: 'POST',
@@ -1247,6 +1272,33 @@ function buildChangesList(style, analysis, prompt) {
         if (/desordenada|cluttered/i.test(analysis)) extras.push('Sistema de organización y almacenaje integrado');
     }
     return [...base, ...extras].slice(0, 7);
+}
+
+// ── Quality selection ───────────────────────────────────────────
+function selectQuality(q) {
+    state.selectedQuality = q;
+    document.querySelectorAll('.quality-card').forEach(card => {
+        card.classList.remove('selected', 'border-primary', 'border-primary/60');
+        card.classList.add('border-border-dark');
+        card.querySelector('.check-mark').classList.remove('bg-primary', 'border-primary');
+        card.querySelector('.check-mark').innerHTML = '';
+    });
+    const chosen = event ? event.currentTarget : document.querySelector(`.quality-card[onclick*="${q}"]`);
+    const all = document.querySelectorAll('.quality-card');
+    all.forEach(c => {
+        const isChosen = c.getAttribute('onclick') && c.getAttribute('onclick').includes(`'${q}'`);
+        if (isChosen) {
+            c.classList.add('selected', 'border-primary');
+            c.classList.remove('border-border-dark');
+            const cm = c.querySelector('.check-mark');
+            cm.classList.add('bg-primary', 'border-primary');
+            cm.innerHTML = '<span class="material-symbols-outlined text-[14px] text-background-dark">check</span>';
+        }
+    });
+    const lbl = document.getElementById('quality-cost-label');
+    if (lbl) {
+        lbl.textContent = q === 'high' ? '2 créditos (Alta Fidelidad)' : '1 crédito (Básica)';
+    }
 }
 </script>
 </body>
