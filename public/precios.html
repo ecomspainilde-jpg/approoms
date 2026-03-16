@@ -64,6 +64,11 @@
 <a class="text-sm font-semibold text-slate-400 hover:text-primary" href="#">Blog</a>
 </div>
 <div id="nav-auth-container" class="flex items-center gap-4">
+    <div id="header-credits-display" class="hidden flex items-center gap-2 px-3 py-1.5 bg-primary/10 border border-primary/20 rounded-full">
+        <span class="material-symbols-outlined text-primary text-sm">toll</span>
+        <span id="header-credits-count" class="text-primary text-sm font-bold">--</span>
+        <span class="text-xs text-slate-400">créditos</span>
+    </div>
     <a id="nav-dashboard-link" class="hidden text-sm font-semibold text-slate-400 hover:text-primary" href="03-dashboard.html">Mis Renders</a>
     <button onclick="handleStart()" class="bg-primary hover:bg-primary/90 text-background-dark px-6 py-2.5 rounded-lg font-bold text-sm">
         Crear Render
@@ -240,8 +245,21 @@
         auth.onAuthStateChanged((user) => {
             if (user) {
                 document.getElementById('nav-dashboard-link').classList.remove('hidden');
+                
+                // Real-time listener for credits
+                const db = firebase.firestore();
+                db.collection('users').doc(user.uid).onSnapshot(doc => {
+                    if (doc.exists) {
+                        const credits = doc.data().credits || 0;
+                        const headerDisplay = document.getElementById('header-credits-display');
+                        const headerCount = document.getElementById('header-credits-count');
+                        if (headerDisplay) headerDisplay.classList.remove('hidden');
+                        if (headerCount) headerCount.textContent = credits;
+                    }
+                }, err => console.error("Snapshot error:", err));
             } else {
                 document.getElementById('nav-dashboard-link').classList.add('hidden');
+                document.getElementById('header-credits-display')?.classList.add('hidden');
             }
             document.documentElement.classList.add('auth-checked');
             loadPricing();

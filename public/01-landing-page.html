@@ -157,6 +157,11 @@
                 <button onclick="openAuth('register')" class="bg-primary hover:bg-primary/90 text-background-dark px-5 py-2 rounded-xl text-sm font-bold tracking-wide transition-all hover:scale-105 amber-glow">Crear cuenta</button>
             </div>
             <div id="user-logged-in" class="hidden items-center gap-3">
+                <div id="header-credits-display" class="hidden flex items-center gap-2 px-3 py-1.5 bg-primary/10 border border-primary/20 rounded-full">
+                    <span class="material-symbols-outlined text-primary text-sm">toll</span>
+                    <span id="header-credits-count" class="text-primary text-sm font-bold">--</span>
+                    <span class="text-xs text-slate-400">créditos</span>
+                </div>
                 <div id="admin-link-container" class="hidden">
                     <a href="admin-dashboard.html" class="text-primary hover:text-primary/80 transition-colors">
                         <span class="material-symbols-outlined">admin_panel_settings</span>
@@ -576,12 +581,20 @@ firebase.auth().onAuthStateChanged(async user => {
             if (doc.exists && doc.data().isAdmin) {
                 document.getElementById('admin-link-container').classList.remove('hidden');
             }
+            if (doc.exists) {
+                const credits = doc.data().credits || 0;
+                const headerDisplay = document.getElementById('header-credits-display');
+                const headerCount = document.getElementById('header-credits-count');
+                if (headerDisplay) headerDisplay.classList.remove('hidden');
+                if (headerCount) headerCount.textContent = credits;
+            }
         } catch (e) {
             console.error("Admin check error:", e);
         }
     } else {
         localStorage.removeItem('rr_token');
         document.getElementById('admin-link-container').classList.add('hidden');
+        document.getElementById('header-credits-display')?.classList.add('hidden');
     }
     // Always load pricing regardless of auth
     loadDynamicPricing();

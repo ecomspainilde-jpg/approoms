@@ -266,6 +266,16 @@
             document.documentElement.classList.add('auth-checked');
             
             document.getElementById('user-display-name').textContent = user.displayName?.split(' ')[0] || 'Creativo';
+            
+            // Real-time listener for credits
+            db.collection('users').doc(user.uid).onSnapshot(doc => {
+                if (doc.exists) {
+                    const credits = doc.data().credits || 0;
+                    const balanceEl = document.getElementById('credits-balance');
+                    if (balanceEl) balanceEl.innerHTML = `${credits} <span class="text-xs text-gray-500 font-normal">créditos</span>`;
+                }
+            }, err => console.error("Credit listener error:", err));
+
             await loadUserData(user);
             await loadRenders(user);
         });

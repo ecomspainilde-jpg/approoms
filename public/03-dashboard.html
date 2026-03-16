@@ -63,6 +63,16 @@
 <a class="text-sm font-medium text-nebula-silver hover:text-lunar-white" href="07-consejos-decoracion.html">Blog</a>
 </div>
 <div class="flex items-center gap-4">
+    <!-- Persistent Credits Display -->
+    <div class="flex items-center gap-2 px-3 py-1.5 bg-background-dark/50 border border-white/10 rounded-full">
+        <span class="material-symbols-outlined text-primary text-[18px]">database</span>
+        <span id="header-credits-count" class="text-sm font-bold">--</span>
+        <span class="text-[10px] text-nebula-silver font-medium uppercase tracking-wider hidden sm:inline">Créditos</span>
+        <a href="modal-compra.html" id="header-buy-credits-btn" onclick="window.open(this.href, 'Purchase', 'width=1000,height=800'); return false;" class="ml-1 px-2 py-0.5 bg-primary/10 hover:bg-primary/20 text-primary text-[10px] font-bold rounded-md border border-primary/20 transition-all hidden">
+            COMPRAR
+        </a>
+    </div>
+
     <a href="02-upload-wizard.html" class="bg-primary hover:bg-primary/90 text-background-dark px-5 py-2 rounded-lg font-bold text-sm transition-all flex items-center gap-2">
         <span class="material-symbols-outlined text-sm">add_circle</span>
         Nuevo Render
@@ -221,6 +231,24 @@ firebase.auth().onAuthStateChanged(async (u) => {
                 if (adminLink) adminLink.classList.remove('hidden');
             }
         }
+        
+        // Real-time listener for credits
+        db.collection('users').doc(u.uid).onSnapshot(doc => {
+            if (doc.exists) {
+                const credits = doc.data().credits || 0;
+                const creditText = document.getElementById('user-credits-count');
+                const headerCreditEl = document.getElementById('header-credits-count');
+                const buyBtn = document.getElementById('header-buy-credits-btn');
+                
+                if (creditText) creditText.textContent = credits;
+                if (headerCreditEl) headerCreditEl.textContent = credits;
+                if (buyBtn) {
+                    if (credits <= 2) buyBtn.classList.remove('hidden');
+                    else buyBtn.classList.add('hidden');
+                }
+            }
+        }, err => console.error("Credit listener error:", err));
+
         loadRenders();
     } catch (e) {
         console.error("Error loading user data:", e);

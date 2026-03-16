@@ -211,6 +211,19 @@
         }
         
         document.documentElement.classList.add('auth-checked');
+
+        // Check for error parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('error') === 'insufficient_credits') {
+            const header = document.querySelector('h2');
+            const alert = document.createElement('div');
+            alert.className = "mb-6 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl flex items-center gap-3 text-amber-400";
+            alert.innerHTML = `
+                <span class="material-symbols-outlined">warning</span>
+                <p class="text-sm font-medium">¡Vaya! No tienes suficientes créditos para generar ese render. Elige un paquete abajo para continuar.</p>
+            `;
+            header.parentElement.insertBefore(alert, header);
+        }
     });
 
     let selectedPkgKey = 'package_15';

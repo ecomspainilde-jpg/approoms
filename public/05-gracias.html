@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <!-- Firebase SDK -->
@@ -19,7 +19,7 @@
                     colors: {
                         "primary": "#f0a400",
                         "background-light": "#f8f7f5",
-                        "background-dark": "#0D1117", // Overriding slightly for the requested deep navy-black
+                        "background-dark": "#0D1117", 
                         "soft-charcoal": "#161B22",
                     },
                     fontFamily: {
@@ -69,11 +69,13 @@
 <h1 class="text-xl font-bold tracking-tight text-slate-100">RenderRoom</h1>
 </div>
 <div class="flex items-center gap-4">
-<button class="p-2 rounded-full hover:bg-white/5 transition-colors">
-<span class="material-symbols-outlined text-slate-400">notifications</span>
-</button>
+<div id="header-credits-display" class="hidden flex items-center gap-2 px-3 py-1.5 bg-primary/10 border border-primary/20 rounded-full">
+<span class="material-symbols-outlined text-primary text-sm">toll</span>
+<span id="header-credits-count" class="text-primary text-sm font-bold">--</span>
+<span class="text-xs text-slate-400">créditos</span>
+</div>
 <div class="w-8 h-8 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center overflow-hidden">
-<img alt="User profile" data-alt="Minimalist user profile avatar icon" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBnIVuyKzFoi-KZS_abIL2PDqALKoMDwqvCajli6lGtUvk1BvOHwxX-IGWodjGa2fZBajerUR9mFFNS-80I6uGQ154XvhSMQjrpdtG_KATKvIfJTuncvpwbCf7NR9VPi-zMLcds_jy8PfIK8CCm5IiL-C7Wy5whhaiGu5BfRbekLYccuUaJmkVUx0YZq_E382-XMJ2eA5EDmNwT6_EWqSgWN6aMI2xhOVaKyDN-0E78SlpDkvdytfFPHOWdo-r-annJBWKSm0jJNKBs"/>
+<img alt="User profile" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBnIVuyKzFoi-KZS_abIL2PDqALKoMDwqvCajli6lGtUvk1BvOHwxX-IGWodjGa2fZBajerUR9mFFNS-80I6uGQ154XvhSMQjrpdtG_KATKvIfJTuncvpwbCf7NR9VPi-zMLcds_jy8PfIK8CCm5IiL-C7Wy5whhaiGu5BfRbekLYccuUaJmkVUx0YZq_E382-XMJ2eA5EDmNwT6_EWqSgWN6aMI2xhOVaKyDN-0E78SlpDkvdytfFPHOWdo-r-annJBWKSm0jJNKBs"/>
 </div>
 </div>
 </div>
@@ -97,19 +99,19 @@
 <div class="w-full max-w-xl glass-card rounded-xl p-8 mb-12">
 <div class="flex items-center justify-between mb-8 pb-4 border-b border-white/10">
 <h3 class="text-lg font-semibold text-slate-100 flex items-center gap-2">
-<span class="material-symbols-outlined text-primary">receipt_long</span>
-                    Resumen de Orden
-                </h3>
-<span class="text-xs font-medium uppercase tracking-widest text-primary bg-primary/10 px-3 py-1 rounded-full border border-primary/20">Confirmado</span>
+<span class="material-symbols-outlined text-emerald-500">check_circle</span>
+Pago Confirmado
+</h3>
+<span class="text-xs font-medium uppercase tracking-widest text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">Éxito</span>
 </div>
 <div class="space-y-6">
 <div class="flex items-start gap-4">
-<div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-<span class="material-symbols-outlined text-primary">layers</span>
+<div class="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-emerald-500">account_balance_wallet</span>
 </div>
 <div class="flex-grow">
-<p class="text-slate-400 text-sm">Paquete</p>
-<p class="text-slate-100 font-medium">+5 Renders HD Premium</p>
+<p class="text-slate-400 text-sm">Nuevo Saldo Disponible</p>
+<p id="dynamic-credits-total" class="text-emerald-400 font-black text-3xl">-- créditos</p>
 </div>
 </div>
 <div class="flex items-start gap-4">
@@ -117,37 +119,24 @@
 <span class="material-symbols-outlined text-primary">shield</span>
 </div>
 <div class="flex-grow">
-<p class="text-slate-400 text-sm">Procesador</p>
-<div class="flex items-center gap-2">
-<p class="text-slate-100 font-medium">Stripe Secure</p>
-<span class="text-[10px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded">SSL</span>
+<p class="text-slate-400 text-sm">Transacción Segura</p>
+<p class="text-slate-100 font-medium">Procesado por Stripe</p>
 </div>
 </div>
 </div>
-<div class="flex items-start gap-4">
-<div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-<span class="material-symbols-outlined text-primary">fingerprint</span>
-</div>
-<div class="flex-grow">
-<p class="text-slate-400 text-sm">ID de Sesión</p>
-<p class="text-slate-100 font-mono text-sm">stripe_ref_88291_0x2a9</p>
-</div>
-</div>
-</div>
-<div class="mt-8 pt-6 border-t border-white/10 flex justify-between items-center">
-<span class="text-slate-400">Total Pagado</span>
-<span class="text-2xl font-bold text-primary">$29.00 USD</span>
+<div class="mt-8 pt-6 border-t border-white/10 text-center">
+<p class="text-slate-400 text-sm italic">Tus créditos se han añadido a tu cuenta correctamente.</p>
 </div>
 </div>
 <!-- Primary Actions -->
 <div class="flex flex-col sm:flex-row items-center gap-4 w-full max-w-xl">
 <a href="02-upload-wizard.html" class="w-full bg-gradient-to-r from-primary to-amber-500 hover:from-amber-500 hover:to-primary text-background-dark font-bold py-4 px-8 rounded-xl transition-all duration-300 transform hover:scale-[1.02] flex items-center justify-center gap-2 text-lg shadow-lg shadow-primary/20">
-                Crear mi primer Render
+                Empezar a Renderizar
                 <span class="material-symbols-outlined">arrow_forward</span>
 </a>
-<a href="creditos.html" class="w-full border border-primary/40 hover:bg-primary/5 text-primary font-semibold py-4 px-8 rounded-xl transition-all flex items-center justify-center gap-2">
-<span class="material-symbols-outlined">history</span>
-                Ver mi historial de créditos
+<a href="03-dashboard.html" class="w-full border border-primary/40 hover:bg-primary/5 text-primary font-semibold py-4 px-8 rounded-xl transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">dashboard</span>
+                Ir al Dashboard
 </a>
 </div>
 </main>
@@ -174,6 +163,8 @@
     };
     firebase.initializeApp(firebaseConfig);
 
+    const db = firebase.firestore();
+
     // Auth Logic with FOUC prevention
     firebase.auth().onAuthStateChanged((u) => {
       if (!u) {
@@ -182,6 +173,25 @@
       } else {
         console.log("User authenticated:", u.email);
         document.documentElement.classList.add('auth-checked');
+
+        // Real-time listener for credits
+        db.collection('users').doc(u.uid).onSnapshot(doc => {
+            if (doc.exists) {
+                const credits = doc.data().credits || 0;
+                
+                // Update header
+                const headerDisplay = document.getElementById('header-credits-display');
+                const headerCount = document.getElementById('header-credits-count');
+                if (headerDisplay) headerDisplay.classList.remove('hidden');
+                if (headerCount) headerCount.textContent = credits;
+                
+                // Update main card
+                const dynamicCredits = document.getElementById('dynamic-credits-total');
+                if (dynamicCredits) {
+                    dynamicCredits.textContent = `${credits} créditos`;
+                }
+            }
+        }, err => console.error("Snapshot error:", err));
       }
     });
 </script>

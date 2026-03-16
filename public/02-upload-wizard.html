@@ -143,6 +143,16 @@
         </div>
     </div>
     <div class="flex items-center gap-4">
+        <!-- Persistent Credits Display -->
+        <div class="flex items-center gap-2 px-3 py-1.5 bg-surface-dark border border-border-dark rounded-full">
+            <span class="material-symbols-outlined text-primary text-[18px]">database</span>
+            <span id="header-credits-count" class="text-sm font-bold">--</span>
+            <span class="text-[10px] text-muted-text font-medium uppercase tracking-wider hidden sm:inline">Créditos</span>
+            <a href="modal-compra.html" id="header-buy-credits-btn" onclick="window.open(this.href, 'Purchase', 'width=1000,height=800'); return false;" class="ml-1 px-2 py-0.5 bg-primary/10 hover:bg-primary/20 text-primary text-[10px] font-bold rounded-md border border-primary/20 transition-all hidden">
+                COMPRAR
+            </a>
+        </div>
+        
         <div id="admin-link-container" class="hidden">
             <a href="admin-dashboard.html" class="text-primary hover:text-primary/80 transition-colors">
                 <span class="material-symbols-outlined">admin_panel_settings</span>
@@ -538,6 +548,21 @@ auth.onAuthStateChanged(async (user) => {
         window.location.replace('01-landing-page.html');
         return;
     }
+
+    // Real-time listener for credits
+    db.collection('users').doc(user.uid).onSnapshot(doc => {
+        if (doc.exists) {
+            const credits = doc.data().credits || 0;
+            const creditEl = document.getElementById('header-credits-count');
+            const buyBtn = document.getElementById('header-buy-credits-btn');
+            if (creditEl) creditEl.textContent = credits;
+            if (buyBtn) {
+                // Show buy button if credits are low (e.g., 2 or less)
+                if (credits <= 2) buyBtn.classList.remove('hidden');
+                else buyBtn.classList.add('hidden');
+            }
+        }
+    }, err => console.error("Credit listener error:", err));
 
     try {
         const doc = await db.collection('users').doc(user.uid).get();
@@ -959,12 +984,12 @@ async function generateRender() {
             
             btn.disabled = false;
             btn.innerHTML = '<span class="material-symbols-outlined">payments</span> Comprar Créditos';
-            btn.onclick = () => window.open('modal-compra.html', 'Purchase', 'width=1000,height=800');
+            btn.onclick = () => window.open('modal-compra.html?error=insufficient_credits', 'Purchase', 'width=1000,height=800');
             
             const errBox = document.createElement('div');
             errBox.id = 'gen-error-box';
             errBox.className = 'mt-4 bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 text-amber-400 text-sm flex items-start gap-2 fade-in';
-            errBox.innerHTML = `<span class="material-symbols-outlined text-sm mt-0.5 flex-shrink-0">toll</span><div><strong>No tienes créditos suficientes:</strong><br>Necesitas al menos 1 crédito para generar este render. <a href="modal-compra.html" target="_blank" class="underline font-bold">Haz clic aquí para añadir créditos.</a></div>`;
+            errBox.innerHTML = `<span class="material-symbols-outlined text-sm mt-0.5 flex-shrink-0">toll</span><div><strong>No tienes créditos suficientes:</strong><br>Necesitas al menos 1 crédito para generar este render. <a href="modal-compra.html?error=insufficient_credits" target="_blank" class="underline font-bold">Haz clic aquí para añadir créditos.</a></div>`;
             progressPanel.after(errBox);
             return;
         }

@@ -545,7 +545,7 @@ def api_checkout():
             line_items=[line_item],
             mode='payment',
             success_url=request.host_url + '05-gracias.html?session_id={CHECKOUT_SESSION_ID}',
-            cancel_url=request.host_url + '04-pago-bizum.html',
+            cancel_url=request.host_url + 'precios.html',
             metadata={
                 'userId': user['uid'],
                 'packageId': package_id,
