@@ -30,6 +30,11 @@
         }
     </script>
     <style>
+        /* FOUC Prevention */
+        body { opacity: 0; transition: opacity 0.3s ease; }
+        .auth-checked body { opacity: 1; }
+    </style>
+    <style>
         body { font-family: 'Outfit', sans-serif; background-color: #0a0a0c; color: #e1e1e6; }
         .glass { background: rgba(18, 18, 23, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
         .active-nav { background: rgba(240, 164, 0, 0.1); border-left: 3px solid #f0a400; color: #f0a400; }
@@ -254,9 +259,12 @@
 
         auth.onAuthStateChanged(async (user) => {
             if (!user) {
-                window.location.href = '01-landing-page.html';
+                window.location.replace('01-landing-page.html');
                 return;
             }
+            // Add class to reveal body
+            document.documentElement.classList.add('auth-checked');
+            
             document.getElementById('user-display-name').textContent = user.displayName?.split(' ')[0] || 'Creativo';
             await loadUserData(user);
             await loadRenders(user);

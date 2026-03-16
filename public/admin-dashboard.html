@@ -29,18 +29,16 @@
     <style>
         .glass-nav { background: rgba(13, 17, 23, 0.8); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(228, 159, 12, 0.1); }
         .stat-card { background: linear-gradient(135deg, #1c2128 0%, #161b22 100%); border: 1px solid rgba(255,255,255,0.05); }
+        
+        /* Prevent FOUC: hide body by default */
+        body { opacity: 0; transition: opacity 0.3s ease; }
+        .auth-checked body { opacity: 1; }
     </style>
 </head>
 <body class="bg-background-dark font-display text-slate-100 min-h-screen">
     <div id="loading-overlay" class="fixed inset-0 z-[100] bg-background-dark flex flex-col items-center justify-center">
         <div class="size-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
         <p class="mt-4 text-primary font-bold animate-pulse">Verificando acceso de administrador...</p>
-        <div id="manual-bypass" class="hidden mt-8 flex flex-col items-center gap-2">
-            <p class="text-xs text-slate-500">¿Demasiado tiempo?</p>
-            <button onclick="document.getElementById('loading-overlay').classList.add('hidden'); loadStats(); loadUsers();" class="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs font-bold transition-all">
-                Forzar Entrada (Debug)
-            </button>
-        </div>
     </div>
 
     <!-- Top Navigation -->
@@ -272,49 +270,35 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // Show bypass button after 5 seconds if still loading
-    setTimeout(() => {
-        const bypass = document.getElementById('manual-bypass');
-        if (bypass && !document.getElementById('loading-overlay').classList.contains('hidden')) {
-            bypass.classList.remove('hidden');
-        }
-    }, 5000);
-
     firebase.auth().onAuthStateChanged(async user => {
         if (!user) {
             console.log("No authenticated user found. Redirecting to landing.");
-            window.location.href = '01-landing-page.html';
+            window.location.replace('01-landing-page.html');
             return;
         }
         
-        console.log("Authenticated User UID:", user.uid);
-        console.log("Email:", user.email);
+        console.log("Authenticated User:", user.email);
 
         // Verify Admin Status
         try {
             const userRef = db.collection('users').doc(user.uid);
             const doc = await userRef.get();
-            console.log("Firestore User Doc Exists:", doc.exists);
             
-            if (doc.exists) {
-                const userData = doc.data();
-                console.log("User isAdmin flag:", userData.isAdmin);
-                
-                if (userData.isAdmin === true) {
-                    document.getElementById('loading-overlay').classList.add('hidden');
-                    loadStats();
-                    loadUsers();
-                    return;
-                }
+            if (doc.exists && doc.data().isAdmin === true) {
+                console.log("Admin access granted.");
+                document.documentElement.classList.add('auth-checked');
+                document.getElementById('loading-overlay').classList.add('hidden');
+                loadStats();
+                loadUsers();
+            } else {
+                console.warn("Access denied: Not an admin.");
+                alert('Acceso Denegado: Se requiere privilegios de administrador.');
+                window.location.replace('03-dashboard.html');
             }
-            
-            alert('Acceso Denegado: Se requiere privilegios de administrador para la cuenta: ' + user.email);
-            window.location.href = '03-dashboard.html';
-            
         } catch (e) {
             console.error("Critical Auth Check Failure:", e);
             alert("Error en la verificación de seguridad: " + e.message);
-            window.location.href = '03-dashboard.html';
+            window.location.replace('03-dashboard.html');
         }
     });
 
@@ -328,16 +312,30 @@
             document.getElementById('stat-total-renders').textContent = renderSnap.size;
             
             let totalRevenue = 0;
-            purchaseSnap.forEach(doc => {
-                const amount = doc.data().amount || 0;
-                totalRevenue += amount;
-            });
-            // Prices are stored in cents in purchases collection for Stripe but displayed in EUR here
-            // Checking if amount is likely in cents or EUR
-            const displayRevenue = totalRevenue > 1000 ? (totalRevenue / 100).toFixed(2) : totalRevenue.toFixed(2);
-            document.getElementById('stat-total-revenue').textContent = displayRevenue + '€';
+            const purchasingUsers = new Set();
             
-            const conversion = userSnap.size > 0 ? ((renderSnap.size / userSnap.size) * 100).toFixed(1) : 0;
+            purchaseSnap.forEach(doc => {
+                const data = doc.data();
+                let amount = data.amount || 0;
+                const userId = data.userId;
+                
+                if (userId) purchasingUsers.add(userId);
+                
+                // Normalization logic: 
+                // Stripe amounts are in cents. If amount > 500 we assume it might be cents (unless it's a very large purchase).
+                // A better check is if currency is 'eur' and it's from Stripe.
+                // For now, we use the logic that if it's > 50 it's likely cents (minimum purchase is usually > 1 EUR)
+                if (amount > 50) {
+                    totalRevenue += amount / 100;
+                } else {
+                    totalRevenue += amount;
+                }
+            });
+            
+            document.getElementById('stat-total-revenue').textContent = totalRevenue.toFixed(2) + '€';
+            
+            // Conversion Rate: Users with purchases / Total Users
+            const conversion = userSnap.size > 0 ? ((purchasingUsers.size / userSnap.size) * 100).toFixed(1) : 0;
             document.getElementById('stat-conversion').textContent = conversion + '%';
         } catch (e) {
             console.error("Error loading stats:", e);

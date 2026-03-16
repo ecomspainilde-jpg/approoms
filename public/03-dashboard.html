@@ -41,6 +41,12 @@
             box-shadow: 0 0 20px rgba(228, 159, 12, 0.2);
             border-color: rgba(228, 159, 12, 0.4);
         }
+        .glass-nav { background: rgba(13, 17, 23, 0.7); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(228, 159, 12, 0.1); }
+        .tab-btn.active { color: #e49f0c; border-bottom: 2px solid #e49f0c; }
+        
+        /* Prevent FOUC: hide body by default */
+        body { opacity: 0; transition: opacity 0.3s ease; }
+        .auth-checked body { opacity: 1; }
     </style>
 </head>
 <body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
@@ -176,37 +182,48 @@ const firebaseConfig = {
   messagingSenderId: "124806819551"
 };
 firebase.initializeApp(firebaseConfig);
-
-firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-firebase.auth().onAuthStateChanged(async user => {
-    if (user) {
-        // Update UI
-        const initials = (user.displayName || user.email || 'U').charAt(0).toUpperCase();
-        document.getElementById('user-initials').textContent = initials;
-        
-        // Load Credits & User Info
-        try {
-            const doc = await db.collection('users').doc(user.uid).get();
-            if (doc.exists) {
-                const data = doc.data();
-                if (data.isAdmin) {
-                    document.getElementById('admin-link-container').classList.remove('hidden');
-                }
-                const creditEl = document.getElementById('user-credits-count');
-                if (creditEl) creditEl.textContent = data.credits || 0;
-            }
-        } catch (e) {
-            console.error("Firestore user data error:", e);
-        }
+let user; // Declare user globally
 
-        user.getIdToken().then(token => {
-            localStorage.setItem('rr_token', token);
-            loadRenders();
-        });
-    } else {
-        window.location.href = '01-landing-page.html';
+firebase.auth().onAuthStateChanged(async (u) => {
+    if (!u) {
+        console.log("No user authenticated. Redirecting to landing page...");
+        window.location.replace('01-landing-page.html');
+        return;
+    }
+    
+    console.log("User authenticated:", u.email);
+    user = u;
+    
+    // Set token for API calls
+    try {
+        const token = await u.getIdToken();
+        localStorage.setItem('rr_token', token);
+    } catch (e) {
+        console.error("Error getting token:", e);
+    }
+
+    document.body.classList.add('auth-checked'); // Add class to body to show content
+
+    // Update UI
+    const initials = (user.displayName || user.email || 'U').charAt(0).toUpperCase();
+    const initialsEl = document.getElementById('user-initials');
+    if (initialsEl) initialsEl.textContent = initials;
+    
+    // Load Credits & User Info
+    try {
+        const doc = await db.collection('users').doc(u.uid).get();
+        if (doc.exists) {
+            const data = doc.data();
+            if (data.isAdmin) {
+                const adminLink = document.getElementById('admin-link-container');
+                if (adminLink) adminLink.classList.remove('hidden');
+            }
+        }
+        loadRenders();
+    } catch (e) {
+        console.error("Error loading user data:", e);
     }
 });
 

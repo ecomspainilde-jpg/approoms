@@ -697,17 +697,33 @@ def admin_get_stats():
         users_count = sum(1 for _ in db.collection("users").stream())
         renders_count = sum(1 for _ in db.collection("renders").stream())
 
-        # Calculate total revenue from purchases
+        # Calculate total revenue and conversion metrics
         total_revenue = 0
+        purchasing_users = set()
+        
         for doc in db.collection("purchases").stream():
             p = doc.to_dict()
-            total_revenue += p.get("amount", 0)
+            amount = p.get("amount", 0)
+            user_id = p.get("userId")
+            if user_id:
+                purchasing_users.add(user_id)
+            
+            # Normalization: Stripe (cents) vs manual (EUR)
+            if amount > 50:
+                total_revenue += amount / 100
+            else:
+                total_revenue += amount
+
+        conversion_rate = 0
+        if users_count > 0:
+            conversion_rate = (len(purchasing_users) / users_count) * 100
 
         return jsonify(
             {
                 "totalUsers": users_count,
                 "totalRenders": renders_count,
-                "totalRevenue": total_revenue,
+                "totalRevenue": float("{:.2f}".format(total_revenue)),
+                "conversionRate": float("{:.1f}".format(conversion_rate)),
             }
         )
     except Exception as e:

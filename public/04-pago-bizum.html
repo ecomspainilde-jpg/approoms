@@ -7,6 +7,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
@@ -26,12 +30,15 @@
             },
         }
     </script>
-<style>
+    <style>
         .glass {
             background: rgba(255, 255, 255, 0.03);
             backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
+        /* Prevent FOUC: hide body by default */
+        body { opacity: 0; transition: opacity 0.3s ease; }
+        .auth-checked body { opacity: 1; }
     </style>
 </head>
 <body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
@@ -195,4 +202,27 @@
 </div>
 <p class="text-[10px] text-slate-600 uppercase tracking-[0.2em]">RenderRoom AI © 2024 • Pagos seguros procesados por Stripe</p>
 </footer>
+<script>
+    // ── Firebase Config ─────────────────────────────
+    const firebaseConfig = {
+      projectId: "gen-lang-client-0426824151",
+      appId: "1:124806819551:web:1c90d1154b458fa064036a",
+      storageBucket: "gen-lang-client-0426824151.firebasestorage.app",
+      apiKey: "AIzaSyDj99qdmDt4GiVeRkvCSfTOSDw3uqD-_Ew",
+      authDomain: "gen-lang-client-0426824151.firebaseapp.com",
+      messagingSenderId: "124806819551"
+    };
+    firebase.initializeApp(firebaseConfig);
+
+    // Auth Logic with FOUC prevention
+    firebase.auth().onAuthStateChanged((u) => {
+      if (!u) {
+        console.log("No user authenticated. Redirecting to landing page...");
+        window.location.replace('01-landing-page.html');
+      } else {
+        console.log("User authenticated:", u.email);
+        document.documentElement.classList.add('auth-checked');
+      }
+    });
+</script>
 </body></html>

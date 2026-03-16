@@ -7,6 +7,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
@@ -49,6 +53,9 @@
         .amber-glow {
             box-shadow: 0 0 40px rgba(240, 164, 0, 0.15);
         }
+        /* Prevent FOUC: hide body by default */
+        body { opacity: 0; transition: opacity 0.3s ease; }
+        .auth-checked body { opacity: 1; }
     </style>
 </head>
 <body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen flex flex-col font-display">
@@ -133,15 +140,15 @@
 </div>
 </div>
 <!-- Primary Actions -->
-<div class="flex flex-col sm:row items-center gap-4 w-full max-w-xl">
-<button class="w-full bg-gradient-to-r from-primary to-amber-500 hover:from-amber-500 hover:to-primary text-background-dark font-bold py-4 px-8 rounded-xl transition-all duration-300 transform hover:scale-[1.02] flex items-center justify-center gap-2 text-lg shadow-lg shadow-primary/20">
+<div class="flex flex-col sm:flex-row items-center gap-4 w-full max-w-xl">
+<a href="02-upload-wizard.html" class="w-full bg-gradient-to-r from-primary to-amber-500 hover:from-amber-500 hover:to-primary text-background-dark font-bold py-4 px-8 rounded-xl transition-all duration-300 transform hover:scale-[1.02] flex items-center justify-center gap-2 text-lg shadow-lg shadow-primary/20">
                 Crear mi primer Render
                 <span class="material-symbols-outlined">arrow_forward</span>
-</button>
-<button class="w-full border border-primary/40 hover:bg-primary/5 text-primary font-semibold py-4 px-8 rounded-xl transition-all flex items-center justify-center gap-2">
+</a>
+<a href="creditos.html" class="w-full border border-primary/40 hover:bg-primary/5 text-primary font-semibold py-4 px-8 rounded-xl transition-all flex items-center justify-center gap-2">
 <span class="material-symbols-outlined">history</span>
                 Ver mi historial de créditos
-            </button>
+</a>
 </div>
 </main>
 <!-- Footer -->
@@ -155,4 +162,27 @@
 </div>
 </div>
 </footer>
+<script>
+    // ── Firebase Config ─────────────────────────────
+    const firebaseConfig = {
+      projectId: "gen-lang-client-0426824151",
+      appId: "1:124806819551:web:1c90d1154b458fa064036a",
+      storageBucket: "gen-lang-client-0426824151.firebasestorage.app",
+      apiKey: "AIzaSyDj99qdmDt4GiVeRkvCSfTOSDw3uqD-_Ew",
+      authDomain: "gen-lang-client-0426824151.firebaseapp.com",
+      messagingSenderId: "124806819551"
+    };
+    firebase.initializeApp(firebaseConfig);
+
+    // Auth Logic with FOUC prevention
+    firebase.auth().onAuthStateChanged((u) => {
+      if (!u) {
+        console.log("No user authenticated. Redirecting to landing page...");
+        window.location.replace('01-landing-page.html');
+      } else {
+        console.log("User authenticated:", u.email);
+        document.documentElement.classList.add('auth-checked');
+      }
+    });
+</script>
 </body></html>

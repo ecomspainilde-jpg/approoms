@@ -7,6 +7,9 @@
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <script id="tailwind-config">
         tailwind.config = {
@@ -34,6 +37,11 @@
             },
         }
     </script>
+    <style>
+        /* FOUC Prevention */
+        body { opacity: 0; transition: opacity 0.3s ease; }
+        .auth-checked body { opacity: 1; }
+    </style>
 </head>
 <body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen flex items-center justify-center overflow-hidden">
 <!-- Background Dashboard Blur Mockup -->
@@ -172,6 +180,34 @@
 </div>
 
 <script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyDj99qdmDt4GiVeRkvCSfTOSDw3uqD-_Ew",
+        authDomain: "gen-lang-client-0426824151.firebaseapp.com",
+        projectId: "gen-lang-client-0426824151",
+        storageBucket: "gen-lang-client-0426824151.firebasestorage.app",
+        messagingSenderId: "124806819551",
+        appId: "1:124806819551:web:1c90d1154b458fa064036a"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    auth.onAuthStateChanged(async (user) => {
+        if (!user) {
+            window.location.replace('01-landing-page.html');
+            return;
+        }
+        
+        // Update token in localStorage
+        try {
+            const token = await user.getIdToken();
+            localStorage.setItem('rr_token', token);
+        } catch (e) {
+            console.error("Error getting token:", e);
+        }
+        
+        document.documentElement.classList.add('auth-checked');
+    });
+
     let selectedPkg = 'pro';
     const packages = {
         'basic': { id: 'pkg_single_render', price: '2,50€', credits: '1' },
@@ -192,10 +228,11 @@
     async function handleStripePayment() {
         const btn = document.getElementById('pay-button');
         const btnText = document.getElementById('btn-text');
-        const token = localStorage.getItem('rr_token');
+        const user = auth.currentUser;
 
-        if (!token) {
+        if (!user) {
             alert('Por favor, inicia sesión para realizar la compra.');
+            window.location.replace('01-landing-page.html');
             return;
         }
 
@@ -203,6 +240,7 @@
             btn.disabled = true;
             btnText.textContent = 'Procesando...';
             
+            const token = await user.getIdToken();
             const response = await fetch('/api/checkout', {
                 method: 'POST',
                 headers: {

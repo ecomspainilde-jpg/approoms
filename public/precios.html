@@ -7,7 +7,9 @@
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
@@ -41,6 +43,9 @@
         .pro-glow {
             box-shadow: 0 0 25px rgba(242, 170, 13, 0.15);
         }
+        /* FOUC Prevention */
+        body { opacity: 0; transition: opacity 0.3s ease; }
+        .auth-checked body { opacity: 1; }
     </style>
 </head>
 <body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
@@ -58,9 +63,12 @@
 <a class="text-sm font-semibold text-primary" href="#">Precios</a>
 <a class="text-sm font-semibold text-slate-400 hover:text-primary" href="#">Blog</a>
 </div>
-<button class="bg-primary hover:bg-primary/90 text-background-dark px-6 py-2.5 rounded-lg font-bold text-sm">
-                Crear Render
-            </button>
+<div id="nav-auth-container" class="flex items-center gap-4">
+    <a id="nav-dashboard-link" class="hidden text-sm font-semibold text-slate-400 hover:text-primary" href="03-dashboard.html">Mis Renders</a>
+    <button onclick="handleStart()" class="bg-primary hover:bg-primary/90 text-background-dark px-6 py-2.5 rounded-lg font-bold text-sm">
+        Crear Render
+    </button>
+</div>
 </div>
 </nav>
 <main class="max-w-7xl mx-auto px-6 py-20">
@@ -211,4 +219,37 @@
 </div>
 </div>
 </footer>
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDj99qdmDt4GiVeRkvCSfTOSDw3uqD-_Ew",
+            authDomain: "gen-lang-client-0426824151.firebaseapp.com",
+            projectId: "gen-lang-client-0426824151",
+            storageBucket: "gen-lang-client-0426824151.firebasestorage.app",
+            messagingSenderId: "124806819551",
+            appId: "1:124806819551:web:1c90d1154b458fa064036a"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                document.getElementById('nav-dashboard-link').classList.remove('hidden');
+            } else {
+                document.getElementById('nav-dashboard-link').classList.add('hidden');
+            }
+            document.documentElement.classList.add('auth-checked');
+        });
+
+        function handleStart() {
+            const user = auth.currentUser;
+            if (user) {
+                window.location.href = '02-upload-wizard.html';
+            } else {
+                // Redirect to landing page to show auth modal
+                window.location.href = '01-landing-page.html?auth=register';
+            }
+        }
+    </script>
 </body></html>

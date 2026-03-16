@@ -57,6 +57,11 @@
     #disclaimer-modal { position:fixed; inset:0; background:rgba(0,0,0,.75); z-index:999; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(4px); }
     #disclaimer-box { background:#161B22; border:1px solid #30363D; border-radius:1.25rem; max-width:520px; width:90%; padding:2rem; box-shadow:0 25px 60px rgba(0,0,0,.6); }
 </style>
+  <style>
+    /* Prevent FOUC: hide body by default */
+    body { opacity: 0; transition: opacity 0.3s ease; }
+    .auth-checked body { opacity: 1; }
+  </style>
 </head>
 <body class="bg-background-dark font-display text-slate-100 min-h-screen">
 
@@ -422,25 +427,27 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+const auth = firebase.auth();
 
-firebase.auth().onAuthStateChanged(async user => {
-    if (user) {
-        // Update UI
-        const initials = (user.displayName || user.email || 'U').charAt(0).toUpperCase();
-        document.getElementById('user-initials').textContent = initials;
-
-        // Check Admin
-        try {
-            const doc = await db.collection('users').doc(user.uid).get();
-            if (doc.exists && doc.data().isAdmin) {
-                document.getElementById('admin-link-container').classList.remove('hidden');
-            }
-        } catch (e) {
-            console.error("Admin check error:", e);
-        }
-
-        user.getIdToken().then(token => localStorage.setItem('rr_token', token));
+auth.onAuthStateChanged(async (user) => {
+    if (!user) {
+        window.location.replace('01-landing-page.html');
+        return;
     }
+
+    try {
+        const doc = await db.collection('users').doc(user.uid).get();
+        if (doc.exists && doc.data().isAdmin) {
+            const adminLink = document.getElementById('admin-link-container');
+            if (adminLink) adminLink.classList.remove('hidden');
+        }
+    } catch (e) {
+        console.error("Admin check error:", e);
+    }
+
+    const token = await user.getIdToken();
+    localStorage.setItem('rr_token', token);
+    document.documentElement.classList.add('auth-checked');
 });
 
 function getAuthHeaders() {
