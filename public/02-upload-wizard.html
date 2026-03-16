@@ -288,33 +288,49 @@
 
         <!-- Recommendations Section -->
         <div id="recommendations-section" class="hidden mt-8 fade-in">
-            <div class="flex items-center gap-2 mb-4">
-                <span class="material-symbols-outlined text-primary">auto_awesome</span>
-                <h3 class="font-bold text-lg text-primary">Sugerencias inteligentes (IA)</h3>
-            </div>
-            <p class="text-sm text-muted-text mb-4">Nuestro analista Gemini recomienda estos cambios para el estilo <span id="rec-style-name" class="capitalize font-bold text-slate-200"></span>:</p>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- Add items -->
-                <div class="bg-surface-dark border border-border-dark rounded-xl p-5">
-                    <p class="text-xs font-bold text-green-500 uppercase tracking-widest mb-3 flex items-center gap-1">
-                        <span class="material-symbols-outlined text-sm">add_circle</span> Añadir
-                    </p>
-                    <div id="rec-add-list" class="space-y-3">
-                        <!-- Items injected here -->
+            <div class="bg-surface-dark border border-primary/20 rounded-2xl p-6 shadow-2xl relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-4 opacity-10">
+                    <span class="material-symbols-outlined text-6xl">auto_awesome</span>
+                </div>
+                
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="size-10 rounded-full bg-primary/20 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-primary">psychology</span>
+                    </div>
+                    <div>
+                        <h3 class="font-black text-xl text-slate-100">Sugerencias de Diseño IA</h3>
+                        <p class="text-xs text-muted-text">Basado en el estilo <span id="rec-style-name" class="text-primary font-bold"></span> y el análisis de tu espacio</p>
                     </div>
                 </div>
-                <!-- Remove items -->
-                <div class="bg-surface-dark border border-border-dark rounded-xl p-5">
-                    <p class="text-xs font-bold text-orange-400 uppercase tracking-widest mb-3 flex items-center gap-1">
-                        <span class="material-symbols-outlined text-sm">do_not_disturb_on</span> Quitar/Sustituir
-                    </p>
-                    <div id="rec-remove-list" class="space-y-3">
-                        <!-- Items injected here -->
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Add items -->
+                    <div class="space-y-3">
+                        <p class="text-[10px] font-black text-green-500 uppercase tracking-widest flex items-center gap-2 mb-2">
+                            <span class="size-2 rounded-full bg-green-500 animate-pulse"></span> Recomendado Añadir
+                        </p>
+                        <div id="rec-add-list" class="grid grid-cols-1 gap-2">
+                            <!-- Items injected here -->
+                        </div>
+                    </div>
+                    <!-- Remove items -->
+                    <div class="space-y-3">
+                        <p class="text-[10px] font-black text-orange-400 uppercase tracking-widest flex items-center gap-2 mb-2">
+                            <span class="size-2 rounded-full bg-orange-400 animate-pulse"></span> Sugerido Retirar
+                        </p>
+                        <div id="rec-remove-list" class="grid grid-cols-1 gap-2">
+                            <!-- Items injected here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-6 pt-6 border-t border-border-dark flex items-center justify-between">
+                    <p class="text-[11px] text-muted-text italic max-w-[70%]">Desmarca los elementos que NO quieras que la IA aplique en el render final.</p>
+                    <div class="flex items-center gap-1 text-primary text-[10px] font-bold">
+                        <span class="material-symbols-outlined text-sm">verified</span> IA Activa
                     </div>
                 </div>
             </div>
-            <p class="text-xs text-muted-text mt-4 italic">Selecciona los elementos que quieres que la IA incluya o elimine específicamente.</p>
         </div>
 
         <div class="mt-6 flex justify-between">
@@ -778,20 +794,26 @@ function showRecommendations() {
     
     state.roomData.recommendations.add_es.forEach((item, i) => {
         const div = document.createElement('label');
-        div.className = 'flex items-center gap-3 p-3 bg-background-dark/40 rounded-lg cursor-pointer hover:bg-background-dark/60 transition-colors';
+        div.className = 'flex items-center gap-3 p-3 bg-background-dark/20 border border-white/5 rounded-xl cursor-pointer hover:bg-white/5 transition-all group';
         div.innerHTML = `
-            <input type="checkbox" class="accent-primary rounded" data-type="add" data-item="${item}" checked>
-            <span class="text-sm text-slate-200">${item}</span>
+            <div class="relative flex items-center justify-center">
+                <input type="checkbox" class="peer appearance-none size-5 rounded-md border border-white/20 bg-transparent checked:bg-green-500 checked:border-green-500 transition-all cursor-pointer" data-type="add" data-item="${item}" checked>
+                <span class="material-symbols-outlined text-[14px] text-white absolute opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none">check</span>
+            </div>
+            <span class="text-sm text-slate-300 group-hover:text-white transition-colors capitalize">${item}</span>
         `;
         addList.appendChild(div);
     });
     
     state.roomData.recommendations.remove_es.forEach((item, i) => {
         const div = document.createElement('label');
-        div.className = 'flex items-center gap-3 p-3 bg-background-dark/40 rounded-lg cursor-pointer hover:bg-background-dark/60 transition-colors';
+        div.className = 'flex items-center gap-3 p-3 bg-background-dark/20 border border-white/5 rounded-xl cursor-pointer hover:bg-white/5 transition-all group';
         div.innerHTML = `
-            <input type="checkbox" class="accent-primary rounded" data-type="remove" data-item="${item}" checked>
-            <span class="text-sm text-slate-200">${item}</span>
+            <div class="relative flex items-center justify-center">
+                <input type="checkbox" class="peer appearance-none size-5 rounded-md border border-white/20 bg-transparent checked:bg-orange-500 checked:border-orange-500 transition-all cursor-pointer" data-type="remove" data-item="${item}" checked>
+                <span class="material-symbols-outlined text-[14px] text-white absolute opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none">close</span>
+            </div>
+            <span class="text-sm text-slate-300 group-hover:text-white transition-colors capitalize">${item}</span>
         `;
         removeList.appendChild(div);
     });
@@ -877,6 +899,9 @@ async function generateRender() {
     const btn = document.getElementById('btn-generate');
     btn.disabled = true;
     btn.innerHTML = '<svg class="spin size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> Procesando…';
+
+    const prompt = document.getElementById('prompt-input').value || 'Una habitación bella y acogedora';
+    const primaryImageB64 = state.imagesBase64[state.primaryIndex] || state.imagesBase64[0] || null;
 
     const progressPanel = document.getElementById('gen-progress');
     progressPanel.classList.remove('hidden');
