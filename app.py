@@ -274,14 +274,12 @@ def generate_room_render(
             "Maximum detail on all decorative elements — every texture must be crisp and photorealistic."
         )
         gen_temperature = 0.2
-        gen_candidates  = 2  # generate 2, pick best
     else:
         quality_suffix = (
             "\n\nOUTPUT: Photorealistic interior design photo of the SAME room after restyling. "
             "The client must immediately recognise it as the same physical space."
         )
         gen_temperature = 0.5
-        gen_candidates  = 1
 
     edit_instruction = base_instruction + quality_suffix
 
@@ -304,12 +302,11 @@ def generate_room_render(
                 model="gemini-2.0-flash-exp",
                 contents=[
                     genai_types.Part.from_bytes(data=img_bytes, mime_type="image/jpeg"),
-                    genai_types.Part.from_text(edit_instruction),
+                    genai_types.Part.from_text(text=edit_instruction),
                 ],
                 config=genai_types.GenerateContentConfig(
                     response_modalities=["IMAGE", "TEXT"],
                     temperature=gen_temperature,
-                    candidate_count=gen_candidates,
                 ),
             )
             # Extract image from response — pick candidate with most detail
@@ -337,9 +334,9 @@ def generate_room_render(
     # ── FALLBACK: Imagen Edit API with source image ───────────────────────────
     if base_image_b64:
         try:
-            from vertexai.preview.vision_models import ImageEditingModel  # type: ignore
+            from vertexai.preview.vision_models import ImageGenerationModel, Image as VisionImage  # type: ignore
 
-            edit_model = ImageEditingModel.from_pretrained("imagegeneration@006")
+            edit_model = ImageGenerationModel.from_pretrained("imagegeneration@006")
             src_image  = VisionImage(image_bytes=base64.b64decode(base_image_b64))
 
             imagen_prompt = (
