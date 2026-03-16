@@ -520,9 +520,16 @@ def api_checkout():
         name = pkg_data.get("name", "Credits Package")
         credits_amount = pkg_data.get("creditsAmount", 0)
 
-        session = stripe.checkout.Session.create(
-            payment_method_types=['card', 'paypal', 'ideal'],
-            line_items=[{
+        line_item = {}
+        stripe_price_id = pkg_data.get("stripePriceId")
+        
+        if stripe_price_id:
+            line_item = {
+                'price': stripe_price_id,
+                'quantity': 1,
+            }
+        else:
+            line_item = {
                 'price_data': {
                     'currency': currency,
                     'product_data': {
@@ -531,7 +538,11 @@ def api_checkout():
                     'unit_amount': price,
                 },
                 'quantity': 1,
-            }],
+            }
+
+        session = stripe.checkout.Session.create(
+            payment_method_types=['card', 'paypal', 'ideal', 'link'],
+            line_items=[line_item],
             mode='payment',
             success_url=request.host_url + '05-gracias.html?session_id={CHECKOUT_SESSION_ID}',
             cancel_url=request.host_url + '04-pago-bizum.html',
@@ -830,6 +841,59 @@ def admin_update_pricing():
         )
 
         return jsonify({"success": True, "message": f"Price updated to {new_price}"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/admin/package", methods=["POST"])
+def admin_update_package():
+    """Update a credit package (admin only)."""
+    admin = verify_admin()
+    if not admin:
+        return jsonify({"error": "Unauthorized - Admin access required"}), 403
+
+    if not db:
+        return jsonify({"error": "Firestore not initialized"}), 500
+
+    try:
+        data = request.json
+        pkg_id = data.get("id")
+        name = data.get("name")
+        price = data.get("price")
+        credits_amount = data.get("creditsAmount")
+        stripe_price_id = data.get("stripePriceId")
+        is_active = data.get("isActive", True)
+
+        if not pkg_id:
+            return jsonify({"error": "Missing package id"}), 400
+
+        pkg_ref = db.collection("packages").document(pkg_id)
+        old_pkg = pkg_ref.get()
+        old_data = old_pkg.to_dict() if old_pkg.exists else {}
+
+        update_data = {
+            "updatedAt": datetime.datetime.now(timezone.utc),
+            "updatedBy": admin["uid"]
+        }
+        if name: update_data["name"] = name
+        if price is not None: update_data["price"] = int(price)
+        if credits_amount is not None: update_data["creditsAmount"] = int(credits_amount)
+        if stripe_price_id: update_data["stripePriceId"] = stripe_price_id
+        update_data["isActive"] = is_active
+
+        pkg_ref.update(update_data)
+
+        # Record history
+        db.collection("priceHistory").add({
+            "packageId": pkg_id,
+            "oldData": old_data,
+            "newData": update_data,
+            "changedAt": datetime.datetime.now(timezone.utc),
+            "changedBy": admin["uid"],
+            "type": "package"
+        })
+
+        return jsonify({"success": True, "message": f"Package {pkg_id} updated"})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

@@ -68,75 +68,80 @@
 <p class="text-slate-400 mt-1">Selecciona un paquete para continuar renderizando tus espacios con IA.</p>
 </div>
 </div>
-<!-- Package Selection Grid -->
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-<!-- Básico -->
-<div onclick="selectPackage('basic')" id="pkg-basic" class="flex flex-col gap-4 rounded-xl border border-slate-700 bg-card-dark p-6 cursor-pointer hover:border-slate-500 transition-all group package-card">
-<div class="flex flex-col gap-1">
-<h3 class="text-slate-400 text-sm font-bold uppercase tracking-widest">Básico</h3>
-<div class="flex items-baseline gap-2 mt-2">
-<span class="text-white text-3xl font-black">2,50€</span>
-<span class="text-slate-400 text-sm font-medium">1 render</span>
-</div>
-</div>
-<ul class="space-y-3 mt-2">
-<li class="flex items-center gap-2 text-sm text-slate-300">
-<span class="material-symbols-outlined text-primary text-lg">check_circle</span>
-                                1 crédito de renderizado
-                            </li>
-<li class="flex items-center gap-2 text-sm text-slate-300">
-<span class="material-symbols-outlined text-primary text-lg">check_circle</span>
-                                Calidad Estándar
-                            </li>
-</ul>
-</div>
-<!-- Pro (Selected) -->
-<div onclick="selectPackage('pro')" id="pkg-pro" class="relative flex flex-col gap-4 rounded-xl border-2 border-primary bg-card-dark p-6 cursor-pointer shadow-[0_0_30px_rgba(228,159,12,0.15)] ring-1 ring-primary/50 package-card selected">
-<div class="absolute -top-3 left-1/2 -translate-x-1/2">
-<span class="bg-primary text-background-dark text-xs font-black px-4 py-1 rounded-full uppercase tracking-widest flex items-center gap-1 shadow-lg">
-<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1">star</span>
-                                Popular
-                            </span>
-</div>
-<div class="flex flex-col gap-1">
-<h3 class="text-primary text-sm font-bold uppercase tracking-widest">Pro</h3>
-<div class="flex items-baseline gap-2 mt-2 text-white">
-<span class="text-4xl font-black">10,00€</span>
-<span class="text-primary text-sm font-bold">5 renders</span>
-</div>
-</div>
-<ul class="space-y-3 mt-2">
-<li class="flex items-center gap-2 text-sm text-slate-100 font-medium">
-<span class="material-symbols-outlined text-primary text-lg" style="font-variation-settings: 'FILL' 1">check_circle</span>
-                                5 créditos de renderizado
-                            </li>
-<li class="flex items-center gap-2 text-sm text-slate-100 font-medium">
-<span class="material-symbols-outlined text-primary text-lg" style="font-variation-settings: 'FILL' 1">check_circle</span>
-                                Calidad Ultra HD
-                            </li>
-</ul>
-</div>
-<!-- Agencia -->
-<div onclick="selectPackage('agency')" id="pkg-agency" class="flex flex-col gap-4 rounded-xl border border-slate-700 bg-card-dark p-6 cursor-pointer hover:border-slate-500 transition-all group package-card">
-<div class="flex flex-col gap-1">
-<h3 class="text-slate-400 text-sm font-bold uppercase tracking-widest">Agencia</h3>
-<div class="flex items-baseline gap-2 mt-2">
-<span class="text-white text-3xl font-black">30,00€</span>
-<span class="text-slate-400 text-sm font-medium">20 renders</span>
-</div>
-</div>
-<ul class="space-y-3 mt-2">
-<li class="flex items-center gap-2 text-sm text-slate-300">
-<span class="material-symbols-outlined text-primary text-lg">check_circle</span>
-                                20 créditos de renderizado
-                            </li>
-<li class="flex items-center gap-2 text-sm text-slate-300">
-<span class="material-symbols-outlined text-primary text-lg">check_circle</span>
-                                Procesamiento Prioritario
-                            </li>
-</ul>
-</div>
-</div>
+            <!-- Package Selection Grid -->
+            <div id="packages-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+                <!-- 5 EUR -->
+                <div onclick="selectPackage('package_5')" id="pkg-package_5" class="flex flex-col gap-4 rounded-xl border border-slate-700 bg-card-dark p-4 cursor-pointer hover:border-slate-500 transition-all group package-card">
+                    <div class="flex flex-col gap-1">
+                        <h3 class="text-slate-400 text-xs font-bold uppercase tracking-widest">Inicial</h3>
+                        <div class="flex items-baseline gap-1 mt-1">
+                            <span class="text-white text-2xl font-black">5€</span>
+                            <span class="text-slate-400 text-xs font-medium">5 renders</span>
+                        </div>
+                    </div>
+                    <ul class="space-y-2 mt-1">
+                        <li class="flex items-center gap-2 text-xs text-slate-300">
+                            <span class="material-symbols-outlined text-primary text-base">check_circle</span>
+                            5 créditos
+                        </li>
+                    </ul>
+                </div>
+                <!-- 10 EUR -->
+                <div onclick="selectPackage('package_10')" id="pkg-package_10" class="flex flex-col gap-4 rounded-xl border border-slate-700 bg-card-dark p-4 cursor-pointer hover:border-slate-500 transition-all group package-card">
+                    <div class="flex flex-col gap-1">
+                        <h3 class="text-slate-400 text-xs font-bold uppercase tracking-widest">Estándar</h3>
+                        <div class="flex items-baseline gap-1 mt-1">
+                            <span class="text-white text-2xl font-black">10€</span>
+                            <span class="text-slate-400 text-xs font-medium">12 renders</span>
+                        </div>
+                    </div>
+                    <ul class="space-y-2 mt-1">
+                        <li class="flex items-center gap-2 text-xs text-slate-300">
+                            <span class="material-symbols-outlined text-primary text-base">check_circle</span>
+                            12 créditos
+                        </li>
+                    </ul>
+                </div>
+                <!-- 15 EUR (Selected) -->
+                <div onclick="selectPackage('package_15')" id="pkg-package_15" class="relative flex flex-col gap-4 rounded-xl border-2 border-primary bg-card-dark p-4 cursor-pointer shadow-[0_0_30px_rgba(228,159,12,0.15)] ring-1 ring-primary/50 package-card selected">
+                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
+                        <span class="bg-primary text-background-dark text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest flex items-center gap-1 shadow-lg whitespace-nowrap">
+                            <span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1">star</span>
+                            Recomendado
+                        </span>
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <h3 class="text-primary text-xs font-bold uppercase tracking-widest">Profesional</h3>
+                        <div class="flex items-baseline gap-1 mt-1 text-white">
+                            <span class="text-2xl font-black">15€</span>
+                            <span class="text-primary text-xs font-bold">20 renders</span>
+                        </div>
+                    </div>
+                    <ul class="space-y-2 mt-1">
+                        <li class="flex items-center gap-2 text-xs text-slate-100 font-medium">
+                            <span class="material-symbols-outlined text-primary text-base" style="font-variation-settings: 'FILL' 1">check_circle</span>
+                            20 créditos
+                        </li>
+                    </ul>
+                </div>
+                <!-- 25 EUR -->
+                <div onclick="selectPackage('package_25')" id="pkg-package_25" class="flex flex-col gap-4 rounded-xl border border-slate-700 bg-card-dark p-4 cursor-pointer hover:border-slate-500 transition-all group package-card">
+                    <div class="flex flex-col gap-1">
+                        <h3 class="text-slate-400 text-xs font-bold uppercase tracking-widest">Premium</h3>
+                        <div class="flex items-baseline gap-1 mt-1">
+                            <span class="text-white text-2xl font-black">25€</span>
+                            <span class="text-slate-400 text-xs font-medium">40 renders</span>
+                        </div>
+                    </div>
+                    <ul class="space-y-2 mt-1">
+                        <li class="flex items-center gap-2 text-xs text-slate-300">
+                            <span class="material-symbols-outlined text-primary text-base">check_circle</span>
+                            40 créditos
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
 <!-- Summary & Payment -->
 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center pt-8 border-t border-slate-800">
 <!-- Glassmorphism Box -->
@@ -208,7 +213,7 @@
         document.documentElement.classList.add('auth-checked');
     });
 
-    let selectedPkgKey = 'pro';
+    let selectedPkgKey = 'package_15';
     let availablePackages = {};
 
     async function fetchPackages() {
@@ -217,45 +222,25 @@
             const data = await res.json();
             
             if (data.packages && data.packages.length > 0) {
-                // Map the packages from the backend to our local keys for easier UI handling
-                // We'll search for the IDs we know
-                const backendPackages = data.packages;
-                
-                const findPkg = (id) => backendPackages.find(p => p.id === id);
-                
-                const basic = findPkg('pkg_single_render');
-                const pro = findPkg('pkg_pro_renders');
-                const agency = findPkg('pkg_agency_renders');
-                
-                if (basic) {
-                    availablePackages['basic'] = { 
-                        id: basic.id, 
-                        price: (basic.price / 100).toFixed(2).replace('.', ',') + '€', 
-                        credits: basic.creditsAmount 
+                data.packages.forEach(pkg => {
+                    const uiKey = pkg.id; 
+                    availablePackages[uiKey] = { 
+                        id: pkg.id, 
+                        price: (pkg.price / 100).toFixed(2).replace('.', ',') + '€', 
+                        credits: pkg.creditsAmount 
                     };
-                    document.querySelector('#pkg-basic .text-3xl').textContent = availablePackages['basic'].price;
-                    document.querySelector('#pkg-basic .text-sm.font-medium').textContent = `${basic.creditsAmount} ${basic.creditsAmount == 1 ? 'render' : 'renders'}`;
-                }
-                
-                if (pro) {
-                    availablePackages['pro'] = { 
-                        id: pro.id, 
-                        price: (pro.price / 100).toFixed(2).replace('.', ',') + '€', 
-                        credits: pro.creditsAmount 
-                    };
-                    document.querySelector('#pkg-pro .text-4xl').textContent = availablePackages['pro'].price;
-                    document.querySelector('#pkg-pro .text-sm.font-bold').textContent = `${pro.creditsAmount} ${pro.creditsAmount == 1 ? 'render' : 'renders'}`;
-                }
-                
-                if (agency) {
-                    availablePackages['agency'] = { 
-                        id: agency.id, 
-                        price: (agency.price / 100).toFixed(2).replace('.', ',') + '€', 
-                        credits: agency.creditsAmount 
-                    };
-                    document.querySelector('#pkg-agency .text-3xl').textContent = availablePackages['agency'].price;
-                    document.querySelector('#pkg-agency .text-sm.font-medium').textContent = `${agency.creditsAmount} ${agency.creditsAmount == 1 ? 'render' : 'renders'}`;
-                }
+
+                    const card = document.getElementById(`pkg-${uiKey}`);
+                    if (card) {
+                        const priceEl = card.querySelector('.text-2xl');
+                        const creditsEl = card.querySelector('.text-xs.font-medium');
+                        const listCreditsEl = card.querySelector('li');
+
+                        if (priceEl) priceEl.textContent = availablePackages[uiKey].price;
+                        if (creditsEl) creditsEl.textContent = `${pkg.creditsAmount} renders`;
+                        if (listCreditsEl) listCreditsEl.innerHTML = `<span class="material-symbols-outlined text-primary text-base">check_circle</span> ${pkg.creditsAmount} créditos`;
+                    }
+                });
                 
                 // Refresh summary
                 selectPackage(selectedPkgKey);
