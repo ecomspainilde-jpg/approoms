@@ -194,49 +194,65 @@
                     <!-- package_5 -->
                     <div class="p-4 bg-background-dark rounded-xl border border-white/5">
                         <h4 class="text-sm font-bold text-white mb-1">Pack Inicial</h4>
-                        <p class="text-slate-500 text-[10px] mb-3">ID: package_5 (5 cr.)</p>
+                        <p class="text-slate-500 text-[10px] mb-3">ID: package_5</p>
                         <div class="space-y-3">
                             <div class="relative">
                                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">€</span>
-                                <input type="number" id="price-package_5" step="0.01" min="0" class="w-full bg-surface-dark border border-white/10 rounded-lg pl-7 pr-3 py-2 text-white font-bold text-lg focus:border-primary outline-none" placeholder="5.00">
+                                <input type="number" id="price-package_5" step="0.01" min="0" class="w-full bg-surface-dark border border-white/10 rounded-t-lg pl-7 pr-3 py-2 text-white font-bold text-lg focus:border-primary outline-none" placeholder="Precio">
                             </div>
-                            <button onclick="updatePackage('package_5', 'price-package_5', 5, 'Inicial')" class="w-full py-2 bg-primary/10 text-primary border border-primary/30 font-bold rounded-lg hover:bg-primary/20 transition-all text-sm">Actualizar</button>
+                            <div class="relative mt-[-12px]">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">Cr.</span>
+                                <input type="number" id="credits-package_5" step="1" min="1" class="w-full bg-surface-dark border border-white/10 border-t-0 rounded-b-lg pl-9 pr-3 py-2 text-primary font-bold text-md focus:border-primary outline-none" placeholder="Créditos">
+                            </div>
+                            <button onclick="updatePackage('package_5', 'price-package_5', 'credits-package_5', 'Inicial')" class="w-full py-2 bg-primary/10 text-primary border border-primary/30 font-bold rounded-lg hover:bg-primary/20 transition-all text-sm mt-3">Guardar</button>
                         </div>
                     </div>
                     <!-- package_10 -->
                     <div class="p-4 bg-background-dark rounded-xl border border-white/5">
                         <h4 class="text-sm font-bold text-white mb-1">Pack Estándar</h4>
-                        <p class="text-slate-500 text-[10px] mb-3">ID: package_10 (12 cr.)</p>
+                        <p class="text-slate-500 text-[10px] mb-3">ID: package_10</p>
                         <div class="space-y-3">
                             <div class="relative">
                                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">€</span>
-                                <input type="number" id="price-package_10" step="0.01" min="0" class="w-full bg-surface-dark border border-white/10 rounded-lg pl-7 pr-3 py-2 text-white font-bold text-lg focus:border-primary outline-none" placeholder="10.00">
+                                <input type="number" id="price-package_10" step="0.01" min="0" class="w-full bg-surface-dark border border-white/10 rounded-t-lg pl-7 pr-3 py-2 text-white font-bold text-lg focus:border-primary outline-none" placeholder="Precio">
                             </div>
-                            <button onclick="updatePackage('package_10', 'price-package_10', 12, 'Estándar')" class="w-full py-2 bg-primary/10 text-primary border border-primary/30 font-bold rounded-lg hover:bg-primary/20 transition-all text-sm">Actualizar</button>
+                            <div class="relative mt-[-12px]">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">Cr.</span>
+                                <input type="number" id="credits-package_10" step="1" min="1" class="w-full bg-surface-dark border border-white/10 border-t-0 rounded-b-lg pl-9 pr-3 py-2 text-primary font-bold text-md focus:border-primary outline-none" placeholder="Créditos">
+                            </div>
+                            <button onclick="updatePackage('package_10', 'price-package_10', 'credits-package_10', 'Estándar')" class="w-full py-2 bg-primary/10 text-primary border border-primary/30 font-bold rounded-lg hover:bg-primary/20 transition-all text-sm mt-3">Guardar</button>
                         </div>
                     </div>
                     <!-- package_15 -->
                     <div class="p-4 bg-background-dark rounded-xl border border-white/5 border-primary/30">
                         <h4 class="text-sm font-bold text-white mb-1">Pack Pro</h4>
-                        <p class="text-slate-500 text-[10px] mb-3">ID: package_15 (20 cr.)</p>
+                        <p class="text-slate-500 text-[10px] mb-3">ID: package_15</p>
                         <div class="space-y-3">
                             <div class="relative">
                                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">€</span>
-                                <input type="number" id="price-package_15" step="0.01" min="0" class="w-full bg-surface-dark border border-white/10 rounded-lg pl-7 pr-3 py-2 text-white font-bold text-lg focus:border-primary outline-none" placeholder="15.00">
+                                <input type="number" id="price-package_15" step="0.01" min="0" class="w-full bg-surface-dark border border-white/10 rounded-t-lg pl-7 pr-3 py-2 text-white font-bold text-lg focus:border-primary outline-none" placeholder="Precio">
                             </div>
-                            <button onclick="updatePackage('package_15', 'price-package_15', 20, 'Profesional')" class="w-full py-2 bg-primary/10 text-primary border border-primary/30 font-bold rounded-lg hover:bg-primary/20 transition-all text-sm">Actualizar</button>
+                            <div class="relative mt-[-12px]">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">Cr.</span>
+                                <input type="number" id="credits-package_15" step="1" min="1" class="w-full bg-surface-dark border border-white/10 border-t-0 rounded-b-lg pl-9 pr-3 py-2 text-primary font-bold text-md focus:border-primary outline-none" placeholder="Créditos">
+                            </div>
+                            <button onclick="updatePackage('package_15', 'price-package_15', 'credits-package_15', 'Profesional')" class="w-full py-2 bg-primary/10 text-primary border border-primary/30 font-bold rounded-lg hover:bg-primary/20 transition-all text-sm mt-3">Guardar</button>
                         </div>
                     </div>
                     <!-- package_25 -->
                     <div class="p-4 bg-background-dark rounded-xl border border-white/5">
                         <h4 class="text-sm font-bold text-white mb-1">Pack Premium</h4>
-                        <p class="text-slate-500 text-[10px] mb-3">ID: package_25 (40 cr.)</p>
+                        <p class="text-slate-500 text-[10px] mb-3">ID: package_25</p>
                         <div class="space-y-3">
                             <div class="relative">
                                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">€</span>
-                                <input type="number" id="price-package_25" step="0.01" min="0" class="w-full bg-surface-dark border border-white/10 rounded-lg pl-7 pr-3 py-2 text-white font-bold text-lg focus:border-primary outline-none" placeholder="25.00">
+                                <input type="number" id="price-package_25" step="0.01" min="0" class="w-full bg-surface-dark border border-white/10 rounded-t-lg pl-7 pr-3 py-2 text-white font-bold text-lg focus:border-primary outline-none" placeholder="Precio">
                             </div>
-                            <button onclick="updatePackage('package_25', 'price-package_25', 40, 'Premium')" class="w-full py-2 bg-primary/10 text-primary border border-primary/30 font-bold rounded-lg hover:bg-primary/20 transition-all text-sm">Actualizar</button>
+                            <div class="relative mt-[-12px]">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">Cr.</span>
+                                <input type="number" id="credits-package_25" step="1" min="1" class="w-full bg-surface-dark border border-white/10 border-t-0 rounded-b-lg pl-9 pr-3 py-2 text-primary font-bold text-md focus:border-primary outline-none" placeholder="Créditos">
+                            </div>
+                            <button onclick="updatePackage('package_25', 'price-package_25', 'credits-package_25', 'Premium')" class="w-full py-2 bg-primary/10 text-primary border border-primary/30 font-bold rounded-lg hover:bg-primary/20 transition-all text-sm mt-3">Guardar</button>
                         </div>
                     </div>
                 </div>
@@ -562,19 +578,21 @@
             
             // Credit Packages
             const packs = [
-                {id: 'package_5', input: 'price-package_5', def: '5.00'},
-                {id: 'package_10', input: 'price-package_10', def: '10.00'},
-                {id: 'package_15', input: 'price-package_15', def: '15.00'},
-                {id: 'package_25', input: 'price-package_25', def: '25.00'}
+                {id: 'package_5', priceInput: 'price-package_5', creditsInput: 'credits-package_5', defPrice: '5.00', defCr: 5},
+                {id: 'package_10', priceInput: 'price-package_10', creditsInput: 'credits-package_10', defPrice: '10.00', defCr: 12},
+                {id: 'package_15', priceInput: 'price-package_15', creditsInput: 'credits-package_15', defPrice: '15.00', defCr: 20},
+                {id: 'package_25', priceInput: 'price-package_25', creditsInput: 'credits-package_25', defPrice: '25.00', defCr: 40}
             ];
 
             for (const p of packs) {
                 const doc = await db.collection('packages').doc(p.id).get();
                 if (doc.exists) {
                     const priceInCents = doc.data().price || 0;
-                    document.getElementById(p.input).value = (priceInCents / 100).toFixed(2);
+                    document.getElementById(p.priceInput).value = (priceInCents / 100).toFixed(2);
+                    document.getElementById(p.creditsInput).value = doc.data().creditsAmount || p.defCr;
                 } else {
-                    document.getElementById(p.input).value = p.def;
+                    document.getElementById(p.priceInput).value = p.defPrice;
+                    document.getElementById(p.creditsInput).value = p.defCr;
                 }
             }
         } catch (e) {
@@ -638,12 +656,14 @@
     }
 
     // Update credit package in Firebase
-    async function updatePackage(pkgId, inputId, creditsAmount, name) {
-        const priceInput = document.getElementById(inputId);
+    async function updatePackage(pkgId, priceInputId, creditsInputId, name) {
+        const priceInput = document.getElementById(priceInputId);
+        const creditsInput = document.getElementById(creditsInputId);
         const newPriceEur = parseFloat(priceInput.value);
+        const newCreditsAmount = parseInt(creditsInput.value);
         
-        if (isNaN(newPriceEur) || newPriceEur < 0) {
-            alert('Precio inválido');
+        if (isNaN(newPriceEur) || newPriceEur < 0 || isNaN(newCreditsAmount) || newCreditsAmount < 1) {
+            alert('Precio o cantidad de créditos inválidos');
             return;
         }
 
@@ -660,7 +680,7 @@
             await db.collection('packages').doc(pkgId).set({
                 name: name,
                 price: priceInCents, // Stripe uses cents
-                creditsAmount: creditsAmount,
+                creditsAmount: newCreditsAmount,
                 currency: 'eur',
                 isActive: true,
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()

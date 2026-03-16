@@ -1,0 +1,138 @@
+Both GOOGLE_API_KEY and GEMINI_API_KEY are set. Using GOOGLE_API_KEY.
+Traceback (most recent call last):
+  File "C:\imf\habitacion\test_api.py", line 18, in <module>
+    response = genai_client.models.generate_content(
+        model="gemini-2.0-flash-exp",
+    ...<8 lines>...
+        ),
+    )
+  File "C:\Users\emili\AppData\Roaming\Python\Python314\site-packages\google\genai\models.py", line 5709, in generate_content
+    response = self._generate_content(
+        model=model, contents=contents, config=parsed_config
+    )
+  File "C:\Users\emili\AppData\Roaming\Python\Python314\site-packages\google\genai\models.py", line 4371, in _generate_content
+    response = self._api_client.request(
+        'post', path, request_dict, http_options
+    )
+  File "C:\Users\emili\AppData\Roaming\Python\Python314\site-packages\google\genai\_api_client.py", line 1401, in request
+    response = self._request(http_request, http_options, stream=False)
+  File "C:\Users\emili\AppData\Roaming\Python\Python314\site-packages\google\genai\_api_client.py", line 1237, in _request
+    return self._retry(self._request_once, http_request, stream)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\emili\AppData\Roaming\Python\Python314\site-packages\tenacity\__init__.py", line 470, in __call__
+    do = self.iter(retry_state=retry_state)
+  File "C:\Users\emili\AppData\Roaming\Python\Python314\site-packages\tenacity\__init__.py", line 371, in iter
+    result = action(retry_state)
+  File "C:\Users\emili\AppData\Roaming\Python\Python314\site-packages\tenacity\__init__.py", line 413, in exc_check
+    raise retry_exc.reraise()
+          ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\emili\AppData\Roaming\Python\Python314\site-packages\tenacity\__init__.py", line 184, in reraise
+    raise self.last_attempt.result()
+          ~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Python314\Lib\concurrent\futures\_base.py", line 443, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "C:\Python314\Lib\concurrent\futures\_base.py", line 395, in __get_result
+    raise self._exception
+  File "C:\Users\emili\AppData\Roaming\Python\Python314\site-packages\tenacity\__init__.py", line 473, in __call__
+    result = fn(*args, **kwargs)
+  File "C:\Users\emili\AppData\Roaming\Python\Python314\site-packages\google\genai\_api_client.py", line 1214, in _request_once
+    errors.APIError.raise_for_response(response)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\emili\AppData\Roaming\Python\Python314\site-packages\google\genai\errors.py", line 134, in raise_for_response
+    cls.raise_error(response.status_code, response_json, response)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\emili\AppData\Roaming\Python\Python314\site-packages\google\genai\errors.py", line 159, in raise_error
+    raise ClientError(status_code, response_json, response)
+google.genai.errors.ClientError: 404 NOT_FOUND. {'error': {'code': 404, 'message': 'models/gemini-2.0-flash-exp is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.', 'status': 'NOT_FOUND'}}
+C:\Users\emili\AppData\Roaming\Python\Python314\site-packages\vertexai\_model_garden\_model_garden_models.py:278: UserWarning: This feature is deprecated as of June 24, 2025 and will be removed on June 24, 2026. For details, see https://cloud.google.com/vertex-ai/generative-ai/docs/deprecations/genai-vertexai-sdk.
+  warning_logs.show_deprecation_warning()
+C:\Users\emili\AppData\Roaming\Python\Python314\site-packages\vertexai\vision_models\_vision_models.py:154: UserWarning: This feature is deprecated as of June 24, 2025 and will be removed on June 24, 2026. For details, see https://cloud.google.com/vertex-ai/generative-ai/docs/deprecations/genai-vertexai-sdk.
+  warning_logs.show_deprecation_warning()
+Traceback (most recent call last):
+  File "C:\Users\emili\AppData\Roaming\Python\Python314\site-packages\google\api_core\grpc_helpers.py", line 75, in error_remapped_callable
+    return callable_(*args, **kwargs)
+  File "C:\Users\emili\AppData\Roaming\Python\Python314\site-packages\grpc\_interceptor.py", line 276, in __call__
+    response, ignored_call = self._with_call(
+                             ~~~~~~~~~~~~~~~^
+        request,
+        ^^^^^^^^
+    ...<4 lines>...
+        compression=compression,
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\emili\AppData\Roaming\Python\Python314\site-packages\grpc\_interceptor.py", line 331, in _with_call
+    return call.result(), call
+           ~~~~~~~~~~~^^
+  File "C:\Users\emili\AppData\Roaming\Python\Python314\site-packages\grpc\_channel.py", line 438, in result
+    raise self
+  File "C:\Users\emili\AppData\Roaming\Python\Python314\site-packages\grpc\_interceptor.py", line 314, in continuation
+    response, call = self._thunk(new_method).with_call(
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        request,
+        ^^^^^^^^
+    ...<4 lines>...
+        compression=new_compression,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\emili\AppData\Roaming\Python\Python314\site-packages\grpc\_channel.py", line 1173, in with_call
+    return _end_unary_response_blocking(state, call, True, None)
+  File "C:\Users\emili\AppData\Roaming\Python\Python314\site-packages\grpc\_channel.py", line 990, in _end_unary_response_blocking
+    raise _InactiveRpcError(state)  # pytype: disable=not-instantiable
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+grpc._channel._InactiveRpcError: <_InactiveRpcError of RPC that terminated with:
+	status = StatusCode.INTERNAL
+	details = "Internal error encountered."
+	debug_error_string = "UNKNOWN:Error received from peer ipv4:142.251.140.234:443 {grpc_status:13, grpc_message:"Internal error encountered."}"
+>
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\imf\habitacion\test_api.py", line 42, in <module>
+    result = edit_model.edit_image(
+        prompt="Redecorate this room",
+    ...<2 lines>...
+        number_of_images=1,
+    )
+  File "C:\Users\emili\AppData\Roaming\Python\Python314\site-packages\vertexai\vision_models\_vision_models.py", line 1229, in edit_image
+    return self._generate_images(
+           ~~~~~~~~~~~~~~~~~~~~~^
+        prompt=prompt,
+        ^^^^^^^^^^^^^^
+    ...<18 lines>...
+        person_generation=person_generation,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\emili\AppData\Roaming\Python\Python314\site-packages\vertexai\vision_models\_vision_models.py", line 1034, in _generate_images
+    response = self._endpoint.predict(
+        instances=[instance],
+        parameters=parameters,
+    )
+  File "C:\Users\emili\AppData\Roaming\Python\Python314\site-packages\google\cloud\aiplatform\models.py", line 2630, in predict
+    prediction_response = self._prediction_client.predict(
+        endpoint=self._gca_resource.name,
+    ...<2 lines>...
+        timeout=timeout,
+    )
+  File "C:\Users\emili\AppData\Roaming\Python\Python314\site-packages\google\cloud\aiplatform_v1\services\prediction_service\client.py", line 1014, in predict
+    response = rpc(
+        request,
+    ...<2 lines>...
+        metadata=metadata,
+    )
+  File "C:\Users\emili\AppData\Roaming\Python\Python314\site-packages\google\api_core\gapic_v1\method.py", line 131, in __call__
+    return wrapped_func(*args, **kwargs)
+  File "C:\Users\emili\AppData\Roaming\Python\Python314\site-packages\google\api_core\grpc_helpers.py", line 77, in error_remapped_callable
+    raise exceptions.from_grpc_error(exc) from exc
+google.api_core.exceptions.InternalServerError: 500 Internal error encountered.
+Vertex AI initialized: gen-lang-client-0426824151 in us-central1
+Firebase initialized successfully for project: gen-lang-client-0426824151
+Testing Gemini Flash Normal Quality...
+Gemini Normal ERROR:
+
+Testing Imagen Edit with ImageGenerationModel...
+Imagen Edit ERROR:

@@ -14,7 +14,7 @@ img_bytes = buf.getvalue()
 
 try:
     print("Testing Gemini Flash Normal Quality...")
-    genai_client = google_genai.Client(vertexai=True, project=project_id, location=location)
+    genai_client = google_genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
     response = genai_client.models.generate_content(
         model="gemini-2.0-flash-exp",
         contents=[
@@ -37,7 +37,7 @@ try:
     print("\nTesting Imagen Edit with ImageGenerationModel...")
     from vertexai.preview.vision_models import ImageGenerationModel
     from vertexai.vision_models import Image as VisionImage
-    edit_model = ImageGenerationModel.from_pretrained("imagegeneration@006")
+    edit_model = ImageGenerationModel.from_pretrained("imagen-3.0-generate-001")
     src_image = VisionImage(image_bytes=img_bytes)
     result = edit_model.edit_image(
         prompt="Redecorate this room",
