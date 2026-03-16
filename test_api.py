@@ -35,7 +35,8 @@ except Exception as e:
 
 try:
     print("\nTesting Imagen Edit with ImageGenerationModel...")
-    from vertexai.preview.vision_models import ImageGenerationModel, VisionImage
+    from vertexai.preview.vision_models import ImageGenerationModel
+    from vertexai.vision_models import Image as VisionImage
     edit_model = ImageGenerationModel.from_pretrained("imagegeneration@006")
     src_image = VisionImage(image_bytes=img_bytes)
     result = edit_model.edit_image(

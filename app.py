@@ -334,7 +334,8 @@ def generate_room_render(
     # ── FALLBACK: Imagen Edit API with source image ───────────────────────────
     if base_image_b64:
         try:
-            from vertexai.preview.vision_models import ImageGenerationModel, Image as VisionImage  # type: ignore
+            from vertexai.preview.vision_models import ImageGenerationModel  # type: ignore
+            from vertexai.vision_models import Image as VisionImage  # type: ignore
 
             edit_model = ImageGenerationModel.from_pretrained("imagegeneration@006")
             src_image  = VisionImage(image_bytes=base64.b64decode(base_image_b64))
