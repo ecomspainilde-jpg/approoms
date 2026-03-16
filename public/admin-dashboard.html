@@ -146,43 +146,86 @@
                 <p class="text-slate-500 text-sm mt-1">Modifica los precios de los renders y packs de créditos.</p>
             </div>
             <div class="p-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <!-- Render Price -->
+                <!-- Render Prices -->
+                <h4 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Precios por Render (Individual)</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+                    <!-- Render Normal Price -->
                     <div class="p-6 bg-background-dark rounded-xl border border-white/5">
                         <div class="flex items-center justify-between mb-4">
-                            <h4 class="text-lg font-bold text-white">Precio por Render</h4>
-                            <span class="px-3 py-1 bg-primary/10 text-primary text-xs font-bold rounded-full">ACTIVO</span>
+                            <h4 class="text-lg font-bold text-white">Render Normal</h4>
+                            <span class="px-3 py-1 bg-primary/10 text-primary text-xs font-bold rounded-full">ESTÁNDAR</span>
                         </div>
-                        <p class="text-slate-500 text-sm mb-4">Precio actual por cada render de habitación.</p>
+                        <p class="text-slate-500 text-sm mb-4">Precio para renders en calidad estándar.</p>
                         <div class="flex items-center gap-4">
                             <div class="relative flex-1">
                                 <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">€</span>
-                                <input type="number" id="price-render" step="0.01" min="0" class="w-full bg-surface-dark border border-white/10 rounded-xl pl-8 pr-4 py-3 text-white font-bold text-xl focus:border-primary focus:outline-none" placeholder="2.50">
+                                <input type="number" id="price-render-normal" step="0.01" min="0" class="w-full bg-surface-dark border border-white/10 rounded-xl pl-8 pr-4 py-3 text-white font-bold text-xl focus:border-primary focus:outline-none" placeholder="2.50">
                             </div>
-                            <button onclick="updatePrice('render')" class="px-6 py-3 bg-primary text-background-dark font-bold rounded-xl hover:scale-105 transition-transform">
+                            <button onclick="updatePrice('render_normal')" class="px-6 py-3 bg-primary text-background-dark font-bold rounded-xl hover:scale-105 transition-transform">
                                 Guardar
                             </button>
                         </div>
-                        <p id="render-price-status" class="text-xs mt-3"></p>
+                        <p id="render-normal-price-status" class="text-xs mt-3"></p>
                     </div>
 
-                    <!-- Credits Price -->
+                    <!-- Render High Price -->
                     <div class="p-6 bg-background-dark rounded-xl border border-white/5">
                         <div class="flex items-center justify-between mb-4">
-                            <h4 class="text-lg font-bold text-white">Pack de Créditos</h4>
-                            <span class="px-3 py-1 bg-green-500/10 text-green-500 text-xs font-bold rounded-full">PACK</span>
+                            <h4 class="text-lg font-bold text-white">Render Alta Calidad</h4>
+                            <span class="px-3 py-1 bg-primary/10 text-primary text-xs font-bold rounded-full">PREMIUM</span>
                         </div>
-                        <p class="text-slate-500 text-sm mb-4">Precio por pack de créditos (10 créditos).</p>
+                        <p class="text-slate-500 text-sm mb-4">Precio para renders en alta fidelidad.</p>
                         <div class="flex items-center gap-4">
                             <div class="relative flex-1">
                                 <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">€</span>
-                                <input type="number" id="price-credits" step="0.01" min="0" class="w-full bg-surface-dark border border-white/10 rounded-xl pl-8 pr-4 py-3 text-white font-bold text-xl focus:border-primary focus:outline-none" placeholder="10.00">
+                                <input type="number" id="price-render-high" step="0.01" min="0" class="w-full bg-surface-dark border border-white/10 rounded-xl pl-8 pr-4 py-3 text-white font-bold text-xl focus:border-primary focus:outline-none" placeholder="5.00">
                             </div>
-                            <button onclick="updatePrice('credits')" class="px-6 py-3 bg-primary text-background-dark font-bold rounded-xl hover:scale-105 transition-transform">
+                            <button onclick="updatePrice('render_high')" class="px-6 py-3 bg-primary text-background-dark font-bold rounded-xl hover:scale-105 transition-transform">
                                 Guardar
                             </button>
                         </div>
-                        <p id="credits-price-status" class="text-xs mt-3"></p>
+                        <p id="render-high-price-status" class="text-xs mt-3"></p>
+                    </div>
+                </div>
+
+                <!-- Credit Packs -->
+                <h4 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Packs de Créditos (Tienda)</h4>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Basic Pack -->
+                    <div class="p-6 bg-background-dark rounded-xl border border-white/5">
+                        <h4 class="text-lg font-bold text-white mb-1">Pack Básico</h4>
+                        <p class="text-slate-500 text-xs mb-4">ID: pkg_single_render (1 crédito)</p>
+                        <div class="space-y-4">
+                            <div class="relative">
+                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">€</span>
+                                <input type="number" id="price-pkg-basic" step="0.01" min="0" class="w-full bg-surface-dark border border-white/10 rounded-xl pl-8 pr-4 py-3 text-white font-bold text-xl focus:border-primary outline-none" placeholder="2.50">
+                            </div>
+                            <button onclick="updatePackage('pkg_single_render', 'price-pkg-basic', 1, 'Básico')" class="w-full py-3 bg-primary/10 text-primary border border-primary/30 font-bold rounded-xl hover:bg-primary/20 transition-all">Actualizar Pack</button>
+                        </div>
+                    </div>
+                    <!-- Pro Pack -->
+                    <div class="p-6 bg-background-dark rounded-xl border border-white/5">
+                        <h4 class="text-lg font-bold text-white mb-1">Pack Pro</h4>
+                        <p class="text-slate-500 text-xs mb-4">ID: pkg_pro_renders (5 créditos)</p>
+                        <div class="space-y-4">
+                            <div class="relative">
+                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">€</span>
+                                <input type="number" id="price-pkg-pro" step="0.01" min="0" class="w-full bg-surface-dark border border-white/10 rounded-xl pl-8 pr-4 py-3 text-white font-bold text-xl focus:border-primary outline-none" placeholder="10.00">
+                            </div>
+                            <button onclick="updatePackage('pkg_pro_renders', 'price-pkg-pro', 5, 'Pro')" class="w-full py-3 bg-primary/10 text-primary border border-primary/30 font-bold rounded-xl hover:bg-primary/20 transition-all">Actualizar Pack</button>
+                        </div>
+                    </div>
+                    <!-- Agency Pack -->
+                    <div class="p-6 bg-background-dark rounded-xl border border-white/5">
+                        <h4 class="text-lg font-bold text-white mb-1">Pack Agencia</h4>
+                        <p class="text-slate-500 text-xs mb-4">ID: pkg_agency_renders (20 créditos)</p>
+                        <div class="space-y-4">
+                            <div class="relative">
+                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">€</span>
+                                <input type="number" id="price-pkg-agency" step="0.01" min="0" class="w-full bg-surface-dark border border-white/10 rounded-xl pl-8 pr-4 py-3 text-white font-bold text-xl focus:border-primary outline-none" placeholder="30.00">
+                            </div>
+                            <button onclick="updatePackage('pkg_agency_renders', 'price-pkg-agency', 20, 'Agencia')" class="w-full py-3 bg-primary/10 text-primary border border-primary/30 font-bold rounded-xl hover:bg-primary/20 transition-all">Actualizar Pack</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -488,71 +531,141 @@
     // Load current prices from Firebase
     async function loadPrices() {
         try {
-            const renderDoc = await db.collection('pricing').doc('render').get();
-            const creditsDoc = await db.collection('pricing').doc('credits').get();
+            // Render Prices
+            const normalDoc = await db.collection('pricing').doc('render_normal').get();
+            const highDoc = await db.collection('pricing').doc('render_high').get();
             
-            if (renderDoc.exists) {
-                document.getElementById('price-render').value = renderDoc.data().price;
+            if (normalDoc.exists) {
+                document.getElementById('price-render-normal').value = normalDoc.data().price;
             } else {
-                document.getElementById('price-render').value = '2.50';
+                document.getElementById('price-render-normal').value = '2.50';
+            }
+
+            if (highDoc.exists) {
+                document.getElementById('price-render-high').value = highDoc.data().price;
+            } else {
+                document.getElementById('price-render-high').value = '5.00';
             }
             
-            if (creditsDoc.exists) {
-                document.getElementById('price-credits').value = creditsDoc.data().price;
-            } else {
-                document.getElementById('price-credits').value = '10.00';
+            // Credit Packages
+            const packs = [
+                {id: 'pkg_single_render', input: 'price-pkg-basic', def: '2.50'},
+                {id: 'pkg_pro_renders', input: 'price-pkg-pro', def: '10.00'},
+                {id: 'pkg_agency_renders', input: 'price-pkg-agency', def: '30.00'}
+            ];
+
+            for (const p of packs) {
+                const doc = await db.collection('packages').doc(p.id).get();
+                if (doc.exists) {
+                    // Convert cents to EUR for the input
+                    const priceInCents = doc.data().price || 0;
+                    document.getElementById(p.input).value = (priceInCents / 100).toFixed(2);
+                } else {
+                    document.getElementById(p.input).value = p.def;
+                }
             }
         } catch (e) {
             console.error("Error loading prices:", e);
-            document.getElementById('price-render').value = '2.50';
-            document.getElementById('price-credits').value = '10.00';
         }
     }
 
-    // Update price in Firebase
+    // Update price in Firebase (for renders)
     async function updatePrice(docId) {
-        const inputId = docId === 'render' ? 'price-render' : 'price-credits';
-        const statusId = docId === 'render' ? 'render-price-status' : 'credits-price-status';
+        let inputId, statusId;
+        if (docId === 'render_normal') {
+            inputId = 'price-render-normal';
+            statusId = 'render-normal-price-status';
+        } else if (docId === 'render_high') {
+            inputId = 'price-render-high';
+            statusId = 'render-high-price-status';
+        }
+        
         const newPrice = parseFloat(document.getElementById(inputId).value);
         
         if (isNaN(newPrice) || newPrice < 0) {
-            document.getElementById(statusId).textContent = 'Precio inválido';
-            document.getElementById(statusId).className = 'text-xs mt-3 text-red-500';
+            alert('Precio inválido');
             return;
         }
         
         const btn = document.querySelector(`button[onclick="updatePrice('${docId}')"]`);
         const originalText = btn.textContent;
-        btn.textContent = 'Guardando...';
+        btn.textContent = '...';
         btn.disabled = true;
         
         try {
-            // Get old price for history
             const oldDoc = await db.collection('pricing').doc(docId).get();
             const oldPrice = oldDoc.exists ? oldDoc.data().price : null;
             
-            // Update price
             await db.collection('pricing').doc(docId).set({
                 price: newPrice,
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
                 updatedBy: firebase.auth().currentUser.uid
-            });
+            }, { merge: true });
             
-            // Record in price history
             await db.collection('priceHistory').add({
                 pricingId: docId,
                 oldPrice: oldPrice,
                 newPrice: newPrice,
                 changedBy: firebase.auth().currentUser.uid,
-                changedAt: firebase.firestore.FieldValue.serverTimestamp()
+                changedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                type: 'render'
             });
             
-            document.getElementById(statusId).textContent = '¡Precio actualizado!';
-            document.getElementById(statusId).className = 'text-xs mt-3 text-green-500';
+            if (statusId) {
+                document.getElementById(statusId).textContent = '¡Guardado!';
+                setTimeout(() => { document.getElementById(statusId).textContent = ''; }, 3000);
+            }
         } catch (e) {
             console.error("Error updating price:", e);
-            document.getElementById(statusId).textContent = 'Error al guardar: ' + e.message;
-            document.getElementById(statusId).className = 'text-xs mt-3 text-red-500';
+            alert('Error: ' + e.message);
+        } finally {
+            btn.textContent = originalText;
+            btn.disabled = false;
+        }
+    }
+
+    // Update credit package in Firebase
+    async function updatePackage(pkgId, inputId, creditsAmount, name) {
+        const priceInput = document.getElementById(inputId);
+        const newPriceEur = parseFloat(priceInput.value);
+        
+        if (isNaN(newPriceEur) || newPriceEur < 0) {
+            alert('Precio inválido');
+            return;
+        }
+
+        const btn = document.querySelector(`button[onclick*="'${pkgId}'"]`);
+        const originalText = btn.textContent;
+        btn.textContent = '...';
+        btn.disabled = true;
+
+        try {
+            const priceInCents = Math.round(newPriceEur * 100);
+            const oldDoc = await db.collection('packages').doc(pkgId).get();
+            const oldPrice = oldDoc.exists ? (oldDoc.data().price / 100) : null;
+
+            await db.collection('packages').doc(pkgId).set({
+                name: name,
+                price: priceInCents, // Stripe uses cents
+                creditsAmount: creditsAmount,
+                currency: 'eur',
+                isActive: true,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+
+            await db.collection('priceHistory').add({
+                pricingId: pkgId,
+                oldPrice: oldPrice,
+                newPrice: newPriceEur,
+                changedBy: firebase.auth().currentUser.uid,
+                changedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                type: 'package'
+            });
+
+            alert(`Pack "${name}" actualizado a ${newPriceEur.toFixed(2)}€`);
+        } catch (e) {
+            console.error("Error updating package:", e);
+            alert('Error: ' + e.message);
         } finally {
             btn.textContent = originalText;
             btn.disabled = false;
@@ -579,7 +692,11 @@
             for (const doc of snapshot.docs) {
                 const h = doc.data();
                 const date = h.changedAt ? new Date(h.changedAt.toDate()).toLocaleString() : 'N/A';
-                const productName = h.pricingId === 'render' ? 'Render' : 'Credits Pack';
+                let productName = 'Desconocido';
+                if (h.pricingId === 'render') productName = 'Render (Antiguo)';
+                else if (h.pricingId === 'render_normal') productName = 'Render Normal';
+                else if (h.pricingId === 'render_high') productName = 'Render Alta';
+                else if (h.pricingId === 'credits') productName = 'Pack Créditos';
                 
                 tbody.innerHTML += `
                     <tr class="hover:bg-white/5 transition-colors">

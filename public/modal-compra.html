@@ -208,21 +208,75 @@
         document.documentElement.classList.add('auth-checked');
     });
 
-    let selectedPkg = 'pro';
-    const packages = {
-        'basic': { id: 'pkg_single_render', price: '2,50€', credits: '1' },
-        'pro': { id: 'pkg_pro_renders', price: '10,00€', credits: '5' },
-        'agency': { id: 'pkg_agency_renders', price: '30,00€', credits: '20' }
-    };
+    let selectedPkgKey = 'pro';
+    let availablePackages = {};
+
+    async function fetchPackages() {
+        try {
+            const res = await fetch('/api/admin/pricing');
+            const data = await res.json();
+            
+            if (data.packages && data.packages.length > 0) {
+                // Map the packages from the backend to our local keys for easier UI handling
+                // We'll search for the IDs we know
+                const backendPackages = data.packages;
+                
+                const findPkg = (id) => backendPackages.find(p => p.id === id);
+                
+                const basic = findPkg('pkg_single_render');
+                const pro = findPkg('pkg_pro_renders');
+                const agency = findPkg('pkg_agency_renders');
+                
+                if (basic) {
+                    availablePackages['basic'] = { 
+                        id: basic.id, 
+                        price: (basic.price / 100).toFixed(2).replace('.', ',') + '€', 
+                        credits: basic.creditsAmount 
+                    };
+                    document.querySelector('#pkg-basic .text-3xl').textContent = availablePackages['basic'].price;
+                    document.querySelector('#pkg-basic .text-sm.font-medium').textContent = `${basic.creditsAmount} ${basic.creditsAmount == 1 ? 'render' : 'renders'}`;
+                }
+                
+                if (pro) {
+                    availablePackages['pro'] = { 
+                        id: pro.id, 
+                        price: (pro.price / 100).toFixed(2).replace('.', ',') + '€', 
+                        credits: pro.creditsAmount 
+                    };
+                    document.querySelector('#pkg-pro .text-4xl').textContent = availablePackages['pro'].price;
+                    document.querySelector('#pkg-pro .text-sm.font-bold').textContent = `${pro.creditsAmount} ${pro.creditsAmount == 1 ? 'render' : 'renders'}`;
+                }
+                
+                if (agency) {
+                    availablePackages['agency'] = { 
+                        id: agency.id, 
+                        price: (agency.price / 100).toFixed(2).replace('.', ',') + '€', 
+                        credits: agency.creditsAmount 
+                    };
+                    document.querySelector('#pkg-agency .text-3xl').textContent = availablePackages['agency'].price;
+                    document.querySelector('#pkg-agency .text-sm.font-medium').textContent = `${agency.creditsAmount} ${agency.creditsAmount == 1 ? 'render' : 'renders'}`;
+                }
+                
+                // Refresh summary
+                selectPackage(selectedPkgKey);
+            }
+        } catch (e) {
+            console.error("Error fetching packages:", e);
+        }
+    }
+
+    // Call fetchPackages on load
+    fetchPackages();
 
     function selectPackage(pkg) {
-        selectedPkg = pkg;
+        if (!availablePackages[pkg]) return;
+        selectedPkgKey = pkg;
         // Update UI
         document.querySelectorAll('.package-card').forEach(el => el.classList.remove('selected', 'border-2', 'border-primary', 'shadow-[0_0_30px_rgba(228,159,12,0.15)]', 'ring-1', 'ring-primary/50'));
         document.getElementById(`pkg-${pkg}`).classList.add('selected', 'border-2', 'border-primary', 'shadow-[0_0_30px_rgba(228,159,12,0.15)]', 'ring-1', 'ring-primary/50');
         
-        document.getElementById('display-total').textContent = packages[pkg].price;
-        document.getElementById('display-credits').innerHTML = `<span class="material-symbols-outlined text-sm">add</span> ${packages[pkg].credits} créditos`;
+        document.getElementById('display-total').textContent = availablePackages[pkg].price;
+        document.getElementById('display-credits').innerHTML = `<span class="material-symbols-outlined text-sm">add</span> ${availablePackages[pkg].credits} créditos`;
     }
 
     async function handleStripePayment() {
@@ -247,7 +301,7 @@
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ packageId: packages[selectedPkg].id })
+                body: JSON.stringify({ packageId: availablePackages[selectedPkgKey].id })
             });
 
             const result = await response.json();

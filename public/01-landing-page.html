@@ -193,7 +193,7 @@
                 </h2>
                 <div class="flex flex-col gap-4">
                     <div class="flex items-baseline gap-4">
-                        <span class="text-6xl font-black text-primary">2,50€</span>
+                        <span class="text-6xl font-black text-primary" id="hero-price">2,50€</span>
                         <div class="flex flex-col">
                             <span class="text-slate-500 line-through text-lg font-medium">3,50€ precio de un perrito</span>
                             <span class="bg-white/5 border border-white/10 text-white text-[10px] font-bold px-2 py-0.5 rounded-md w-fit mt-1">¡1€ MENOS!</span>
@@ -397,7 +397,7 @@
         <div class="w-full max-w-md gradient-border p-12 text-center shadow-2xl">
             <h3 class="text-2xl font-bold text-slate-100 mb-2">Plan Render Único</h3>
             <div class="flex items-center justify-center gap-2 mb-8">
-                <span class="text-5xl font-black text-primary">2,50€</span>
+                <span class="text-5xl font-black text-primary" id="pricing-card-price">2,50€</span>
                 <span class="text-slate-500 font-medium">/ render</span>
             </div>
             <ul class="text-left space-y-4 mb-10">
@@ -583,7 +583,26 @@ firebase.auth().onAuthStateChanged(async user => {
         localStorage.removeItem('rr_token');
         document.getElementById('admin-link-container').classList.add('hidden');
     }
+    // Always load pricing regardless of auth
+    loadDynamicPricing();
 });
+
+async function loadDynamicPricing() {
+    try {
+        const res = await fetch('/api/admin/pricing');
+        const data = await res.json();
+        
+        if (data.render_normal) {
+            const priceText = data.render_normal.price.toFixed(2).replace('.', ',') + '€';
+            const heroPriceEl = document.getElementById('hero-price');
+            const cardPriceEl = document.getElementById('pricing-card-price');
+            if (heroPriceEl) heroPriceEl.textContent = priceText;
+            if (cardPriceEl) cardPriceEl.textContent = priceText;
+        }
+    } catch (e) {
+        console.error("Error loading dynamic pricing:", e);
+    }
+}
 
 async function syncUserToFirestore(user) {
     const db = firebase.firestore();

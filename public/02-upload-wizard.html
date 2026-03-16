@@ -56,6 +56,14 @@
     /* Disclaimer modal */
     #disclaimer-modal { position:fixed; inset:0; background:rgba(0,0,0,.75); z-index:999; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(4px); }
     #disclaimer-box { background:#161B22; border:1px solid #30363D; border-radius:1.25rem; max-width:520px; width:90%; padding:2rem; box-shadow:0 25px 60px rgba(0,0,0,.6); }
+    
+    .quality-card { border: 2px solid transparent; transition: all .25s; cursor: pointer; }
+    .quality-card:hover { border-color: rgba(240,164,0,.4); }
+    .quality-card.selected { border-color: #f0a400; background: rgba(240,164,0,0.05); }
+    .quality-card.selected .check-mark { background: #f0a400; border-color: #f0a400; }
+    .quality-card.selected .check-mark::after { opacity: 1; }
+    .check-mark { position: relative; border-radius: 999px; }
+    .check-mark::after { content: 'check'; font-family: 'Material Symbols Outlined'; font-size: 14px; color: #0D1117; opacity: 0; transition: opacity .2s; }
 </style>
   <style>
     /* Prevent FOUC: hide body by default */
@@ -275,9 +283,38 @@
                 <div class="p-3">
                     <p class="font-bold text-sm">Alma Bohemia</p>
                     <p class="text-xs text-muted-text mt-0.5">Libre, artístico y lleno de vida</p>
-                    <a href="13-estilo-bohemio.html" target="_blank" class="text-xs text-primary hover:underline mt-1 block" onclick="event.stopPropagation()">Ver más →</a>
+            </div>
+        </div>
+
+        <!-- Recommendations Section -->
+        <div id="recommendations-section" class="hidden mt-8 fade-in">
+            <div class="flex items-center gap-2 mb-4">
+                <span class="material-symbols-outlined text-primary">auto_awesome</span>
+                <h3 class="font-bold text-lg text-primary">Sugerencias inteligentes (IA)</h3>
+            </div>
+            <p class="text-sm text-muted-text mb-4">Nuestro analista Gemini recomienda estos cambios para el estilo <span id="rec-style-name" class="capitalize font-bold text-slate-200"></span>:</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Add items -->
+                <div class="bg-surface-dark border border-border-dark rounded-xl p-5">
+                    <p class="text-xs font-bold text-green-500 uppercase tracking-widest mb-3 flex items-center gap-1">
+                        <span class="material-symbols-outlined text-sm">add_circle</span> Añadir
+                    </p>
+                    <div id="rec-add-list" class="space-y-3">
+                        <!-- Items injected here -->
+                    </div>
+                </div>
+                <!-- Remove items -->
+                <div class="bg-surface-dark border border-border-dark rounded-xl p-5">
+                    <p class="text-xs font-bold text-orange-400 uppercase tracking-widest mb-3 flex items-center gap-1">
+                        <span class="material-symbols-outlined text-sm">do_not_disturb_on</span> Quitar/Sustituir
+                    </p>
+                    <div id="rec-remove-list" class="space-y-3">
+                        <!-- Items injected here -->
+                    </div>
                 </div>
             </div>
+            <p class="text-xs text-muted-text mt-4 italic">Selecciona los elementos que quieres que la IA incluya o elimine específicamente.</p>
         </div>
 
         <div class="mt-6 flex justify-between">
@@ -323,13 +360,33 @@
             </div>
         </div>
 
-        <!-- Pricing -->
-        <div class="bg-primary/5 border border-primary/20 rounded-xl p-5 flex items-center justify-between mb-6">
-            <div>
-                <p class="font-bold">Render IA · Alta Fidelidad</p>
-                <p class="text-xs text-muted-text">4K · Análisis Gemini · Entrega inmediata</p>
+        <!-- Quality Selection -->
+        <div class="space-y-4 mb-6">
+            <h3 class="font-bold text-sm uppercase tracking-wider text-muted-text">Calidad del Render</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Normal Quality -->
+                <div class="quality-card selected bg-surface-dark p-5 rounded-2xl border border-border-dark flex items-center justify-between" onclick="selectQuality('normal')">
+                    <div class="flex items-center gap-4">
+                        <div class="check-mark size-6 border-2 border-border-dark flex items-center justify-center"></div>
+                        <div>
+                            <p class="font-black text-slate-100">Calidad Normal</p>
+                            <p class="text-[10px] text-muted-text">720p · Optimizado · Rápido</p>
+                        </div>
+                    </div>
+                    <span id="price-display-normal" class="text-2xl font-black text-primary">2,50€</span>
+                </div>
+                <!-- High Quality -->
+                <div class="quality-card bg-surface-dark p-5 rounded-2xl border border-border-dark flex items-center justify-between" onclick="selectQuality('high')">
+                    <div class="flex items-center gap-4">
+                        <div class="check-mark size-6 border-2 border-border-dark flex items-center justify-center"></div>
+                        <div>
+                            <p class="font-black text-slate-100">Alta Fidelidad</p>
+                            <p class="text-[10px] text-muted-text">4K · Realismo Máximo · Gemini Pro</p>
+                        </div>
+                    </div>
+                    <span id="price-display-high" class="text-2xl font-black text-primary">5,00€</span>
+                </div>
             </div>
-            <span class="text-3xl font-black text-primary">2,50€</span>
         </div>
 
         <button id="btn-generate" class="w-full bg-gradient-to-r from-primary to-orange-500 hover:opacity-90 text-background-dark font-black py-4 rounded-xl text-lg transition-all flex items-center justify-center gap-2" onclick="generateRender()">
@@ -400,6 +457,37 @@
                     <h4 class="font-bold text-xs uppercase tracking-wider text-muted-text mb-2">Prompt enviado a Vertex AI Imagen</h4>
                     <p id="prop-prompt" class="text-xs text-slate-500 leading-relaxed font-mono"></p>
                 </div>
+
+                <!-- Action Buttons: PDF and Share -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-border-dark">
+                    <button id="btn-pdf" onclick="generatePDF()" class="flex items-center justify-center gap-2 bg-slate-100 hover:bg-white text-background-dark font-bold py-3 rounded-xl transition-all">
+                        <span class="material-symbols-outlined">description</span> Descargar Propuesta (PDF)
+                    </button>
+                    <!-- Share Dropdown -->
+                    <div class="relative group">
+                        <button class="w-full flex items-center justify-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 font-bold py-3 rounded-xl transition-all">
+                            <span class="material-symbols-outlined">share</span> Compartir Diseño
+                        </button>
+                        <div class="absolute bottom-full left-0 w-full mb-2 bg-surface-dark border border-border-dark rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10 p-2 grid grid-cols-2 gap-2">
+                            <button onclick="shareResult('twitter')" class="flex flex-col items-center gap-1 p-3 rounded-lg hover:bg-white/5 transition-colors">
+                                <span class="material-symbols-outlined text-sky-400">flutter_dash</span>
+                                <span class="text-[10px] font-bold">Twitter</span>
+                            </button>
+                            <button onclick="shareResult('facebook')" class="flex flex-col items-center gap-1 p-3 rounded-lg hover:bg-white/5 transition-colors">
+                                <span class="material-symbols-outlined text-blue-500">facebook</span>
+                                <span class="text-[10px] font-bold">Facebook</span>
+                            </button>
+                            <button onclick="shareResult('whatsapp')" class="flex flex-col items-center gap-1 p-3 rounded-lg hover:bg-white/5 transition-colors">
+                                <span class="material-symbols-outlined text-green-500">chat</span>
+                                <span class="text-[10px] font-bold">WhatsApp</span>
+                            </button>
+                            <button onclick="shareResult('pinterest')" class="flex flex-col items-center gap-1 p-3 rounded-lg hover:bg-white/5 transition-colors">
+                                <span class="material-symbols-outlined text-red-500">push_pin</span>
+                                <span class="text-[10px] font-bold">Pinterest</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="flex gap-4">
@@ -445,6 +533,9 @@ auth.onAuthStateChanged(async (user) => {
         console.error("Admin check error:", e);
     }
 
+    // Load dynamic prices
+    fetchPrices();
+
     const token = await user.getIdToken();
     localStorage.setItem('rr_token', token);
     document.documentElement.classList.add('auth-checked');
@@ -486,8 +577,36 @@ let state = {
     primaryIndex: 0,  // Index of the main photo for the render
     roomData: null,   // Store JSON analysis
     selectedStyle: null,
+    selectedQuality: 'normal',
+    prices: {
+        normal: 2.50,
+        high: 5.00
+    },
     currentStep: 1,
 };
+
+async function fetchPrices() {
+    try {
+        const res = await fetch('/api/admin/pricing');
+        const data = await res.json();
+        if (data.render_normal) state.prices.normal = data.render_normal.price;
+        if (data.render_high) state.prices.high = data.render_high.price;
+        
+        // Update UI
+        document.getElementById('price-display-normal').textContent = `${state.prices.normal.toFixed(2).replace('.', ',')}€`;
+        document.getElementById('price-display-high').textContent = `${state.prices.high.toFixed(2).replace('.', ',')}€`;
+    } catch (e) {
+        console.error("Error fetching prices:", e);
+    }
+}
+
+function selectQuality(q) {
+    state.selectedQuality = q;
+    document.querySelectorAll('.quality-card').forEach(c => c.classList.remove('selected'));
+    const cards = document.querySelectorAll('.quality-card');
+    if (q === 'normal') cards[0].classList.add('selected');
+    else cards[1].classList.add('selected');
+}
 
 // ── Upload Zone ────────────────────────────────────────────────
 const uploadZone = document.getElementById('upload-zone');
@@ -641,7 +760,41 @@ function selectStyle(card) {
     document.querySelectorAll('.style-card').forEach(c => c.classList.remove('selected'));
     card.classList.add('selected');
     state.selectedStyle = card.dataset.style;
+    showRecommendations();
     setBtnEnabled(document.getElementById('btn-to-generate'), true);
+}
+
+function showRecommendations() {
+    if (!state.roomData || !state.roomData.recommendations) return;
+    
+    document.getElementById('rec-style-name').textContent = state.selectedStyle;
+    document.getElementById('recommendations-section').classList.remove('hidden');
+    
+    const addList = document.getElementById('rec-add-list');
+    const removeList = document.getElementById('rec-remove-list');
+    
+    addList.innerHTML = '';
+    removeList.innerHTML = '';
+    
+    state.roomData.recommendations.add_es.forEach((item, i) => {
+        const div = document.createElement('label');
+        div.className = 'flex items-center gap-3 p-3 bg-background-dark/40 rounded-lg cursor-pointer hover:bg-background-dark/60 transition-colors';
+        div.innerHTML = `
+            <input type="checkbox" class="accent-primary rounded" data-type="add" data-item="${item}" checked>
+            <span class="text-sm text-slate-200">${item}</span>
+        `;
+        addList.appendChild(div);
+    });
+    
+    state.roomData.recommendations.remove_es.forEach((item, i) => {
+        const div = document.createElement('label');
+        div.className = 'flex items-center gap-3 p-3 bg-background-dark/40 rounded-lg cursor-pointer hover:bg-background-dark/60 transition-colors';
+        div.innerHTML = `
+            <input type="checkbox" class="accent-primary rounded" data-type="remove" data-item="${item}" checked>
+            <span class="text-sm text-slate-200">${item}</span>
+        `;
+        removeList.appendChild(div);
+    });
 }
 
 // Pre-select style from URL param
@@ -740,8 +893,13 @@ async function generateRender() {
     document.getElementById('spin-ai').classList.add('hidden');
     document.getElementById('label-ai').classList.remove('text-primary','text-green-500');
 
-    const prompt = document.getElementById('prompt-input').value || 'Una habitación bella y acogedora';
-    const primaryImageB64 = state.imagesBase64[state.primaryIndex] || state.imagesBase64[0] || null;
+    // Gather checked recommendations
+    const selectedAdd = Array.from(document.querySelectorAll('#rec-add-list input:checked')).map(i => i.dataset.item);
+    const selectedRemove = Array.from(document.querySelectorAll('#rec-remove-list input:checked')).map(i => i.dataset.item);
+    
+    let enhancedPrompt = prompt;
+    if (selectedAdd.length > 0) enhancedPrompt += ". PLEASE ADD: " + selectedAdd.join(", ");
+    if (selectedRemove.length > 0) enhancedPrompt += ". PLEASE REMOVE/REPLACE: " + selectedRemove.join(", ");
 
     try {
         // Step 1: Real credit check via generation attempt
@@ -758,9 +916,10 @@ async function generateRender() {
                 ...getAuthHeaders()
             },
             body: JSON.stringify({
-                prompt,
+                prompt: enhancedPrompt,
                 room_data: state.roomData,
                 style: state.selectedStyle,
+                quality: state.selectedQuality,
                 image_base64: primaryImageB64
             })
         });
@@ -819,7 +978,51 @@ async function generateRender() {
     }
 }
 
+// ── PDF & Sharing ──────────────────────────────────────────────
+async function generatePDF() {
+    const btn = document.getElementById('btn-pdf');
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="material-symbols-outlined spin text-sm">sync</span> Generando propuesta...';
+    
+    try {
+        const res = await fetch('/api/generate-pdf', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+            body: JSON.stringify({ renderId: state.lastRenderId })
+        });
+        const data = await res.json();
+        if (data.success) {
+            window.open(data.pdfUrl, '_blank');
+        } else {
+            alert("Error al generar PDF: " + data.error);
+        }
+    } catch (e) {
+        console.error(e);
+        alert("Fallo de conexión al generar PDF");
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    }
+}
+
+function shareResult(platform) {
+    const url = encodeURIComponent(window.location.origin);
+    const text = encodeURIComponent("¡Mira el nuevo diseño de mi habitación con RenderRoom AI! ✨ #InteriorDesign #AI");
+    let shareUrl = "";
+    
+    switch(platform) {
+        case 'twitter': shareUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}`; break;
+        case 'facebook': shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`; break;
+        case 'whatsapp': shareUrl = `https://api.whatsapp.com/send?text=${text}%20${url}`; break;
+        case 'pinterest': shareUrl = `https://pinterest.com/pin/create/button/?url=${url}&description=${text}`; break;
+    }
+    
+    if (shareUrl) window.open(shareUrl, '_blank', 'width=600,height=400');
+}
+
 function showResult(data, userPrompt) {
+    state.lastRenderId = data.image_id;
     const errBoxOld = document.getElementById('gen-error-box');
     if (errBoxOld) errBoxOld.remove();
 

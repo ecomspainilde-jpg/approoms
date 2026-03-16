@@ -30,6 +30,7 @@ from vertexai.generative_models import GenerativeModel, Part, Image as VertexIma
 import firebase_admin  # type: ignore
 from firebase_admin import credentials, auth, firestore, storage  # type: ignore
 import stripe  # type: ignore
+from fpdf import FPDF # type: ignore
 
 app = Flask(__name__, static_folder="public", static_url_path="")
 stripe.api_key = os.environ.get("STRIPE_SECRET_KEY", "sk_test_placeholder")
@@ -70,17 +71,24 @@ except Exception as e:
     bucket = None
 
 
-def get_render_price():
-    """Get the current render price from Firebase, fallback to default"""
+def get_render_price(quality: str = "normal"):
+    """Get the current render price from Firebase based on quality, fallback to default"""
     if not db:
-        return 2.50
+        return 2.50 if quality == "normal" else 5.00
     try:
-        doc = db.collection("pricing").document("render").get()
+        doc_id = "render_normal" if quality == "normal" else "render_high"
+        doc = db.collection("pricing").document(doc_id).get()
         if doc.exists:
-            return doc.to_dict().get("price", 2.50)
+            return doc.to_dict().get("price", 2.50 if quality == "normal" else 5.00)
+        
+        # Fallback to old 'render' doc if new docs don't exist yet
+        old_doc = db.collection("pricing").document("render").get()
+        if old_doc.exists:
+            return old_doc.to_dict().get("price", 2.50)
+            
     except Exception as e:
-        print("Error fetching price:", e)
-    return 2.50
+        print(f"Error fetching {quality} price:", e)
+    return 2.50 if quality == "normal" else 5.00
 
 
 def get_credits_price():
@@ -138,8 +146,14 @@ Return ONLY a valid JSON object:
   "inventory_en": "List 5-8 main objects detected across all photos.",
   "blind_spot_data": "Details from context images not visible in master.",
   "detailed_description_es": "Descripción profesional confirmando que hemos triangulado el espacio correctamente.",
-  "imagen_prompt_seed_en": "STRUCTURAL_LOCK: Specific geometric description to ensure 100% fidelity to MASTER IMAGE perspective."
-}"""
+  "imagen_prompt_seed_en": "STRUCTURAL_LOCK: Specific geometric description to ensure 100% fidelity to MASTER IMAGE perspective.",
+  "recommendations": {
+    "add_es": ["Elemento decorativo 1", "Elemento decorativo 2", "Elemento decorativo 3"],
+    "remove_es": ["Objeto a quitar 1", "Objeto a quitar 2"]
+  }
+}
+Note: Recommendations for 'add_es' and 'remove_es' must be tailored to the detected room type and style, focusing on high-impact changes.
+"""
     contents.append(analysis_prompt)
 
     for model_name in models_to_try:
@@ -192,8 +206,11 @@ def generate_room_render(
             f"HIGH-END TRANSFORMATION: {style_desc}. "
             "REPLACE ALL MATERIALS with luxury finishes, implement professional ambient lighting, contemporary upscale design. "
             f"USER REQUEST: {prompt}. "
-            "CRITICAL CONSTRAINTS: ABSOLUTE PERSPECTIVE LOCK. Maintain 100% of the original camera angle, "
-            "window/door positions, and structural layout. 8K photorealistic, interior design magazine quality."
+            "CRITICAL CONSTRAINTS: ABSOLUTE GEOMETRIC LOCK. "
+            "DO NOT MOVE OR RESIZE WALLS, WINDOWS, OR DOORS. "
+            "Maintain 100% of the original camera angle and focal length. "
+            "The transformation must happen WITHIN the existing structural shell. "
+            "8K photorealistic, interior design magazine quality."
         )
 
         # Use Vertex AI Imagen 3.0
@@ -327,6 +344,7 @@ def api_generate_image():
     prompt = data.get("prompt", "")
     room_data = data.get("room_data", {})
     style = data.get("style", "moderno")
+    quality = data.get("quality", "normal")
     image_base64 = data.get("image_base64")
 
     if not prompt:
@@ -383,6 +401,7 @@ def api_generate_image():
                     "email": user.get("email", "unknown"),
                     "prompt": prompt,
                     "style": style,
+                    "quality": quality,
                     "room_type": room_type,
                     "approx_size": room_size,
                     "imageUrl": filename,
@@ -390,7 +409,7 @@ def api_generate_image():
                     "createdAt": datetime.datetime.now(timezone.utc),
                     "roomData": room_data,
                     "fullPrompt": result["full_prompt"],
-                    "price": get_render_price(),
+                    "price": get_render_price(quality),
                     "currency": "EUR",
                     "status": "completed",
                 }
@@ -404,8 +423,8 @@ def api_generate_image():
                 purchase_doc = {
                     "userId": user["uid"],
                     "email": user.get("email", "unknown"),
-                    "productId": f"render_{style}",
-                    "amount": get_render_price(),
+                    "productId": f"render_{style}_{quality}",
+                    "amount": get_render_price(quality),
                     "currency": "EUR",
                     "timestamp": datetime.datetime.now(timezone.utc),
                     "renderId": image_id,
@@ -738,18 +757,30 @@ def admin_get_pricing():
 
     try:
         pricing = {}
-        docs = db.collection("pricing").stream()
-        for doc in docs:
+        # Fetch render prices
+        render_docs = db.collection("pricing").stream()
+        for doc in render_docs:
             pricing[doc.id] = doc.to_dict()
 
+        # Fetch credit packages
+        packages = []
+        pkg_docs = db.collection("packages").stream()
+        for doc in pkg_docs:
+            p = doc.to_dict()
+            p["id"] = doc.id
+            packages.append(p)
+        
+        pricing["packages"] = packages
+
         # Return defaults if not set
-        if "render" not in pricing:
-            pricing["render"] = {"price": 2.50, "description": "Single render"}
-        if "credits" not in pricing:
-            pricing["credits"] = {"price": 10.00, "description": "Credits pack"}
+        if "render_normal" not in pricing:
+            pricing["render_normal"] = {"price": 2.50}
+        if "render_high" not in pricing:
+            pricing["render_high"] = {"price": 5.00}
 
         return jsonify(pricing)
     except Exception as e:
+        print("Error in admin_get_pricing:", e)
         return jsonify({"error": str(e)}), 500
 
 
@@ -792,8 +823,9 @@ def admin_update_pricing():
                 "pricingId": doc_id,
                 "oldPrice": old_price,
                 "newPrice": float(new_price),
-                "changedBy": admin["uid"],
                 "changedAt": datetime.datetime.now(timezone.utc),
+                "changedBy": admin["uid"],
+                "type": "render"
             }
         )
 
@@ -828,6 +860,102 @@ def admin_get_price_history():
             history.append(h)
         return jsonify(history)
     except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/generate-pdf", methods=["POST"])
+def api_generate_pdf():
+    """Generate a PDF report for a render."""
+    user = verify_token()
+    if not user:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    data = request.json
+    render_id = data.get("renderId")
+    if not render_id:
+        return jsonify({"error": "Missing renderId"}), 400
+
+    if not db or not bucket:
+        return jsonify({"error": "Firebase services not initialized"}), 500
+
+    try:
+        doc_ref = db.collection("renders").document(render_id)
+        doc = doc_ref.get()
+        if not doc.exists:
+            return jsonify({"error": "Render not found"}), 404
+        
+        render_data = doc.to_dict()
+        if render_data["userId"] != user["uid"] and not verify_admin():
+            return jsonify({"error": "Access denied"}), 403
+
+        # from fpdf import FPDF # Moved to top
+        
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_font("helvetica", "B", 24)
+        pdf.set_text_color(240, 164, 0) # Primary color
+        pdf.cell(0, 20, "Propuesta de Diseño RenderRoom", ln=True, align="C")
+        
+        pdf.ln(10)
+        pdf.set_font("helvetica", "B", 14)
+        pdf.set_text_color(0, 0, 0)
+        pdf_title = f"{render_data.get('room_type', 'Habitación')} - Estilo {render_data.get('style', 'Moderno').capitalize()}"
+        pdf.cell(0, 10, f"Proyecto: {pdf_title}", ln=True)
+        
+        created_at = render_data.get('createdAt')
+        date_str = created_at.strftime('%d/%m/%Y') if hasattr(created_at, 'strftime') else 'Reciente'
+        pdf.cell(0, 10, f"Fecha: {date_str}", ln=True)
+        
+        pdf.ln(10)
+        pdf.set_font("helvetica", "B", 12)
+        pdf.cell(0, 10, "Análisis del Espacio:", ln=True)
+        pdf.set_font("helvetica", "", 10)
+        analysis_text = render_data.get("roomData", {}).get("detailed_description_es", "No disponible")
+        pdf.multi_cell(0, 5, analysis_text)
+        
+        pdf.ln(5)
+        pdf.set_font("helvetica", "B", 12)
+        pdf.cell(0, 10, "Recomendaciones de Estilo:", ln=True)
+        
+        recs = render_data.get("roomData", {}).get("recommendations", {})
+        if recs:
+            pdf.set_font("helvetica", "B", 10)
+            pdf.cell(0, 7, "Elementos sugeridos para añadir:", ln=True)
+            pdf.set_font("helvetica", "", 10)
+            for item in recs.get("add_es", []):
+                pdf.cell(0, 7, f"- {item}", ln=True)
+            
+            pdf.ln(2)
+            pdf.set_font("helvetica", "B", 10)
+            pdf.cell(0, 7, "Elementos a retirar o mejorar:", ln=True)
+            pdf.set_font("helvetica", "", 10)
+            for item in recs.get("remove_es", []):
+                pdf.cell(0, 7, f"- {item}", ln=True)
+        
+        pdf.ln(15)
+        pdf.set_font("helvetica", "I", 8)
+        pdf.set_text_color(128, 128, 128)
+        pdf.cell(0, 10, "Este informe ha sido generado automáticamente por la tecnología RoomChic AI.", align="C")
+
+        # Output to bytes
+        pdf_content = pdf.output(dest='S')
+        
+        # Upload to Firebase Storage
+        pdf_blob_path = f"reports/{user['uid']}/{render_id}.pdf"
+        blob = bucket.blob(pdf_blob_path)
+        blob.upload_from_string(pdf_content, content_type="application/pdf")
+        
+        # Make public URL
+        blob.make_public()
+        pdf_url = blob.public_url
+        
+        # Update render doc
+        doc_ref.update({"pdfUrl": pdf_url})
+        
+        return jsonify({"success": True, "pdfUrl": pdf_url})
+        
+    except Exception as e:
+        print("Error generating PDF:", e)
         return jsonify({"error": str(e)}), 500
 
 
