@@ -1036,14 +1036,39 @@ async function generatePDF() {
     btn.innerHTML = '<span class="material-symbols-outlined spin text-sm">sync</span> Generando propuesta...';
     
     try {
+        // Build inline render data as fallback when render wasn't saved to Firestore
+        const inlineRenderData = {
+            room_type: state.roomData ? state.roomData.room_type : 'Habitación',
+            approx_size: state.roomData ? state.roomData.approx_size : '',
+            style: state.selectedStyle || 'moderno',
+            roomData: state.roomData || {},
+            createdAt: new Date().toISOString()
+        };
+
+        const payload = { renderId: state.lastRenderId || null };
+        if (!state.lastRenderId) {
+            payload.renderData = inlineRenderData;
+        }
+
         const res = await fetch('/api/generate-pdf', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
-            body: JSON.stringify({ renderId: state.lastRenderId })
+            body: JSON.stringify(payload)
         });
         const data = await res.json();
         if (data.success) {
-            window.open(data.pdfUrl, '_blank');
+            if (data.pdfUrl) {
+                window.open(data.pdfUrl, '_blank');
+            } else if (data.pdfBase64) {
+                // Fallback: open from base64 when Storage is unavailable
+                const byteChars = atob(data.pdfBase64);
+                const byteArr = new Uint8Array(byteChars.length);
+                for (let i = 0; i < byteChars.length; i++) byteArr[i] = byteChars.charCodeAt(i);
+                const blob = new Blob([byteArr], { type: 'application/pdf' });
+                const url = URL.createObjectURL(blob);
+                window.open(url, '_blank');
+                setTimeout(() => URL.revokeObjectURL(url), 60000);
+            }
         } else {
             alert("Error al generar PDF: " + data.error);
         }

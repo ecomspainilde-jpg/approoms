@@ -360,10 +360,14 @@ def api_generate_image():
 
         image_b64 = result["image_base64"]
 
+        # Generate a local image_id regardless of storage availability
+        image_id = str(uuid.uuid4())
+
         # Check Firebase Storage
         if not bucket:
             return jsonify(
                 {
+                    "image_id": image_id,
                     "image_base64": image_b64,
                     "warning": "Firebase Storage not initialized. Image not saved.",
                     "full_prompt": result["full_prompt"],
@@ -381,8 +385,7 @@ def api_generate_image():
                 input_data = base64.b64decode(image_base64)
                 input_blob.upload_from_string(input_data, content_type="image/png")
 
-            # Save Generated Render to Firebase Storage
-            image_id = str(uuid.uuid4())
+            # Save Generated Render to Firebase Storage (image_id already set above)
             filename = f"renders/{user['uid']}/{image_id}.png"
             blob = bucket.blob(filename)
             image_data = base64.b64decode(image_b64)
@@ -444,6 +447,7 @@ def api_generate_image():
             print("Error saving to Firebase:", e)
             return jsonify(
                 {
+                    "image_id": image_id,
                     "image_base64": image_b64,
                     "warning": f"Error saving to Firebase: {str(e)}",
                     "full_prompt": result["full_prompt"],
@@ -978,23 +982,30 @@ def api_generate_pdf():
 
     data = request.json
     render_id = data.get("renderId")
-    if not render_id:
-        return jsonify({"error": "Missing renderId"}), 400
 
-    if db is None:
-        return jsonify({"error": "Firestore not initialized"}), 500
-    if bucket is None:
-        return jsonify({"error": "Firebase Storage not initialized"}), 500
+    # Try to load render data from Firestore if we have a render_id and db
+    render_data = None
+    doc_ref = None
+    if render_id and db is not None:
+        try:
+            doc_ref = db.collection("renders").document(render_id)
+            doc = doc_ref.get()
+            if doc.exists:
+                render_data = doc.to_dict()
+                if render_data.get("userId") != user["uid"] and not verify_admin():
+                    return jsonify({"error": "Access denied"}), 403
+        except Exception as e:
+            print("Error fetching render from Firestore:", e)
+
+    # Fallback: use inline data passed from the frontend
+    if render_data is None:
+        inline = data.get("renderData", {})
+        if not inline:
+            return jsonify({"error": "Missing renderId and no inline renderData provided"}), 400
+        render_data = inline
+        render_id = render_id or str(uuid.uuid4())
 
     try:
-        doc_ref = db.collection("renders").document(render_id)
-        doc = doc_ref.get()
-        if not doc.exists:
-            return jsonify({"error": "Render not found"}), 404
-        
-        render_data = doc.to_dict()
-        if render_data["userId"] != user["uid"] and not verify_admin():
-            return jsonify({"error": "Access denied"}), 403
 
         # from fpdf import FPDF # Moved to top
         
@@ -1047,20 +1058,27 @@ def api_generate_pdf():
 
         # Output to bytes
         pdf_content = pdf.output(dest='S')
-        
-        # Upload to Firebase Storage
-        pdf_blob_path = f"reports/{user['uid']}/{render_id}.pdf"
-        blob = bucket.blob(pdf_blob_path)
-        blob.upload_from_string(pdf_content, content_type="application/pdf")
-        
-        # Make public URL
-        blob.make_public()
-        pdf_url = blob.public_url
-        
-        # Update render doc
-        doc_ref.update({"pdfUrl": pdf_url})
-        
-        return jsonify({"success": True, "pdfUrl": pdf_url})
+
+        # Try to upload to Firebase Storage, fall back to base64 delivery
+        if bucket is not None:
+            try:
+                pdf_blob_path = f"reports/{user['uid']}/{render_id}.pdf"
+                blob = bucket.blob(pdf_blob_path)
+                blob.upload_from_string(pdf_content, content_type="application/pdf")
+                blob.make_public()
+                pdf_url = blob.public_url
+                if doc_ref:
+                    try:
+                        doc_ref.update({"pdfUrl": pdf_url})
+                    except Exception:
+                        pass
+                return jsonify({"success": True, "pdfUrl": pdf_url})
+            except Exception as upload_err:
+                print("PDF upload failed, delivering as base64:", upload_err)
+
+        # Deliver PDF as base64 when storage is unavailable
+        pdf_b64 = base64.b64encode(pdf_content).decode("utf-8")
+        return jsonify({"success": True, "pdfBase64": pdf_b64})
         
     except Exception as e:
         print("Error generating PDF:", e)
