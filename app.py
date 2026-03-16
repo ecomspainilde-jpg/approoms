@@ -223,38 +223,57 @@ def generate_room_render(
         if room_data:
             arch = room_data.get("architecture_en", "")
             seed = room_data.get("imagen_prompt_seed_en", "")
+            room_type = room_data.get("room_type", "room")
+            dims = room_data.get("dimensions_est", "")
         else:
             arch = ""
             seed = ""
+            room_type = "room"
+            dims = ""
         
-        # Step 1: Theoretical BEFORE description (Conceptual Structural Anchor)
-        structural_prompt = (
-            "Professional architectural photography, wide-angle lens. "
-            "SCENE CONTEXT: Extreme clutter, ancient worn-out furniture, dim poor lighting, scratched floors. "
-            f"STRUCTURAL ANCHOR: {arch}. Perspective lock: {seed}. "
+        # ── TIER 1: ABSOLUTE STRUCTURAL LOCK ─────────────────────────────────
+        # These elements must remain pixel-perfect identical to the original photo.
+        absolute_lock = (
+            "ABSOLUTE STRUCTURAL LOCK — THESE ELEMENTS MUST REMAIN IDENTICAL TO THE ORIGINAL PHOTO: "
+            "All walls (exact position, shape, and their current surface color/texture — do NOT repaint or retexture walls). "
+            "All windows (exact size, shape, position, mullions, and natural light coming through them). "
+            "All doors and door frames (exact position and size). "
+            "Floor plan and floor area dimensions (do NOT reshape the room). "
+            "Ceiling shape, height, structural beams, and any fixed architectural details. "
+            "Any built-in structural element such as columns, alcoves, or fixed radiators. "
+            "The camera viewpoint and focal length (same angle, same perspective lines, same framing). "
+            f"Architectural reference: {arch}. Perspective seed: {seed}. "
         )
 
-        # Step 2: AFTER transformation (The actual generation)
-        transformation_prompt = (
-            f"HIGH-END TRANSFORMATION: {style_desc}. "
-            "REPLACE ALL MATERIALS with luxury finishes, implement professional ambient lighting, contemporary upscale design. "
-            f"USER REQUEST: {prompt}. "
-            "CRITICAL CONSTRAINTS: ABSOLUTE GEOMETRIC LOCK. "
-            "DO NOT MOVE OR RESIZE WALLS, WINDOWS, OR DOORS. "
-            "Maintain 100% of the original camera angle and focal length. "
-            "The transformation must happen WITHIN the existing structural shell. "
-            "8K photorealistic, interior design magazine quality."
+        # ── TIER 2: ALLOWED CHANGES (style & decor layer only) ─────────────────
+        allowed_changes = (
+            f"STYLE RESKIN ONLY — Apply {style_desc} style. "
+            "YOU MAY ONLY CHANGE THE FOLLOWING MOVABLE OR DECORATIVE ELEMENTS: "
+            "Furniture (sofas, chairs, tables, beds, shelves, desks — replace existing pieces with style-appropriate ones). "
+            "Lighting fixtures (ceiling lights, floor lamps, table lamps, pendant lights — replace with style-coherent alternatives). "
+            "Wall art and paintings (add or replace artwork on walls, keep the wall surface itself unchanged). "
+            "Textiles (rugs, curtains, cushions, bedcovers, throws — replace with style-coherent alternatives). "
+            "Decorative accessories (plants, vases, books, mirrors, sculptures, candles). "
+            "Floor finish color or material tone (keep same floor area and layout, change only the visual finish). "
+            f"Client preferences: {prompt}. "
+        )
+
+        # ── TIER 3: Quality bar ────────────────────────────────────────────────
+        quality_bar = (
+            "OUTPUT: 8K ultra-photorealistic interior design photography. "
+            "Accurate global illumination, soft shadows, realistic material reflections. "
+            "The viewer must immediately recognise this as the exact same physical room — "
+            "same spatial layout, same window light, same camera angle — with only the decoration changed."
         )
 
         # Use Vertex AI Imagen 3.0
         model = ImageGenerationModel.from_pretrained("imagen-3.0-generate-001")
-        
-        # Build the final prompt combining everything
-        # We explicitly tell Imagen 3.0 to act as a Gemini-powered engine for high-fidelity interior design.
+
         final_prompt = (
-            f"Gemini-powered Architectural Transformation. "
-            f"Original Scene: {structural_prompt} "
-            f"Required Evolution: {transformation_prompt}"
+            f"Interior design restyling of a {room_type}{' (' + dims + ')' if dims else ''}. "
+            f"{absolute_lock} "
+            f"{allowed_changes} "
+            f"{quality_bar}"
         )
 
         for attempt in range(max_retries):
