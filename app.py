@@ -632,15 +632,16 @@ def api_checkout():
             }
 
         session = stripe.checkout.Session.create(
-            payment_method_types=['card', 'paypal', 'ideal', 'link'],
+            payment_method_types=['card'],
             line_items=[line_item],
             mode='payment',
             success_url=request.host_url + '05-gracias.html?session_id={CHECKOUT_SESSION_ID}',
-            cancel_url=request.host_url + 'precios.html',
+            cancel_url=request.host_url + 'modal-compra.html?error=cancelled',
+            client_reference_id=user['uid'],
             metadata={
                 'userId': user['uid'],
                 'packageId': package_id,
-                'creditsAmount': credits_amount
+                'creditsAmount': str(credits_amount)
             }
         )
 
@@ -650,23 +651,44 @@ def api_checkout():
         return jsonify({"error": str(e)}), 500
 
 
-@firestore.transactional
-def add_credits_txn(transaction, user_ref, credits_amount, amount_paid):
-    user_doc = user_ref.get(transaction=transaction)
-    if user_doc.exists:
-        data = user_doc.to_dict()
-        new_credits = data.get("credits", 0) + credits_amount
-        new_purchases = data.get("totalPurchases", 0) + amount_paid
-        transaction.update(user_ref, {
-            "credits": new_credits,
-            "totalPurchases": new_purchases
-        })
-    else:
-        transaction.set(user_ref, {
-            "credits": credits_amount,
-            "totalPurchases": amount_paid,
-            "totalGenerations": 0
-        })
+def add_credits_to_user(user_id, credits_amount, amount_paid):
+    """Atomically add credits to a user using a Firestore transaction."""
+    user_ref = db.collection("users").document(user_id)
+
+    @firestore.transactional
+    def _txn(transaction):
+        snapshot = user_ref.get(transaction=transaction)
+        if snapshot.exists:
+            current = snapshot.to_dict()
+            new_credits = current.get("credits", 0) + credits_amount
+            new_purchases = current.to_dict().get("totalPurchases", 0) + amount_paid if hasattr(snapshot, 'to_dict') else amount_paid
+            transaction.update(user_ref, {
+                "credits": new_credits,
+                "totalPurchases": firestore.Increment(amount_paid)
+            })
+        else:
+            transaction.set(user_ref, {
+                "credits": credits_amount,
+                "totalPurchases": amount_paid,
+                "totalGenerations": 0
+            })
+
+    try:
+        _txn(db.transaction())
+    except Exception:
+        # Fallback: non-transactional update
+        snap = user_ref.get()
+        if snap.exists:
+            user_ref.update({
+                "credits": firestore.Increment(credits_amount),
+                "totalPurchases": firestore.Increment(amount_paid)
+            })
+        else:
+            user_ref.set({
+                "credits": credits_amount,
+                "totalPurchases": amount_paid,
+                "totalGenerations": 0
+            })
 
 
 @app.route("/api/webhook", methods=["POST"])
@@ -678,30 +700,39 @@ def stripe_webhook():
         event = stripe.Webhook.construct_event(
             payload, sig_header, webhook_secret
         )
-    except ValueError as e:
+    except ValueError:
         return jsonify({'error': 'Invalid payload'}), 400
-    except stripe.error.SignatureVerificationError as e:
+    except stripe.error.SignatureVerificationError:
         return jsonify({'error': 'Invalid signature'}), 400
 
     if event['type'] == 'checkout.session.completed':
-        session = event['data']['object']
+        session_obj = event['data']['object']
         
-        user_id = session.get('metadata', {}).get('userId')
-        package_id = session.get('metadata', {}).get('packageId')
-        credits_amount = int(session.get('metadata', {}).get('creditsAmount', 0))
-        amount_paid = session.get('amount_total', 0)
+        user_id = session_obj.get('metadata', {}).get('userId') or session_obj.get('client_reference_id')
+        package_id = session_obj.get('metadata', {}).get('packageId')
+        credits_amount = int(session_obj.get('metadata', {}).get('creditsAmount', 0))
+        amount_paid = session_obj.get('amount_total', 0)
+        session_id = session_obj.get('id', '')
         
-        if db and user_id:
-            db.collection("transactions").document(session['id']).set({
+        print(f"Webhook: payment completed user={user_id} credits={credits_amount} amount={amount_paid}")
+        
+        if db and user_id and credits_amount > 0:
+            # Idempotency: only process once
+            txn_ref = db.collection("transactions").document(session_id)
+            if txn_ref.get().exists:
+                print(f"Webhook: session {session_id} already processed, skipping.")
+                return jsonify({'status': 'already_processed'})
+
+            txn_ref.set({
                 "userId": user_id,
                 "packageId": package_id,
                 "amountPaid": amount_paid,
+                "creditsAmount": credits_amount,
                 "status": "completed",
                 "createdAt": datetime.datetime.now(timezone.utc),
             })
-            
-            user_ref = db.collection("users").document(user_id)
-            add_credits_txn(db.transaction(), user_ref, credits_amount, amount_paid)
+            add_credits_to_user(user_id, credits_amount, amount_paid)
+            print(f"Webhook: {credits_amount} credits added to user {user_id}")
 
     return jsonify({'status': 'success'})
 
