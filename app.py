@@ -875,8 +875,10 @@ def api_generate_pdf():
     if not render_id:
         return jsonify({"error": "Missing renderId"}), 400
 
-    if not db or not bucket:
-        return jsonify({"error": "Firebase services not initialized"}), 500
+    if db is None:
+        return jsonify({"error": "Firestore not initialized"}), 500
+    if bucket is None:
+        return jsonify({"error": "Firebase Storage not initialized"}), 500
 
     try:
         doc_ref = db.collection("renders").document(render_id)
