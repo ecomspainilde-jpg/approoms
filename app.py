@@ -476,12 +476,47 @@ def get_my_renders():
             r = doc.to_dict()
             r["id"] = doc.id
             # Convert datetime to string for JSON
-            if "createdAt" in r:
+            if "createdAt" in r and r["createdAt"]:
                 r["createdAt"] = r["createdAt"].isoformat()
+            
+            # Proxy URLs
+            if r.get("imageUrl"):
+                r["imageUrl"] = f"/api/storage/{r['imageUrl']}"
+            if r.get("inputImageUrl"):
+                r["inputImageUrl"] = f"/api/storage/{r['inputImageUrl']}"
+                
             result.append(r)
         return jsonify(result)
     except Exception as e:
         print("Error fetching from Firestore:", e)
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/storage/<path:path>")
+def serve_firebase_storage(path):
+    """Proxy route to serve files from Firebase Storage."""
+    if not bucket:
+        return jsonify({"error": "Storage not initialized"}), 500
+    
+    try:
+        blob = bucket.blob(path)
+        if not blob.exists():
+            return jsonify({"error": "File not found"}), 404
+        
+        # Download as bytes
+        data = blob.download_as_bytes()
+        
+        # Content type mapping
+        content_type = "image/png"
+        if path.endswith(".jpg") or path.endswith(".jpeg"):
+            content_type = "image/jpeg"
+        elif path.endswith(".pdf"):
+            content_type = "application/pdf"
+            
+        from flask import Response
+        return Response(data, mimetype=content_type)
+    except Exception as e:
+        print(f"Error serving storage path {path}:", e)
         return jsonify({"error": str(e)}), 500
 
 
@@ -706,6 +741,13 @@ def admin_get_renders():
             r["id"] = doc.id
             if "createdAt" in r and r["createdAt"]:
                 r["createdAt"] = r["createdAt"].isoformat()
+            
+            # Proxy URLs
+            if r.get("imageUrl"):
+                r["imageUrl"] = f"/api/storage/{r['imageUrl']}"
+            if r.get("inputImageUrl"):
+                r["inputImageUrl"] = f"/api/storage/{r['inputImageUrl']}"
+                
             renders.append(r)
         return jsonify(renders)
     except Exception as e:
