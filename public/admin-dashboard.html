@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="dark" lang="es">
+<html class="light" lang="es">
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
@@ -17,9 +17,9 @@
             theme: {
                 extend: {
                     colors: {
-                        "primary": "#e49f0c",
-                        "background-dark": "#0D1117",
-                        "surface-dark": "#161b22",
+                        "primary": "#f0a500",
+                        "background-light": "#fefefe",
+                        "surface-light": "#ffffff",
                     },
                     fontFamily: { "display": ["Inter", "sans-serif"] },
                 },
@@ -27,16 +27,17 @@
         }
     </script>
     <style>
-        .glass-nav { background: rgba(13, 17, 23, 0.8); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(228, 159, 12, 0.1); }
-        .stat-card { background: linear-gradient(135deg, #1c2128 0%, #161b22 100%); border: 1px solid rgba(255,255,255,0.05); }
+        .glass-nav { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(240, 165, 0, 0.1); }
+        .stat-card { background: #ffffff; border: 1px solid rgba(0,0,0,0.05); box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); transition: transform 0.2s; }
+        .stat-card:hover { transform: translateY(-2px); }
         
         /* Prevent FOUC: hide body by default */
         body { opacity: 0; transition: opacity 0.3s ease; }
         .auth-checked body { opacity: 1; }
     </style>
 </head>
-<body class="bg-background-dark font-display text-slate-100 min-h-screen">
-    <div id="loading-overlay" class="fixed inset-0 z-[100] bg-background-dark flex flex-col items-center justify-center">
+<body class="bg-slate-50 font-display text-slate-900 min-h-screen">
+    <div id="loading-overlay" class="fixed inset-0 z-[100] bg-white flex flex-col items-center justify-center">
         <div class="size-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
         <p class="mt-4 text-primary font-bold animate-pulse">Verificando acceso de administrador...</p>
     </div>
@@ -46,71 +47,72 @@
         <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
             <div class="flex items-center gap-2">
                 <span class="material-symbols-outlined text-primary text-3xl">admin_panel_settings</span>
-                <h1 class="text-xl font-bold tracking-tight text-slate-100">Render<span class="text-primary">Room</span> <span class="text-xs uppercase bg-primary/20 text-primary px-2 py-0.5 rounded ml-2">Admin</span></h1>
+                <h1 class="text-xl font-bold tracking-tight text-slate-900">Render<span class="text-primary">Room</span> <span class="text-[10px] uppercase bg-primary/10 text-primary px-2 py-0.5 rounded ml-2 font-black">Admin</span></h1>
             </div>
             <div class="flex items-center gap-4">
                 <div class="hidden md:flex items-center gap-4">
-                    <button onclick="switchTab('overview')" class="text-sm font-medium hover:text-primary transition-colors" id="tab-overview">Resumen</button>
-                    <button onclick="switchTab('users')" class="text-sm font-medium hover:text-primary transition-colors" id="tab-users">Usuarios</button>
-                    <button onclick="switchTab('pricing')" class="text-sm font-medium hover:text-primary transition-colors text-primary" id="tab-pricing">Precios</button>
-                    <button onclick="switchTab('history')" class="text-sm font-medium hover:text-primary transition-colors" id="tab-history">Historial</button>
+                    <button onclick="switchTab('overview')" class="text-sm font-semibold hover:text-primary transition-colors text-slate-600" id="tab-overview">Resumen</button>
+                    <button onclick="switchTab('users')" class="text-sm font-semibold hover:text-primary transition-colors text-slate-600" id="tab-users">Usuarios</button>
+                    <button onclick="switchTab('pricing')" class="text-sm font-semibold hover:text-primary transition-colors text-slate-600" id="tab-pricing">Precios</button>
+                    <button onclick="switchTab('history')" class="text-sm font-semibold hover:text-primary transition-colors text-slate-600" id="tab-history">Historial</button>
                 </div>
-                <a class="text-sm font-medium hover:text-primary transition-colors" href="01-landing-page.html">Ir a la Web</a>
-                <button onclick="firebase.auth().signOut()" class="text-xs text-slate-400 hover:text-primary transition-colors">Cerrar Sesión</button>
+                <div class="h-6 w-px bg-slate-200 mx-1"></div>
+                <a class="text-sm font-bold text-primary hover:underline transition-colors" href="01-landing-page.html">Ir a la Web</a>
+                <button onclick="firebase.auth().signOut()" class="text-xs font-bold text-slate-400 hover:text-red-500 transition-colors">Cerrar Sesión</button>
             </div>
         </div>
     </nav>
 
     <main class="max-w-7xl mx-auto px-6 pt-24 pb-12">
         <header class="mb-10">
-            <h2 class="text-3xl font-extrabold">Panel de Control</h2>
-            <p class="text-slate-500">Visualiza el estado global de la plataforma y gestiona usuarios.</p>
+            <h2 class="text-3xl font-extrabold text-slate-900">Panel de Control</h2>
+            <p class="text-slate-500 font-medium tracking-tight">Visualiza el estado global de la plataforma y gestiona usuarios.</p>
         </header>
 
         <!-- Stats Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
             <div class="stat-card p-6 rounded-2xl">
                 <div class="flex justify-between items-start mb-4">
-                    <div class="p-3 bg-blue-500/10 text-blue-500 rounded-xl">
+                    <div class="p-3 bg-blue-50 text-blue-600 rounded-xl">
                         <span class="material-symbols-outlined">group</span>
                     </div>
                 </div>
-                <p class="text-slate-500 text-sm font-bold uppercase tracking-wider">Total Usuarios</p>
-                <h3 id="stat-total-users" class="text-3xl font-black mt-1">Cargando...</h3>
+                <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest">Total Usuarios</p>
+                <h3 id="stat-total-users" class="text-3xl font-black mt-1 text-slate-900">Cargando...</h3>
             </div>
             <div class="stat-card p-6 rounded-2xl">
                 <div class="flex justify-between items-start mb-4">
-                    <div class="p-3 bg-primary/10 text-primary rounded-xl">
+                    <div class="p-3 bg-amber-50 text-primary rounded-xl">
                         <span class="material-symbols-outlined">render_output</span>
                     </div>
                 </div>
-                <p class="text-slate-500 text-sm font-bold uppercase tracking-wider">Renders Generados</p>
-                <h3 id="stat-total-renders" class="text-3xl font-black mt-1">Cargando...</h3>
+                <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest">Renders Generados</p>
+                <h3 id="stat-total-renders" class="text-3xl font-black mt-1 text-slate-900">Cargando...</h3>
             </div>
             <div class="stat-card p-6 rounded-2xl">
                 <div class="flex justify-between items-start mb-4">
-                    <div class="p-3 bg-green-500/10 text-green-500 rounded-xl">
+                    <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
                         <span class="material-symbols-outlined">payments</span>
                     </div>
                 </div>
-                <p class="text-slate-500 text-sm font-bold uppercase tracking-wider">Ingresos Est.</p>
-                <h3 id="stat-total-revenue" class="text-3xl font-black mt-1">Cargando...</h3>
+                <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest">Ingresos Est.</p>
+                <h3 id="stat-total-revenue" class="text-3xl font-black mt-1 text-slate-900">Cargando...</h3>
             </div>
             <div class="stat-card p-6 rounded-2xl border-primary/20">
                 <div class="flex justify-between items-start mb-4">
-                    <div class="p-3 bg-accent-violet/10 text-8b5cf6 rounded-xl">
+                    <div class="p-3 bg-violet-50 text-violet-600 rounded-xl">
                         <span class="material-symbols-outlined">monitoring</span>
                     </div>
                 </div>
-                <p class="text-slate-500 text-sm font-bold uppercase tracking-wider">Conversión</p>
-                <h3 id="stat-conversion" class="text-3xl font-black mt-1">--%</h3>
+                <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest">Conversión</p>
+                <h3 id="stat-conversion" class="text-3xl font-black mt-1 text-slate-900">--%</h3>
             </div>
         </div>
 
         <!-- Users Table -->
-        <section id="section-users" class="bg-surface-dark rounded-2xl border border-white/5 overflow-hidden shadow-2xl">
-            <div class="p-6 border-b border-white/5 flex justify-between items-center">
-                <h3 class="text-xl font-bold flex items-center gap-2">
+        <section id="section-users" class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                <h3 class="text-lg font-bold flex items-center gap-2 text-slate-800">
                     <span class="material-symbols-outlined text-primary">manage_accounts</span>
                     Usuarios Registrados
                 </h3>
@@ -118,7 +120,7 @@
             <div class="overflow-x-auto">
                 <table class="w-full text-left">
                     <thead>
-                        <tr class="text-xs font-bold text-slate-500 uppercase tracking-widest border-b border-white/5">
+                        <tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 bg-slate-50/30">
                             <th class="px-6 py-4">Usuario</th>
                             <th class="px-6 py-4">Email</th>
                             <th class="px-6 py-4">Último Render</th>
@@ -126,10 +128,9 @@
                             <th class="px-6 py-4 text-right">Acciones</th>
                         </tr>
                     </thead>
-                    <tbody id="user-table-body" class="divide-y divide-white/5">
-                        <!-- Users will be loaded here -->
+                    <tbody id="user-table-body" class="divide-y divide-slate-50 font-medium text-slate-600">
                         <tr>
-                            <td colspan="5" class="px-6 py-10 text-center text-slate-500">Cargando base de datos de usuarios...</td>
+                            <td colspan="5" class="px-6 py-12 text-center text-slate-400 italic">Cargando base de datos...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -137,122 +138,155 @@
         </section>
 
         <!-- Pricing Management -->
-        <section id="section-pricing" class="bg-surface-dark rounded-2xl border border-white/5 overflow-hidden shadow-2xl mb-12" style="display:none;">
-            <div class="p-6 border-b border-white/5">
-                <h3 class="text-xl font-bold flex items-center gap-2">
+        <section id="section-pricing" class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm mb-12" style="display:none;">
+            <div class="p-6 border-b border-slate-100 bg-slate-50/50">
+                <h3 class="text-lg font-bold flex items-center gap-2 text-slate-800">
                     <span class="material-symbols-outlined text-primary">sell</span>
                     Gestión de Precios
                 </h3>
-                <p class="text-slate-500 text-sm mt-1">Modifica los precios de los renders y packs de créditos.</p>
+                <p class="text-slate-500 text-xs font-medium mt-1">Modifica los precios de los renders y packs de créditos.</p>
             </div>
             <div class="p-6">
                 <!-- Render Prices -->
-                <h4 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Precios por Render (Individual)</h4>
+                <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6">Precios por Render (Individual)</h4>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
                     <!-- Render Normal Price -->
-                    <div class="p-6 bg-background-dark rounded-xl border border-white/5">
+                    <div class="p-6 bg-slate-50 rounded-2xl border border-slate-100">
                         <div class="flex items-center justify-between mb-4">
-                            <h4 class="text-lg font-bold text-white">Render Normal</h4>
-                            <span class="px-3 py-1 bg-primary/10 text-primary text-xs font-bold rounded-full">ESTÁNDAR</span>
+                            <h4 class="text-sm font-bold text-slate-900">Render Normal</h4>
+                            <span class="px-3 py-1 bg-primary/10 text-primary text-[10px] font-black rounded-full uppercase">ESTÁNDAR</span>
                         </div>
-                        <p class="text-slate-500 text-sm mb-4">Precio para renders en calidad estándar.</p>
+                        <p class="text-slate-500 text-xs mb-6">Precio para renders en calidad estándar.</p>
                         <div class="flex items-center gap-4">
                             <div class="relative flex-1">
                                 <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">€</span>
-                                <input type="number" id="price-render-normal" step="0.01" min="0" class="w-full bg-surface-dark border border-white/10 rounded-xl pl-8 pr-4 py-3 text-white font-bold text-xl focus:border-primary focus:outline-none" placeholder="2.50">
+                                <input type="number" id="price-render-normal" step="0.01" min="0" class="w-full bg-white border border-slate-200 rounded-xl pl-8 pr-4 py-3 text-slate-900 font-bold text-xl focus:border-primary focus:ring-0 outline-none" placeholder="2.50">
                             </div>
-                            <button onclick="updatePrice('render_normal')" class="px-6 py-3 bg-primary text-background-dark font-bold rounded-xl hover:scale-105 transition-transform">
+                            <button onclick="updatePrice('render_normal')" class="px-6 py-3 bg-primary text-white font-bold rounded-xl hover:scale-105 transition-transform shadow-lg shadow-primary/20">
                                 Guardar
                             </button>
                         </div>
-                        <p id="render-normal-price-status" class="text-xs mt-3"></p>
+                        <p id="render-normal-price-status" class="text-xs mt-3 font-medium text-emerald-600"></p>
                     </div>
 
                     <!-- Render High Price -->
-                    <div class="p-6 bg-background-dark rounded-xl border border-white/5">
+                    <div class="p-6 bg-slate-50 rounded-2xl border border-slate-100">
                         <div class="flex items-center justify-between mb-4">
-                            <h4 class="text-lg font-bold text-white">Render Alta Calidad</h4>
-                            <span class="px-3 py-1 bg-primary/10 text-primary text-xs font-bold rounded-full">PREMIUM</span>
+                            <h4 class="text-sm font-bold text-slate-900">Render Alta Calidad</h4>
+                            <span class="px-3 py-1 bg-primary/10 text-primary text-[10px] font-black rounded-full uppercase">PREMIUM</span>
                         </div>
-                        <p class="text-slate-500 text-sm mb-4">Precio para renders en alta fidelidad.</p>
+                        <p class="text-slate-500 text-xs mb-6">Precio para renders en alta fidelidad.</p>
                         <div class="flex items-center gap-4">
                             <div class="relative flex-1">
                                 <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">€</span>
-                                <input type="number" id="price-render-high" step="0.01" min="0" class="w-full bg-surface-dark border border-white/10 rounded-xl pl-8 pr-4 py-3 text-white font-bold text-xl focus:border-primary focus:outline-none" placeholder="5.00">
+                                <input type="number" id="price-render-high" step="0.01" min="0" class="w-full bg-white border border-slate-200 rounded-xl pl-8 pr-4 py-3 text-slate-900 font-bold text-xl focus:border-primary focus:ring-0 outline-none" placeholder="5.00">
                             </div>
-                            <button onclick="updatePrice('render_high')" class="px-6 py-3 bg-primary text-background-dark font-bold rounded-xl hover:scale-105 transition-transform">
+                            <button onclick="updatePrice('render_high')" class="px-6 py-3 bg-primary text-white font-bold rounded-xl hover:scale-105 transition-transform shadow-lg shadow-primary/20">
                                 Guardar
                             </button>
                         </div>
-                        <p id="render-high-price-status" class="text-xs mt-3"></p>
+                        <p id="render-high-price-status" class="text-xs mt-3 font-medium text-emerald-600"></p>
                     </div>
                 </div>
 
                 <!-- Credit Packs -->
-                <h4 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Packs de Créditos (Tienda)</h4>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6 px-1">Packs de Créditos (Tienda)</h4>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     <!-- package_5 -->
-                    <div class="p-4 bg-background-dark rounded-xl border border-white/5">
-                        <h4 class="text-sm font-bold text-white mb-1">Pack Inicial</h4>
-                        <p class="text-slate-500 text-[10px] mb-3">ID: package_5</p>
-                        <div class="space-y-3">
-                            <div class="relative">
-                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">€</span>
-                                <input type="number" id="price-package_5" step="0.01" min="0" class="w-full bg-surface-dark border border-white/10 rounded-t-lg pl-7 pr-3 py-2 text-white font-bold text-lg focus:border-primary outline-none" placeholder="Precio">
+                    <div class="stat-card p-5 rounded-2xl bg-white border border-slate-100">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="text-sm font-bold text-slate-900">Pack Inicial</h4>
+                            <span class="text-[9px] font-black text-slate-300 bg-slate-50 px-1.5 py-0.5 rounded uppercase">pkg_5</span>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="space-y-1">
+                                <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Precio (€)</label>
+                                <div class="relative">
+                                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">€</span>
+                                    <input type="number" id="price-package_5" step="0.01" min="0" class="w-full bg-slate-50 border border-slate-100 rounded-xl pl-8 pr-4 py-2.5 text-slate-900 font-bold focus:border-primary outline-none" placeholder="0.00">
+                                </div>
                             </div>
-                            <div class="relative mt-[-12px]">
-                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">Cr.</span>
-                                <input type="number" id="credits-package_5" step="1" min="1" class="w-full bg-surface-dark border border-white/10 border-t-0 rounded-b-lg pl-9 pr-3 py-2 text-primary font-bold text-md focus:border-primary outline-none" placeholder="Créditos">
+                            <div class="space-y-1">
+                                <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Cant. Créditos</label>
+                                <div class="relative">
+                                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">Cr.</span>
+                                    <input type="number" id="credits-package_5" step="1" min="1" class="w-full bg-slate-50 border border-slate-100 rounded-xl pl-10 pr-4 py-2.5 text-primary font-bold focus:border-primary outline-none" placeholder="0">
+                                </div>
                             </div>
-                            <button onclick="updatePackage('package_5', 'price-package_5', 'credits-package_5', 'Inicial')" class="w-full py-2 bg-primary/10 text-primary border border-primary/30 font-bold rounded-lg hover:bg-primary/20 transition-all text-sm mt-3">Guardar</button>
+                            <button onclick="updatePackage('package_5', 'price-package_5', 'credits-package_5', 'Inicial')" class="w-full py-3 bg-primary text-white font-bold rounded-xl hover:scale-[1.02] transition-all shadow-lg shadow-primary/10 text-xs mt-2">Guardar Cambios</button>
                         </div>
                     </div>
                     <!-- package_10 -->
-                    <div class="p-4 bg-background-dark rounded-xl border border-white/5">
-                        <h4 class="text-sm font-bold text-white mb-1">Pack Estándar</h4>
-                        <p class="text-slate-500 text-[10px] mb-3">ID: package_10</p>
-                        <div class="space-y-3">
-                            <div class="relative">
-                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">€</span>
-                                <input type="number" id="price-package_10" step="0.01" min="0" class="w-full bg-surface-dark border border-white/10 rounded-t-lg pl-7 pr-3 py-2 text-white font-bold text-lg focus:border-primary outline-none" placeholder="Precio">
+                    <div class="stat-card p-5 rounded-2xl bg-white border border-slate-100">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="text-sm font-bold text-slate-900">Pack Estándar</h4>
+                            <span class="text-[9px] font-black text-slate-300 bg-slate-50 px-1.5 py-0.5 rounded uppercase">pkg_10</span>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="space-y-1">
+                                <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Precio (€)</label>
+                                <div class="relative">
+                                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">€</span>
+                                    <input type="number" id="price-package_10" step="0.01" min="0" class="w-full bg-slate-50 border border-slate-100 rounded-xl pl-8 pr-4 py-2.5 text-slate-900 font-bold focus:border-primary outline-none" placeholder="0.00">
+                                </div>
                             </div>
-                            <div class="relative mt-[-12px]">
-                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">Cr.</span>
-                                <input type="number" id="credits-package_10" step="1" min="1" class="w-full bg-surface-dark border border-white/10 border-t-0 rounded-b-lg pl-9 pr-3 py-2 text-primary font-bold text-md focus:border-primary outline-none" placeholder="Créditos">
+                            <div class="space-y-1">
+                                <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Cant. Créditos</label>
+                                <div class="relative">
+                                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">Cr.</span>
+                                    <input type="number" id="credits-package_10" step="1" min="1" class="w-full bg-slate-50 border border-slate-100 rounded-xl pl-10 pr-4 py-2.5 text-primary font-bold focus:border-primary outline-none" placeholder="0">
+                                </div>
                             </div>
-                            <button onclick="updatePackage('package_10', 'price-package_10', 'credits-package_10', 'Estándar')" class="w-full py-2 bg-primary/10 text-primary border border-primary/30 font-bold rounded-lg hover:bg-primary/20 transition-all text-sm mt-3">Guardar</button>
+                            <button onclick="updatePackage('package_10', 'price-package_10', 'credits-package_10', 'Estándar')" class="w-full py-3 bg-primary text-white font-bold rounded-xl hover:scale-[1.02] transition-all shadow-lg shadow-primary/10 text-xs mt-2">Guardar Cambios</button>
                         </div>
                     </div>
                     <!-- package_15 -->
-                    <div class="p-4 bg-background-dark rounded-xl border border-white/5 border-primary/30">
-                        <h4 class="text-sm font-bold text-white mb-1">Pack Pro</h4>
-                        <p class="text-slate-500 text-[10px] mb-3">ID: package_15</p>
-                        <div class="space-y-3">
-                            <div class="relative">
-                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">€</span>
-                                <input type="number" id="price-package_15" step="0.01" min="0" class="w-full bg-surface-dark border border-white/10 rounded-t-lg pl-7 pr-3 py-2 text-white font-bold text-lg focus:border-primary outline-none" placeholder="Precio">
+                    <div class="stat-card p-5 rounded-2xl bg-white border-2 border-primary/20 bg-amber-50/5 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 bg-primary text-white text-[8px] font-black px-3 py-1 rounded-bl-xl uppercase tracking-tighter">MÁS VENDIDO</div>
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="text-sm font-bold text-slate-900">Pack Pro</h4>
+                            <span class="text-[9px] font-black text-slate-300 bg-slate-50 px-1.5 py-0.5 rounded uppercase">pkg_15</span>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="space-y-1">
+                                <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Precio (€)</label>
+                                <div class="relative">
+                                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">€</span>
+                                    <input type="number" id="price-package_15" step="0.01" min="0" class="w-full bg-white border border-slate-200 rounded-xl pl-8 pr-4 py-2.5 text-slate-900 font-bold focus:border-primary outline-none" placeholder="0.00">
+                                </div>
                             </div>
-                            <div class="relative mt-[-12px]">
-                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">Cr.</span>
-                                <input type="number" id="credits-package_15" step="1" min="1" class="w-full bg-surface-dark border border-white/10 border-t-0 rounded-b-lg pl-9 pr-3 py-2 text-primary font-bold text-md focus:border-primary outline-none" placeholder="Créditos">
+                            <div class="space-y-1">
+                                <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Cant. Créditos</label>
+                                <div class="relative">
+                                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">Cr.</span>
+                                    <input type="number" id="credits-package_15" step="1" min="1" class="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-primary font-bold focus:border-primary outline-none" placeholder="0">
+                                </div>
                             </div>
-                            <button onclick="updatePackage('package_15', 'price-package_15', 'credits-package_15', 'Profesional')" class="w-full py-2 bg-primary/10 text-primary border border-primary/30 font-bold rounded-lg hover:bg-primary/20 transition-all text-sm mt-3">Guardar</button>
+                            <button onclick="updatePackage('package_15', 'price-package_15', 'credits-package_15', 'Profesional')" class="w-full py-3 bg-primary text-white font-bold rounded-xl hover:scale-[1.02] transition-all shadow-xl shadow-primary/30 text-xs mt-2">Actualizar Pack</button>
                         </div>
                     </div>
                     <!-- package_25 -->
-                    <div class="p-4 bg-background-dark rounded-xl border border-white/5">
-                        <h4 class="text-sm font-bold text-white mb-1">Pack Premium</h4>
-                        <p class="text-slate-500 text-[10px] mb-3">ID: package_25</p>
-                        <div class="space-y-3">
-                            <div class="relative">
-                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">€</span>
-                                <input type="number" id="price-package_25" step="0.01" min="0" class="w-full bg-surface-dark border border-white/10 rounded-t-lg pl-7 pr-3 py-2 text-white font-bold text-lg focus:border-primary outline-none" placeholder="Precio">
+                    <div class="stat-card p-5 rounded-2xl bg-white border border-slate-100">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="text-sm font-bold text-slate-900">Pack Premium</h4>
+                            <span class="text-[9px] font-black text-slate-300 bg-slate-50 px-1.5 py-0.5 rounded uppercase">pkg_25</span>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="space-y-1">
+                                <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Precio (€)</label>
+                                <div class="relative">
+                                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">€</span>
+                                    <input type="number" id="price-package_25" step="0.01" min="0" class="w-full bg-slate-50 border border-slate-100 rounded-xl pl-8 pr-4 py-2.5 text-slate-900 font-bold focus:border-primary outline-none" placeholder="0.00">
+                                </div>
                             </div>
-                            <div class="relative mt-[-12px]">
-                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">Cr.</span>
-                                <input type="number" id="credits-package_25" step="1" min="1" class="w-full bg-surface-dark border border-white/10 border-t-0 rounded-b-lg pl-9 pr-3 py-2 text-primary font-bold text-md focus:border-primary outline-none" placeholder="Créditos">
+                            <div class="space-y-1">
+                                <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Cant. Créditos</label>
+                                <div class="relative">
+                                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">Cr.</span>
+                                    <input type="number" id="credits-package_25" step="1" min="1" class="w-full bg-slate-50 border border-slate-100 rounded-xl pl-10 pr-4 py-2.5 text-primary font-bold focus:border-primary outline-none" placeholder="0">
+                                </div>
                             </div>
-                            <button onclick="updatePackage('package_25', 'price-package_25', 'credits-package_25', 'Premium')" class="w-full py-2 bg-primary/10 text-primary border border-primary/30 font-bold rounded-lg hover:bg-primary/20 transition-all text-sm mt-3">Guardar</button>
+                            <button onclick="updatePackage('package_25', 'price-package_25', 'credits-package_25', 'Premium')" class="w-full py-3 bg-primary text-white font-bold rounded-xl hover:scale-[1.02] transition-all shadow-lg shadow-primary/10 text-xs mt-2">Guardar Cambios</button>
                         </div>
                     </div>
                 </div>
@@ -261,28 +295,28 @@
         </section>
 
         <!-- Price History -->
-        <section id="section-history" class="bg-surface-dark rounded-2xl border border-white/5 overflow-hidden shadow-2xl mb-12" style="display:none;">
-            <div class="p-6 border-b border-white/5 flex justify-between items-center">
-                <h3 class="text-xl font-bold flex items-center gap-2">
+        <section id="section-history" class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm mb-12" style="display:none;">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                <h3 class="text-lg font-bold flex items-center gap-2 text-slate-800">
                     <span class="material-symbols-outlined text-primary">history</span>
                     Historial de Cambios de Precio
                 </h3>
-                <button onclick="loadPriceHistory()" class="text-sm text-primary hover:underline">Actualizar</button>
+                <button onclick="loadPriceHistory()" class="text-[10px] font-black uppercase tracking-widest text-primary hover:underline hover:scale-105 transition-all">Actualizar Lista</button>
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full text-left">
                     <thead>
-                        <tr class="text-xs font-bold text-slate-500 uppercase tracking-widest border-b border-white/5">
+                        <tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 bg-slate-50/30">
                             <th class="px-6 py-4">Fecha</th>
                             <th class="px-6 py-4">Producto</th>
                             <th class="px-6 py-4">Precio Anterior</th>
                             <th class="px-6 py-4">Nuevo Precio</th>
-                            <th class="px-6 py-4">Cambiado Por</th>
+                            <th class="px-6 py-4">Admin</th>
                         </tr>
                     </thead>
-                    <tbody id="price-history-body" class="divide-y divide-white/5">
+                    <tbody id="price-history-body" class="divide-y divide-slate-50 font-medium text-slate-600">
                         <tr>
-                            <td colspan="5" class="px-6 py-10 text-center text-slate-500">Cargando historial...</td>
+                            <td colspan="5" class="px-6 py-10 text-center text-slate-400 text-xs italic">Cargando historial...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -291,42 +325,46 @@
     </main>
 
     <!-- Edit User Modal -->
-    <div id="edit-user-modal" class="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center hidden">
-        <div class="bg-surface-dark w-full max-w-md p-8 rounded-2xl border border-white/10 shadow-2xl">
+    <div id="edit-user-modal" class="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center hidden p-4">
+        <div class="bg-white w-full max-w-md p-8 rounded-3xl border border-white shadow-2xl relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-1 bg-primary"></div>
             <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-bold">Editar Usuario</h3>
-                <button onclick="closeEditModal()" class="text-slate-400 hover:text-white">
+                <div>
+                    <h3 class="text-2xl font-black text-slate-900">Editar Usuario</h3>
+                    <p class="text-slate-400 text-xs font-bold uppercase tracking-widest">Ajustes de Cuenta</p>
+                </div>
+                <button onclick="closeEditModal()" class="text-slate-300 hover:text-slate-900 transition-colors">
                     <span class="material-symbols-outlined">close</span>
                 </button>
             </div>
             
             <form id="edit-user-form" onsubmit="handleUserUpdate(event)">
                 <input type="hidden" id="edit-uid">
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Nombre</label>
-                        <input type="text" id="edit-name" class="w-full bg-background-dark border border-white/10 rounded-xl px-4 py-3 focus:border-primary outline-none">
+                <div class="space-y-6">
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nombre Completo</label>
+                        <input type="text" id="edit-name" class="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 font-bold text-slate-900 focus:border-primary outline-none transition-all">
                     </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Créditos</label>
-                        <input type="number" id="edit-credits" class="w-full bg-background-dark border border-white/10 rounded-xl px-4 py-3 focus:border-primary outline-none">
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Saldo de Créditos</label>
+                        <input type="number" id="edit-credits" class="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 font-bold text-primary text-xl focus:border-primary outline-none transition-all">
                     </div>
-                    <div class="flex items-center gap-3 p-3 bg-white/5 rounded-xl">
-                        <input type="checkbox" id="edit-is-admin" class="size-5 rounded border-white/10 text-primary focus:ring-primary bg-background-dark">
-                        <label for="edit-is-admin" class="text-sm font-medium">Privilegios de Administrador</label>
+                    <div class="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-50 transition-colors hover:border-primary/20 cursor-pointer">
+                        <input type="checkbox" id="edit-is-admin" class="size-5 rounded border-slate-300 text-primary focus:ring-primary bg-white">
+                        <label for="edit-is-admin" class="text-sm font-bold text-slate-700 select-none cursor-pointer">Privilegios de Administrador</label>
                     </div>
                 </div>
                 
-                <div class="mt-8 flex gap-3">
-                    <button type="button" onclick="closeEditModal()" class="flex-1 px-6 py-3 bg-white/5 hover:bg-white/10 font-bold rounded-xl transition-all">Cancelar</button>
-                    <button type="submit" id="save-user-btn" class="flex-1 px-6 py-3 bg-primary text-background-dark font-bold rounded-xl hover:scale-105 transition-transform">Guardar Cambios</button>
+                <div class="mt-10 flex gap-3">
+                    <button type="button" onclick="closeEditModal()" class="flex-1 px-6 py-4 bg-slate-100 text-slate-500 font-bold rounded-2xl hover:bg-slate-200 transition-all">Cancelar</button>
+                    <button type="submit" id="save-user-btn" class="flex-1 px-6 py-4 bg-primary text-white font-bold rounded-2xl hover:scale-[1.05] transition-transform shadow-xl shadow-primary/20">Guardar</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <footer class="max-w-7xl mx-auto px-6 py-12 text-center text-slate-600 border-t border-white/5 mt-12">
-        <p>© 2024 RenderRoom Admin System v1.0.0</p>
+    <footer class="max-w-7xl mx-auto px-6 py-12 text-center text-slate-400 border-t border-slate-100 mt-12 text-xs font-bold uppercase tracking-widest">
+        <p>© 2024 RenderRoom Admin System v1.1.0 • <span class="text-primary">Light Edition</span></p>
     </footer>
 
     <script>
@@ -393,10 +431,6 @@
                 
                 if (userId) purchasingUsers.add(userId);
                 
-                // Normalization logic: 
-                // Stripe amounts are in cents. If amount > 500 we assume it might be cents (unless it's a very large purchase).
-                // A better check is if currency is 'eur' and it's from Stripe.
-                // For now, we use the logic that if it's > 50 it's likely cents (minimum purchase is usually > 1 EUR)
                 if (amount > 50) {
                     totalRevenue += amount / 100;
                 } else {
@@ -406,7 +440,6 @@
             
             document.getElementById('stat-total-revenue').textContent = totalRevenue.toFixed(2) + '€';
             
-            // Conversion Rate: Users with purchases / Total Users
             const conversion = userSnap.size > 0 ? ((purchasingUsers.size / userSnap.size) * 100).toFixed(1) : 0;
             document.getElementById('stat-conversion').textContent = conversion + '%';
         } catch (e) {
@@ -425,7 +458,6 @@
                 const isAdmin = user.isAdmin || false;
                 const uid = doc.id;
                 
-                // Get latest render for this user
                 let lastRenderInfo = 'Ninguno';
                 try {
                     const rSnap = await db.collection('renders')
@@ -440,24 +472,24 @@
                 } catch(e) {}
 
                 tableBody.innerHTML += `
-                    <tr class="hover:bg-white/5 transition-colors">
+                    <tr class="hover:bg-slate-50 transition-colors">
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-3">
-                                <div class="size-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xs">
+                                <div class="size-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">
                                     ${(user.displayName || user.email).charAt(0).toUpperCase()}
                                 </div>
-                                <span class="font-semibold">${user.displayName || 'Sin nombre'}</span>
+                                <span class="font-bold text-slate-800">${user.displayName || 'Sin nombre'}</span>
                             </div>
                         </td>
-                        <td class="px-6 py-4 text-slate-400 text-sm">${user.email}</td>
-                        <td class="px-6 py-4 text-slate-400 text-sm">${lastRenderInfo}</td>
+                        <td class="px-6 py-4 text-slate-400 text-xs font-medium">${user.email}</td>
+                        <td class="px-6 py-4 text-slate-500 text-xs">${lastRenderInfo}</td>
                         <td class="px-6 py-4">
-                            <span class="px-2 py-1 ${isAdmin ? 'bg-primary/20 text-primary' : 'bg-slate-500/20 text-slate-500'} text-[10px] font-bold uppercase rounded">
+                            <span class="px-2 py-1 ${isAdmin ? 'bg-primary/10 text-primary' : 'bg-slate-100 text-slate-400'} text-[10px] font-black uppercase rounded">
                                 ${isAdmin ? 'Admin' : 'Usuario'}
                             </span>
                         </td>
                         <td class="px-6 py-4 text-right">
-                            <button onclick="openEditModal('${uid}', '${user.displayName || ''}', ${user.credits || 0}, ${isAdmin})" class="p-2 hover:text-primary transition-colors">
+                            <button onclick="openEditModal('${uid}', '${user.displayName || ''}', ${user.credits || 0}, ${isAdmin})" class="size-9 bg-slate-50 rounded-lg flex items-center justify-center text-slate-400 hover:text-primary hover:bg-primary/10 transition-all">
                                 <span class="material-symbols-outlined text-lg">edit</span>
                             </button>
                         </td>
@@ -466,11 +498,10 @@
             });
         } catch (e) {
             console.error("Error loading users:", e);
-            tableBody.innerHTML = '<tr><td colspan="5" class="px-6 py-10 text-center text-red-500">Error al cargar usuarios. Verifica los permisos de Firestore.</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="5" class="px-6 py-10 text-center text-red-500">Error al cargar usuarios.</td></tr>';
         }
     }
 
-    // Modal logic
     function openEditModal(uid, name, credits, isAdmin) {
         document.getElementById('edit-uid').value = uid;
         document.getElementById('edit-name').value = name;
@@ -492,60 +523,42 @@
         
         const saveBtn = document.getElementById('save-user-btn');
         const originalText = saveBtn.textContent;
-        saveBtn.textContent = 'Guardando...';
+        saveBtn.textContent = '...';
         saveBtn.disabled = true;
         
         try {
-            const idToken = await firebase.auth().currentUser.getIdToken();
-            const response = await fetch(`/api/admin/users/${uid}`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${idToken}`
-                },
-                body: JSON.stringify({
-                    displayName: name,
-                    credits: credits,
-                    isAdmin: isAdmin
-                })
+            await db.collection('users').doc(uid).update({
+                displayName: name,
+                credits: credits,
+                isAdmin: isAdmin,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             });
-            
-            const result = await response.json();
-            if (response.ok) {
-                closeEditModal();
-                loadUsers(); // Refresh list
-            } else {
-                alert('Error: ' + result.error);
-            }
+            closeEditModal();
+            loadUsers();
         } catch (e) {
             console.error("Error updating user:", e);
-            alert('Error de conexión: ' + e.message);
+            alert('Error al guardar: ' + e.message);
         } finally {
             saveBtn.textContent = originalText;
             saveBtn.disabled = false;
         }
     }
 
-    // Tab switching
     function switchTab(tab) {
-        // Hide all sections
         document.getElementById('section-users').style.display = 'none';
         document.getElementById('section-pricing').style.display = 'none';
         document.getElementById('section-history').style.display = 'none';
         
-        // Reset tab buttons
-        document.getElementById('tab-overview').classList.remove('text-primary');
-        document.getElementById('tab-users').classList.remove('text-primary');
-        document.getElementById('tab-pricing').classList.remove('text-primary');
-        document.getElementById('tab-history').classList.remove('text-primary');
+        const tabs = ['overview', 'users', 'pricing', 'history'];
+        tabs.forEach(t => {
+            const btn = document.getElementById('tab-' + t);
+            btn.classList.remove('text-primary');
+            btn.classList.add('text-slate-600');
+        });
         
-        // Show selected section
-        if (tab === 'overview') {
+        if (tab === 'overview' || tab === 'users') {
             document.getElementById('section-users').style.display = 'block';
-            document.getElementById('tab-overview').classList.add('text-primary');
-        } else if (tab === 'users') {
-            document.getElementById('section-users').style.display = 'block';
-            document.getElementById('tab-users').classList.add('text-primary');
+            document.getElementById('tab-' + tab).classList.add('text-primary');
         } else if (tab === 'pricing') {
             document.getElementById('section-pricing').style.display = 'block';
             document.getElementById('tab-pricing').classList.add('text-primary');
@@ -557,42 +570,20 @@
         }
     }
 
-    // Load current prices from Firebase
     async function loadPrices() {
         try {
-            // Render Prices
             const normalDoc = await db.collection('pricing').doc('render_normal').get();
             const highDoc = await db.collection('pricing').doc('render_high').get();
             
-            if (normalDoc.exists) {
-                document.getElementById('price-render-normal').value = normalDoc.data().price;
-            } else {
-                document.getElementById('price-render-normal').value = '1.00';
-            }
-
-            if (highDoc.exists) {
-                document.getElementById('price-render-high').value = highDoc.data().price;
-            } else {
-                document.getElementById('price-render-high').value = '3.50';
-            }
+            if (normalDoc.exists) document.getElementById('price-render-normal').value = normalDoc.data().price;
+            if (highDoc.exists) document.getElementById('price-render-high').value = highDoc.data().price;
             
-            // Credit Packages
-            const packs = [
-                {id: 'package_5', priceInput: 'price-package_5', creditsInput: 'credits-package_5', defPrice: '5.00', defCr: 5},
-                {id: 'package_10', priceInput: 'price-package_10', creditsInput: 'credits-package_10', defPrice: '10.00', defCr: 12},
-                {id: 'package_15', priceInput: 'price-package_15', creditsInput: 'credits-package_15', defPrice: '15.00', defCr: 20},
-                {id: 'package_25', priceInput: 'price-package_25', creditsInput: 'credits-package_25', defPrice: '25.00', defCr: 40}
-            ];
-
+            const packs = ['package_5', 'package_10', 'package_15', 'package_25'];
             for (const p of packs) {
-                const doc = await db.collection('packages').doc(p.id).get();
+                const doc = await db.collection('packages').doc(p).get();
                 if (doc.exists) {
-                    const priceInCents = doc.data().price || 0;
-                    document.getElementById(p.priceInput).value = (priceInCents / 100).toFixed(2);
-                    document.getElementById(p.creditsInput).value = doc.data().creditsAmount || p.defCr;
-                } else {
-                    document.getElementById(p.priceInput).value = p.defPrice;
-                    document.getElementById(p.creditsInput).value = p.defCr;
+                    document.getElementById('price-' + p).value = (doc.data().price / 100).toFixed(2);
+                    document.getElementById('credits-' + p).value = doc.data().creditsAmount;
                 }
             }
         } catch (e) {
@@ -600,28 +591,10 @@
         }
     }
 
-    // Update price in Firebase (for renders)
     async function updatePrice(docId) {
-        let inputId, statusId;
-        if (docId === 'render_normal') {
-            inputId = 'price-render-normal';
-            statusId = 'render-normal-price-status';
-        } else if (docId === 'render_high') {
-            inputId = 'price-render-high';
-            statusId = 'render-high-price-status';
-        }
-        
+        let inputId = docId === 'render_normal' ? 'price-render-normal' : 'price-render-high';
         const newPrice = parseFloat(document.getElementById(inputId).value);
-        
-        if (isNaN(newPrice) || newPrice < 0) {
-            alert('Precio inválido');
-            return;
-        }
-        
-        const btn = document.querySelector(`button[onclick="updatePrice('${docId}')"]`);
-        const originalText = btn.textContent;
-        btn.textContent = '...';
-        btn.disabled = true;
+        if (isNaN(newPrice)) return;
         
         try {
             const oldDoc = await db.collection('pricing').doc(docId).get();
@@ -641,37 +614,14 @@
                 changedAt: firebase.firestore.FieldValue.serverTimestamp(),
                 type: 'render'
             });
-            
-            if (statusId) {
-                document.getElementById(statusId).textContent = '¡Guardado!';
-                setTimeout(() => { document.getElementById(statusId).textContent = ''; }, 3000);
-            }
-        } catch (e) {
-            console.error("Error updating price:", e);
-            alert('Error: ' + e.message);
-        } finally {
-            btn.textContent = originalText;
-            btn.disabled = false;
-        }
+            alert('Precio actualizado');
+        } catch (e) { alert(e.message); }
     }
 
-    // Update credit package in Firebase
     async function updatePackage(pkgId, priceInputId, creditsInputId, name) {
-        const priceInput = document.getElementById(priceInputId);
-        const creditsInput = document.getElementById(creditsInputId);
-        const newPriceEur = parseFloat(priceInput.value);
-        const newCreditsAmount = parseInt(creditsInput.value);
+        const newPriceEur = parseFloat(document.getElementById(priceInputId).value);
+        const newCreditsAmount = parseInt(document.getElementById(creditsInputId).value);
         
-        if (isNaN(newPriceEur) || newPriceEur < 0 || isNaN(newCreditsAmount) || newCreditsAmount < 1) {
-            alert('Precio o cantidad de créditos inválidos');
-            return;
-        }
-
-        const btn = document.querySelector(`button[onclick*="'${pkgId}'"]`);
-        const originalText = btn.textContent;
-        btn.textContent = '...';
-        btn.disabled = true;
-
         try {
             const priceInCents = Math.round(newPriceEur * 100);
             const oldDoc = await db.collection('packages').doc(pkgId).get();
@@ -679,10 +629,8 @@
 
             await db.collection('packages').doc(pkgId).set({
                 name: name,
-                price: priceInCents, // Stripe uses cents
+                price: priceInCents,
                 creditsAmount: newCreditsAmount,
-                currency: 'eur',
-                isActive: true,
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             }, { merge: true });
 
@@ -694,62 +642,31 @@
                 changedAt: firebase.firestore.FieldValue.serverTimestamp(),
                 type: 'package'
             });
-
-            alert(`Pack "${name}" actualizado a ${newPriceEur.toFixed(2)}€`);
-        } catch (e) {
-            console.error("Error updating package:", e);
-            alert('Error: ' + e.message);
-        } finally {
-            btn.textContent = originalText;
-            btn.disabled = false;
-        }
+            alert('Pack actualizado');
+        } catch (e) { alert(e.message); }
     }
 
-    // Load price history
     async function loadPriceHistory() {
         const tbody = document.getElementById('price-history-body');
-        tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-10 text-center text-slate-500">Cargando historial...</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-10 text-center text-slate-500">Cargando...</td></tr>';
         
         try {
-            const snapshot = await db.collection('priceHistory')
-                .orderBy('changedAt', 'desc')
-                .limit(50)
-                .get();
-            
-            if (snapshot.empty) {
-                tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-10 text-center text-slate-500">No hay historial de precios.</td></tr>';
-                return;
-            }
-            
+            const snapshot = await db.collection('priceHistory').orderBy('changedAt', 'desc').limit(50).get();
             tbody.innerHTML = '';
-            for (const doc of snapshot.docs) {
+            snapshot.forEach(doc => {
                 const h = doc.data();
                 const date = h.changedAt ? new Date(h.changedAt.toDate()).toLocaleString() : 'N/A';
-                let productName = 'Desconocido';
-                if (h.pricingId === 'render') productName = 'Render (Antiguo)';
-                else if (h.pricingId === 'render_normal') productName = 'Render Normal';
-                else if (h.pricingId === 'render_high') productName = 'Render Alta';
-                else if (h.pricingId === 'credits') productName = 'Pack Créditos';
-                else if (h.pricingId === 'package_5') productName = 'Pack Inicial';
-                else if (h.pricingId === 'package_10') productName = 'Pack Estándar';
-                else if (h.pricingId === 'package_15') productName = 'Pack Pro';
-                else if (h.pricingId === 'package_25') productName = 'Pack Premium';
-                else if (h.type === 'package') productName = 'Pack ' + h.pricingId.split('_')[1] + ' Cr.';
-                
                 tbody.innerHTML += `
-                    <tr class="hover:bg-white/5 transition-colors">
-                        <td class="px-6 py-4 text-slate-400 text-sm">${date}</td>
-                        <td class="px-6 py-4 font-bold">${productName}</td>
-                        <td class="px-6 py-4 text-slate-400">€${h.oldPrice || 'N/A'}</td>
-                        <td class="px-6 py-4 text-primary font-bold">€${h.newPrice}</td>
-                        <td class="px-6 py-4 text-slate-500 text-xs">${h.changedBy ? h.changedBy.substring(0, 8) + '...' : 'Sistema'}</td>
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="px-6 py-4 text-slate-400 text-xs">${date}</td>
+                        <td class="px-6 py-4 font-bold text-slate-800 text-xs uppercase">${h.pricingId}</td>
+                        <td class="px-6 py-4 text-slate-400 font-bold text-xs">€${h.oldPrice || '-'}</td>
+                        <td class="px-6 py-4 text-primary font-bold text-xs">€${h.newPrice}</td>
+                        <td class="px-6 py-4 text-slate-400 text-[10px] font-bold">${h.changedBy ? h.changedBy.substring(0,6) : 'SYS'}</td>
                     </tr>
                 `;
-            }
-        } catch (e) {
-            console.error("Error loading price history:", e);
-            tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-10 text-center text-red-500">Error al cargar historial: ' + e.message + '</td></tr>';
-        }
+            });
+        } catch (e) { tbody.innerHTML = '<tr><td colspan="5">Error</td></tr>'; }
     }
     </script>
 </body>
