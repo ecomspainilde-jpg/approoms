@@ -5,426 +5,263 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Consejos de Decoración — RenderRoom</title>
   <meta name="description" content="Inspiración, tendencias y trucos profesionales para transformar tu hogar. Tips de decoración de interiores gratis.">
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-    :root {
-      --bg: #0D1117;
-      --surface: #161B22;
-      --elevated: #1C2333;
-      --amber: #F0A500;
-      --amber-light: #FFB830;
-      --violet: #7C3AED;
-      --text: #E6EDF3;
-      --text-secondary: #8B949E;
-      --border: rgba(72,79,88,0.3);
-      --radius: 16px;
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <style>
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.82);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        .advice-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background-color: white;
+            border: 1px solid #F1F5F9;
+            border-radius: 1.5rem;
+        }
+        .advice-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px -12px rgba(245, 158, 11, 0.1);
+            border-color: rgba(245, 158, 11, 0.2);
+        }
+    </style>
+  <script id="tailwind-config">
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#F59E0B", // Ámbar Solar
+            "background": "#FFFFFF",
+            "surface": "#F8FAFC",
+            "border": "#F1F5F9",
+            "text-primary": "#1E293B",
+            "text-secondary": "#475569",
+            "accent-violet": "#6366F1"
+          },
+          fontFamily: {
+            "display": ["Inter", "sans-serif"]
+          }
+        }
+      }
     }
-    html { scroll-behavior: smooth; }
-    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); }
-
-    /* NAV */
-    nav {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-      background: rgba(13,17,23,0.85);
-      backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--border);
-      padding: 1rem 2rem;
-      display: flex; align-items: center; justify-content: space-between;
-    }
-    .nav-logo {
-      font-size: 1.25rem; font-weight: 800;
-      background: linear-gradient(135deg, var(--amber), var(--amber-light));
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      background-clip: text; text-decoration: none;
-    }
-    .nav-links { display: flex; gap: 2rem; align-items: center; }
-    .nav-links a { color: var(--text-secondary); text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: color 0.2s; }
-    .nav-links a:hover, .nav-links a.active { color: var(--amber); }
-    .nav-links a.active { position: relative; }
-    .nav-links a.active::after { content: ''; position: absolute; bottom: -4px; left: 0; right: 0; height: 2px; background: var(--amber); border-radius: 2px; }
-    .nav-cta {
-      background: linear-gradient(135deg, var(--amber), var(--amber-light));
-      color: #0D1117; font-weight: 700; padding: 0.5rem 1.25rem;
-      border-radius: 10px; text-decoration: none; font-size: 0.85rem; transition: opacity 0.2s;
-    }
-    .nav-cta:hover { opacity: 0.85; }
-
-    /* HERO */
-    .hero {
-      margin-top: 73px;
-      padding: 5rem 2rem 4rem;
-      background: linear-gradient(135deg, rgba(124,58,237,0.12) 0%, rgba(240,165,0,0.08) 100%);
-      text-align: center;
-    }
-    .hero h1 { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800; margin-bottom: 1rem; }
-    .hero p { color: var(--text-secondary); font-size: 1.1rem; max-width: 600px; margin: 0 auto 2rem; line-height: 1.7; }
-    .search-wrap { max-width: 560px; margin: 0 auto; position: relative; }
-    .search-input {
-      width: 100%; padding: 1rem 1rem 1rem 3rem;
-      background: var(--surface); border: 1.5px solid var(--border);
-      border-radius: var(--radius); color: var(--text); font-size: 1rem; font-family: 'Inter', sans-serif;
-      outline: none; transition: border-color 0.2s;
-    }
-    .search-input:focus { border-color: var(--amber); }
-    .search-input::placeholder { color: var(--text-secondary); }
-    .search-icon { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-secondary); font-size: 1.1rem; }
-
-    /* CATEGORIES */
-    .categories { padding: 1.5rem 2rem; display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
-    .pill {
-      padding: 0.5rem 1.25rem; border-radius: 999px; font-size: 0.85rem; font-weight: 500;
-      cursor: pointer; border: 1.5px solid var(--border); background: var(--surface);
-      color: var(--text-secondary); transition: all 0.2s;
-    }
-    .pill.active, .pill:hover { background: var(--amber); border-color: var(--amber); color: #0D1117; font-weight: 600; }
-
-    /* CONTAINER */
-    .container { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
-
-    /* FEATURED */
-    .section-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; }
-    .featured-card {
-      border-radius: var(--radius); overflow: hidden; position: relative; margin-bottom: 4rem;
-      min-height: 420px; display: flex; align-items: flex-end;
-      background: linear-gradient(135deg, #1a2a4a 0%, #2a1a3a 100%);
-      border: 1px solid var(--border);
-    }
-    .featured-img-placeholder {
-      position: absolute; inset: 0;
-      background: linear-gradient(135deg, #0f2040 0%, #1a0a30 50%, #0a1528 100%);
-      display: flex; align-items: center; justify-content: center; font-size: 8rem; opacity: 0.4;
-    }
-    .featured-overlay {
-      position: absolute; inset: 0;
-      background: linear-gradient(to top, rgba(13,17,23,0.95) 0%, rgba(13,17,23,0.4) 50%, transparent 100%);
-    }
-    .featured-content { position: relative; padding: 2.5rem; }
-    .tag-badge {
-      display: inline-block; background: var(--amber); color: #0D1117;
-      font-weight: 700; font-size: 0.75rem; padding: 0.3rem 0.75rem;
-      border-radius: 999px; margin-bottom: 1rem;
-    }
-    .featured-content h2 { font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 800; margin-bottom: 0.75rem; max-width: 650px; }
-    .featured-content p { color: var(--text-secondary); max-width: 550px; line-height: 1.6; margin-bottom: 1rem; }
-    .author-line { display: flex; align-items: center; gap: 0.75rem; color: var(--text-secondary); font-size: 0.85rem; }
-    .author-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--amber); color: #0D1117; font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; }
-    .read-link { color: var(--amber); font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.9rem; margin-top: 1rem; transition: gap 0.2s; }
-    .read-link:hover { gap: 0.6rem; }
-
-    /* GRID */
-    .articles-section { padding: 2rem 0 4rem; }
-    .articles-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
-    .article-card {
-      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
-      overflow: hidden; transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
-      display: flex; flex-direction: column;
-    }
-    .article-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 40px rgba(240,165,0,0.12);
-      border-color: rgba(240,165,0,0.35);
-    }
-    .article-img {
-      height: 180px; position: relative; overflow: hidden;
-      display: flex; align-items: center; justify-content: center; font-size: 4rem;
-    }
-    .article-img-bg { position: absolute; inset: 0; opacity: 0.6; }
-    .article-tag {
-      position: absolute; top: 0.75rem; left: 0.75rem;
-      background: rgba(240,165,0,0.9); color: #0D1117; font-weight: 600;
-      font-size: 0.7rem; padding: 0.25rem 0.6rem; border-radius: 999px;
-    }
-    .article-body { padding: 1.25rem; flex: 1; display: flex; flex-direction: column; }
-    .article-body h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.5rem; line-height: 1.4; }
-    .article-body p { font-size: 0.82rem; color: var(--text-secondary); line-height: 1.6; flex: 1; }
-    .article-meta { display: flex; align-items: center; gap: 0.5rem; margin-top: 1rem; color: var(--text-secondary); font-size: 0.75rem; }
-    .dot { width: 3px; height: 3px; border-radius: 50%; background: var(--border); }
-
-    /* CTA BANNER */
-    .cta-banner {
-      background: var(--surface);
-      border: 1.5px solid var(--amber);
-      border-radius: var(--radius);
-      padding: 2.5rem;
-      text-align: center;
-      margin: 0 0 4rem;
-      position: relative;
-      overflow: hidden;
-    }
-    .cta-banner::before {
-      content: '';
-      position: absolute; inset: 0;
-      background: linear-gradient(135deg, rgba(240,165,0,0.05), rgba(124,58,237,0.05));
-    }
-    .cta-banner h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 0.5rem; position: relative; }
-    .cta-banner p { color: var(--text-secondary); margin-bottom: 1.5rem; position: relative; }
-    .cta-btn {
-      display: inline-block;
-      background: linear-gradient(135deg, var(--amber), var(--amber-light));
-      color: #0D1117; font-weight: 700; padding: 0.875rem 2.5rem;
-      border-radius: 12px; text-decoration: none; font-size: 1.05rem;
-      position: relative; transition: opacity 0.2s, transform 0.2s;
-    }
-    .cta-btn:hover { opacity: 0.9; transform: scale(1.02); }
-    .tagline { color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.75rem; position: relative; }
-
-    /* STYLES SECTION */
-    .styles-section { padding: 0 0 4rem; }
-    .styles-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
-    .style-card {
-      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
-      padding: 1.5rem; text-align: center; transition: all 0.2s; cursor: pointer;
-    }
-    .style-card:hover { border-color: var(--amber); box-shadow: 0 8px 24px rgba(240,165,0,0.1); }
-    .style-emoji { font-size: 2.5rem; margin-bottom: 0.75rem; display: block; }
-    .style-card h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.4rem; }
-    .style-card p { font-size: 0.8rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 1rem; }
-    .style-link { color: var(--amber); font-size: 0.8rem; font-weight: 600; text-decoration: none; }
-
-    /* NEWSLETTER */
-    .newsletter {
-      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
-      padding: 2.5rem; text-align: center; margin-bottom: 4rem;
-    }
-    .newsletter h2 { font-size: 1.3rem; font-weight: 700; margin-bottom: 0.5rem; }
-    .newsletter p { color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.9rem; }
-    .newsletter-form { display: flex; gap: 0.75rem; max-width: 480px; margin: 0 auto; }
-    .newsletter-input {
-      flex: 1; padding: 0.875rem 1.25rem;
-      background: var(--elevated); border: 1.5px solid var(--border);
-      border-radius: 10px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 0.9rem; outline: none;
-      transition: border-color 0.2s;
-    }
-    .newsletter-input:focus { border-color: var(--amber); }
-    .newsletter-input::placeholder { color: var(--text-secondary); }
-    .newsletter-btn {
-      background: linear-gradient(135deg, var(--amber), var(--amber-light));
-      color: #0D1117; font-weight: 700; padding: 0.875rem 1.5rem;
-      border: none; border-radius: 10px; cursor: pointer; font-size: 0.9rem; white-space: nowrap; transition: opacity 0.2s;
-    }
-    .newsletter-btn:hover { opacity: 0.85; }
-    .no-spam { color: var(--border); font-size: 0.78rem; margin-top: 0.75rem; }
-
-    /* FOOTER */
-    footer {
-      border-top: 1px solid var(--border);
-      padding: 2rem;
-      text-align: center;
-      color: var(--text-secondary);
-      font-size: 0.85rem;
-    }
-    footer a { color: var(--amber); text-decoration: none; }
-
-    @media (max-width: 900px) {
-      .articles-grid { grid-template-columns: repeat(2, 1fr); }
-      .styles-grid { grid-template-columns: repeat(2, 1fr); }
-      .nav-links { display: none; }
-    }
-    @media (max-width: 600px) {
-      .articles-grid { grid-template-columns: 1fr; }
-      .newsletter-form { flex-direction: column; }
-    }
-  </style>
+  </script>
 </head>
-<body>
+<body class="bg-background font-display text-text-primary antialiased">
 
-<!-- NAV -->
-<nav>
-  <a class="nav-logo" href="01-landing-page.html">🏠 RenderRoom</a>
-  <div class="nav-links">
-    <a href="01-landing-page.html">Inicio</a>
-    <a href="03-dashboard.html">Mis Renders</a>
-    <a href="07-consejos-decoracion.html" class="active">Consejos</a>
-    <a href="06-perfil-usuario.html">Perfil</a>
-  </div>
-  <a class="nav-cta" href="02-upload-wizard.html">Renderiza Ahora</a>
-</nav>
-
-<!-- HERO -->
-<section class="hero">
-  <h1>💡 Consejos de Decoración</h1>
-  <p>Inspiración, tendencias y trucos profesionales para transformar tu hogar</p>
-  <div class="search-wrap">
-    <span class="search-icon">🔍</span>
-    <input class="search-input" type="text" placeholder="Buscar consejos de decoración...">
-  </div>
-</section>
-
-<!-- CATEGORIES -->
-<div class="categories">
-  <button class="pill active">Todos</button>
-  <button class="pill">Salón</button>
-  <button class="pill">Dormitorio</button>
-  <button class="pill">Cocina</button>
-  <button class="pill">Baño</button>
-  <button class="pill">Oficina</button>
-  <button class="pill">Comedor</button>
-  <button class="pill">Terraza</button>
-</div>
-
-<div class="container">
-
-  <!-- FEATURED -->
-  <h2 class="section-title">⭐ Artículo Destacado</h2>
-  <div class="featured-card" style="background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=2000') center/cover no-repeat;">
-    <div class="featured-overlay"></div>
-    <div class="featured-content">
-      <span class="tag-badge">🔥 Tendencia 2025</span>
-      <h2>Tendencias 2025: La Evolución del Lujo Silencioso</h2>
-      <p>Descubre cómo el 'Material Drenching', las formas orgánicas y la tecnología invisible están redefiniendo el hogar moderno. Guía completa habitación por habitación.</p>
-      <div class="author-line">
-        <div class="author-avatar">RR</div>
-        <span>Por RenderRoom Team</span>
-        <span>·</span>
-        <span>10 Mar 2026</span>
-        <span>·</span>
-        <span>⏱️ 8 min de lectura</span>
+  <!-- NAVIGATION -->
+  <nav class="fixed top-0 left-0 right-0 z-50 glass-nav border-b border-border">
+    <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      <a href="01-landing-page.html" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
+        <div class="size-10 bg-gradient-to-br from-primary to-orange-500 rounded-lg flex items-center justify-center text-white">
+          <span class="material-symbols-outlined font-bold">deployed_code</span>
+        </div>
+        <h2 class="text-2xl font-black tracking-tight">Render<span class="text-primary">Room</span></h2>
+      </a>
+      
+      <div class="hidden md:flex items-center space-x-8">
+        <a class="text-sm font-medium text-text-secondary hover:text-primary transition-colors" href="01-landing-page.html">Inicio</a>
+        <a class="text-sm font-medium text-text-secondary hover:text-primary transition-colors" href="03-dashboard.html">Dashboard</a>
+        <a class="text-sm font-medium text-primary" href="07-consejos-decoracion.html">Consejos</a>
+        <a class="text-sm font-medium text-text-secondary hover:text-primary transition-colors" href="06-perfil-usuario.html">Perfil</a>
       </div>
-      <a class="read-link" href="blog-tendencias-2025.html">Leer guía completa →</a>
-    </div>
-  </div>
 
-<!-- ARTICLES GRID -->
-  <section class="articles-section">
-    <h2 class="section-title">📰 Últimos Consejos</h2>
-    <div class="articles-grid">
-      <a href="blog-salon-2025.html" class="article-card">
-        <div class="article-img" style="background: url('https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=800') center/cover no-repeat;">
-          <div class="article-img-bg"></div>
-          <span class="article-tag">Salón</span>
-        </div>
-        <div class="article-body">
-          <h3>Salón 2025: Material Drenching y Formas Orgánicas</h3>
-          <p>La tendencia de 'sumergir' la habitación en un solo color o material llega con fuerza. Sofás curvos y tonos 'Stone Fruit Chic'.</p>
-          <div class="article-meta"><span>🛋️</span><span>5 min de lectura</span><span class="dot"></span><span>Mar 2026</span></div>
-        </div>
-      </a>
-
-      <a href="blog-dormitorio-2025.html" class="article-card">
-        <div class="article-img" style="background: url('https://images.unsplash.com/photo-1540518614846-7eded433c457?q=80&w=800') center/cover no-repeat;">
-          <div class="article-img-bg"></div>
-          <span class="article-tag">Dormitorio</span>
-        </div>
-        <div class="article-body">
-          <h3>Dormitorio 2025: El Refugio de los 'Nuevos Románticos'</h3>
-          <p>Paredes con tapizados, techos decorados y una vuelta a la personalización emocional. Espacios que invitan al descanso absoluto.</p>
-          <div class="article-meta"><span>🌙</span><span>4 min de lectura</span><span class="dot"></span><span>Mar 2026</span></div>
-        </div>
-      </a>
-
-      <a href="blog-cocina-2025.html" class="article-card">
-        <div class="article-img" style="background: url('https://images.unsplash.com/photo-1556911223-e4521516b080?q=80&w=800') center/cover no-repeat;">
-          <div class="article-img-bg"></div>
-          <span class="article-tag">Cocina</span>
-        </div>
-        <div class="article-body">
-          <h3>Cocina 2025: Tecnología Invisible y Texturas 'Fluting'</h3>
-          <p>Electrodomésticos ocultos y materiales nobles. El nogal y la piedra natural se combinan con islas estriadas.</p>
-          <div class="article-meta"><span>🍳</span><span>6 min de lectura</span><span class="dot"></span><span>Mar 2026</span></div>
-        </div>
-      </a>
-
-      <a href="blog-bano-2025.html" class="article-card">
-        <div class="article-img" style="background: url('https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?q=80&w=800') center/cover no-repeat;">
-          <div class="article-img-bg"></div>
-          <span class="article-tag">Baño</span>
-        </div>
-        <div class="article-body">
-          <h3>Baño 2025: Tu Spa Privado Inteligente</h3>
-          <p>Duchas sin juntas, grifería inteligente y texturas Wabi-sabi. Convierte tu baño en una experiencia sensorial diaria.</p>
-          <div class="article-meta"><span>🚿</span><span>4 min de lectura</span><span class="dot"></span><span>Mar 2026</span></div>
-        </div>
-      </a>
-
-      <a href="blog-oficina-2025.html" class="article-card">
-        <div class="article-img" style="background: url('https://images.unsplash.com/photo-1524758631624-e2822e304c36?q=80&w=800') center/cover no-repeat;">
-          <div class="article-img-bg"></div>
-          <span class="article-tag">Oficina</span>
-        </div>
-        <div class="article-body">
-          <h3>Oficina 2025: Biofilia y la Revolución del Confort</h3>
-          <p>Productividad inspirada por la naturaleza. El uso del corcho y plantas integradas para un entorno de trabajo saludable.</p>
-          <div class="article-meta"><span>💻</span><span>5 min de lectura</span><span class="dot"></span><span>Mar 2026</span></div>
-        </div>
-      </a>
-
-      <a href="blog-comedor-2025.html" class="article-card">
-        <div class="article-img" style="background: url('https://images.unsplash.com/photo-1577202214328-c04b77cefb5d?q=80&w=800') center/cover no-repeat;">
-          <div class="article-img-bg"></div>
-          <span class="article-tag">Comedor</span>
-        </div>
-        <div class="article-body">
-          <h3>Comedor 2025: El Arte de Reunirse con Estilo</h3>
-          <p>Mesas circulares y mezcla de épocas. Cómo crear un oasis tecnológico cálido para cenas inolvidable.</p>
-          <div class="article-meta"><span>🍷</span><span>5 min de lectura</span><span class="dot"></span><span>Mar 2026</span></div>
-        </div>
+      <a href="02-upload-wizard.html" class="bg-primary hover:bg-primary/90 text-white px-6 py-2.5 rounded-xl text-sm font-bold tracking-wide transition-all hover:scale-105 shadow-lg shadow-primary/20">
+        Renderiza Ahora
       </a>
     </div>
-  </section>
+  </nav>
 
-  <!-- CTA BANNER -->
-  <div class="cta-banner">
-    <h2>💡 ¿Quieres ver cómo quedarían estos estilos en TU habitación?</h2>
-    <p>Prueba un render de interiores con IA y descúbrelo en 2-4 horas</p>
-    <a class="cta-btn" href="02-upload-wizard.html">Renderiza Ahora por 2,50€</a>
-    <p class="tagline">¡1€ menos que un perrito! 🌭 · Sin suscripción · Pago único</p>
-  </div>
-
-  <!-- STYLES -->
-  <section class="styles-section">
-    <h2 class="section-title">🏡 Estilos Populares</h2>
-    <div class="styles-grid">
-      <div class="style-card" style="background: linear-gradient(rgba(22,27,34,0.8), rgba(22,27,34,0.8)), url('img/gallery_modern.png') center/cover;">
-        <h3>Moderno Minimalista</h3>
-        <p>Líneas limpias, paleta neutra y máximo orden. El estilo que nunca pasa de moda.</p>
-        <a class="style-link" href="08-estilo-moderno.html">Ver renders →</a>
-      </div>
-      <div class="style-card" style="background: linear-gradient(rgba(22,27,34,0.8), rgba(22,27,34,0.8)), url('img/gallery_nordic.png') center/cover;">
-        <h3>Nórdico Escandinavo</h3>
-        <p>Madera clara, texturas naturales y esa cálida sensación de hygge escandinavo.</p>
-        <a class="style-link" href="09-estilo-nordico.html">Ver renders →</a>
-      </div>
-      <div class="style-card" style="background: linear-gradient(rgba(22,27,34,0.8), rgba(22,27,34,0.8)), url('img/gallery_industrial.png') center/cover;">
-        <h3>Industrial Urbano</h3>
-        <p>Ladrillo visto, metal y madera oscura. El loft urbano hecho habitación.</p>
-        <a class="style-link" href="10-estilo-industrial.html">Ver renders →</a>
-      </div>
-      <div class="style-card" style="background: linear-gradient(rgba(22,27,34,0.8), rgba(22,27,34,0.8)), url('img/gallery_boho.png') center/cover;">
-        <h3>Bohemio Ecléctico</h3>
-        <p>Textiles, plantas y colores. La自由 creativa en estado puro.</p>
-        <a class="style-link" href="13-estilo-bohemio.html">Ver renders →</a>
+  <!-- HERO -->
+  <header class="pt-32 pb-16 bg-surface border-b border-border">
+    <div class="max-w-4xl mx-auto px-6 text-center">
+      <h1 class="text-4xl lg:text-5xl font-black tracking-tight mb-6">Inspiración para tu hogar</h1>
+      <p class="text-lg text-text-secondary mb-10 leading-relaxed">
+        Descubre cómo la IA y el diseño de interiores se unen para crear espacios únicos. 
+        Trucos, tendencias y guías prácticas.
+      </p>
+      
+      <div class="max-w-xl mx-auto relative group">
+        <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary group-focus-within:text-primary transition-colors">search</span>
+        <input type="text" placeholder="Buscar consejos..." class="w-full pl-12 pr-4 py-4 rounded-2xl bg-white border border-border focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all text-sm">
       </div>
     </div>
-  </section>
+  </header>
 
-  <!-- NEWSLETTER -->
-  <div class="newsletter">
-    <h2>📬 Recibe consejos cada semana en tu email</h2>
-    <p>Inspiración, tendencias y trucos de decoración directamente en tu bandeja de entrada</p>
-    <div class="newsletter-form">
-      <input class="newsletter-input" type="email" placeholder="tu@email.com">
-      <button class="newsletter-btn">Suscribirse ✨</button>
-    </div>
-    <p class="no-spam">Sin spam. Solo inspiración. Puedes darte de baja cuando quieras.</p>
+  <!-- CATEGORIES -->
+  <div class="max-w-7xl mx-auto px-6 py-12 flex items-center justify-center gap-3 overflow-x-auto whitespace-nowrap scrollbar-hide">
+    <button class="px-5 py-2 rounded-full border border-primary bg-primary text-white font-bold text-sm">Todo</button>
+    <button class="px-5 py-2 rounded-full border border-border bg-white text-text-secondary hover:border-primary hover:text-primary font-medium text-sm transition-all">Salón</button>
+    <button class="px-5 py-2 rounded-full border border-border bg-white text-text-secondary hover:border-primary hover:text-primary font-medium text-sm transition-all">Dormitorio</button>
+    <button class="px-5 py-2 rounded-full border border-border bg-white text-text-secondary hover:border-primary hover:text-primary font-medium text-sm transition-all">Cocina</button>
+    <button class="px-5 py-2 rounded-full border border-border bg-white text-text-secondary hover:border-primary hover:text-primary font-medium text-sm transition-all">Baño</button>
+    <button class="px-5 py-2 rounded-full border border-border bg-white text-text-secondary hover:border-primary hover:text-primary font-medium text-sm transition-all">Oficina</button>
+    <button class="px-5 py-2 rounded-full border border-border bg-white text-text-secondary hover:border-primary hover:text-primary font-medium text-sm transition-all">Jardín</button>
   </div>
 
-</div>
+  <main class="max-w-7xl mx-auto px-6 pb-24">
+    <!-- FEATURED ARTICLE -->
+    <section class="mb-20">
+      <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+        <span class="material-symbols-outlined text-primary">star</span> Artículo Destacado
+      </h2>
+      <a href="blog-tendencias-2025.html" class="group block relative rounded-3xl overflow-hidden aspect-[21/9] border border-border solar-glow transition-all hover:scale-[1.01]">
+        <img src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=2000" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="Tendencias 2025">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-10">
+          <div class="space-y-4">
+            <span class="inline-block px-3 py-1 bg-primary text-white text-[10px] font-bold uppercase tracking-widest rounded-full">Tendencias 2025</span>
+            <h3 class="text-3xl font-black text-white max-w-2xl leading-tight">La Evolución del Lujo Silencioso: Espacios que Respiran</h3>
+            <p class="text-white/80 max-w-xl text-lg line-clamp-2">Descubre cómo el 'Material Drenching', las formas orgánicas y la tecnología invisible están redefiniendo el hogar moderno.</p>
+            <div class="flex items-center gap-4 text-white/60 text-sm italic">
+              <span>Por RenderRoom Team</span>
+              <span>• 10 Mar 2026</span>
+              <span class="flex items-center gap-1"><span class="material-symbols-outlined text-xs">schedule</span> 8 min</span>
+            </div>
+          </div>
+        </div>
+      </a>
+    </section>
 
-<footer>
-  <p>© 2026 RenderRoom · Renders de interiores por <strong style="color:var(--amber)">2,50€</strong> · Hecho con ❤️ e IA</p>
-  <p style="margin-top:0.5rem"><a href="01-landing-page.html">← Volver al inicio</a></p>
-</footer>
+    <!-- ARTICLES GRID -->
+    <section class="mb-24">
+      <h2 class="text-xl font-bold mb-8">Últimos Consejos</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        
+        <!-- Article 1 -->
+        <a href="blog-salon-2025.html" class="group bg-white border border-border rounded-[2rem] overflow-hidden card-hover solar-glow group">
+          <div class="aspect-video relative overflow-hidden">
+            <img src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=800" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Salón">
+            <span class="absolute top-4 left-4 px-2 py-1 bg-white/90 backdrop-blur-md rounded-md text-[10px] font-bold uppercase tracking-wider text-text-primary">Salón</span>
+          </div>
+          <div class="p-6">
+            <h3 class="font-bold text-text-primary mb-2 group-hover:text-primary transition-colors">Salón 2025: Material Drenching y Formas Orgánicas</h3>
+            <p class="text-sm text-text-secondary line-clamp-2">La tendencia de 'sumergir' la habitación en un solo color o material llega con fuerza.</p>
+            <div class="mt-6 flex items-center justify-between text-[10px] font-bold text-text-secondary uppercase tracking-widest">
+              <span>🛋️ Mar 2026</span>
+              <span>5 min lectura</span>
+            </div>
+          </div>
+        </a>
 
-<script>
-  // Category filter interaction
-  document.querySelectorAll('.pill').forEach(pill => {
-    pill.addEventListener('click', () => {
-      document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
-      pill.classList.add('active');
-    });
-  });
-</script>
+        <!-- Article 2 -->
+        <a href="blog-dormitorio-2025.html" class="group bg-white border border-border rounded-[2rem] overflow-hidden card-hover solar-glow group">
+          <div class="aspect-video relative overflow-hidden">
+            <img src="https://images.unsplash.com/photo-1540518614846-7eded433c457?q=80&w=800" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Dormitorio">
+            <span class="absolute top-4 left-4 px-2 py-1 bg-white/90 backdrop-blur-md rounded-md text-[10px] font-bold uppercase tracking-wider text-text-primary">Dormitorio</span>
+          </div>
+          <div class="p-6">
+            <h3 class="font-bold text-text-primary mb-2 group-hover:text-primary transition-colors">El Refugio de los 'Nuevos Románticos'</h3>
+            <p class="text-sm text-text-secondary line-clamp-2">Paredes con tapizados y una vuelta a la personalización emocional en el dormitorio.</p>
+            <div class="mt-6 flex items-center justify-between text-[10px] font-bold text-text-secondary uppercase tracking-widest">
+              <span>🌙 Mar 2026</span>
+              <span>4 min lectura</span>
+            </div>
+          </div>
+        </a>
+
+        <!-- Article 3 -->
+        <a href="blog-cocina-2025.html" class="group bg-white border border-border rounded-[2rem] overflow-hidden card-hover solar-glow group">
+          <div class="aspect-video relative overflow-hidden">
+            <img src="https://images.unsplash.com/photo-1556911223-e4521516b080?q=80&w=800" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Cocina">
+            <span class="absolute top-4 left-4 px-2 py-1 bg-white/90 backdrop-blur-md rounded-md text-[10px] font-bold uppercase tracking-wider text-text-primary">Cocina</span>
+          </div>
+          <div class="p-6">
+            <h3 class="font-bold text-text-primary mb-2 group-hover:text-primary transition-colors">Cocina 2025: Tecnología Invisible</h3>
+            <p class="text-sm text-text-secondary line-clamp-2">Electrodomésticos ocultos y materiales nobles como el nogal y la piedra natural.</p>
+            <div class="mt-6 flex items-center justify-between text-[10px] font-bold text-text-secondary uppercase tracking-widest">
+              <span>🍳 Mar 2026</span>
+              <span>6 min lectura</span>
+            </div>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <!-- CTA BANNER -->
+    <section class="bg-primary/5 rounded-3xl p-12 border border-primary/20 text-center relative overflow-hidden mb-24">
+      <div class="absolute -top-12 -right-12 size-48 bg-primary/10 rounded-full blur-3xl"></div>
+      <div class="absolute -bottom-12 -left-12 size-48 bg-accent-violet/10 rounded-full blur-3xl"></div>
+      
+      <div class="relative z-10 max-w-2xl mx-auto">
+        <h2 class="text-3xl font-black mb-4">¿Quieres ver cómo quedarían estos estilos en TU casa?</h2>
+        <p class="text-text-secondary mb-8">Sube una foto y deja que nuestra IA haga la magia. Recibe tu diseño en 24 horas.</p>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <a href="02-upload-wizard.html" class="bg-primary hover:bg-primary/90 text-white px-8 py-4 rounded-xl font-black transition-all hover:scale-105 shadow-xl shadow-primary/20">
+            Probar Render Gratis
+          </a>
+          <span class="text-sm font-bold text-text-secondary">* Pago único de 2,50€ después del primer render</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- NEWSLETTER -->
+    <section class="max-w-3xl mx-auto bg-white border border-border rounded-3xl p-12 text-center shadow-lg">
+      <div class="size-16 bg-primary/10 rounded-full flex items-center justify-center text-primary mx-auto mb-6">
+        <span class="material-symbols-outlined !text-3xl">mail</span>
+      </div>
+      <h2 class="text-2xl font-black mb-4">Suscríbete a nuestra Newsletter</h2>
+      <p class="text-text-secondary mb-8">Recibe un consejo de decoración semanal y ofertas exclusivas directamente en tu email.</p>
+      <form class="flex flex-col sm:flex-row gap-3">
+        <input type="email" placeholder="tu@email.com" class="flex-1 px-6 py-4 rounded-xl bg-surface border border-border focus:border-primary outline-none transition-all">
+        <button type="submit" class="bg-text-primary px-8 py-4 rounded-xl text-white font-bold hover:bg-black transition-all">Suscribirme ✨</button>
+      </form>
+      <p class="mt-4 text-[10px] text-text-secondary uppercase tracking-widest font-bold">Sin spam. Solo inspiración. Date de baja cuando quieras.</p>
+    </section>
+  </main>
+
+  <footer class="bg-surface border-t border-border py-20">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="flex flex-col md:flex-row justify-between items-start gap-20">
+        <div class="max-w-xs">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="size-10 bg-primary rounded-xl flex items-center justify-center text-white">
+              <span class="material-symbols-outlined font-bold">deployed_code</span>
+            </div>
+            <h2 class="text-2xl font-black tracking-tight">RenderRoom</h2>
+          </div>
+          <p class="text-text-secondary leading-relaxed mb-8">
+            La herramienta de IA líder para propietarios y decoradores que buscan visualizaciones rápidas y realistas.
+          </p>
+        </div>
+        
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-16 flex-1">
+          <div>
+            <h5 class="font-bold text-sm mb-6 uppercase tracking-widest text-text-secondary">App</h5>
+            <ul class="space-y-4 text-sm font-medium">
+              <li><a href="02-upload-wizard.html" class="hover:text-primary transition-colors">Nuevo Render</a></li>
+              <li><a href="03-dashboard.html" class="hover:text-primary transition-colors">Mis Proyectos</a></li>
+              <li><a href="precios.html" class="hover:text-primary transition-colors">Créditos</a></li>
+            </ul>
+          </div>
+          <div>
+            <h5 class="font-bold text-sm mb-6 uppercase tracking-widest text-text-secondary">Compañía</h5>
+            <ul class="space-y-4 text-sm font-medium">
+              <li><a href="07-consejos-decoracion.html" class="hover:text-primary transition-colors">Blog</a></li>
+              <li><a href="#" class="hover:text-primary transition-colors">Sobre Nosotros</a></li>
+              <li><a href="#" class="hover:text-primary transition-colors">Soporte</a></li>
+            </ul>
+          </div>
+          <div class="col-span-2 sm:col-span-1">
+            <h5 class="font-bold text-sm mb-6 uppercase tracking-widest text-text-secondary">Legal</h5>
+            <ul class="space-y-4 text-sm font-medium">
+              <li><a href="privacidad.html" class="hover:text-primary transition-colors">Privacidad</a></li>
+              <li><a href="terminos.html" class="hover:text-primary transition-colors">Términos</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      
+      <div class="mt-20 pt-8 border-t border-border flex flex-col sm:flex-row justify-between items-center gap-6">
+        <p class="text-xs text-text-secondary font-bold uppercase tracking-[0.2em]">© 2024 RenderRoom AI. Made with Love & Power.</p>
+        <div class="flex gap-6">
+          <a href="#" class="text-text-secondary hover:text-primary"><span class="material-symbols-outlined">brand_awareness</span></a>
+          <a href="#" class="text-text-secondary hover:text-primary"><span class="material-symbols-outlined">alternate_email</span></a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
 </body>
 </html>

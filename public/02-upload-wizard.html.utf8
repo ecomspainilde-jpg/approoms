@@ -1,5 +1,5 @@
-﻿<!DOCTYPE html>
-<html class="dark" lang="es">
+<!DOCTYPE html>
+<html lang="es">
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
@@ -13,57 +13,104 @@
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 <script id="tailwind-config">
     tailwind.config = {
-        darkMode: "class",
         theme: {
             extend: {
                 colors: {
-                    "primary": "#f0a400",
-                    "background-dark": "#0D1117",
-                    "surface-dark": "#161B22",
-                    "border-dark": "#30363D",
-                    "muted-text": "#8B949E",
+                    "primary": "#F59E0B",
+                    "background": "#FFFFFF",
+                    "surface": "#F8FAFC",
+                    "border": "#F1F5F9",
+                    "text-primary": "#1E293B",
+                    "text-secondary": "#475569",
+                    "accent-red": "#EF4444",
+                    "accent-green": "#10B981"
                 },
-                fontFamily: { "display": ["Inter", "sans-serif"] },
+                fontFamily: {
+                    "display": ["Inter", "sans-serif"]
+                },
+                borderRadius: {
+                    "DEFAULT": "0.5rem",
+                    "lg": "1rem",
+                    "xl": "1.5rem",
+                    "2xl": "2rem",
+                    "3xl": "3rem",
+                    "full": "9999px"
+                },
             },
         },
     }
 </script>
-<style>
-    .glass { background: rgba(22,27,34,0.85); backdrop-filter: blur(16px); }
-    .style-card { transition: all .25s; border: 2px solid transparent; cursor: pointer; }
-    .style-card:hover { border-color: rgba(240,164,0,.4); transform: translateY(-2px); }
-    .style-card.selected { border-color: #f0a400; box-shadow: 0 0 20px rgba(240,164,0,.3); }
-    .upload-zone { border: 2px dashed #30363D; transition: all .25s; }
-    .upload-zone.dragover { border-color: #f0a400; background: rgba(240,164,0,.05); }
-    .upload-zone.has-image { border-style: solid; border-color: #f0a400; }
-    .progress-step { transition: all .3s; }
-    .progress-step.active .step-num { background: #f0a400; color: #0D1117; }
-    .progress-step.done .step-num { background: #22c55e; color: #fff; }
-    .progress-step.active .step-label { color: #f0a400; }
+<style type="text/tailwindcss">
+    @layer utilities {
+        .glass-header {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .solar-glow {
+            box-shadow: 0 10px 40px rgba(245, 158, 11, 0.12);
+        }
+        .solar-card {
+            @apply bg-white border border-border/50 rounded-3xl transition-all duration-300 hover:shadow-2xl hover:shadow-primary/5 hover:border-primary/20;
+        }
+        .step-active {
+            @apply bg-primary text-white scale-110 shadow-lg shadow-primary/30;
+        }
+        .step-inactive {
+            @apply bg-surface text-text-secondary border border-border;
+        }
+        .step-done {
+            @apply bg-accent-green text-white border-transparent;
+        }
+        .style-card { 
+            @apply relative overflow-hidden bg-white border-2 border-transparent rounded-2xl transition-all duration-300 cursor-pointer;
+        }
+        .style-card:hover { 
+            @apply border-primary/40 -translate-y-1 shadow-xl;
+        }
+        .style-card.selected { 
+            @apply border-primary shadow-2xl shadow-primary/20 scale-[1.02];
+        }
+        .upload-zone { 
+            @apply relative bg-white border-2 border-dashed border-border rounded-[2rem] p-12 transition-all duration-500 cursor-pointer overflow-hidden;
+        }
+        .upload-zone.dragover { 
+            @apply border-primary bg-primary/5 scale-[1.02];
+        }
+        .upload-zone.has-image { 
+            @apply border-solid border-primary/30;
+        }
+        .quality-card {
+            @apply bg-surface border-2 border-transparent rounded-3xl p-6 transition-all duration-300 cursor-pointer relative overflow-hidden;
+        }
+        .quality-card:hover { 
+            @apply border-primary/20 bg-white shadow-lg;
+        }
+        .quality-card.selected { 
+            @apply border-primary bg-white shadow-xl scale-[1.02];
+        }
+    }
+    body { 
+        @apply bg-[#FCFDFF] text-text-primary antialiased;
+        background-image: 
+            radial-gradient(at 0% 0%, rgba(245, 158, 11, 0.03) 0px, transparent 50%),
+            radial-gradient(at 100% 100%, rgba(245, 158, 11, 0.05) 0px, transparent 50%);
+        background-attachment: fixed;
+    }
+    .auth-checked body { opacity: 1; }
+    
+    /* Disclaimer modal */
+    #disclaimer-modal { 
+        @apply fixed inset-0 z-[100] flex items-center justify-center bg-text-primary/40 backdrop-blur-sm;
+    }
+    #disclaimer-box { 
+        @apply bg-white border border-border rounded-[2.5rem] max-w-lg w-[90%] p-10 shadow-2xl;
+    }
+    
     .spin { animation: spin 1s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
     .fade-in { animation: fadeIn .5s ease; }
     @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
-    .proposal-section { border-left: 3px solid #f0a400; padding-left: 1rem; }
-    /* Photo selector */
-    .photo-thumb { position: relative; cursor: pointer; border-radius: 0.75rem; overflow: hidden; border: 2px solid transparent; transition: all .2s; }
-    .photo-thumb:hover { border-color: rgba(240,164,0,.4); }
-    .photo-thumb.primary { border-color: #f0a400; box-shadow: 0 0 16px rgba(240,164,0,.35); }
-    .photo-thumb .primary-badge { display: none; position: absolute; top: 6px; left: 6px; background: #f0a400; color: #0D1117; font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 999px; letter-spacing:.04em; }
-    .photo-thumb.primary .primary-badge { display: block; }
-    .photo-thumb .select-hint { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,.7)); text-align:center; padding: 10px 4px 6px; font-size: 10px; color: #ccc; opacity:0; transition:.2s; }
-    .photo-thumb:hover .select-hint { opacity:1; }
-    /* Disclaimer modal */
-    #disclaimer-modal { position:fixed; inset:0; background:rgba(0,0,0,.75); z-index:999; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(4px); }
-    #disclaimer-box { background:#161B22; border:1px solid #30363D; border-radius:1.25rem; max-width:520px; width:90%; padding:2rem; box-shadow:0 25px 60px rgba(0,0,0,.6); }
-    
-    .quality-card { border: 2px solid transparent; transition: all .25s; cursor: pointer; }
-    .quality-card:hover { border-color: rgba(240,164,0,.4); }
-    .quality-card.selected { border-color: #f0a400; background: rgba(240,164,0,0.05); }
-    .quality-card.selected .check-mark { background: #f0a400; border-color: #f0a400; }
-    .quality-card.selected .check-mark::after { opacity: 1; }
-    .check-mark { position: relative; border-radius: 999px; }
-    .check-mark::after { content: 'check'; font-family: 'Material Symbols Outlined'; font-size: 14px; color: #0D1117; opacity: 0; transition: opacity .2s; }
 </style>
   <style>
     /* Prevent FOUC: hide body by default */
@@ -76,271 +123,286 @@
 <!-- ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ DISCLAIMER MODAL ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ -->
 <div id="disclaimer-modal">
     <div id="disclaimer-box" class="fade-in">
-        <div class="flex items-center gap-3 mb-4">
-            <div class="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
-                <span class="material-symbols-outlined">privacy_tip</span>
+        <div class="flex items-center gap-4 mb-8">
+            <div class="size-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+                <span class="material-symbols-outlined !text-3xl">privacy_tip</span>
             </div>
             <div>
-                <h2 class="font-black text-lg">Aviso sobre tus fotos</h2>
-                <p class="text-xs text-muted-text">Lee antes de continuar</p>
+                <h2 class="font-black text-2xl tracking-tight">Fotos y Privacidad</h2>
+                <p class="text-sm text-text-secondary">Información importante</p>
             </div>
         </div>
-        <div class="space-y-3 text-sm text-slate-300 leading-relaxed mb-6">
-            <p>Al subir im├ígenes a RenderRoom, confirmas que:</p>
-            <ul class="space-y-2 text-sm">
-                <li class="flex items-start gap-2">
-                    <span class="material-symbols-outlined text-primary text-sm mt-0.5 flex-shrink-0">check_circle</span>
-                    <span>Las fotograf├¡as son de tu propiedad o tienes autorizaci├│n expresa del propietario para utilizarlas.</span>
-                </li>
-                <li class="flex items-start gap-2">
-                    <span class="material-symbols-outlined text-primary text-sm mt-0.5 flex-shrink-0">check_circle</span>
-                    <span>Las im├ígenes no contienen datos personales identificables de terceros sin su consentimiento (<a href="privacidad.html" class="text-primary underline" target="_blank">RGPD</a>).</span>
-                </li>
-                <li class="flex items-start gap-2">
-                    <span class="material-symbols-outlined text-primary text-sm mt-0.5 flex-shrink-0">check_circle</span>
-                    <span>El contenido es apto para todos los p├║blicos y no infringe derechos de autor de terceros.</span>
-                </li>
-                <li class="flex items-start gap-2">
-                    <span class="material-symbols-outlined text-primary text-sm mt-0.5 flex-shrink-0">check_circle</span>
-                    <span>Las im├ígenes se usar├ín exclusivamente para la generaci├│n del render solicitado y no ser├ín compartidas p├║blicamente sin tu permiso.</span>
-                </li>
-            </ul>
-            <p class="text-xs text-muted-text border-t border-border-dark pt-3">Conforme a nuestra <a href="privacidad.html" class="text-primary underline" target="_blank">Pol├¡tica de Privacidad</a> y <a href="terminos.html" class="text-primary underline" target="_blank">T├®rminos de Uso</a>. El tratamiento de datos est├í amparado por el RGPD (UE) 2016/679.</p>
+        <div class="space-y-4 mb-8">
+            <div class="p-4 bg-surface rounded-2xl border border-border/50">
+                <ul class="space-y-3">
+                    <li class="flex items-start gap-3">
+                        <span class="material-symbols-outlined text-accent-green text-sm mt-0.5">check_circle</span>
+                        <span class="text-sm text-text-secondary">Confirma que eres el propietario o tienes permiso.</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <span class="material-symbols-outlined text-accent-green text-sm mt-0.5">check_circle</span>
+                        <span class="text-sm text-text-secondary">Uso exclusivo para generación del render solicitado.</span>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <span class="material-symbols-outlined text-accent-green text-sm mt-0.5">check_circle</span>
+                        <span class="text-sm text-text-secondary">Cumplimiento estricto con el <strong class="text-text-primary">RGPD</strong>.</span>
+                    </li>
+                </ul>
+            </div>
+            <p class="text-xs text-text-secondary leading-relaxed px-2">
+                Al continuar, aceptas que tratemos tus imágenes según nuestra 
+                <a href="privacidad.html" class="text-primary font-bold hover:underline" target="_blank">Política de Privacidad</a>.
+            </p>
         </div>
-        <div class="flex items-center gap-3 mb-4">
-            <input type="checkbox" id="disclaimer-check" class="w-4 h-4 accent-primary rounded cursor-pointer">
-            <label for="disclaimer-check" class="text-sm cursor-pointer select-none">He le├¡do y acepto los t├®rminos de uso de im├ígenes</label>
+        <div class="flex items-center gap-3 p-4 bg-surface rounded-2xl border border-border/50 mb-8 cursor-pointer group hover:bg-white hover:border-primary/20 transition-all" onclick="document.getElementById('disclaimer-check').click()">
+            <input type="checkbox" id="disclaimer-check" class="size-5 accent-primary rounded-lg border-border cursor-pointer">
+            <label for="disclaimer-check" class="text-sm font-bold text-text-secondary group-hover:text-text-primary cursor-pointer transition-colors">He leído y acepto los términos</label>
         </div>
-        <button id="disclaimer-confirm" disabled onclick="acceptDisclaimer()" class="w-full bg-primary/30 text-primary/50 font-bold py-3 rounded-xl transition-all cursor-not-allowed">
-            Continuar ÔåÆ
+        <button id="disclaimer-confirm" disabled onclick="acceptDisclaimer()" class="w-full bg-surface text-text-secondary/50 font-black py-4 rounded-2xl transition-all cursor-not-allowed text-lg">
+            Empezar Ahora
         </button>
     </div>
 </div>
 
 <!-- NAV -->
-<header class="glass sticky top-0 z-50 border-b border-border-dark flex items-center justify-between px-6 md:px-10 py-4">
-    <a href="01-landing-page.html" class="flex items-center gap-3">
-        <div class="size-8 bg-gradient-to-br from-primary to-orange-600 rounded-lg flex items-center justify-center text-background-dark">
-            <span class="material-symbols-outlined text-sm font-bold">deployed_code</span>
-        </div>
-        <h2 class="text-xl font-black tracking-tight">Render<span class="text-primary">Room</span></h2>
-    </a>
-    <!-- Steps progress -->
-    <div class="hidden md:flex items-center gap-2">
-        <div id="step-indicator-1" class="progress-step active flex items-center gap-2">
-            <div class="step-num size-7 rounded-full bg-surface-dark border border-border-dark flex items-center justify-center text-xs font-bold">1</div>
-            <span class="step-label text-sm font-semibold text-muted-text">Foto</span>
-        </div>
-        <div class="w-8 h-px bg-border-dark"></div>
-        <div id="step-indicator-2" class="progress-step flex items-center gap-2">
-            <div class="step-num size-7 rounded-full bg-surface-dark border border-border-dark flex items-center justify-center text-xs font-bold">2</div>
-            <span class="step-label text-sm font-semibold text-muted-text">Estilo</span>
-        </div>
-        <div class="w-8 h-px bg-border-dark"></div>
-        <div id="step-indicator-3" class="progress-step flex items-center gap-2">
-            <div class="step-num size-7 rounded-full bg-surface-dark border border-border-dark flex items-center justify-center text-xs font-bold">3</div>
-            <span class="step-label text-sm font-semibold text-muted-text">Generar</span>
-        </div>
-    </div>
-    <div class="flex items-center gap-4">
-        <!-- Persistent Credits Display -->
-        <div class="flex items-center gap-2 px-3 py-1.5 bg-surface-dark border border-border-dark rounded-full">
-            <span class="material-symbols-outlined text-primary text-[18px]">database</span>
-            <span id="header-credits-count" class="text-sm font-bold">--</span>
-            <span class="text-[10px] text-muted-text font-medium uppercase tracking-wider hidden sm:inline">Cr├®ditos</span>
-            <a href="modal-compra.html" id="header-buy-credits-btn" onclick="window.open(this.href, 'Purchase', 'width=1000,height=800'); return false;" class="ml-1 px-2 py-0.5 bg-primary/10 hover:bg-primary/20 text-primary text-[10px] font-bold rounded-md border border-primary/20 transition-all hidden">
-                COMPRAR
-            </a>
-        </div>
-        
-        <div id="admin-link-container" class="hidden">
-            <a href="admin-dashboard.html" class="text-primary hover:text-primary/80 transition-colors">
-                <span class="material-symbols-outlined">admin_panel_settings</span>
-            </a>
-        </div>
-        <a href="03-dashboard.html" class="text-sm text-muted-text hover:text-primary transition-colors font-medium">Mis Renders</a>
-        <a href="06-perfil-usuario.html" class="flex items-center gap-3">
-            <div id="user-initials" class="w-8 h-8 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-primary font-bold text-xs">
-                U
+<header class="fixed top-0 left-0 right-0 z-50 glass-header border-b border-border h-20">
+    <div class="max-w-7xl mx-auto px-6 h-full flex items-center justify-between">
+        <a href="01-landing-page.html" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
+            <div class="size-9 bg-primary rounded-lg flex items-center justify-center text-white">
+                <span class="material-symbols-outlined font-bold text-xl">deployed_code</span>
             </div>
+            <h2 class="text-xl font-black tracking-tight">Render<span class="text-primary">Room</span></h2>
         </a>
+
+        <!-- Stepper Desktop -->
+        <nav class="hidden lg:flex items-center gap-12">
+            <div id="step-indicator-1" class="progress-step flex items-center gap-3">
+                <div class="step-num size-8 rounded-full flex items-center justify-center text-xs font-black step-active">1</div>
+                <span class="step-label text-sm font-bold">Subida</span>
+            </div>
+            <div class="w-12 h-px bg-border"></div>
+            <div id="step-indicator-2" class="progress-step flex items-center gap-3 opacity-40">
+                <div class="step-num size-8 rounded-full flex items-center justify-center text-xs font-black step-inactive">2</div>
+                <span class="step-label text-sm font-bold">Estilo</span>
+            </div>
+            <div class="w-12 h-px bg-border"></div>
+            <div id="step-indicator-3" class="progress-step flex items-center gap-3 opacity-40">
+                <div class="step-num size-8 rounded-full flex items-center justify-center text-xs font-black step-inactive">3</div>
+                <span class="step-label text-sm font-bold">Generación</span>
+            </div>
+        </nav>
+
+        <div class="flex items-center gap-4">
+            <!-- Credits Display -->
+            <div class="flex items-center gap-2 px-3 py-1.5 bg-surface border border-border rounded-full">
+                <span class="material-symbols-outlined text-primary text-[20px]">database</span>
+                <span id="header-credits-count" class="text-sm font-black text-text-primary">--</span>
+                <a href="modal-compra.html" id="header-buy-credits-btn" onclick="window.open(this.href, 'Purchase', 'width=1000,height=800'); return false;" class="ml-1 px-2 py-0.5 bg-primary/10 hover:bg-primary/20 text-primary text-[10px] font-black rounded-md border border-primary/20 transition-all hidden">
+                    + CARGAR
+                </a>
+            </div>
+            
+            <a href="03-dashboard.html" class="size-10 bg-surface rounded-full border border-border flex items-center justify-center text-text-secondary hover:text-primary transition-colors">
+                <span class="material-symbols-outlined">person</span>
+            </a>
+        </div>
     </div>
 </header>
 
-<main class="max-w-4xl mx-auto px-6 py-10 space-y-10">
-
-    <!-- ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ STEP 1: UPLOAD ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ -->
-    <section id="section-upload">
-        <div class="mb-6">
-            <span class="text-primary text-xs font-bold uppercase tracking-widest">Paso 1</span>
-            <h1 class="text-3xl font-black mt-1">Sube tu foto</h1>
-            <p class="text-muted-text mt-1">Nuestra IA analizar├í tu habitaci├│n y generar├í un dise├▒o personalizado</p>
-        </div>
-
-        <!-- Drop Zone -->
-        <div id="upload-zone" class="upload-zone rounded-2xl p-8 flex flex-col items-center justify-center gap-4 text-center cursor-pointer relative min-h-[300px]">
-            <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp" multiple aria-label="Subir fotos de la habitaci├│n" class="hidden"/>
-            <!-- Placeholder state -->
-            <div id="upload-placeholder">
-                <div class="size-20 rounded-full bg-primary/10 flex items-center justify-center text-primary mx-auto mb-4">
-                    <span class="material-symbols-outlined text-5xl">add_photo_alternate</span>
-                </div>
-                <h3 class="text-xl font-bold mb-1">Sube fotos de tu habitaci├│n</h3>
-                <p class="text-muted-text text-sm">Arrastra hasta 3 im├ígenes o haz clic aqu├¡</p>
-                <p class="text-xs text-muted-text/60 mt-2">Varios ├íngulos ayudan a Gemini a entender mejor el espacio</p>
+    <main class="max-w-5xl mx-auto px-6 py-12 space-y-12">
+    
+        <!-- ───── STEP 1: UPLOAD ───── -->
+        <section id="section-upload" class="fade-in">
+            <div class="mb-10 text-center">
+                <span class="text-primary text-xs font-black uppercase tracking-widest px-3 py-1 bg-primary/10 rounded-full">Paso 1</span>
+                <h1 class="text-4xl font-black mt-4 text-text-primary tracking-tight">Sube tu foto</h1>
+                <p class="text-text-secondary mt-2 text-lg">Nuestra IA analizará tu habitación y generará un diseño personalizado</p>
             </div>
-            <!-- Preview state (hidden) -->
-            <div id="upload-preview" class="hidden w-full">
-                <p class="text-xs text-muted-text mb-3 flex items-center gap-1">
-                    <span class="material-symbols-outlined text-primary text-sm">touch_app</span>
-                    Toca una foto para marcarla como <strong class="text-primary ml-1">foto principal</strong> para el render
+    
+            <!-- Drop Zone -->
+            <div id="upload-zone" class="upload-zone p-12 flex flex-col items-center justify-center gap-6 text-center cursor-pointer relative min-h-[350px]">
+                <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp" multiple aria-label="Subir fotos de la habitación" class="hidden"/>
+                <!-- Placeholder state -->
+                <div id="upload-placeholder" class="solar-glow p-8 rounded-full bg-white/50">
+                    <div class="size-24 rounded-3xl bg-primary flex items-center justify-center text-white shadow-lg shadow-primary/30 mx-auto mb-6 rotate-3 hover:rotate-0 transition-transform duration-500">
+                        <span class="material-symbols-outlined text-5xl">add_photo_alternate</span>
+                    </div>
+                    <h3 class="text-2xl font-black mb-2 text-text-primary">Sube fotos de tu habitación</h3>
+                    <p class="text-text-secondary font-medium">Arrastra hasta 3 imágenes o haz clic aquí</p>
+                    <p class="text-xs text-text-secondary/60 mt-4 max-w-sm mx-aut            <!-- Preview state (hidden) -->
+            <div id="upload-preview" class="hidden w-full px-4">
+                <p class="text-sm text-text-secondary mb-6 flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-primary">touch_app</span>
+                    Toca una foto para marcarla como <strong class="text-primary font-black">foto principal</strong>
                 </p>
-                <div id="preview-grid" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div id="preview-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     <!-- Previews will be injected here -->
                 </div>
-                <button id="change-photo-btn" class="text-xs text-muted-text hover:text-primary transition-colors underline">Cambiar fotos</button>
+                <button id="change-photo-btn" class="px-6 py-2 bg-white border border-border text-text-secondary font-bold rounded-full hover:bg-surface transition-all shadow-sm">Cambiar fotos</button>
             </div>
         </div>
 
         <!-- Analysis Panel -->
-        <div id="analysis-panel" class="hidden mt-6 bg-surface-dark rounded-xl border border-border-dark p-6 fade-in">
-            <div id="analysis-loading" class="flex items-center gap-3 text-primary">
-                <svg class="spin size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
-                <span class="text-sm font-semibold">Analizando tu habitaci├│n con Gemini VisionÔÇª</span>
+        <div id="analysis-panel" class="hidden mt-8 bg-white rounded-3xl border border-border p-8 solar-card fade-in">
+            <div id="analysis-loading" class="flex flex-col items-center justify-center gap-4 text-primary py-4">
+                <div class="size-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+                <span class="text-lg font-black tracking-tight">Analizando tu habitación con IA...</span>
             </div>
             <div id="analysis-result" class="hidden">
-                <div class="flex items-center gap-2 mb-3">
-                    <span class="material-symbols-outlined text-primary">home_search</span>
-                    <h3 class="font-bold text-primary">An├ílisis de tu habitaci├│n</h3>
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="size-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
+                        <span class="material-symbols-outlined font-bold">home_search</span>
+                    </div>
+                    <h3 class="font-black text-xl text-text-primary tracking-tight">Análisis del espacio</h3>
                 </div>
-                <div id="analysis-text" class="text-slate-300 text-sm leading-relaxed whitespace-pre-line max-h-48 overflow-y-auto pr-1"></div>
+                <div id="analysis-text" class="text-text-secondary text-base leading-relaxed whitespace-pre-line max-h-60 overflow-y-auto pr-2 font-medium"></div>
 
                 <!-- Image Validation Badge -->
-                <div id="image-validation-panel" class="hidden mt-4 pt-4 border-t border-border-dark">
-                    <div class="flex items-center gap-3 mb-3">
-                        <div id="validation-badge" class="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-black">
+                <div id="image-validation-panel" class="hidden mt-6 pt-6 border-t border-border">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div id="validation-badge" class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black">
                             <span id="validation-icon" class="material-symbols-outlined text-sm"></span>
                             <span id="validation-label"></span>
                             <span id="validation-score" class="ml-1 opacity-70"></span>
                         </div>
-                        <span class="text-xs text-muted-text">Aptitud para render</span>
+                        <span class="text-sm font-bold text-text-secondary">Aptitud para el render</span>
                     </div>
-                    <div id="validation-issues" class="hidden space-y-1.5"></div>
-                    <div id="validation-checks" class="grid grid-cols-3 gap-2 mt-3"></div>
+                    <div id="validation-issues" class="hidden space-y-2"></div>
+                    <div id="validation-checks" class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4"></div>
                 </div>
             </div>
-            <div id="analysis-error" class="hidden text-orange-400 text-sm">
-                <span class="material-symbols-outlined text-sm mr-1">warning</span>
-                <span id="analysis-error-text"></span> ÔÇö puedes continuar igualmente con tu descripci├│n manual.
+            <div id="analysis-error" class="hidden bg-accent-red/5 border border-accent-red/20 rounded-2xl p-4 text-accent-red text-sm flex items-center gap-3">
+                <span class="material-symbols-outlined">warning</span>
+                <p><span id="analysis-error-text" class="font-bold"></span> — puedes continuar igualmente con tu descripción manual.</p>
             </div>
         </div>
 
         <!-- Manual description -->
-        <div id="prompt-section" class="mt-6 bg-surface-dark rounded-xl border border-border-dark p-6">
-            <h3 class="font-bold mb-3">┬┐Qu├® imaginas para tu habitaci├│n?</h3>
-            <textarea id="prompt-input" rows="3" placeholder="Ej: Quiero un espacio luminoso, acogedor, con toques de naturaleza y colores tierraÔÇª" class="w-full bg-background-dark/60 border border-border-dark rounded-lg p-3 text-sm text-slate-200 placeholder-muted-text focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"></textarea>
+        <div id="prompt-section" class="mt-8 bg-surface rounded-3xl border border-border p-8">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="size-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
+                    <span class="material-symbols-outlined font-bold">edit_note</span>
+                </div>
+                <h3 class="font-black text-xl text-text-primary tracking-tight">¿Qué imaginas para tu habitación?</h3>
+            </div>
+            <textarea id="prompt-input" rows="4" placeholder="Ej: Quiero un espacio luminoso, acogedor, con toques de madera natural y colores tierra..." class="w-full bg-white border border-border rounded-2xl p-4 text-text-primary placeholder:text-text-secondary/30 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium resize-none shadow-sm"></textarea>
         </div>
 
-        <div class="mt-4 flex justify-end">
-            <button id="btn-to-style" disabled class="bg-primary/30 text-primary/50 font-bold py-3 px-8 rounded-xl transition-all cursor-not-allowed" onclick="goToStep2()">
-                Elegir estilo ÔåÆ
+        <div class="mt-8 flex justify-end">
+            <button id="btn-to-style" disabled class="bg-primary/20 text-primary font-black py-4 px-10 rounded-2xl transition-all cursor-not-allowed text-lg hover:shadow-lg hover:shadow-primary/10" onclick="goToStep2()">
+                Siguiente Paso: Estilo →
             </button>
         </div>
     </section>
 
-    <!-- ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ STEP 2: STYLE ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ -->
-    <section id="section-style" class="hidden">
-        <div class="mb-6">
-            <span class="text-primary text-xs font-bold uppercase tracking-widest">Paso 2</span>
-            <h2 class="text-3xl font-black mt-1">Elige tu estilo</h2>
-            <p class="text-muted-text mt-1">Selecciona el look que quieres para tu espacio</p>
-        </div>
-        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-            <!-- Moderno -->
-            <div class="style-card bg-surface-dark rounded-xl overflow-hidden" data-style="moderno" onclick="selectStyle(this)">
-                <div class="aspect-video bg-cover bg-center" style="background-image:url('img/style_moderno.png')"></div>
-                <div class="p-3">
-                    <p class="font-bold text-sm">┬íHazlo Moderno!</p>
-                    <p class="text-xs text-muted-text mt-0.5">L├¡neas limpias y elegancia atemporal</p>
-                    <a href="08-estilo-moderno.html" target="_blank" class="text-xs text-primary hover:underline mt-1 block" onclick="event.stopPropagation()">Explorar look ÔåÆ</a>
+        <!-- ───── STEP 2: STYLE ───── -->
+        <section id="section-style" class="hidden fade-in">
+            <div class="mb-10 text-center">
+                <span class="text-primary text-xs font-black uppercase tracking-widest px-3 py-1 bg-primary/10 rounded-full">Paso 2</span>
+                <h2 class="text-4xl font-black mt-4 text-text-primary tracking-tight">Elige tu estilo</h2>
+                <p class="text-text-secondary mt-2 text-lg">Selecciona el look que quieres para tu espacio</p>
+            </div>
+            
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
+                <!-- Moderno -->
+                <div class="style-card bg-white" data-style="moderno" onclick="selectStyle(this)">
+                    <div class="aspect-[4/3] bg-cover bg-center" style="background-image:url('img/style_moderno.png')"></div>
+                    <div class="p-4">
+                        <p class="font-black text-text-primary">¡Hazlo Moderno!</p>
+                        <p class="text-xs text-text-secondary mt-1">Líneas limpias y elegancia atemporal</p>
+                        <a href="08-estilo-moderno.html" target="_blank" class="text-xs text-primary font-bold hover:underline mt-3 inline-flex items-center gap-1" onclick="event.stopPropagation()">
+                            Explorar look <span class="material-symbols-outlined text-xs">arrow_forward</span>
+                        </a>
+                    </div>
+                </div>
+                <!-- Nórdico -->
+                <div class="style-card bg-white" data-style="nordico" onclick="selectStyle(this)">
+                    <div class="aspect-[4/3] bg-cover bg-center" style="background-image:url('img/style_nordico.png')"></div>
+                    <div class="p-4">
+                        <p class="font-black text-text-primary">Calidez Nórdica</p>
+                        <p class="text-xs text-text-secondary mt-1">Madera natural y luz acogedora</p>
+                        <a href="09-estilo-nordico.html" target="_blank" class="text-xs text-primary font-bold hover:underline mt-3 inline-flex items-center gap-1" onclick="event.stopPropagation()">
+                            Ver detalles <span class="material-symbols-outlined text-xs">arrow_forward</span>
+                        </a>
+                    </div>
+                </div>
+                <!-- Industrial -->
+                <div class="style-card bg-white" data-style="industrial" onclick="selectStyle(this)">
+                    <div class="aspect-[4/3] bg-cover bg-center" style="background-image:url('img/style_industrial.png')"></div>
+                    <div class="p-4">
+                        <p class="font-black text-text-primary">Esencia Industrial</p>
+                        <p class="text-xs text-text-secondary mt-1">Carácter urbano y texturas crudas</p>
+                        <a href="10-estilo-industrial.html" target="_blank" class="text-xs text-primary font-bold hover:underline mt-3 inline-flex items-center gap-1" onclick="event.stopPropagation()">
+                            Descubrir look <span class="material-symbols-outlined text-xs">arrow_forward</span>
+                        </a>
+                    </div>
+                </div>
+                <!-- Minimalista -->
+                <div class="style-card bg-white" data-style="minimalista" onclick="selectStyle(this)">
+                    <div class="aspect-[4/3] bg-cover bg-center" style="background-image:url('img/style_minimalista.png')"></div>
+                    <div class="p-4">
+                        <p class="font-black text-text-primary">Pura Calma</p>
+                        <p class="text-xs text-text-secondary mt-1">Espacio libre de ruido visual</p>
+                        <a href="11-estilo-minimalista.html" target="_blank" class="text-xs text-primary font-bold hover:underline mt-3 inline-flex items-center gap-1" onclick="event.stopPropagation()">
+                            Ver estilo <span class="material-symbols-outlined text-xs">arrow_forward</span>
+                        </a>
+                    </div>
+                </div>
+                <!-- Rústico -->
+                <div class="style-card bg-white" data-style="rustico" onclick="selectStyle(this)">
+                    <div class="aspect-[4/3] bg-cover bg-center" style="background-image:url('img/style_rustico.png')"></div>
+                    <div class="p-4">
+                        <p class="font-black text-text-primary">Encanto Rústico</p>
+                        <p class="text-xs text-text-secondary mt-1">La calidez de lo natural</p>
+                        <a href="12-estilo-rustico.html" target="_blank" class="text-xs text-primary font-bold hover:underline mt-3 inline-flex items-center gap-1" onclick="event.stopPropagation()">
+                            Inspírate <span class="material-symbols-outlined text-xs">arrow_forward</span>
+                        </a>
+                    </div>
+                </div>
+                <!-- Bohemio -->
+                <div class="style-card bg-white" data-style="bohemio" onclick="selectStyle(this)">
+                    <div class="aspect-[4/3] bg-cover bg-center" style="background-image:url('img/style_bohemio.png')"></div>
+                    <div class="p-4">
+                        <p class="font-black text-text-primary">Alma Bohemia</p>
+                        <p class="text-xs text-text-secondary mt-1">Libre, artístico y lleno de vida</p>
+                        <a href="#" class="text-xs text-primary font-bold hover:underline mt-3 inline-flex items-center gap-1" onclick="event.stopPropagation()">
+                            Explorar <span class="material-symbols-outlined text-xs">arrow_forward</span>
+                        </a>
+                    </div>
                 </div>
             </div>
-            <!-- N├│rdico -->
-            <div class="style-card bg-surface-dark rounded-xl overflow-hidden" data-style="nordico" onclick="selectStyle(this)">
-                <div class="aspect-video bg-cover bg-center" style="background-image:url('img/style_nordico.png')"></div>
-                <div class="p-3">
-                    <p class="font-bold text-sm">Calidez N├│rdica</p>
-                    <p class="text-xs text-muted-text mt-0.5">Madera natural y luz acogedora</p>
-                    <a href="09-estilo-nordico.html" target="_blank" class="text-xs text-primary hover:underline mt-1 block" onclick="event.stopPropagation()">Ver detalles ÔåÆ</a>
-                </div>
-            </div>
-            <!-- Industrial -->
-            <div class="style-card bg-surface-dark rounded-xl overflow-hidden" data-style="industrial" onclick="selectStyle(this)">
-                <div class="aspect-video bg-cover bg-center" style="background-image:url('img/style_industrial.png')"></div>
-                <div class="p-3">
-                    <p class="font-bold text-sm">Esencia Industrial</p>
-                    <p class="text-xs text-muted-text mt-0.5">Car├ícter urbano y texturas crudas</p>
-                    <a href="10-estilo-industrial.html" target="_blank" class="text-xs text-primary hover:underline mt-1 block" onclick="event.stopPropagation()">Descubrir look ÔåÆ</a>
-                </div>
-            </div>
-            <!-- Minimalista -->
-            <div class="style-card bg-surface-dark rounded-xl overflow-hidden" data-style="minimalista" onclick="selectStyle(this)">
-                <div class="aspect-video bg-cover bg-center" style="background-image:url('img/style_minimalista.png')"></div>
-                <div class="p-3">
-                    <p class="font-bold text-sm">Pura Calma</p>
-                    <p class="text-xs text-muted-text mt-0.5">Espacio libre de ruido visual</p>
-                    <a href="11-estilo-minimalista.html" target="_blank" class="text-xs text-primary hover:underline mt-1 block" onclick="event.stopPropagation()">Ver estilo ÔåÆ</a>
-                </div>
-            </div>
-            <!-- R├║stico -->
-            <div class="style-card bg-surface-dark rounded-xl overflow-hidden" data-style="rustico" onclick="selectStyle(this)">
-                <div class="aspect-video bg-cover bg-center" style="background-image:url('img/style_rustico.png')"></div>
-                <div class="p-3">
-                    <p class="font-bold text-sm">Encanto R├║stico</p>
-                    <p class="text-xs text-muted-text mt-0.5">La calidez de lo natural</p>
-                    <a href="12-estilo-rustico.html" target="_blank" class="text-xs text-primary hover:underline mt-1 block" onclick="event.stopPropagation()">Insp├¡rate ÔåÆ</a>
-                </div>
-            </div>
-            <!-- Bohemio -->
-            <div class="style-card bg-surface-dark rounded-xl overflow-hidden" data-style="bohemio" onclick="selectStyle(this)">
-                <div class="aspect-video bg-cover bg-center" style="background-image:url('img/style_bohemio.png')"></div>
-                <div class="p-3">
-                    <p class="font-bold text-sm">Alma Bohemia</p>
-                    <p class="text-xs text-muted-text mt-0.5">Libre, art├¡stico y lleno de vida</p>
-            </div>
-        </div>
 
         <!-- Recommendations Section -->
-        <div id="recommendations-section" class="hidden mt-8 fade-in">
-            <div class="bg-surface-dark border border-primary/20 rounded-2xl p-6 shadow-2xl relative overflow-hidden">
-                <div class="absolute top-0 right-0 p-4 opacity-10">
-                    <span class="material-symbols-outlined text-6xl">auto_awesome</span>
+        <div id="recommendations-section" class="hidden mt-10 fade-in">
+            <div class="bg-white border border-border rounded-3xl p-8 solar-card relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-6 opacity-5">
+                    <span class="material-symbols-outlined text-8xl">auto_awesome</span>
                 </div>
                 
-                <div class="flex items-center gap-3 mb-6">
-                    <div class="size-10 rounded-full bg-primary/20 flex items-center justify-center">
-                        <span class="material-symbols-outlined text-primary">psychology</span>
+                <div class="flex items-center gap-4 mb-8 relative">
+                    <div class="size-14 rounded-2xl bg-primary/10 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-primary text-3xl">psychology</span>
                     </div>
                     <div>
-                        <h3 class="font-black text-xl text-slate-100">Sugerencias de Dise├▒o IA</h3>
-                        <p class="text-xs text-muted-text">Basado en el estilo <span id="rec-style-name" class="text-primary font-bold"></span> y el an├ílisis de tu espacio</p>
+                        <h3 class="font-black text-2xl text-text-primary tracking-tight">Sugerencias de Diseño IA</h3>
+                        <p class="text-sm text-text-secondary">Basado en el estilo <span id="rec-style-name" class="text-primary font-black"></span> y tu espacio</p>
                     </div>
                 </div>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 relative">
                     <!-- Add items -->
-                    <div class="space-y-3">
-                        <p class="text-[10px] font-black text-green-500 uppercase tracking-widest flex items-center gap-2 mb-2">
-                            <span class="size-2 rounded-full bg-green-500 animate-pulse"></span> Recomendado A├▒adir
+                    <div class="space-y-4">
+                        <p class="text-xs font-black text-accent-green uppercase tracking-widest flex items-center gap-2 mb-2">
+                            <span class="size-2 rounded-full bg-accent-green animate-pulse"></span> Recomendado Añadir
                         </p>
                         <div id="rec-add-list" class="grid grid-cols-1 gap-2">
                             <!-- Items injected here -->
                         </div>
                     </div>
                     <!-- Remove items -->
-                    <div class="space-y-3">
-                        <p class="text-[10px] font-black text-orange-400 uppercase tracking-widest flex items-center gap-2 mb-2">
-                            <span class="size-2 rounded-full bg-orange-400 animate-pulse"></span> Sugerido Retirar
+                    <div class="space-y-4">
+                        <p class="text-xs font-black text-primary uppercase tracking-widest flex items-center gap-2 mb-2">
+                            <span class="size-2 rounded-full bg-primary animate-pulse"></span> Sugerido Retirar
                         </p>
                         <div id="rec-remove-list" class="grid grid-cols-1 gap-2">
                             <!-- Items injected here -->
@@ -348,221 +410,254 @@
                     </div>
                 </div>
                 
-                <div class="mt-6 pt-6 border-t border-border-dark flex items-center justify-between">
-                    <p class="text-[11px] text-muted-text italic max-w-[70%]">Desmarca los elementos que NO quieras que la IA aplique en el render final.</p>
-                    <div class="flex items-center gap-1 text-primary text-[10px] font-bold">
+                <div class="mt-8 pt-8 border-t border-border flex items-center justify-between relative">
+                    <p class="text-xs text-text-secondary italic max-w-[70%]">Desmarca los elementos que NO quieras que la IA aplique en el render final.</p>
+                    <div class="flex items-center gap-1.5 px-3 py-1 bg-accent-green/10 text-accent-green text-xs font-black rounded-full">
                         <span class="material-symbols-outlined text-sm">verified</span> IA Activa
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="mt-6 flex justify-between">
-            <button onclick="goToStep1()" class="text-muted-text hover:text-slate-100 font-semibold py-2 px-4 transition-colors">ÔåÉ Volver</button>
-            <button id="btn-to-generate" disabled class="bg-primary/30 text-primary/50 font-bold py-3 px-8 rounded-xl transition-all cursor-not-allowed" onclick="goToStep3()">
-                Continuar ÔåÆ
+        <div class="mt-10 flex justify-between items-center bg-surface p-6 rounded-3xl border border-border">
+            <button onclick="goToStep1()" class="flex items-center gap-2 text-text-secondary hover:text-text-primary font-black py-2 px-6 transition-colors">
+                <span class="material-symbols-outlined text-xl">arrow_back</span> Volver
+            </button>
+            <button id="btn-to-generate" disabled class="bg-primary text-white font-black py-4 px-12 rounded-2xl transition-all shadow-lg shadow-primary/20 hover:shadow-primary/30 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed" onclick="goToStep3()">
+                Continuar a Generación <span class="material-symbols-outlined ml-1">arrow_forward</span>
             </button>
         </div>
     </section>
 
-    <!-- ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ STEP 3: GENERATE ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ -->
-    <section id="section-generate" class="hidden">
-        <div class="mb-6">
-            <span class="text-primary text-xs font-bold uppercase tracking-widest">Paso 3</span>
-            <h2 class="text-3xl font-black mt-1">Genera tu render</h2>
-            <p class="text-muted-text mt-1">Revisi├│n final y generaci├│n con IA</p>
-        </div>
-
-        <!-- Summary before generating -->
-        <div id="generate-summary" class="bg-surface-dark rounded-xl border border-border-dark p-6 mb-6 space-y-4">
-            <div class="flex items-center gap-3">
-                <span class="material-symbols-outlined text-primary">photo_camera</span>
-                <div>
-                    <p class="text-xs text-muted-text">Tus fotos</p>
-                    <div id="summary-photos" class="flex gap-2 mt-1">
-                        <!-- Summary thumbnails injected here -->
+        <!-- ───── STEP 3: GENERATE ───── -->
+        <section id="section-generate" class="hidden fade-in">
+            <div class="mb-10 text-center">
+                <span class="text-primary text-xs font-black uppercase tracking-widest px-3 py-1 bg-primary/10 rounded-full">Paso 3</span>
+                <h2 class="text-4xl font-black mt-4 text-text-primary tracking-tight">Genera tu render</h2>
+                <p class="text-text-secondary mt-2 text-lg">Revisión final y generación con IA</p>
+            </div>
+    
+            <!-- Summary before generating -->
+            <div id="generate-summary" class="bg-white rounded-3xl border border-border p-8 mb-8 space-y-6 solar-card">
+                <div class="flex items-center gap-4">
+                    <div class="size-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
+                        <span class="material-symbols-outlined font-bold">photo_camera</span>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-xs text-text-secondary font-black uppercase tracking-wider">Tus fotos</p>
+                        <div id="summary-photos" class="flex gap-3 mt-2">
+                            <!-- Summary thumbnails injected here -->
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="size-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
+                        <span class="material-symbols-outlined font-bold">style</span>
+                    </div>
+                    <div>
+                        <p class="text-xs text-text-secondary font-black uppercase tracking-wider">Estilo elegido</p>
+                        <p id="summary-style" class="font-black text-lg text-text-primary capitalize mt-1"></p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-4">
+                    <div class="size-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary mt-1">
+                        <span class="material-symbols-outlined font-bold">chat</span>
+                    </div>
+                    <div>
+                        <p class="text-xs text-text-secondary font-black uppercase tracking-wider">Tu descripción personalizada</p>
+                        <p id="summary-prompt" class="text-base text-text-secondary mt-1 italic font-medium leading-relaxed"></p>
                     </div>
                 </div>
             </div>
-            <div class="flex items-center gap-3">
-                <span class="material-symbols-outlined text-primary">style</span>
-                <div>
-                    <p class="text-xs text-muted-text">Estilo elegido</p>
-                    <p id="summary-style" class="font-bold text-sm capitalize mt-0.5"></p>
-                </div>
-            </div>
-            <div class="flex items-center gap-3">
-                <span class="material-symbols-outlined text-primary">chat</span>
-                <div>
-                    <p class="text-xs text-muted-text">Tu descripci├│n</p>
-                    <p id="summary-prompt" class="text-sm text-slate-300 mt-0.5 italic"></p>
-                </div>
-            </div>
-        </div>
 
-        <!-- Quality Selection -->
-        <div class="space-y-4 mb-6">
-            <h3 class="font-bold text-sm uppercase tracking-wider text-muted-text">Calidad del Render</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- Normal Quality -->
-                <div class="quality-card selected bg-surface-dark p-5 rounded-2xl border border-border-dark cursor-pointer transition-all hover:border-primary/40" onclick="selectQuality('normal')">
-                    <div class="flex items-start justify-between mb-3">
-                        <div class="flex items-center gap-3">
-                            <div class="check-mark size-6 rounded-md border-2 border-border-dark flex items-center justify-center flex-shrink-0"></div>
-                            <div>
-                                <p class="font-black text-slate-100">Calidad B├ísica</p>
-                                <p class="text-[10px] text-muted-text">Generaci├│n r├ípida</p>
+            <!-- Quality Selection -->
+            <div class="space-y-6 mb-8">
+                <h3 class="font-black text-sm uppercase tracking-widest text-text-secondary">Calidad del Render</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Normal Quality -->
+                    <div class="quality-card selected bg-white p-6 rounded-3xl border border-border cursor-pointer transition-all hover:shadow-xl" onclick="selectQuality('normal')">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex items-center gap-4">
+                                <div class="check-mark size-7 rounded-xl border-2 border-border flex items-center justify-center flex-shrink-0 transition-colors">
+                                    <span class="material-symbols-outlined text-lg text-white">check</span>
+                                </div>
+                                <div>
+                                    <p class="font-black text-xl text-text-primary tracking-tight">Calidad Básica</p>
+                                    <p class="text-xs text-text-secondary font-medium">Generación rápida</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-2xl font-black text-primary">1</span>
+                                <span class="text-xs text-text-secondary font-bold block -mt-1 uppercase">Crédito</span>
                             </div>
                         </div>
-                        <div class="text-right">
-                            <span class="text-xl font-black text-primary">1</span>
-                            <span class="text-xs text-muted-text block -mt-1">cr├®dito</span>
-                        </div>
+                        <ul class="space-y-2 ml-11">
+                            <li class="text-sm text-text-secondary flex items-center gap-2 font-medium"><span class="material-symbols-outlined text-lg text-accent-green">check_circle</span>Mismo espacio, nuevo estilo</li>
+                            <li class="text-sm text-text-secondary flex items-center gap-2 font-medium"><span class="material-symbols-outlined text-lg text-accent-green">check_circle</span>Resolución estándar</li>
+                            <li class="text-sm text-text-secondary flex items-center gap-2 font-medium"><span class="material-symbols-outlined text-lg text-accent-green">check_circle</span>Resultado en ~30 seg</li>
+                        </ul>
                     </div>
-                    <ul class="space-y-1 ml-9">
-                        <li class="text-[11px] text-slate-400 flex items-center gap-1.5"><span class="material-symbols-outlined text-[13px] text-green-400">check</span>Mismo espacio, nuevo estilo</li>
-                        <li class="text-[11px] text-slate-400 flex items-center gap-1.5"><span class="material-symbols-outlined text-[13px] text-green-400">check</span>Resoluci├│n est├índar</li>
-                        <li class="text-[11px] text-slate-400 flex items-center gap-1.5"><span class="material-symbols-outlined text-[13px] text-green-400">check</span>Resultado en ~30 seg</li>
-                    </ul>
-                </div>
-                <!-- High Quality -->
-                <div class="quality-card bg-surface-dark p-5 rounded-2xl border border-primary/20 cursor-pointer transition-all hover:border-primary/60 relative overflow-hidden" onclick="selectQuality('high')">
-                    <div class="absolute top-0 right-0 bg-primary text-background-dark text-[9px] font-black px-2 py-1 rounded-bl-xl">RECOMENDADO</div>
-                    <div class="flex items-start justify-between mb-3">
-                        <div class="flex items-center gap-3">
-                            <div class="check-mark size-6 rounded-md border-2 border-border-dark flex items-center justify-center flex-shrink-0"></div>
-                            <div>
-                                <p class="font-black text-slate-100">Alta Fidelidad</p>
-                                <p class="text-[10px] text-muted-text">4K ┬À Realismo m├íximo</p>
+                    <!-- High Quality -->
+                    <div class="quality-card bg-white p-6 rounded-3xl border border-primary/20 cursor-pointer transition-all hover:shadow-xl relative overflow-hidden" onclick="selectQuality('high')">
+                        <div class="absolute top-0 right-0 bg-primary text-white text-[10px] font-black px-4 py-1.5 rounded-bl-2xl tracking-widest">RECOMENDADO</div>
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex items-center gap-4">
+                                <div class="check-mark size-7 rounded-xl border-2 border-border flex items-center justify-center flex-shrink-0 transition-colors">
+                                    <span class="material-symbols-outlined text-lg text-white">check</span>
+                                </div>
+                                <div>
+                                    <p class="font-black text-xl text-text-primary tracking-tight">Alta Fidelidad</p>
+                                    <p class="text-xs text-text-secondary font-medium italic">4K · Realismo máximo</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-2xl font-black text-primary">2</span>
+                                <span class="text-xs text-text-secondary font-bold block -mt-1 uppercase">Créditos</span>
                             </div>
                         </div>
-                        <div class="text-right">
-                            <span class="text-xl font-black text-primary">2</span>
-                            <span class="text-xs text-muted-text block -mt-1">cr├®ditos</span>
-                        </div>
-                    </div>
-                    <ul class="space-y-1 ml-9">
-                        <li class="text-[11px] text-slate-400 flex items-center gap-1.5"><span class="material-symbols-outlined text-[13px] text-green-400">check</span>Todo lo de B├ísica +</li>
-                        <li class="text-[11px] text-slate-400 flex items-center gap-1.5"><span class="material-symbols-outlined text-[13px] text-primary">check</span>Texturas ultra-detalladas (madera, tela, cristal)</li>
-                        <li class="text-[11px] text-slate-400 flex items-center gap-1.5"><span class="material-symbols-outlined text-[13px] text-primary">check</span>Iluminaci├│n global precisa</li>
-                        <li class="text-[11px] text-slate-400 flex items-center gap-1.5"><span class="material-symbols-outlined text-[13px] text-primary">check</span>Calidad estudio fotogr├ífico</li>
-                    </ul>
-                </div>
-            </div>
-            <p id="quality-cost-hint" class="text-center text-xs text-muted-text">Selecci├│n actual: <span id="quality-cost-label" class="text-primary font-bold">1 cr├®dito (B├ísica)</span></p>
-        </div>
-
-
-        <button id="btn-generate" class="w-full bg-gradient-to-r from-primary to-orange-500 hover:opacity-90 text-background-dark font-black py-4 rounded-xl text-lg transition-all flex items-center justify-center gap-2" onclick="generateRender()">
-            <span class="material-symbols-outlined">auto_awesome</span> Pagar y Generar Render
-        </button>
-
-        <div class="mt-4 flex justify-start">
-            <button onclick="goToStep2()" class="text-muted-text hover:text-slate-100 font-semibold py-2 px-4 transition-colors">ÔåÉ Volver</button>
-        </div>
-
-        <!-- Generation Progress -->
-        <div id="gen-progress" class="hidden mt-8 space-y-4 fade-in">
-            <div id="gen-step-pay" class="flex items-center gap-3 text-slate-400">
-                <div class="spin-wrap size-5 flex items-center justify-center">
-                    <svg id="spin-pay" class="spin size-5 text-primary hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
-                    <span id="check-pay" class="material-symbols-outlined text-green-500 hidden text-sm">check_circle</span>
-                </div>
-                <span id="label-pay" class="text-sm">Procesando pagoÔÇª</span>
-            </div>
-            <div id="gen-step-ai" class="flex items-center gap-3 text-slate-400">
-                <div class="size-5 flex items-center justify-center">
-                    <svg id="spin-ai" class="spin size-5 text-primary hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
-                    <span id="check-ai" class="material-symbols-outlined text-green-500 hidden text-sm">check_circle</span>
-                </div>
-                <span id="label-ai" class="text-sm">Generando render con Vertex AI ImagenÔÇª</span>
-            </div>
-        </div>
-
-        <!-- RESULT PANEL -->
-        <div id="result-panel" class="hidden mt-10 fade-in space-y-8">
-            <!-- Generated image -->
-            <div class="text-center">
-                <h2 class="text-2xl font-black text-primary mb-4">­ƒÄ¿ Tu render est├í listo</h2>
-                <img id="result-image" src="" alt="Render generado" class="w-full rounded-2xl border-2 border-primary/30 shadow-2xl shadow-primary/10"/>
-                <a id="download-btn" class="mt-4 inline-flex items-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 font-semibold py-2 px-6 rounded-xl transition-all text-sm" download="render-habitacion.png">
-                    <span class="material-symbols-outlined text-sm">download</span> Descargar render
-                </a>
-            </div>
-
-            <!-- Proposal -->
-            <div class="bg-surface-dark rounded-2xl border border-border-dark p-8 space-y-6">
-                <h3 class="text-xl font-black text-slate-100 flex items-center gap-2">
-                    <span class="material-symbols-outlined text-primary">description</span>
-                    Propuesta de Dise├▒o Completa
-                </h3>
-
-                <!-- Room analysis -->
-                <div class="proposal-section fade-in" id="prop-analysis-wrap">
-                    <h4 class="font-bold text-sm uppercase tracking-wider text-muted-text mb-2">­ƒÅá An├ílisis de tu habitaci├│n (Gemini Vision)</h4>
-                    <p id="prop-analysis" class="text-slate-300 text-sm leading-relaxed whitespace-pre-line"></p>
-                </div>
-
-                <!-- Style description -->
-                <div class="proposal-section fade-in">
-                    <h4 class="font-bold text-sm uppercase tracking-wider text-muted-text mb-2">­ƒÄ¿ Estilo aplicado: <span id="prop-style-name" class="text-primary capitalize"></span></h4>
-                    <p id="prop-style-desc" class="text-slate-300 text-sm leading-relaxed"></p>
-                </div>
-
-                <!-- What changes were made -->
-                <div class="proposal-section fade-in">
-                    <h4 class="font-bold text-sm uppercase tracking-wider text-muted-text mb-2">Ô£¿ Cambios propuestos en el render</h4>
-                    <ul id="prop-changes" class="text-slate-300 text-sm space-y-1.5 list-none">
-                    </ul>
-                </div>
-
-                <!-- Full prompt used -->
-                <div class="bg-background-dark/60 rounded-xl p-4">
-                    <h4 class="font-bold text-xs uppercase tracking-wider text-muted-text mb-2">Prompt enviado a Vertex AI Imagen</h4>
-                    <p id="prop-prompt" class="text-xs text-slate-500 leading-relaxed font-mono"></p>
-                </div>
-
-                <!-- Action Buttons: PDF and Share -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-border-dark">
-                    <button id="btn-pdf" onclick="generatePDF()" class="flex items-center justify-center gap-2 bg-slate-100 hover:bg-white text-background-dark font-bold py-3 rounded-xl transition-all">
-                        <span class="material-symbols-outlined">description</span> Descargar Propuesta (PDF)
-                    </button>
-                    <!-- Share Dropdown -->
-                    <div class="relative group">
-                        <button class="w-full flex items-center justify-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 font-bold py-3 rounded-xl transition-all">
-                            <span class="material-symbols-outlined">share</span> Compartir Dise├▒o
-                        </button>
-                        <div class="absolute bottom-full left-0 w-full mb-2 bg-surface-dark border border-border-dark rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10 p-2 grid grid-cols-2 gap-2">
-                            <button onclick="shareResult('twitter')" class="flex flex-col items-center gap-1 p-3 rounded-lg hover:bg-white/5 transition-colors">
-                                <span class="material-symbols-outlined text-sky-400">flutter_dash</span>
-                                <span class="text-[10px] font-bold">Twitter</span>
-                            </button>
-                            <button onclick="shareResult('facebook')" class="flex flex-col items-center gap-1 p-3 rounded-lg hover:bg-white/5 transition-colors">
-                                <span class="material-symbols-outlined text-blue-500">facebook</span>
-                                <span class="text-[10px] font-bold">Facebook</span>
-                            </button>
-                            <button onclick="shareResult('whatsapp')" class="flex flex-col items-center gap-1 p-3 rounded-lg hover:bg-white/5 transition-colors">
-                                <span class="material-symbols-outlined text-green-500">chat</span>
-                                <span class="text-[10px] font-bold">WhatsApp</span>
-                            </button>
-                            <button onclick="shareResult('pinterest')" class="flex flex-col items-center gap-1 p-3 rounded-lg hover:bg-white/5 transition-colors">
-                                <span class="material-symbols-outlined text-red-500">push_pin</span>
-                                <span class="text-[10px] font-bold">Pinterest</span>
-                            </button>
-                        </div>
+                        <ul class="space-y-2 ml-11">
+                            <li class="text-sm border-l-2 border-primary/10 pl-3 py-0.5 text-text-secondary font-black uppercase text-[10px] tracking-widest mb-2">Incluye Calidad Básica +</li>
+                            <li class="text-sm text-text-secondary flex items-center gap-2 font-medium"><span class="material-symbols-outlined text-lg text-primary">stars</span>Texturas ultra-detalladas</li>
+                            <li class="text-sm text-text-secondary flex items-center gap-2 font-medium"><span class="material-symbols-outlined text-lg text-primary">stars</span>Iluminación global precisa</li>
+                            <li class="text-sm text-text-secondary flex items-center gap-2 font-medium"><span class="material-symbols-outlined text-lg text-primary">stars</span>Calidad fotografía profesional</li>
+                        </ul>
                     </div>
                 </div>
+                <div class="bg-primary/5 rounded-2xl p-4 border border-primary/10 flex items-center justify-center gap-3">
+                    <span class="material-symbols-outlined text-primary font-bold">info</span>
+                    <p id="quality-cost-hint" class="text-sm text-text-secondary font-bold">Selección actual: <span id="quality-cost-label" class="text-primary font-black uppercase tracking-wider">1 crédito (Básica)</span></p>
+                </div>
             </div>
 
-            <div class="flex gap-4">
-                <button onclick="goToStep1()" class="flex-1 border border-border-dark hover:border-primary/40 text-muted-text hover:text-primary font-semibold py-3 rounded-xl transition-all">
-                    Nuevo render
+
+            <button id="btn-generate" class="w-full bg-primary text-white font-black py-5 rounded-3xl text-xl transition-all flex items-center justify-center gap-3 shadow-xl shadow-primary/20 hover:shadow-primary/40 active:scale-[0.98]" onclick="generateRender()">
+                <span class="material-symbols-outlined text-2xl">auto_awesome</span> Pagar y Generar Render
+            </button>
+    
+            <div class="mt-6 flex justify-center">
+                <button onclick="goToStep2()" class="text-text-secondary hover:text-text-primary px-8 py-2 font-bold transition-colors flex items-center gap-2">
+                    <span class="material-symbols-outlined">arrow_back</span> Volver a elegir estilo
                 </button>
-                <a href="03-dashboard.html" class="flex-1 bg-surface-dark hover:bg-border-dark border border-border-dark font-semibold py-3 rounded-xl transition-all text-center">
-                    Ver mis renders
-                </a>
             </div>
-        </div>
+    
+            <!-- Generation Progress -->
+            <div id="gen-progress" class="hidden mt-10 space-y-6 fade-in p-8 bg-surface rounded-3xl border border-border">
+                <div id="gen-step-pay" class="flex items-center gap-4 text-text-secondary opacity-50">
+                    <div class="size-6 flex items-center justify-center">
+                        <div id="spin-pay" class="size-5 border-2 border-primary/20 border-t-primary rounded-full animate-spin hidden"></div>
+                        <span id="check-pay" class="material-symbols-outlined text-accent-green hidden">check_circle</span>
+                    </div>
+                    <span id="label-pay" class="text-base font-bold">Procesando pago...</span>
+                </div>
+                <div id="gen-step-ai" class="flex items-center gap-4 text-text-secondary opacity-50">
+                    <div class="size-6 flex items-center justify-center">
+                        <div id="spin-ai" class="size-5 border-2 border-primary/20 border-t-primary rounded-full animate-spin hidden"></div>
+                        <span id="check-ai" class="material-symbols-outlined text-accent-green hidden">check_circle</span>
+                    </div>
+                    <span id="label-ai" class="text-base font-bold">Generando render con Vertex AI Imagen...</span>
+                </div>
+            </div>
+    
+            <!-- RESULT PANEL -->
+            <div id="result-panel" class="hidden mt-12 fade-in space-y-12 pb-20">
+                <!-- Generated image -->
+                <div class="text-center">
+                    <div class="inline-flex items-center gap-2 px-4 py-1.5 bg-accent-green/10 text-accent-green rounded-full text-sm font-black mb-6">
+                        <span class="material-symbols-outlined text-lg">celebration</span> ¡Tu render está listo!
+                    </div>
+                    <div class="relative group">
+                        <img id="result-image" src="" alt="Render generado" class="w-full rounded-[2.5rem] border-4 border-white shadow-2xl transition-transform duration-700 hover:scale-[1.01]"/>
+                        <div class="absolute inset-x-0 bottom-8 flex justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                             <a id="download-btn" class="flex items-center gap-3 bg-white/90 backdrop-blur text-text-primary font-black py-4 px-10 rounded-2xl shadow-2xl hover:bg-white transition-all transform hover:-translate-y-1" download="render-habitacion.png">
+                                <span class="material-symbols-outlined">download</span> Descargar en Alta Calidad
+                            </a>
+                        </div>
+                    </div>
+                </div>
+    
+                <!-- Proposal -->
+                <div class="bg-white rounded-[2.5rem] border border-border p-10 space-y-10 solar-card">
+                    <div class="flex items-center gap-4 border-b border-border pb-6">
+                        <div class="size-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary">
+                            <span class="material-symbols-outlined text-2xl font-bold">description</span>
+                        </div>
+                        <h3 class="text-2xl font-black text-text-primary tracking-tight">Propuesta de Diseño Completa</h3>
+                    </div>
+    
+                    <!-- Room analysis -->
+                    <div class="proposal-section space-y-3" id="prop-analysis-wrap">
+                        <h4 class="font-black text-xs uppercase tracking-widest text-text-secondary flex items-center gap-2">
+                             <span class="material-symbols-outlined text-primary text-lg">house</span> Análisis del Espacio
+                        </h4>
+                        <p id="prop-analysis" class="text-text-secondary text-base leading-relaxed whitespace-pre-line font-medium"></p>
+                    </div>
+    
+                    <!-- Style description -->
+                    <div class="proposal-section space-y-3">
+                        <h4 class="font-black text-xs uppercase tracking-widest text-text-secondary flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-lg">palette</span> Estilo aplicado: <span id="prop-style-name" class="text-primary font-black capitalize"></span>
+                        </h4>
+                        <p id="prop-style-desc" class="text-text-secondary text-base leading-relaxed font-medium"></p>
+                    </div>
+    
+                    <!-- What changes were made -->
+                    <div class="proposal-section space-y-4">
+                        <h4 class="font-black text-xs uppercase tracking-widest text-text-secondary flex items-center gap-2">
+                             <span class="material-symbols-outlined text-primary text-lg">magic_button</span> Cambios realizados
+                        </h4>
+                        <ul id="prop-changes" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <!-- Items injected here should be styled via JS or inherit styles -->
+                        </ul>
+                    </div>
+    
+                    <!-- Full prompt used -->
+                    <div class="bg-surface rounded-3xl p-6 border border-border">
+                        <h4 class="font-black text-[10px] uppercase tracking-widest text-text-secondary/50 mb-3">AI Engine Metadata</h4>
+                        <p id="prop-prompt" class="text-xs text-text-secondary/60 leading-relaxed font-mono break-all"></p>
+                    </div>
+    
+                    <!-- Action Buttons: PDF and Share -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-10 border-t border-border">
+                        <button id="btn-pdf" onclick="generatePDF()" class="flex items-center justify-center gap-3 bg-text-primary text-white font-black py-5 rounded-2xl transition-all shadow-xl hover:bg-black hover:-translate-y-1">
+                            <span class="material-symbols-outlined">picture_as_pdf</span> Descargar Dossier PDF
+                        </button>
+                        <!-- Share Dropdown -->
+                        <div class="relative group">
+                            <button class="w-full flex items-center justify-center gap-3 bg-primary/10 text-primary border border-primary/20 font-black py-5 rounded-2xl transition-all hover:bg-primary/20">
+                                <span class="material-symbols-outlined">share_reviews</span> Compartir Resultado
+                            </button>
+                            <div class="absolute bottom-full left-0 w-full mb-4 bg-white border border-border rounded-3xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10 p-4 grid grid-cols-2 gap-3 scale-95 group-hover:scale-100">
+                                <button onclick="shareResult('twitter')" class="flex flex-col items-center gap-2 p-4 rounded-2xl hover:bg-surface transition-all">
+                                    <span class="material-symbols-outlined text-text-primary">X</span>
+                                    <span class="text-xs font-black">Twitter</span>
+                                </button>
+                                <button onclick="shareResult('facebook')" class="flex flex-col items-center gap-2 p-4 rounded-2xl hover:bg-surface transition-all">
+                                    <span class="material-symbols-outlined text-blue-600 text-3xl">facebook</span>
+                                    <span class="text-xs font-black">Facebook</span>
+                                </button>
+                                <button onclick="shareResult('whatsapp')" class="flex flex-col items-center gap-2 p-4 rounded-2xl hover:bg-surface transition-all">
+                                    <span class="material-symbols-outlined text-accent-green text-3xl">chat</span>
+                                    <span class="text-xs font-black">WhatsApp</span>
+                                </button>
+                                <button onclick="shareResult('pinterest')" class="flex flex-col items-center gap-2 p-4 rounded-2xl hover:bg-surface transition-all">
+                                    <span class="material-symbols-outlined text-red-600 text-3xl">push_pin</span>
+                                    <span class="text-xs font-black">Pinterest</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+    
+                <div class="flex flex-col sm:flex-row gap-6">
+                    <button onclick="goToStep1()" class="flex-1 border-2 border-border text-text-secondary hover:text-text-primary hover:border-text-primary font-black py-5 rounded-2xl transition-all flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined">refresh</span> Nuevo proyecto
+                    </button>
+                    <a href="03-dashboard.html" class="flex-1 bg-surface text-text-primary font-black py-5 rounded-2xl transition-all text-center border border-border hover:bg-white flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined">grid_view</span> Ver mis renders
+                    </a>
+                </div>
+            </div>
+        </section>
     </section>
 
 </main>
@@ -638,11 +733,11 @@ disclaimerCheck.addEventListener('change', () => {
     if (disclaimerCheck.checked) {
         disclaimerConfirm.disabled = false;
         disclaimerConfirm.classList.remove('bg-primary/30','text-primary/50','cursor-not-allowed');
-        disclaimerConfirm.classList.add('bg-primary','text-background-dark','hover:bg-primary/90','cursor-pointer');
+        disclaimerConfirm.classList.add('bg-primary','text-white','hover:shadow-lg','cursor-pointer');
     } else {
         disclaimerConfirm.disabled = true;
         disclaimerConfirm.classList.add('bg-primary/30','text-primary/50','cursor-not-allowed');
-        disclaimerConfirm.classList.remove('bg-primary','text-background-dark','hover:bg-primary/90','cursor-pointer');
+        disclaimerConfirm.classList.remove('bg-primary','text-white','hover:shadow-lg','cursor-pointer');
     }
 });
 function acceptDisclaimer() {
@@ -809,16 +904,16 @@ async function analyzeImage() {
             state.roomData = data;
             const analysisHtml = `
                 <div class="grid grid-cols-2 gap-4 mb-4">
-                    <div class="bg-background-dark/40 p-2 rounded">
-                        <p class="text-[10px] text-muted-text uppercase font-bold">Tipo de Habitaci├│n</p>
-                        <p class="text-sm font-bold text-white">${data.room_type || 'Detectando...'}</p>
+                    <div class="bg-surface p-3 rounded-2xl border border-border">
+                        <p class="text-[10px] text-text-secondary uppercase font-black tracking-widest">Tipo de Habitación</p>
+                        <p class="text-base font-black text-text-primary mt-0.5">${data.room_type || 'Detectando...'}</p>
                     </div>
-                    <div class="bg-background-dark/40 p-2 rounded">
-                        <p class="text-[10px] text-muted-text uppercase font-bold">Tama├▒o Estimado</p>
-                        <p class="text-sm font-bold text-white">${data.approx_size || 'Detectando...'}</p>
+                    <div class="bg-surface p-3 rounded-2xl border border-border">
+                        <p class="text-[10px] text-text-secondary uppercase font-black tracking-widest">Tamaño Estimado</p>
+                        <p class="text-base font-black text-text-primary mt-0.5">${data.approx_size || 'Detectando...'}</p>
                     </div>
                 </div>
-                <p class="text-slate-300 text-sm leading-relaxed">${data.detailed_description_es}</p>
+                <p class="text-text-secondary text-sm leading-relaxed font-medium">${data.detailed_description_es}</p>
             `;
             document.getElementById('analysis-text').innerHTML = analysisHtml;
             document.getElementById('analysis-result').classList.remove('hidden');
@@ -936,26 +1031,26 @@ function showRecommendations() {
     
     state.roomData.recommendations.add_es.forEach((item, i) => {
         const div = document.createElement('label');
-        div.className = 'flex items-center gap-3 p-3 bg-background-dark/20 border border-white/5 rounded-xl cursor-pointer hover:bg-white/5 transition-all group';
+        div.className = 'flex items-center gap-3 p-4 bg-white border border-border rounded-2xl cursor-pointer hover:border-primary/30 hover:shadow-sm transition-all group';
         div.innerHTML = `
             <div class="relative flex items-center justify-center">
-                <input type="checkbox" class="peer appearance-none size-5 rounded-md border border-white/20 bg-transparent checked:bg-green-500 checked:border-green-500 transition-all cursor-pointer" data-type="add" data-item="${item}" checked>
-                <span class="material-symbols-outlined text-[14px] text-white absolute opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none">check</span>
+                <input type="checkbox" class="peer appearance-none size-6 rounded-lg border-2 border-border bg-white checked:bg-accent-green checked:border-accent-green transition-all cursor-pointer" data-type="add" data-item="${item}" checked>
+                <span class="material-symbols-outlined text-sm text-white absolute opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none font-bold">check</span>
             </div>
-            <span class="text-sm text-slate-300 group-hover:text-white transition-colors capitalize">${item}</span>
+            <span class="text-sm text-text-secondary font-bold group-hover:text-text-primary transition-colors capitalize">${item}</span>
         `;
         addList.appendChild(div);
     });
     
     state.roomData.recommendations.remove_es.forEach((item, i) => {
         const div = document.createElement('label');
-        div.className = 'flex items-center gap-3 p-3 bg-background-dark/20 border border-white/5 rounded-xl cursor-pointer hover:bg-white/5 transition-all group';
+        div.className = 'flex items-center gap-3 p-4 bg-white border border-border rounded-2xl cursor-pointer hover:border-primary/30 hover:shadow-sm transition-all group';
         div.innerHTML = `
             <div class="relative flex items-center justify-center">
-                <input type="checkbox" class="peer appearance-none size-5 rounded-md border border-white/20 bg-transparent checked:bg-orange-500 checked:border-orange-500 transition-all cursor-pointer" data-type="remove" data-item="${item}" checked>
-                <span class="material-symbols-outlined text-[14px] text-white absolute opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none">close</span>
+                <input type="checkbox" class="peer appearance-none size-6 rounded-lg border-2 border-border bg-white checked:bg-primary checked:border-primary transition-all cursor-pointer" data-type="remove" data-item="${item}" checked>
+                <span class="material-symbols-outlined text-sm text-white absolute opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none font-bold">close</span>
             </div>
-            <span class="text-sm text-slate-300 group-hover:text-white transition-colors capitalize">${item}</span>
+            <span class="text-sm text-text-secondary font-bold group-hover:text-text-primary transition-colors capitalize">${item}</span>
         `;
         removeList.appendChild(div);
     });
@@ -973,11 +1068,11 @@ function setBtnEnabled(btn, on) {
     if (on) {
         btn.disabled = false;
         btn.classList.remove('bg-primary/30','text-primary/50','cursor-not-allowed');
-        btn.classList.add('bg-primary','text-background-dark','hover:bg-primary/90','cursor-pointer');
+        btn.classList.add('bg-primary','text-white','shadow-lg','hover:shadow-xl','cursor-pointer');
     } else {
         btn.disabled = true;
         btn.classList.add('bg-primary/30','text-primary/50','cursor-not-allowed');
-        btn.classList.remove('bg-primary','text-background-dark','hover:bg-primary/90','cursor-pointer');
+        btn.classList.remove('bg-primary','text-white','shadow-lg','hover:shadow-xl','cursor-pointer');
     }
 }
 
@@ -1005,16 +1100,16 @@ function goToStep3() {
         wrap.appendChild(img);
         if (idx === state.primaryIndex) {
             const badge = document.createElement('span');
-            badge.className = 'absolute -top-1 -right-1 bg-primary text-background-dark text-[8px] font-black px-1.5 py-0.5 rounded-full';
-            badge.textContent = 'Ôÿà';
+            badge.className = 'absolute -top-1 -right-1 bg-primary text-white text-[8px] font-black px-1.5 py-0.5 rounded-full';
+            badge.textContent = '★';
             wrap.appendChild(badge);
         }
         summaryGrid.appendChild(wrap);
     });
     document.getElementById('summary-style').textContent = state.selectedStyle.charAt(0).toUpperCase() + state.selectedStyle.slice(1);
     const roomInfo = state.roomData ? `${state.roomData.room_type} (${state.roomData.approx_size})` : '';
-    document.getElementById('summary-style').innerHTML = `${state.selectedStyle.charAt(0).toUpperCase() + state.selectedStyle.slice(1)} <span class="text-xs text-muted-text ml-2">${roomInfo}</span>`;
-    document.getElementById('summary-prompt').textContent = document.getElementById('prompt-input').value || '(sin descripci├│n adicional)';
+    document.getElementById('summary-style').innerHTML = `${state.selectedStyle.charAt(0).toUpperCase() + state.selectedStyle.slice(1)} <span class="text-xs text-text-secondary ml-2 font-bold">${roomInfo}</span>`;
+    document.getElementById('summary-prompt').textContent = document.getElementById('prompt-input').value || '(sin descripción adicional)';
     showSection('section-generate');
     setActiveStep(3);
 }
@@ -1274,30 +1369,33 @@ function buildChangesList(style, analysis, prompt) {
     return [...base, ...extras].slice(0, 7);
 }
 
-// ÔöÇÔöÇ Quality selection ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+// ─── Quality selection ──────────────────────────────────────────
 function selectQuality(q) {
     state.selectedQuality = q;
     document.querySelectorAll('.quality-card').forEach(card => {
-        card.classList.remove('selected', 'border-primary', 'border-primary/60');
-        card.classList.add('border-border-dark');
-        card.querySelector('.check-mark').classList.remove('bg-primary', 'border-primary');
-        card.querySelector('.check-mark').innerHTML = '';
+        card.classList.remove('selected', 'border-primary');
+        card.classList.add('border-border');
+        const cm = card.querySelector('.check-mark');
+        cm.classList.remove('bg-primary', 'border-primary');
+        cm.classList.add('border-border');
     });
-    const chosen = event ? event.currentTarget : document.querySelector(`.quality-card[onclick*="${q}"]`);
-    const all = document.querySelectorAll('.quality-card');
-    all.forEach(c => {
-        const isChosen = c.getAttribute('onclick') && c.getAttribute('onclick').includes(`'${q}'`);
-        if (isChosen) {
-            c.classList.add('selected', 'border-primary');
-            c.classList.remove('border-border-dark');
-            const cm = c.querySelector('.check-mark');
-            cm.classList.add('bg-primary', 'border-primary');
-            cm.innerHTML = '<span class="material-symbols-outlined text-[14px] text-background-dark">check</span>';
-        }
-    });
+    
+    // The event or specific selection
+    const cards = document.querySelectorAll('.quality-card');
+    const targetIdx = q === 'normal' ? 0 : 1;
+    const card = cards[targetIdx];
+    
+    if (card) {
+        card.classList.add('selected', 'border-primary');
+        card.classList.remove('border-border');
+        const cm = card.querySelector('.check-mark');
+        cm.classList.add('bg-primary', 'border-primary');
+        cm.classList.remove('border-border');
+    }
+    
     const lbl = document.getElementById('quality-cost-label');
     if (lbl) {
-        lbl.textContent = q === 'high' ? '2 cr├®ditos (Alta Fidelidad)' : '1 cr├®dito (B├ísica)';
+        lbl.textContent = q === 'high' ? '2 CRÉDITOS (Alta Fidelidad)' : '1 CRÉDITO (BÁSICA)';
     }
 }
 </script>

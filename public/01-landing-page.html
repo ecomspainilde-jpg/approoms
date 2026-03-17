@@ -1,240 +1,673 @@
-<html class="dark"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>RenderRoom AI — Transforma tu Hogar en Segundos</title>
+    <meta name="description" content="Rediseña cualquier habitación con inteligencia artificial profesional. Sube una foto, elige un estilo y recibe un render 4K en segundos."/>
+    
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+    <script id="tailwind-config">
         tailwind.config = {
-            darkMode: "class",
             theme: {
                 extend: {
                     colors: {
-                        "primary": "#f0a400", // Amber Gold
-                        "background-dark": "#0D1117", // Navy Black
-                        "charcoal": "#161B22",
-                        "nebula": "#C9D1D9", // Nebula Silver
-                        "lunar": "#F0F6FC", // Lunar White
-                        "accent-violet": "#7c3aed"
+                        primary: {
+                            DEFAULT: '#FFB800',
+                            dark: '#E6A600',
+                            light: '#FFF4D6',
+                        },
+                        secondary: '#1A1A1A',
+                        accent: '#FF7A00',
+                        surface: '#F8FAFC',
                     },
                     fontFamily: {
-                        "display": ["Inter", "sans-serif"]
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
                     },
-                    borderRadius: {
-                        "DEFAULT": "0.5rem",
-                        "lg": "1rem",
-                        "xl": "1.5rem",
-                        "full": "9999px"
-                    },
-                },
-            },
+                }
+            }
         }
     </script>
-<style type="text/tailwindcss">
-    @layer utilities {
+
+    <style>
+        :root {
+            --primary: #FFB800;
+            --primary-light: #FFF4D6;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #FFFFFF;
+            color: #1A1A1A;
+        }
+
+        ::selection {
+            background-color: var(--primary-light);
+            color: #1A1A1A;
+        }
+
         .glass-nav {
-            background: rgba(13, 17, 23, 0.7);
+            background: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
         }
-        .amber-glow {
-            box-shadow: 0 0 20px rgba(240, 164, 0, 0.15);
-        }
-        .gradient-border-card {
-            position: relative;
-            background: #161B22;
-        }
-        .gradient-border-card::before {
-            content: "";
-            position: absolute;
-            inset: -1px;
-            z-index: -1;
-            background: linear-gradient(45deg, #f0a400, #7c3aed);
-            border-radius: 1.1rem;
-        }
-    }
-</style>
-</head>
-<body class="bg-background-dark font-display text-nebula antialiased selection:bg-primary/30">
-<nav class="fixed top-0 left-0 right-0 z-50 glass-nav border-b border-white/10">
-<div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-<div class="flex items-center gap-3">
-<div class="size-10 bg-gradient-to-br from-primary to-orange-600 rounded-lg flex items-center justify-center text-background-dark">
-<span class="material-symbols-outlined font-bold">deployed_code</span>
-</div>
-<h2 class="text-lunar text-2xl font-black tracking-tight">Render<span class="text-primary">Room</span></h2>
-</div>
-<div class="hidden md:flex items-center gap-10">
-<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Cómo Funciona</a>
-<a class="text-sm font-medium text-primary border-b-2 border-primary py-1" href="#">Consejos</a>
-<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Galería</a>
-<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Precios</a>
-</div>
-<button class="bg-primary hover:bg-primary/90 text-background-dark px-6 py-2.5 rounded-xl text-sm font-bold tracking-wide transition-all hover:scale-105 amber-glow">
-            Renderiza Ahora
-        </button>
-</div>
-</nav>
-<main class="pt-32 pb-24">
-<div class="max-w-7xl mx-auto px-6">
-<header class="mb-12">
-<nav class="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-500 mb-6">
-<a class="hover:text-primary" href="#">Consejos</a>
-<span class="material-symbols-outlined text-[10px]">chevron_right</span>
-<a class="hover:text-primary" href="#">Estilos</a>
-<span class="material-symbols-outlined text-[10px]">chevron_right</span>
-<span class="text-primary">Moderno</span>
-</nav>
-<h1 class="text-4xl lg:text-6xl font-black text-lunar leading-[1.1] tracking-tight mb-8 max-w-4xl">
-                Cómo el Minimalismo Moderno puede ampliar visualmente tu salón
-            </h1>
-<div class="flex items-center gap-4 text-sm text-slate-400">
-<img alt="Author Avatar" class="size-8 rounded-full border border-white/10" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD3QqAZyl5ol3Z0_dFhU4qYJBx9eG97P9Sx-r6_bvsmK9EoWI5a28l1MVaaxrnjMHJCl0zJYKal0cwzZDK9RXscKTSnUx4_JIWwqDtKlnJpNt0u3fCnf5wx1Fcoh_46N8qDuhOx8Knt5_Tg84XhtLJELu72MRh2KdW4YKuhnchknq1hm7V18JoRHUNDN1Mb7SNRi-MiQJvXEKeeHqLFclBXQDtnR0-eztYsIOUpSxzxP471NKht2Gst6tMhZIWELAcAkTXLUtXwF-xd"/>
-<div class="flex items-center gap-4 divide-x divide-white/10">
-<span class="font-medium text-lunar">Por RenderRoom Team</span>
-<span class="pl-4">12 Oct, 2024</span>
-<span class="pl-4 flex items-center gap-1">
-<span class="material-symbols-outlined text-sm">schedule</span> 5 min lectura
-                    </span>
-</div>
-</div>
-<div class="mt-12 rounded-2xl overflow-hidden aspect-[16/9] border border-white/10 shadow-2xl relative">
-<img alt="Moderno Minimalista Room" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBA1qYdoHIRPRAQsKae6k7Y6QTrc5ZlH5k9Ip-dFL6BEJE0IVyM7viZlXseMXtFnEn6wVpkq0S82ZwtyasLdiRjZr1orkSlp_ONsWMYuqOJ99JVt20otdA5sAUxSnDPaLjWXQ80fHst_0rjote5mgjkXaKdyNYdUsg1_Q3L4mJ_B4KBnxj39bfctroxrticbBpUF1H3zVrLdW92gJweHw7zqyfuZWgReFKsOJIMpeCX3dV0kBvjKdKFJzzbZfBDGFzriUrWbGyOAaV8"/>
-<div class="absolute bottom-6 left-6 bg-background-dark/80 backdrop-blur-md px-4 py-2 rounded-lg border border-white/10">
-<span class="text-primary text-xs font-bold uppercase tracking-widest">Estilo Recomendado: Minimalista</span>
-</div>
-</div>
-</header>
-<div class="flex flex-col lg:flex-row gap-16 relative">
-<article class="max-w-[800px] flex-1">
-<div class="prose prose-invert prose-lg max-w-none space-y-8">
-<p class="text-xl leading-relaxed text-nebula">
-                        El minimalismo no es solo una cuestión de estética; es una filosofía de vida que busca la libertad a través de la reducción. Cuando aplicamos este concepto al diseño de interiores de salones pequeños, los resultados son transformadores.
-                    </p>
-<h2 class="text-3xl font-black text-primary mt-12 mb-6 uppercase tracking-tight">La Regla del "Menos es Más"</h2>
-<p class="text-nebula">
-                        Para empezar a ampliar visualmente tu espacio, es crucial entender que cada objeto que no aporta valor está restando amplitud. La IA de RenderRoom utiliza algoritmos avanzados para identificar puntos de saturación visual en tus fotos actuales y proponer alternativas despejadas.
-                    </p>
-<ul class="space-y-4">
-<li class="flex items-start gap-3">
-<span class="material-symbols-outlined text-primary mt-1">check_circle</span>
-<span>Uso de paletas monocromáticas en tonos neutros.</span>
-</li>
-<li class="flex items-start gap-3">
-<span class="material-symbols-outlined text-primary mt-1">check_circle</span>
-<span>Muebles con patas finas que dejan ver el suelo.</span>
-</li>
-<li class="flex items-start gap-3">
-<span class="material-symbols-outlined text-primary mt-1">check_circle</span>
-<span>Espejos colocados estratégicamente frente a ventanas.</span>
-</li>
-</ul>
-<blockquote class="border-l-4 border-accent-violet bg-white/5 p-8 my-12 italic rounded-r-xl">
-<p class="text-lunar text-2xl font-light">
-                            "El diseño minimalista moderno no se trata de vivir en un espacio vacío, sino de vivir en un espacio que respira."
-                        </p>
-</blockquote>
-<h2 class="text-3xl font-black text-primary mt-12 mb-6 uppercase tracking-tight">Iluminación: El Elemento Invisible</h2>
-<p class="text-nebula">
-                        Una de las claves que nuestra IA siempre prioriza es la maximización de la luz natural. Un renderizado minimalista suele sustituir cortinas pesadas por estores traslúcidos o simplemente dejar los marcos desnudos para integrar el exterior.
-                    </p>
-</div>
-<div class="my-16 space-y-4">
-<h3 class="text-xl font-bold text-lunar mb-6">Transformación Real con RenderRoom</h3>
-<div class="relative rounded-2xl overflow-hidden border border-white/10 group">
-<img alt="Before and After Slider" class="w-full aspect-[16/9] object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHnar0I75dBNNo0vN3W3BKEtOk48RO5MEEPL2ErhfeILLRyTcNHjtABzi3h24rhR04Xw8fDsn1Se4H8-_x_J13HUyGI4cNTf96lWc9Ts0YvPzY4MJQYcI94QatZTMjALx2Tb8BcnhzoWZvRS299lC_Doq9LzE6HKvaby0uC2WFs27sAVVIR8CRK8MnLjdwOYeXbEBjV95bLL0GAtyMsoKsDRhG-YBoiuEzrnP5Q2wzBZSEehqMP9cI5fUqE7bPT2fQtckr4O0l5VbQ"/>
-<div class="absolute inset-y-0 left-1/2 w-1 bg-white/30 backdrop-blur-sm -translate-x-1/2">
-<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-10 bg-white rounded-full flex items-center justify-center shadow-xl">
-<span class="material-symbols-outlined text-background-dark font-bold">unfold_more</span>
-</div>
-</div>
-<div class="absolute bottom-4 left-4 bg-background-dark/80 backdrop-blur px-3 py-1 rounded text-[10px] font-black text-white uppercase tracking-tighter border border-white/10">Antes</div>
-<div class="absolute bottom-4 right-4 bg-primary/90 backdrop-blur px-3 py-1 rounded text-[10px] font-black text-background-dark uppercase tracking-tighter">Después (Minimalista)</div>
-</div>
-</div>
-<div class="prose prose-invert prose-lg max-w-none mt-8 text-nebula">
-<p>
-                        Si estás listo para ver cómo tu propio salón podría lucir bajo estas reglas de diseño, nuestra herramienta de IA puede generar una visualización 4K en menos de 30 segundos. Solo necesitas subir una foto y seleccionar el estilo "Minimalista Moderno".
-                    </p>
-</div>
-</article>
-<aside class="w-full lg:w-[320px]">
-<div class="sticky top-28 space-y-6">
-<div class="gradient-border-card p-8 rounded-2xl shadow-2xl amber-glow">
-<div class="size-12 bg-primary/20 rounded-xl flex items-center justify-center text-primary mb-6">
-<span class="material-symbols-outlined">magic_button</span>
-</div>
-<h4 class="text-xl font-bold text-lunar mb-2">Prueba este Estilo</h4>
-<p class="text-sm text-slate-400 mb-6">Transforma tu habitación ahora mismo con IA profesional.</p>
-<div class="flex items-baseline gap-2 mb-8">
-<span class="text-4xl font-black text-primary">2,50€</span>
-<span class="text-slate-500 text-xs uppercase font-bold tracking-widest">por render</span>
-</div>
-<button class="w-full bg-primary hover:bg-primary/90 text-background-dark py-4 rounded-xl font-black text-sm transition-all hover:scale-[1.02] flex items-center justify-center gap-2">
-<span class="material-symbols-outlined text-lg">upload_file</span>
-                            SUBIR MI FOTO
-                        </button>
-</div>
-<div class="bg-charcoal/50 border border-white/5 p-6 rounded-2xl">
-<h5 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Compartir Artículo</h5>
-<div class="flex gap-3">
-<button class="size-10 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/5 transition-colors">
-<span class="material-symbols-outlined text-sm">share</span>
-</button>
-<button class="size-10 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/5 transition-colors">
-<span class="material-symbols-outlined text-sm">link</span>
-</button>
-</div>
-</div>
-</div>
-</aside>
-</div>
-<section class="mt-32 pt-16 border-t border-white/5">
-<h2 class="text-2xl font-bold text-lunar mb-10">Artículos Relacionados</h2>
-<div class="grid md:grid-cols-3 gap-8">
-<a class="group block space-y-4" href="#">
-<div class="aspect-[4/3] rounded-xl overflow-hidden border border-white/10">
-<img alt="Related" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDQWUpjKgOEYra8zmJWr2VCifCD-lUnq5hV_HGRMF2wRJdcDMZbtfzFp6m-8aotXqBKz4Jlw4lAu7USRZGkusVadQ_y4fxtiJ8HNQlrzWAquhNvLCyUEXRQr_HKoEjr9LpJrDoURbfpQ0J9pprzJyX9ALY19d6wVKcZCnZ5OVXL6pp68YRSSsENKTY72t1HCeELB7MAZ1ANhhubCP6eIzb_kId0zPn2GaGEM63eEBvnZRYq4y86XsSEneUZBUbycGRHleBuCaqyNYAi"/>
-</div>
-<h4 class="font-bold text-lunar group-hover:text-primary transition-colors">5 Errores comunes al iluminar tu salón</h4>
-<p class="text-sm text-slate-400">Descubre cómo evitar las sombras indeseadas y ganar profundidad.</p>
-</a>
-<a class="group block space-y-4" href="#">
-<div class="aspect-[4/3] rounded-xl overflow-hidden border border-white/10">
-<img alt="Related" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZrrIvKTFLqHxJoHi_FXo04996A9dVLQUHdJ7kfMAxEvI3uqx-hXexqxOj_malhP2RVLFnIQWbxursLuaPSYJhcfmsNLZ3_irqT3sgNhe8dPNxvar25PFaUNGmViLW6J3pG3eZRR5YHNXOQ_egLBFnm7NK0yIhXrQtOJKx3H4UJ1sdHjGGpWBW7rM0k1M6cV_odS0Z5rioDKk1lyJz9N1hsiULKchxrHG1RC-IJIPOrGVYHD20_VTlg_ymPKr9OMSZYrGRfGYTmOhh"/>
-</div>
-<h4 class="font-bold text-lunar group-hover:text-primary transition-colors">Estilo Nórdico: Calidez en espacios fríos</h4>
-<p class="text-sm text-slate-400">La guía definitiva para aplicar el concepto Hygge a tu hogar.</p>
-</a>
-<a class="group block space-y-4" href="#">
-<div class="aspect-[4/3] rounded-xl overflow-hidden border border-white/10">
-<img alt="Related" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuATikHqmuLZezQLfCydfw0_YkgCObP9NFHal9C0rKAw4LXu4Y90TF14gRjlhXi1y-Lp5TOf7xOBA5mkvXIuc2rXHXF5jL0Kr6MP-jbyA24QU4yzL35U-tcyDtA8M2H_dO_-WMdfOJzP9FWVwTEv-CfGguNvScXjrUIsQeGhCe-ktCwQmiC6KiG3yWhXnQHhlaFUzHbtlQlFOYv_qSqC8moqacIAEYmtWtktXRGEvKMsqfGSAUvwzhCo7pGYkNj-yDIazydC8KjMAWfU"/>
-</div>
-<h4 class="font-bold text-lunar group-hover:text-primary transition-colors">El auge del diseño industrial en 2024</h4>
-<p class="text-sm text-slate-400">Vuelve la tendencia de ladrillo visto y techos altos.</p>
-</a>
-</div>
-</section>
-</div>
-</main>
-<footer class="border-t border-white/5 py-12">
-<div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
-<div class="flex items-center gap-3">
-<div class="size-8 bg-primary/20 rounded-lg flex items-center justify-center text-primary">
-<span class="material-symbols-outlined text-sm">deployed_code</span>
-</div>
-<h2 class="text-lunar text-lg font-bold tracking-tight">RenderRoom</h2>
-</div>
-<p class="text-slate-500 text-sm">Hecho con ❤️ e IA por el equipo de RenderRoom</p>
-<div class="flex gap-6 text-slate-500">
-<a class="hover:text-primary transition-colors" href="#"><span class="material-symbols-outlined">brand_awareness</span></a>
-<a class="hover:text-primary transition-colors" href="#"><span class="material-symbols-outlined">alternate_email</span></a>
-<a class="hover:text-primary transition-colors" href="#"><span class="material-symbols-outlined">policy</span></a>
-</div>
-</div>
-<div class="max-w-7xl mx-auto px-6 mt-8 pt-8 border-t border-white/5 text-center">
-<p class="text-slate-600 text-[10px] uppercase tracking-[0.2em] font-bold">© 2024 RenderRoom AI. Todos los derechos reservados.</p>
-</div>
-</footer>
 
-</body></html>
+        .solar-glow {
+            box-shadow: 0 20px 50px -12px rgba(255, 184, 0, 0.2);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #1A1A1A 0%, #4A4A4A 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Hero Slider */
+        .slider-container { position: relative; width: 100%; height: 100%; overflow: hidden; border-radius: 2rem; }
+        .slider-before { position: absolute; inset: 0; background-size: cover; background-position: center; }
+        .slider-after { position: absolute; inset: 0; background-size: cover; background-position: center; clip-path: inset(0 0 0 50%); }
+        .slider-line { position: absolute; top: 0; bottom: 0; left: 50%; width: 3px; background: white; transform: translateX(-50%); z-index: 20; box-shadow: 0 0 20px rgba(0,0,0,0.2); }
+        .slider-handle { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 44px; height: 44px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 30; color: var(--primary); box-shadow: 0 10px 20px rgba(0,0,0,0.1); border: 4px solid var(--primary); }
+        .slider-input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: col-resize; z-index: 40; }
+
+        /* Auth Modal */
+        #auth-modal { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        #auth-modal.hidden { opacity: 0; pointer-events: none; transform: scale(0.95); }
+        #auth-modal:not(.hidden) { opacity: 1; transform: scale(1); }
+        .tab-btn.active { color: var(--primary); border-bottom: 3px solid var(--primary); }
+
+        .btn-premium {
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .btn-premium:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.05);
+        }
+
+        .card-premium {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(0,0,0,0.03);
+        }
+        .card-premium:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 30px 60px -12px rgba(255, 184, 0, 0.15);
+            border-color: rgba(255, 184, 0, 0.2);
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-primary/20">
+
+    <!-- Auth Modal Overlay -->
+    <div id="auth-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-md" onclick="closeAuth()"></div>
+        <div class="relative w-full max-w-md bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border border-slate-100">
+            <button onclick="closeAuth()" class="absolute top-6 right-6 text-slate-300 hover:text-slate-600 transition-colors z-10">
+                <span class="material-symbols-outlined text-2xl">close</span>
+            </button>
+            <div class="p-10 pt-12 text-center">
+                <div class="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center text-white mx-auto mb-6 rotate-3">
+                    <span class="material-symbols-outlined text-4xl">wb_sunny</span>
+                </div>
+                <h2 class="text-3xl font-extrabold tracking-tight font-display mb-2">Bienvenido</h2>
+                <p class="text-slate-500 font-medium">Únete a la revolución del diseño con IA.</p>
+            </div>
+            
+            <div class="flex border-b border-slate-100 px-10">
+                <button id="tab-login" class="tab-btn active flex-1 py-4 text-sm font-bold tracking-wide" onclick="switchTab('login')">Entrar</button>
+                <button id="tab-register" class="tab-btn flex-1 py-4 text-sm font-bold tracking-wide text-slate-400" onclick="switchTab('register')">Crear Cuenta</button>
+            </div>
+
+            <!-- Login Form -->
+            <div id="form-login" class="p-10 space-y-5">
+                <div class="space-y-1">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 px-1">Email</label>
+                    <input id="login-email" type="email" placeholder="hola@ejemplo.com" class="w-full bg-slate-50 border-transparent focus:bg-white focus:border-primary/30 rounded-2xl px-5 py-4 text-sm font-medium transition-all outline-none"/>
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 px-1">Contraseña</label>
+                    <input id="login-password" type="password" placeholder="••••••••" class="w-full bg-slate-50 border-transparent focus:bg-white focus:border-primary/30 rounded-2xl px-5 py-4 text-sm font-medium transition-all outline-none"/>
+                </div>
+                <button onclick="handleLogin()" class="w-full bg-primary hover:bg-primary-dark text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-primary/20 btn-premium">
+                    Iniciar Sesión
+                </button>
+                <div class="relative py-2 flex items-center justify-center">
+                    <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-100"></div></div>
+                    <span class="relative bg-white px-4 text-[10px] font-black uppercase tracking-widest text-slate-300">O también</span>
+                </div>
+                <button onclick="handleGoogleLogin()" class="w-full bg-white border border-slate-100 hover:border-slate-200 text-slate-700 font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-3">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5" alt="Google"/>
+                    Acceder con Google
+                </button>
+                <div id="login-msg" class="text-center text-sm hidden"></div>
+            </div>
+
+            <!-- Register Form -->
+            <div id="form-register" class="hidden p-10 space-y-5">
+                <div class="space-y-1">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 px-1">Nombre</label>
+                    <input id="reg-name" type="text" placeholder="Tu Nombre" class="w-full bg-slate-50 border-transparent focus:bg-white focus:border-primary/30 rounded-2xl px-5 py-4 text-sm font-medium transition-all outline-none"/>
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 px-1">Email</label>
+                    <input id="reg-email" type="email" placeholder="hola@ejemplo.com" class="w-full bg-slate-50 border-transparent focus:bg-white focus:border-primary/30 rounded-2xl px-5 py-4 text-sm font-medium transition-all outline-none"/>
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-black uppercase tracking-widest text-slate-400 px-1">Contraseña</label>
+                    <input id="reg-password" type="password" placeholder="Mín. 8 caracteres" class="w-full bg-slate-50 border-transparent focus:bg-white focus:border-primary/30 rounded-2xl px-5 py-4 text-sm font-medium transition-all outline-none"/>
+                </div>
+                <div class="flex items-start gap-3 py-1">
+                    <input id="reg-terms" type="checkbox" class="mt-1 rounded border-slate-300 text-primary focus:ring-primary/20"/>
+                    <label for="reg-terms" class="text-[11px] text-slate-500 leading-relaxed font-medium">Acepto los <a href="#" class="text-primary font-bold">términos de uso</a> y la <a href="#" class="text-primary font-bold">política de privacidad</a>.</label>
+                </div>
+                <button onclick="handleRegister()" class="w-full bg-primary hover:bg-primary-dark text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-primary/20 btn-premium">
+                    Crear Cuenta Gratuita
+                </button>
+                <div id="reg-msg" class="text-center text-sm hidden"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 glass-nav px-6 py-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <a href="01-landing-page.html" class="flex items-center gap-2 group">
+                <div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center rotate-3 group-hover:rotate-6 transition-transform text-white">
+                    <span class="material-symbols-outlined text-2xl">wb_sunny</span>
+                </div>
+                <h1 class="text-xl font-extrabold tracking-tight font-display">RenderRoom</h1>
+            </a>
+            
+            <div class="hidden md:flex items-center space-x-10">
+                <a class="text-sm font-bold text-slate-500 hover:text-primary transition-colors" href="#como-funciona">Cómo funciona</a>
+                <a class="text-sm font-bold text-slate-500 hover:text-primary transition-colors" href="#estilos">Estilos</a>
+                <a class="text-sm font-bold text-slate-500 hover:text-primary transition-colors" href="precios.html">Precios</a>
+                <a class="text-sm font-bold text-slate-500 hover:text-primary transition-colors" href="07-consejos-decoracion.html">Consejos</a>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <div id="user-logged-out" class="flex items-center gap-4">
+                    <button onclick="openAuth('login')" class="text-sm font-bold text-slate-600 hover:text-primary transition-colors hidden md:block">Entrar</button>
+                    <button onclick="openAuth('register')" class="bg-slate-900 hover:bg-black text-white px-6 py-3 rounded-xl text-sm font-bold transition-all hover:scale-105">Empezar</button>
+                </div>
+                <div id="user-logged-in" class="hidden items-center gap-4">
+                    <div id="header-credits-display" class="hidden flex items-center gap-2 px-4 py-2 bg-primary-light border border-primary/10 rounded-full">
+                        <span class="material-symbols-outlined text-primary text-sm font-bold">toll</span>
+                        <span id="header-credits-count" class="text-primary font-bold text-sm">--</span>
+                    </div>
+                    <a href="03-dashboard.html" class="flex items-center gap-2 text-sm font-bold text-slate-600 hover:text-primary transition-colors">Mis Renders</a>
+                    <a href="06-perfil-usuario.html" class="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden ring-2 ring-primary/20">
+                        <img id="user-avatar" alt="User" src="https://ui-avatars.com/api/?name=User&background=FFB800&color=fff"/>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="pt-40 pb-32 px-6 overflow-hidden">
+        <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-20 items-center">
+            <div class="space-y-10 relative z-10">
+                <div class="inline-flex items-center gap-3 bg-primary-light border border-primary/10 px-5 py-2 rounded-full">
+                    <span class="w-2 h-2 bg-primary rounded-full animate-pulse"></span>
+                    <span class="text-primary text-[10px] font-black uppercase tracking-widest">NUEVA IA GENERATIVA GENERATION 4</span>
+                </div>
+                <h2 class="text-6xl md:text-8xl font-extrabold tracking-tight font-display leading-[0.95] gradient-text">
+                    Transforma tu Hogar <br/>
+                    <span class="text-primary">con IA Realista.</span>
+                </h2>
+                <p class="text-slate-500 text-xl font-medium max-w-lg leading-relaxed">
+                    Rediseña cualquier habitación en segundos con realismo profesional. Sube una foto, elige tu estilo y deja que la magia ocurra.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-5 pt-4">
+                    <button onclick="handleStart()" class="bg-primary hover:bg-primary-dark text-white px-10 py-5 rounded-2xl text-lg font-black transition-all hover:scale-105 solar-glow flex items-center justify-center gap-3 btn-premium">
+                        <span class="material-symbols-outlined font-bold">upload_file</span>
+                        Subir mi Foto Ahora
+                    </button>
+                    <button onclick="window.location.hash='#como-funciona'" class="border-2 border-slate-100 hover:border-primary/20 hover:bg-slate-50 px-10 py-5 rounded-2xl text-lg font-bold transition-all flex items-center justify-center gap-3">
+                        <span class="material-symbols-outlined">play_circle</span>
+                        Ver cómo funciona
+                    </button>
+                </div>
+                
+                <div class="flex items-center gap-6 pt-10">
+                    <div class="flex -space-x-4">
+                        <img src="https://i.pravatar.cc/100?u=1" class="w-12 h-12 rounded-full border-4 border-white shadow-sm" alt="User"/>
+                        <img src="https://i.pravatar.cc/100?u=2" class="w-12 h-12 rounded-full border-4 border-white shadow-sm" alt="User"/>
+                        <img src="https://i.pravatar.cc/100?u=3" class="w-12 h-12 rounded-full border-4 border-white shadow-sm" alt="User"/>
+                        <div class="w-12 h-12 rounded-full bg-primary-light border-4 border-white flex items-center justify-center text-primary font-black text-xs">+2k</div>
+                    </div>
+                    <div>
+                        <p class="text-sm font-bold text-slate-800">Con la confianza de +2,000 usuarios</p>
+                        <div class="flex gap-1 text-primary">
+                            <span class="material-symbols-outlined text-sm fill-1">star</span>
+                            <span class="material-symbols-outlined text-sm fill-1">star</span>
+                            <span class="material-symbols-outlined text-sm fill-1">star</span>
+                            <span class="material-symbols-outlined text-sm fill-1">star</span>
+                            <span class="material-symbols-outlined text-sm fill-1">star</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hero Image Slider -->
+            <div class="relative group mt-10 lg:mt-0">
+                <div class="absolute -inset-10 bg-primary/20 blur-[100px] rounded-full opacity-30 group-hover:opacity-50 transition-opacity"></div>
+                <div class="relative aspect-[4/3] rounded-[2.5rem] overflow-hidden shadow-2xl border-8 border-white group-hover:scale-[1.02] transition-transform duration-700">
+                    <div class="slider-container" id="hero-slider">
+                        <!-- Before layer -->
+                        <div class="slider-before" style="background-image: url('img/hero_before.png')"></div>
+                        <!-- After layer -->
+                        <div class="slider-after" style="background-image: url('img/hero_after.png')"></div>
+                        <div class="slider-line"></div>
+                        <div class="slider-handle">
+                            <span class="material-symbols-outlined font-black">unfold_more</span>
+                        </div>
+                        <div class="absolute bottom-6 left-6 px-4 py-2 bg-black/40 backdrop-blur-md rounded-xl text-white text-[10px] font-black uppercase tracking-widest border border-white/20">Antes</div>
+                        <div class="absolute bottom-6 right-6 px-4 py-2 bg-primary/90 backdrop-blur-md rounded-xl text-white text-[10px] font-black uppercase tracking-widest shadow-lg">IA Rediseño</div>
+                        <input type="range" min="0" max="100" value="50" class="slider-input" id="slider-range">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- TRUST LOGOS -->
+    <div class="py-12 border-t border-b border-slate-100 bg-slate-50/30">
+        <div class="max-w-7xl mx-auto px-6 flex flex-wrap items-center justify-between gap-10 opacity-40 grayscale hover:grayscale-0 transition-all duration-700">
+            <span class="text-2xl font-black font-display tracking-tight text-slate-900">VERA DESIGN</span>
+            <span class="text-2xl font-black font-display tracking-tight text-slate-900">ROOM MASTER</span>
+            <span class="text-2xl font-black font-display tracking-tight text-slate-900">AI DECO</span>
+            <span class="text-2xl font-black font-display tracking-tight text-slate-900">NOVA HOME</span>
+            <span class="text-2xl font-black font-display tracking-tight text-slate-900">ARCHI AI</span>
+        </div>
+    </div>
+
+    <!-- CÓMO FUNCIONA -->
+    <section id="como-funciona" class="py-32 px-6">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center space-y-4 mb-24">
+                <h3 class="text-primary font-black text-sm uppercase tracking-[0.3em]">PROCESO MÁGICO</h3>
+                <h2 class="text-5xl md:text-6xl font-extrabold tracking-tight font-display gradient-text">Tu habitación, reinventada en pasos.</h2>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-16 relative">
+                <!-- Connector Line -->
+                <div class="hidden lg:block absolute top-1/3 left-0 w-full h-px border-t-2 border-dashed border-slate-100 -z-10"></div>
+                
+                <!-- Step 1 -->
+                <div class="space-y-8 flex flex-col items-center text-center group">
+                    <div class="w-24 h-24 bg-white rounded-3xl solar-glow flex items-center justify-center text-primary group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 border border-slate-50">
+                        <span class="material-symbols-outlined text-4xl font-bold">add_photo_alternate</span>
+                    </div>
+                    <div class="space-y-4">
+                        <h4 class="text-2xl font-extrabold font-display">1. Sube tu imagen</h4>
+                        <p class="text-slate-500 font-medium leading-relaxed">Captura una foto de tu espacio actual desde cualquier ángulo. Nuestra IA analizará la geometría y luz.</p>
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="space-y-8 flex flex-col items-center text-center group">
+                    <div class="w-24 h-24 bg-white rounded-3xl solar-glow flex items-center justify-center text-primary group-hover:scale-110 group-hover:-rotate-3 transition-all duration-500 border border-slate-50">
+                        <span class="material-symbols-outlined text-4xl font-bold">style</span>
+                    </div>
+                    <div class="space-y-4">
+                        <h4 class="text-2xl font-extrabold font-display">2. Elige un estilo</h4>
+                        <p class="text-slate-500 font-medium leading-relaxed">Selecciona entre más de 20 estilos profesionales. Desde Minimalismo Nórdico hasta Lujo Contemporáneo.</p>
+                    </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="space-y-8 flex flex-col items-center text-center group">
+                    <div class="w-24 h-24 bg-white rounded-3xl solar-glow flex items-center justify-center text-primary group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 border border-slate-50">
+                        <span class="material-symbols-outlined text-4xl font-bold">magic_button</span>
+                    </div>
+                    <div class="space-y-4">
+                        <h4 class="text-2xl font-extrabold font-display">3. Recibe la Magia</h4>
+                        <p class="text-slate-500 font-medium leading-relaxed">En menos de 30 segundos, obtén un render 4K profesional y una propuesta detallada de cambios.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ESTILOS GALLERY -->
+    <section id="estilos" class="py-32 bg-slate-50 px-6 overflow-hidden">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-20">
+                <div class="space-y-4">
+                    <h3 class="text-primary font-black text-sm uppercase tracking-[0.3em]">EXPLORA POSIBILIDADES</h3>
+                    <h2 class="text-5xl font-extrabold tracking-tight font-display gradient-text leading-none">Cientos de estilos, <br/>un solo clic.</h2>
+                </div>
+                <a href="#precios" class="text-slate-900 font-black text-sm uppercase tracking-widest flex items-center gap-3 group hover:text-primary transition-colors">
+                    Ver todos los estilos
+                    <span class="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm group-hover:translate-x-1 transition-transform">
+                        <span class="material-symbols-outlined text-primary font-bold">arrow_forward</span>
+                    </span>
+                </a>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                <!-- Style Card 1 -->
+                <div class="group relative aspect-[3/4] rounded-3xl overflow-hidden card-premium shadow-lg">
+                    <img src="img/style_moderno.png" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="Moderno"/>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+                    <div class="absolute bottom-6 left-6 space-y-1">
+                        <p class="text-primary font-black text-[10px] uppercase tracking-widest">Recomendado</p>
+                        <h4 class="text-white text-xl font-extrabold font-display">Moderno Glam</h4>
+                    </div>
+                </div>
+                <!-- Style Card 2 -->
+                <div class="group relative aspect-[3/4] rounded-3xl overflow-hidden card-premium shadow-lg lg:mt-12">
+                    <img src="img/style_nordico.png" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="Nordico"/>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+                    <div class="absolute bottom-6 left-6 space-y-1">
+                        <p class="text-white/60 font-black text-[10px] uppercase tracking-widest">Popular</p>
+                        <h4 class="text-white text-xl font-extrabold font-display">Nórdico Puro</h4>
+                    </div>
+                </div>
+                <!-- Style Card 3 -->
+                <div class="group relative aspect-[3/4] rounded-3xl overflow-hidden card-premium shadow-lg">
+                    <img src="img/style_industrial.png" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="Industrial"/>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+                    <div class="absolute bottom-6 left-6 space-y-1">
+                        <p class="text-white/60 font-black text-[10px] uppercase tracking-widest">Loft Style</p>
+                        <h4 class="text-white text-xl font-extrabold font-display">Industrial Urbano</h4>
+                    </div>
+                </div>
+                <!-- Style Card 4 -->
+                <div class="group relative aspect-[3/4] rounded-3xl overflow-hidden card-premium shadow-lg lg:mt-12">
+                    <img src="img/style_bohemio.png" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="Bohemio"/>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+                    <div class="absolute bottom-6 left-6 space-y-1">
+                        <p class="text-white/60 font-black text-[10px] uppercase tracking-widest">Acogedor</p>
+                        <h4 class="text-white text-xl font-extrabold font-display">Boho Chic</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- TESTIMONIALS -->
+    <section class="py-32 px-6">
+        <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-20 items-center">
+            <div class="space-y-8">
+                <h3 class="text-primary font-black text-sm uppercase tracking-[0.3em]">OPINIONES</h3>
+                <h2 class="text-5xl font-extrabold tracking-tight font-display gradient-text">Lo que dicen <br/>nuestros usuarios.</h2>
+                <div class="p-10 bg-white rounded-[3rem] shadow-xl border border-slate-50 relative">
+                    <div class="absolute -top-6 -left-6 w-16 h-16 bg-primary rounded-2xl flex items-center justify-center text-white shadow-lg">
+                        <span class="material-symbols-outlined text-4xl">format_quote</span>
+                    </div>
+                    <p class="text-xl font-medium text-slate-700 leading-relaxed italic">
+                        "No podía imaginar cómo quedaría mi salón en estilo industrial hasta que probé RenderRoom. El resultado fue tan realista que simplemente seguí las instrucciones que la IA me dio. ¡Increíble!"
+                    </p>
+                    <div class="mt-8 flex items-center gap-4">
+                        <img src="https://i.pravatar.cc/100?u=maria" class="w-14 h-14 rounded-2xl object-cover shadow-md" alt="User"/>
+                        <div>
+                            <p class="font-extrabold text-slate-900">María Fernández</p>
+                            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Madrid, España</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-6">
+                <div class="space-y-6">
+                    <div class="p-8 bg-slate-50 rounded-3xl border border-slate-100 space-y-4">
+                        <div class="flex text-primary">
+                            <span class="material-symbols-outlined text-sm fill-1">star</span>
+                            <span class="material-symbols-outlined text-sm fill-1">star</span>
+                            <span class="material-symbols-outlined text-sm fill-1">star</span>
+                            <span class="material-symbols-outlined text-sm fill-1">star</span>
+                            <span class="material-symbols-outlined text-sm fill-1">star</span>
+                        </div>
+                        <p class="text-sm font-bold text-slate-900 italic">"Rápido, económico y profesional. La mejor inversión para mi casa."</p>
+                        <p class="text-xs font-black text-slate-400">Carlos J.</p>
+                    </div>
+                    <div class="p-8 bg-slate-50 rounded-3xl border border-slate-100 space-y-4">
+                        <div class="flex text-primary">
+                            <span class="material-symbols-outlined text-sm fill-1">star</span>
+                            <span class="material-symbols-outlined text-sm fill-1">star</span>
+                            <span class="material-symbols-outlined text-sm fill-1">star</span>
+                            <span class="material-symbols-outlined text-sm fill-1">star</span>
+                            <span class="material-symbols-outlined text-sm fill-1">star</span>
+                        </div>
+                        <p class="text-sm font-bold text-slate-900 italic">"Me ahorró miles de euros en arquitectos para una idea inicial."</p>
+                        <p class="text-xs font-black text-slate-400">Elena R.</p>
+                    </div>
+                </div>
+                <div class="space-y-6 mt-12">
+                    <div class="p-8 bg-slate-50 rounded-3xl border border-slate-100 space-y-4">
+                        <div class="flex text-primary">
+                            <span class="material-symbols-outlined text-sm fill-1">star</span>
+                            <span class="material-symbols-outlined text-sm fill-1">star</span>
+                            <span class="material-symbols-outlined text-sm fill-1">star</span>
+                            <span class="material-symbols-outlined text-sm fill-1">star</span>
+                            <span class="material-symbols-outlined text-sm fill-1">star</span>
+                        </div>
+                        <p class="text-sm font-bold text-slate-900 italic">"La propuesta detallada de cambios es oro puro."</p>
+                        <p class="text-xs font-black text-slate-400">Pablo M.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FINAL CTA -->
+    <section class="py-32 px-6">
+        <div class="max-w-7xl mx-auto rounded-[4rem] bg-slate-900 p-16 md:p-24 text-center space-y-12 relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-transparent"></div>
+            <div class="space-y-6 relative z-10">
+                <h2 class="text-5xl md:text-7xl font-extrabold tracking-tight font-display text-white leading-none">
+                    ¿Listo para rediseñar <br/>
+                    <span class="text-primary">tu espacio favorito?</span>
+                </h2>
+                <p class="text-slate-400 text-xl font-medium max-w-2xl mx-auto">
+                    Únete a miles de personas que ya están usando la IA para crear el hogar de sus sueños sin complicaciones.
+                </p>
+            </div>
+            <div class="flex flex-col sm:flex-row justify-center gap-6 relative z-10">
+                <button onclick="handleStart()" class="bg-primary hover:bg-primary-dark text-white px-12 py-6 rounded-2xl text-xl font-extrabold transition-all hover:scale-105 shadow-2xl shadow-primary/20 btn-premium">
+                    Empezar mi Primer Render
+                </button>
+                <a href="precios.html" class="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white px-12 py-6 rounded-2xl text-xl font-bold transition-all border border-white/10">
+                    Ver Precios y Planes
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="py-20 px-6 bg-white border-t border-slate-100 overflow-hidden">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-16 mb-20">
+            <div class="col-span-1 md:col-span-2 space-y-8">
+                <a href="01-landing-page.html" class="flex items-center gap-2 group">
+                    <div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center rotate-3 text-white shadow-lg">
+                        <span class="material-symbols-outlined text-2xl font-bold">wb_sunny</span>
+                    </div>
+                    <span class="text-2xl font-extrabold tracking-tight font-display">RenderRoom</span>
+                </a>
+                <p class="text-slate-500 font-medium max-w-sm text-lg leading-relaxed">Rediseña con inteligencia. La herramienta definitiva para visualización de interiores profesional al alcance de todos.</p>
+                <div class="flex gap-4">
+                    <a href="#" class="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 hover:text-primary hover:bg-white hover:shadow-lg transition-all border border-slate-100"><span class="material-symbols-outlined">brand_awareness</span></a>
+                    <a href="#" class="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 hover:text-primary hover:bg-white hover:shadow-lg transition-all border border-slate-100"><span class="material-symbols-outlined">alternate_email</span></a>
+                    <a href="#" class="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 hover:text-primary hover:bg-white hover:shadow-lg transition-all border border-slate-100"><span class="material-symbols-outlined">share</span></a>
+                </div>
+            </div>
+            
+            <div class="space-y-6">
+                <h4 class="text-xs font-black uppercase tracking-[0.3em] text-slate-900 px-1">Producto</h4>
+                <div class="flex flex-col gap-4">
+                    <a href="#como-funciona" class="text-slate-500 hover:text-primary font-bold text-sm transition-colors">Cómo funciona</a>
+                    <a href="#estilos" class="text-slate-500 hover:text-primary font-bold text-sm transition-colors">Galería de Estilos</a>
+                    <a href="precios.html" class="text-slate-500 hover:text-primary font-bold text-sm transition-colors">Precios y Créditos</a>
+                    <a href="07-consejos-decoracion.html" class="text-slate-500 hover:text-primary font-bold text-sm transition-colors">Blog y Consejos</a>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <h4 class="text-xs font-black uppercase tracking-[0.3em] text-slate-900 px-1">Legal y Ayuda</h4>
+                <div class="flex flex-col gap-4">
+                    <a href="privacidad.html" class="text-slate-500 hover:text-primary font-bold text-sm transition-colors">Política de Privacidad</a>
+                    <a href="terminos.html" class="text-slate-500 hover:text-primary font-bold text-sm transition-colors">Términos de Uso</a>
+                    <a href="#" class="text-slate-500 hover:text-primary font-bold text-sm transition-colors">Centro de Soporte</a>
+                    <a href="#" class="text-slate-500 hover:text-primary font-bold text-sm transition-colors">Contacto</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="max-w-7xl mx-auto pt-10 border-t border-slate-50 flex flex-col md:flex-row justify-between items-center gap-6">
+            <p class="text-slate-400 text-[10px] font-black tracking-widest uppercase">© 2024 RENDERROOM AI. POWERED BY VERTEX AI & GEMINI.</p>
+            <div class="flex items-center gap-2 px-4 py-2 bg-slate-50 rounded-xl text-slate-400 font-bold text-[10px] uppercase tracking-widest border border-slate-100">
+                <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+                Sistemas en Línea
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // ── Firebase Config ─────────────────────────────
+        const firebaseConfig = {
+            projectId: "gen-lang-client-0426824151",
+            appId: "1:124806819551:web:1c90d1154b458fa064036a",
+            storageBucket: "gen-lang-client-0426824151.firebasestorage.app",
+            apiKey: "AIzaSyDj99qdmDt4GiVeRkvCSfTOSDw3uqD-_Ew",
+            authDomain: "gen-lang-client-0426824151.firebaseapp.com",
+            messagingSenderId: "124806819551"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // ── Auth Logic ─────────────────────────────────
+        function handleStart() {
+            const user = firebase.auth().currentUser;
+            if (user) {
+                window.location.href = '02-upload-wizard.html';
+            } else {
+                openAuth('register');
+            }
+        }
+
+        function openAuth(tab) {
+            document.getElementById('auth-modal').classList.remove('hidden');
+            switchTab(tab || 'login');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeAuth() {
+            document.getElementById('auth-modal').classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+        document.addEventListener('keydown', e => { if(e.key==='Escape') closeAuth(); });
+
+        function switchTab(tab) {
+            const isLogin = tab === 'login';
+            document.getElementById('form-login').classList.toggle('hidden', !isLogin);
+            document.getElementById('form-register').classList.toggle('hidden', isLogin);
+            document.getElementById('tab-login').classList.toggle('active', isLogin);
+            document.getElementById('tab-register').classList.toggle('active', !isLogin);
+            document.getElementById('tab-login').classList.toggle('text-slate-400', !isLogin);
+            document.getElementById('tab-register').classList.toggle('text-slate-400', isLogin);
+        }
+
+        async function handleRegister() {
+            const name = document.getElementById('reg-name').value.trim();
+            const email = document.getElementById('reg-email').value.trim();
+            const password = document.getElementById('reg-password').value;
+            const terms = document.getElementById('reg-terms').checked;
+            const msgEl = document.getElementById('reg-msg');
+            
+            if (!name || !email || !password) { showMsg(msgEl, 'Completa todos los campos', 'error'); return; }
+            if (!terms) { showMsg(msgEl, 'Debes aceptar los términos', 'error'); return; }
+            if (password.length < 8) { showMsg(msgEl, 'Mínimo 8 caracteres', 'error'); return; }
+            
+            try {
+                const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
+                await userCredential.user.updateProfile({ displayName: name });
+                showMsg(msgEl, '¡Cuenta creada!', 'success');
+                setTimeout(() => { window.location.href = '03-dashboard.html'; }, 1000);
+            } catch(e) { showMsg(msgEl, e.message, 'error'); }
+        }
+
+        async function handleLogin() {
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+            const msgEl = document.getElementById('login-msg');
+            if (!email || !password) { showMsg(msgEl, 'Ingresa tus credenciales', 'error'); return; }
+            try {
+                await firebase.auth().signInWithEmailAndPassword(email, password);
+                showMsg(msgEl, '¡Bienvenido!', 'success');
+                setTimeout(() => { window.location.href = '03-dashboard.html'; }, 800);
+            } catch(e) { showMsg(msgEl, e.message, 'error'); }
+        }
+
+        async function handleGoogleLogin() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            try {
+                await firebase.auth().signInWithPopup(provider);
+                window.location.href = '03-dashboard.html';
+            } catch (e) { console.error(e); }
+        }
+
+        function showMsg(el, text, type) {
+            el.textContent = text;
+            el.className = `text-center text-sm mt-4 font-bold ${type === 'success' ? 'text-green-500' : 'text-red-500'}`;
+            el.classList.remove('hidden');
+        }
+
+        // ── Auth Observer ─────────────────────────────
+        firebase.auth().onAuthStateChanged(user => {
+            document.getElementById('user-logged-out').classList.toggle('hidden', !!user);
+            document.getElementById('user-logged-in').classList.toggle('hidden', !user);
+            
+            if (user) {
+                const avatar = document.getElementById('user-avatar');
+                if (user.photoURL) avatar.src = user.photoURL;
+                
+                db.collection('users').doc(user.uid).onSnapshot(doc => {
+                    if (doc.exists) {
+                        const data = doc.data();
+                        const countEl = document.getElementById('header-credits-count');
+                        const displayEl = document.getElementById('header-credits-display');
+                        if (countEl) countEl.textContent = data.credits || 0;
+                        if (displayEl) displayEl.classList.remove('hidden');
+                    } else {
+                        // Create user doc if it doesn't exist
+                        db.collection('users').doc(user.uid).set({
+                            displayName: user.displayName,
+                            email: user.email,
+                            credits: 1, // Welcome credit
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        }, { merge: true });
+                    }
+                });
+            }
+        });
+
+        // ── Slider Logic ──────────────────────────────
+        const sliderRange = document.getElementById('slider-range');
+        const sliderAfter = document.querySelector('.slider-after');
+        const sliderLine = document.querySelector('.slider-line');
+        const sliderHandle = document.querySelector('.slider-handle');
+
+        if (sliderRange) {
+            sliderRange.addEventListener('input', (e) => {
+                const val = e.target.value;
+                sliderAfter.style.clipPath = `inset(0 0 0 ${val}%)`;
+                sliderLine.style.left = `${val}%`;
+                sliderHandle.style.left = `${val}%`;
+            });
+        }
+    </script>
+</body>
+</html>

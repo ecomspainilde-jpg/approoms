@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="dark" lang="es">
+<html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,26 +7,36 @@
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-  <script id="tailwind-config">
-    tailwind.config = {
-      darkMode: "class",
-      theme: {
-        extend: {
-          colors: {
-            "primary": "#f0a400",
-            "background-light": "#f8f7f5",
-            "background-dark": "#0D1117",
-            "charcoal": "#161B22",
-            "nebula": "#C9D1D9"
-          },
-          fontFamily: { "display": ["Inter", "sans-serif"] },
-        },
-      },
-    }
-  </script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#F59E0B",
+                        "background": "#FFFFFF",
+                        "surface": "#F8FAFC",
+                        "border": "#F1F5F9",
+                        "text-primary": "#1E293B",
+                        "text-secondary": "#475569"
+                    },
+                    fontFamily: { "display": ["Inter", "sans-serif"] },
+                },
+            },
+        }
+    </script>
 </head>
-<body class="bg-background-dark font-display text-nebula min-h-screen">
-  <nav class="sticky top-0 z-50 glass border-b border-white/10 px-6 py-4">
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .glass-nav {
+                background: rgba(255, 255, 255, 0.8);
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+            }
+        }
+    </style>
+</head>
+<body class="bg-background font-display text-text-secondary min-h-screen antialiased">
+    <nav class="sticky top-0 z-50 glass-nav border-b border-border px-6 py-4">
     <div class="max-w-4xl mx-auto flex items-center justify-between">
       <a href="01-landing-page.html" class="flex items-center gap-3">
         <div class="size-8 bg-gradient-to-br from-primary to-orange-600 rounded-lg flex items-center justify-center text-background-dark">
@@ -42,38 +52,46 @@
   </nav>
 
   <main class="max-w-4xl mx-auto px-6 py-16">
-    <h1 class="text-4xl font-black mb-8">Términos de Uso</h1>
+    <h1 class="text-4xl font-black text-text-primary mb-8 tracking-tight">Términos de Uso</h1>
     
-    <div class="prose prose-invert prose-amber max-w-none space-y-8">
+    <div class="space-y-12">
       <section>
-        <h2 class="text-2xl font-bold text-primary mb-4">1. Aceptación de Términos</h2>
-        <p class="text-nebula/80 leading-relaxed">
+        <h2 class="text-xl font-bold text-text-primary mb-4 flex items-center gap-2">
+            <span class="size-2 bg-primary rounded-full"></span> 1. Aceptación de Términos
+        </h2>
+        <p class="leading-relaxed">
           Al acceder y utilizar RenderRoom, aceptas estos términos de uso. Si no estás de acuerdo, por favor no utilices nuestros servicios.
         </p>
       </section>
 
       <section>
-        <h2 class="text-2xl font-bold text-primary mb-4">2. Descripción del Servicio</h2>
-        <p class="text-nebula/80 leading-relaxed">
+        <h2 class="text-xl font-bold text-text-primary mb-4 flex items-center gap-2">
+            <span class="size-2 bg-primary rounded-full"></span> 2. Descripción del Servicio
+        </h2>
+        <p class="leading-relaxed">
           RenderRoom es una plataforma de renderizado de interiores asistida por inteligencia artificial. 
           Los usuarios pueden subir fotografías de sus habitaciones y recibir renders profesionales en diferentes estilos de decoración.
         </p>
       </section>
 
       <section>
-        <h2 class="text-2xl font-bold text-primary mb-4">3. Precios y Pagos</h2>
-        <p class="text-nebula/80 leading-relaxed">
-          El servicio tiene un coste de 2,50€ por render. Los pagos se procesan de forma segura. 
+        <h2 class="text-xl font-bold text-text-primary mb-4 flex items-center gap-2">
+            <span class="size-2 bg-primary rounded-full"></span> 3. Precios y Pagos
+        </h2>
+        <p class="leading-relaxed">
+          El servicio tiene un coste de pago por render. Los pagos se procesan de forma segura a través de Stripe. 
           No nos responsabilizamos de interrupciones del servicio por causas ajenas a nuestro control.
         </p>
       </section>
 
       <section>
-        <h2 class="text-2xl font-bold text-primary mb-4">4. Uso Responsable</h2>
-        <p class="text-nebula/80 leading-relaxed">
+        <h2 class="text-xl font-bold text-text-primary mb-4 flex items-center gap-2">
+            <span class="size-2 bg-primary rounded-full"></span> 4. Uso Responsable
+        </h2>
+        <p class="leading-relaxed">
           Te comprometes a utilizar el servicio de forma lawful y respetuosa. No está permitido:
         </p>
-        <ul class="list-disc list-inside text-nebula/80 mt-4 space-y-2">
+        <ul class="list-disc list-inside mt-4 space-y-2">
           <li>Subir contenido ofensivo o ilegal</li>
           <li>Intentar acceder a sistemas terceros sin autorización</li>
           <li>Reproducir o redistribuir los renders sin autorización</li>
@@ -81,32 +99,36 @@
       </section>
 
       <section>
-        <h2 class="text-2xl font-bold text-primary mb-4">5. Propiedad Intelectual</h2>
-        <p class="text-nebula/80 leading-relaxed">
+        <h2 class="text-xl font-bold text-text-primary mb-4 flex items-center gap-2">
+            <span class="size-2 bg-primary rounded-full"></span> 5. Propiedad Intelectual
+        </h2>
+        <p class="leading-relaxed">
           Los renders generados son para uso personal del usuario. Nos reservamos el derecho de utilizar 
           imágenes generadas de forma anónima con fines promocionales.
         </p>
       </section>
 
       <section>
-        <h2 class="text-2xl font-bold text-primary mb-4">6. Limitación de Responsabilidad</h2>
-        <p class="text-nebula/80 leading-relaxed">
+        <h2 class="text-xl font-bold text-text-primary mb-4 flex items-center gap-2">
+            <span class="size-2 bg-primary rounded-full"></span> 6. Limitación de Responsabilidad
+        </h2>
+        <p class="leading-relaxed">
           El servicio se proporciona "tal cual". No garantizamos que los renders sean exactamente como se esperan. 
           Nuestra responsabilidad se limita al importe pagado.
-        </p>
-      </section>
-
-      <section>
-        <h2 class="text-2xl font-bold text-primary mb-4">7. Contacto</h2>
-        <p class="text-nebula/80 leading-relaxed">
-          Para consultas sobre estos términos, contacta en <a href="mailto:soporte@renderroom.app" class="text-primary hover:underline">soporte@renderroom.app</a>
         </p>
       </section>
     </div>
   </main>
 
-  <footer class="border-t border-white/10 py-8 text-center">
-    <p class="text-nebula/50 text-sm">© 2024 RenderRoom AI · <a href="01-landing-page.html" class="hover:text-primary transition-colors">Inicio</a></p>
+  <footer class="bg-surface border-t border-border py-20 mt-12">
+    <div class="max-w-4xl mx-auto px-6 text-center">
+        <p class="text-xs text-text-secondary font-bold uppercase tracking-[0.2em] mb-4">© 2024 RenderRoom AI. All Rights Reserved.</p>
+        <div class="flex justify-center gap-8 text-[10px] font-black text-text-secondary uppercase tracking-widest">
+            <a href="01-landing-page.html" class="hover:text-primary">Inicio</a>
+            <a href="precios.html" class="hover:text-primary">Precios</a>
+            <a href="07-consejos-decoracion.html" class="hover:text-primary">Blog</a>
+        </div>
+    </div>
   </footer>
 
   <style>

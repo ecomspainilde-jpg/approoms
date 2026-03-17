@@ -1,156 +1,219 @@
-<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>¡Gracias! - RenderRoom</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
-<html class="dark" lang="es"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-<script id="tailwind-config">
+    <script id="tailwind-config">
         tailwind.config = {
-            darkMode: "class",
             theme: {
                 extend: {
                     colors: {
-                        "primary": "#f0a400",
-                        "background-light": "#f8f7f5",
-                        "background-dark": "#0D1117", 
-                        "soft-charcoal": "#161B22",
+                        primary: {
+                            DEFAULT: '#FFB800',
+                            dark: '#E6A600',
+                            light: '#FFF4D6',
+                        },
+                        secondary: '#1A1A1A',
+                        accent: '#FF7A00',
                     },
                     fontFamily: {
-                        "display": ["Inter", "sans-serif"]
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
                     },
                     borderRadius: {
-                        "DEFAULT": "0.5rem",
-                        "lg": "1rem",
-                        "xl": "1.5rem",
-                        "full": "9999px"
-                    },
-                },
-            },
+                        '2xl': '1.25rem',
+                        '3xl': '2rem',
+                    }
+                }
+            }
         }
     </script>
-<style>
-        body {
-            font-family: 'Inter', sans-serif;
+
+    <style>
+        :root {
+            --primary: #FFB800;
+            --primary-light: #FFF4D6;
         }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #FCFCFD;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        ::selection {
+            background-color: var(--primary-light);
+            color: #1A1A1A;
+        }
+
+        .auth-checked body {
+            opacity: 1;
+        }
+
         .glass-nav {
-            background: rgba(13, 17, 23, 0.7);
+            background: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
         }
-        .glass-card {
-            background: rgba(22, 27, 34, 0.8);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border: 1px solid rgba(240, 164, 0, 0.2);
+
+        .solar-glow {
+            box-shadow: 0 20px 50px -12px rgba(255, 184, 0, 0.15);
         }
-        .amber-glow {
-            box-shadow: 0 0 40px rgba(240, 164, 0, 0.15);
+
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        /* Prevent FOUC: hide body by default */
-        body { opacity: 0; transition: opacity 0.3s ease; }
-        .auth-checked body { opacity: 1; }
+
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 30px 60px -12px rgba(255, 184, 0, 0.2);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #1A1A1A 0%, #4A4A4A 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
     </style>
 </head>
-<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen flex flex-col font-display">
-<!-- Navigation -->
-<nav class="sticky top-0 z-50 glass-nav border-b border-white/5 px-6 py-4">
-<div class="max-w-5xl mx-auto flex items-center justify-between">
-<div class="flex items-center gap-2">
-<div class="text-primary">
-<span class="material-symbols-outlined text-3xl">deployed_code</span>
-</div>
-<h1 class="text-xl font-bold tracking-tight text-slate-100">RenderRoom</h1>
-</div>
-<div class="flex items-center gap-4">
-<div id="header-credits-display" class="hidden flex items-center gap-2 px-3 py-1.5 bg-primary/10 border border-primary/20 rounded-full">
-<span class="material-symbols-outlined text-primary text-sm">toll</span>
-<span id="header-credits-count" class="text-primary text-sm font-bold">--</span>
-<span class="text-xs text-slate-400">créditos</span>
-</div>
-<div class="w-8 h-8 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center overflow-hidden">
-<img alt="User profile" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBnIVuyKzFoi-KZS_abIL2PDqALKoMDwqvCajli6lGtUvk1BvOHwxX-IGWodjGa2fZBajerUR9mFFNS-80I6uGQ154XvhSMQjrpdtG_KATKvIfJTuncvpwbCf7NR9VPi-zMLcds_jy8PfIK8CCm5IiL-C7Wy5whhaiGu5BfRbekLYccuUaJmkVUx0YZq_E382-XMJ2eA5EDmNwT6_EWqSgWN6aMI2xhOVaKyDN-0E78SlpDkvdytfFPHOWdo-r-annJBWKSm0jJNKBs"/>
-</div>
-</div>
-</div>
-</nav>
-<!-- Main Content -->
-<main class="flex-grow flex flex-col items-center justify-center px-4 py-12 md:py-20">
-<!-- Hero Section -->
-<section class="text-center mb-12 animate-fade-in">
-<div class="mb-8 relative inline-block">
-<div class="absolute inset-0 bg-primary blur-3xl opacity-20 rounded-full"></div>
-<div class="relative w-24 h-24 md:w-32 md:h-32 bg-gradient-to-tr from-primary to-amber-300 rounded-full flex items-center justify-center shadow-2xl amber-glow">
-<span class="material-symbols-outlined text-background-dark text-5xl md:text-6xl font-bold">check</span>
-</div>
-</div>
-<h2 class="text-4xl md:text-6xl font-bold text-slate-100 mb-4 tracking-tight">¡Pago Completado!</h2>
-<p class="text-slate-400 text-lg md:text-xl max-w-lg mx-auto leading-relaxed">
-                Tu transacción ha sido procesada con éxito. ¡Es hora de dar vida a tus ideas con la potencia de RenderRoom!
-            </p>
-</section>
-<!-- Order Summary Card -->
-<div class="w-full max-w-xl glass-card rounded-xl p-8 mb-12">
-<div class="flex items-center justify-between mb-8 pb-4 border-b border-white/10">
-<h3 class="text-lg font-semibold text-slate-100 flex items-center gap-2">
-<span class="material-symbols-outlined text-emerald-500">check_circle</span>
-Pago Confirmado
-</h3>
-<span class="text-xs font-medium uppercase tracking-widest text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">Éxito</span>
-</div>
-<div class="space-y-6">
-<div class="flex items-start gap-4">
-<div class="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0">
-<span class="material-symbols-outlined text-emerald-500">account_balance_wallet</span>
-</div>
-<div class="flex-grow">
-<p class="text-slate-400 text-sm">Nuevo Saldo Disponible</p>
-<p id="dynamic-credits-total" class="text-emerald-400 font-black text-3xl">-- créditos</p>
-</div>
-</div>
-<div class="flex items-start gap-4">
-<div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-<span class="material-symbols-outlined text-primary">shield</span>
-</div>
-<div class="flex-grow">
-<p class="text-slate-400 text-sm">Transacción Segura</p>
-<p class="text-slate-100 font-medium">Procesado por Stripe</p>
-</div>
-</div>
-</div>
-<div class="mt-8 pt-6 border-t border-white/10 text-center">
-<p class="text-slate-400 text-sm italic">Tus créditos se han añadido a tu cuenta correctamente.</p>
-</div>
-</div>
-<!-- Primary Actions -->
-<div class="flex flex-col sm:flex-row items-center gap-4 w-full max-w-xl">
-<a href="02-upload-wizard.html" class="w-full bg-gradient-to-r from-primary to-amber-500 hover:from-amber-500 hover:to-primary text-background-dark font-bold py-4 px-8 rounded-xl transition-all duration-300 transform hover:scale-[1.02] flex items-center justify-center gap-2 text-lg shadow-lg shadow-primary/20">
-                Empezar a Renderizar
-                <span class="material-symbols-outlined">arrow_forward</span>
-</a>
-<a href="03-dashboard.html" class="w-full border border-primary/40 hover:bg-primary/5 text-primary font-semibold py-4 px-8 rounded-xl transition-all flex items-center justify-center gap-2">
-<span class="material-symbols-outlined">dashboard</span>
-                Ir al Dashboard
-</a>
-</div>
-</main>
-<!-- Footer -->
-<footer class="py-8 px-6 border-t border-white/5">
-<div class="max-w-5xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-<p class="text-slate-500 text-sm">© 2024 RenderRoom. Todos los derechos reservados.</p>
-<div class="flex gap-6">
-<a class="text-slate-500 hover:text-primary text-sm transition-colors" href="#">Soporte</a>
-<a class="text-slate-500 hover:text-primary text-sm transition-colors" href="#">Privacidad</a>
-<a class="text-slate-500 hover:text-primary text-sm transition-colors" href="#">Términos</a>
-</div>
-</div>
-</footer>
+<body class="text-slate-900 min-h-screen flex flex-col font-sans">
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 glass-nav px-6 py-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <a href="01-landing-page.html" class="flex items-center gap-2 group">
+                <div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center rotate-3 group-hover:rotate-6 transition-transform">
+                    <span class="material-symbols-outlined text-white text-2xl">wb_sunny</span>
+                </div>
+                <h1 class="text-xl font-extrabold tracking-tight font-display">RenderRoom</h1>
+            </a>
+            
+            <div class="flex items-center gap-6">
+                <div id="header-credits-display" class="hidden flex items-center gap-2 px-4 py-2 bg-primary-light border border-primary/10 rounded-full">
+                    <span class="material-symbols-outlined text-primary text-sm font-bold">toll</span>
+                    <span id="header-credits-count" class="text-primary font-bold text-sm">--</span>
+                    <span class="text-xs font-semibold text-primary/60">CRÉDITOS</span>
+                </div>
+                <div class="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden ring-2 ring-white">
+                    <img id="user-avatar" alt="User" src="https://ui-avatars.com/api/?name=User&background=FFB800&color=fff"/>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow flex flex-col items-center justify-center px-4 py-16 md:py-24 max-w-7xl mx-auto w-full">
+        <!-- Success Animation & Title -->
+        <section class="text-center mb-16 space-y-6">
+            <div class="relative inline-block mb-4">
+                <div class="absolute inset-0 bg-primary/20 blur-3xl rounded-full scale-150 animate-pulse"></div>
+                <div class="relative w-24 h-24 md:w-32 md:h-32 bg-white rounded-3xl solar-glow flex items-center justify-center animate-float">
+                    <div class="w-16 h-16 md:w-20 md:h-20 bg-primary/10 rounded-2xl flex items-center justify-center">
+                        <span class="material-symbols-outlined text-primary text-5xl md:text-6xl font-bold">check_circle</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="space-y-2">
+                <h2 class="text-4xl md:text-6xl font-extrabold tracking-tight font-display gradient-text">¡Pago Completado!</h2>
+                <p class="text-slate-500 text-lg md:text-xl max-w-lg mx-auto leading-relaxed font-medium">
+                    Tu transacción ha sido procesada con éxito. ¡Es hora de dar vida a tus ideas con RenderRoom!
+                </p>
+            </div>
+        </section>
+
+        <!-- Order Summary Card -->
+        <div class="w-full max-w-xl bg-white rounded-3xl p-8 md:p-10 solar-glow border border-slate-100 card-hover mb-16 lg:mb-20">
+            <div class="flex items-center justify-between mb-10 pb-6 border-b border-slate-50">
+                <h3 class="text-xl font-bold text-slate-900 flex items-center gap-3">
+                    <span class="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-emerald-500 text-xl">verified</span>
+                    </span>
+                    Resumen de Compra
+                </h3>
+                <span class="text-[10px] font-bold uppercase tracking-widest text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-100">CONFIRMADO</span>
+            </div>
+
+            <div class="space-y-8">
+                <div class="flex items-center gap-5 p-4 bg-slate-50/50 rounded-2xl border border-slate-100/50">
+                    <div class="w-12 h-12 rounded-xl bg-primary-light flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-primary">account_balance_wallet</span>
+                    </div>
+                    <div class="flex-grow">
+                        <p class="text-slate-500 text-xs font-bold uppercase tracking-wider">Nuevo Saldo Total</p>
+                        <p id="dynamic-credits-total" class="text-slate-900 font-extrabold text-3xl">-- créditos</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-5 p-4 bg-slate-50/50 rounded-2xl border border-slate-100/50">
+                    <div class="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-slate-400">shield_check</span>
+                    </div>
+                    <div class="flex-grow">
+                        <p class="text-slate-500 text-xs font-bold uppercase tracking-wider">Transacción Segura</p>
+                        <p class="text-slate-900 font-bold">Procesado por Stripe</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-10 p-4 bg-primary/5 rounded-2xl border border-primary/10 text-center">
+                <p class="text-primary-dark text-sm font-semibold italic">Tus créditos se han añadido instantáneamente.</p>
+            </div>
+        </div>
+
+        <!-- Primary Actions -->
+        <div class="flex flex-col sm:flex-row items-center gap-4 w-full max-w-2xl px-4">
+            <a href="02-upload-wizard.html" class="w-full bg-primary hover:bg-primary-dark text-white font-bold py-5 px-8 rounded-2xl transition-all duration-300 transform hover:scale-[1.02] flex items-center justify-center gap-3 text-lg solar-glow shadow-primary/20">
+                Diseñar mi Habitación
+                <span class="material-symbols-outlined">auto_awesome</span>
+            </a>
+            <a href="03-dashboard.html" class="w-full bg-white border border-slate-200 hover:border-primary/30 hover:bg-primary/5 text-slate-600 hover:text-primary font-bold py-5 px-8 rounded-2xl transition-all flex items-center justify-center gap-3">
+                Mis Renderizados
+                <span class="material-symbols-outlined">dashboard</span>
+            </a>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-12 px-6 bg-white border-t border-slate-100">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+            <div class="flex items-center gap-2 opacity-50">
+                <div class="w-6 h-6 bg-slate-400 rounded-md flex items-center justify-center rotate-3">
+                    <span class="material-symbols-outlined text-white text-sm">wb_sunny</span>
+                </div>
+                <span class="text-sm font-bold tracking-tight font-display text-slate-600">RenderRoom</span>
+            </div>
+            
+            <p class="text-slate-400 text-sm font-medium">© 2024 RenderRoom. Todos los derechos reservados.</p>
+            
+            <div class="flex gap-8">
+                <a class="text-slate-400 hover:text-primary text-sm font-bold transition-colors" href="soporte.html">Soporte</a>
+                <a class="text-slate-400 hover:text-primary text-sm font-bold transition-colors" href="privacidad.html">Privacidad</a>
+                <a class="text-slate-400 hover:text-primary text-sm font-bold transition-colors" href="terminos.html">Términos</a>
+            </div>
+        </div>
+    </footer>
 <script>
     // ── Firebase Config ─────────────────────────────
     const firebaseConfig = {

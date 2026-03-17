@@ -1,233 +1,281 @@
 <!DOCTYPE html>
-
-<html class="dark" lang="es"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>RenderRoom Premium Pricing Plans</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<html lang="es">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Precios — RenderRoom</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-<script id="tailwind-config">
+    <script id="tailwind-config">
         tailwind.config = {
-            darkMode: "class",
             theme: {
                 extend: {
                     colors: {
-                        "primary": "#f2aa0d",
-                        "background-light": "#f8f7f5",
-                        "background-dark": "#0D1117",
-                        "card-dark": "#161B22",
+                        "primary": "#F59E0B", // Ámbar Solar
+                        "background": "#FFFFFF",
+                        "surface": "#F8FAFC",
+                        "border": "#F1F5F9",
+                        "text-primary": "#1E293B",
+                        "text-secondary": "#475569",
+                        "accent-violet": "#6366F1"
                     },
                     fontFamily: {
                         "display": ["Inter", "sans-serif"]
-                    },
-                    borderRadius: {
-                        "DEFAULT": "0.5rem",
-                        "lg": "1rem",
-                        "xl": "1.5rem",
-                        "full": "9999px"
-                    },
+                    }
                 },
             },
         }
     </script>
-<style>
-        .glass-nav {
-            background: rgba(13, 17, 23, 0.7);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-        }
-        .pro-glow {
-            box-shadow: 0 0 25px rgba(242, 170, 13, 0.15);
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .glass-nav {
+                background: rgba(255, 255, 255, 0.8);
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+            }
+            .solar-glow {
+                box-shadow: 0 10px 40px rgba(245, 158, 11, 0.12);
+            }
+            .card-hover {
+                @apply transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-primary/10 hover:border-primary/20;
+            }
         }
         /* FOUC Prevention */
         body { opacity: 0; transition: opacity 0.3s ease; }
         .auth-checked body { opacity: 1; }
     </style>
 </head>
-<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
-<nav class="sticky top-0 z-50 glass-nav border-b border-white/10">
-<div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-<div class="flex items-center gap-3">
-<div class="text-primary">
-<span class="material-symbols-outlined text-4xl">deployed_code</span>
-</div>
-<h2 class="text-2xl font-black tracking-tighter text-slate-100">Render<span class="text-primary">Room</span></h2>
-</div>
-<div class="hidden md:flex items-center gap-10">
-<a class="text-sm font-semibold text-slate-400 hover:text-primary" href="#">Inicio</a>
-<a class="text-sm font-semibold text-slate-400 hover:text-primary" href="#">Estilos</a>
-<a class="text-sm font-semibold text-primary" href="#">Precios</a>
-<a class="text-sm font-semibold text-slate-400 hover:text-primary" href="#">Blog</a>
-</div>
-<div id="nav-auth-container" class="flex items-center gap-4">
-    <div id="header-credits-display" class="hidden flex items-center gap-2 px-3 py-1.5 bg-primary/10 border border-primary/20 rounded-full">
-        <span class="material-symbols-outlined text-primary text-sm">toll</span>
-        <span id="header-credits-count" class="text-primary text-sm font-bold">--</span>
-        <span class="text-xs text-slate-400">créditos</span>
-    </div>
-    <a id="nav-dashboard-link" class="hidden text-sm font-semibold text-slate-400 hover:text-primary" href="03-dashboard.html">Mis Renders</a>
-    <button onclick="handleStart()" class="bg-primary hover:bg-primary/90 text-background-dark px-6 py-2.5 rounded-lg font-bold text-sm">
-        Crear Render
-    </button>
-</div>
-</div>
-</nav>
-<main class="max-w-7xl mx-auto px-6 py-20">
-<header class="text-center mb-20">
-<h1 class="text-5xl md:text-7xl font-black text-slate-100 tracking-tight leading-none mb-6">
-                Obtén más renders. <br/><span class="text-primary">Por menos.</span>
-</h1>
-<p class="text-slate-400 text-lg max-w-2xl mx-auto">
-                Elige el plan que mejor se adapte a tus necesidades de diseño. Desde usuarios ocasionales hasta agencias profesionales.
-            </p>
-</header>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch mb-24">
-        <!-- package_5 -->
-        <div class="bg-card-dark rounded-xl p-6 border border-white/5 flex flex-col justify-between">
-            <div>
-                <h3 class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mb-4">Inicial</h3>
-                <div class="flex items-baseline gap-1 mb-6">
-                    <span class="text-3xl font-black text-slate-100" id="price-package_5">5,00€</span>
-                    <span class="text-slate-500 text-[10px] font-medium">/pago único</span>
+<body class="bg-background font-display text-text-primary antialiased">
+    <!-- NAVIGATION -->
+    <nav class="fixed top-0 left-0 right-0 z-50 glass-nav border-b border-border">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <a href="01-landing-page.html" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
+                <div class="size-10 bg-gradient-to-br from-primary to-orange-500 rounded-lg flex items-center justify-center text-white">
+                    <span class="material-symbols-outlined font-bold">deployed_code</span>
                 </div>
-                <p class="text-slate-200 font-bold mb-6 flex items-center gap-2 text-sm">
-                    <span class="material-symbols-outlined text-primary text-lg">hd</span> <span id="credits-package_5">5 Renders HD</span>
-                </p>
-                <ul class="space-y-3 mb-8">
-                    <li class="flex items-center gap-2 text-xs text-slate-400">
-                        <span class="material-symbols-outlined text-primary text-base">check_circle</span> Sin marcas de agua
-                    </li>
-                    <li class="flex items-center gap-2 text-xs text-slate-400">
-                        <span class="material-symbols-outlined text-primary text-base">check_circle</span> Entrega instantánea
-                    </li>
-                </ul>
+                <h2 class="text-2xl font-black tracking-tight">Render<span class="text-primary">Room</span></h2>
+            </a>
+            
+            <div class="hidden md:flex items-center space-x-8">
+                <a class="text-sm font-medium text-text-secondary hover:text-primary transition-colors" href="01-landing-page.html">Inicio</a>
+                <a class="text-sm font-medium text-text-secondary hover:text-primary transition-colors" href="03-dashboard.html">Dashboard</a>
+                <a class="text-sm font-medium text-text-secondary hover:text-primary transition-colors" href="07-consejos-decoracion.html">Consejos</a>
+                <a class="text-sm font-medium text-text-secondary hover:text-primary transition-colors" href="06-perfil-usuario.html">Perfil</a>
             </div>
-            <button onclick="window.location.href='modal-compra.html'" class="w-full py-3 border border-primary/50 text-primary font-bold rounded-lg hover:bg-primary/5 text-sm">
-                Elegir Inicial
-            </button>
-        </div>
-        <!-- package_10 -->
-        <div class="bg-card-dark rounded-xl p-6 border border-white/5 flex flex-col justify-between">
-            <div>
-                <h3 class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mb-4">Estándar</h3>
-                <div class="flex items-baseline gap-1 mb-6">
-                    <span class="text-3xl font-black text-slate-100" id="price-package_10">10,00€</span>
-                </div>
-                <p class="text-slate-200 font-bold mb-6 flex items-center gap-2 text-sm">
-                    <span class="material-symbols-outlined text-primary text-lg">auto_awesome</span> <span id="credits-package_10">12 Renders HD</span>
-                </p>
-                <ul class="space-y-3 mb-8">
-                    <li class="flex items-center gap-2 text-xs text-slate-400">
-                        <span class="material-symbols-outlined text-primary text-base">check_circle</span> Soporte prioritario
-                    </li>
-                    <li class="flex items-center gap-2 text-xs text-slate-400">
-                        <span class="material-symbols-outlined text-primary text-base">check_circle</span> Historial guardado
-                    </li>
-                </ul>
-            </div>
-            <button onclick="window.location.href='modal-compra.html'" class="w-full py-3 border border-primary/50 text-primary font-bold rounded-lg hover:bg-primary/5 text-sm">
-                Elegir Estándar
-            </button>
-        </div>
-        <!-- package_15 - Featured -->
-        <div class="bg-card-dark rounded-xl p-6 border-2 border-primary pro-glow relative flex flex-col justify-between scale-105 z-10">
-            <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-background-dark font-black text-[9px] uppercase tracking-tighter px-3 py-1 rounded-full flex items-center gap-1">
-                🔥 Recomendado
-            </div>
-            <div>
-                <h3 class="text-primary font-bold uppercase tracking-widest text-[10px] mb-4">Profesional</h3>
-                <div class="flex items-baseline gap-1 mb-6">
-                    <span class="text-4xl font-black text-slate-100 tracking-tighter" id="price-package_15">15,00€</span>
-                </div>
-                <p class="text-slate-200 font-bold mb-6 flex items-center gap-2 text-base">
-                    <span class="material-symbols-outlined text-primary text-xl">workspace_premium</span> <span id="credits-package_15">20 Renders HD</span>
-                </p>
-                <ul class="space-y-3 mb-8">
-                    <li class="flex items-center gap-2 text-xs text-slate-300">
-                        <span class="material-symbols-outlined text-primary text-base">check_circle</span> Todas las funciones
-                    </li>
-                    <li class="flex items-center gap-2 text-xs text-slate-300">
-                        <span class="material-symbols-outlined text-primary text-base">check_circle</span> Calidad 4K
-                    </li>
-                </ul>
-            </div>
-            <button onclick="window.location.href='modal-compra.html'" class="w-full py-3 bg-gradient-to-r from-primary to-orange-500 text-background-dark font-black text-sm rounded-lg hover:opacity-90">
-                ¡Empezar Ya!
-            </button>
-        </div>
-        <!-- package_25 -->
-        <div class="bg-card-dark rounded-xl p-6 border border-white/5 flex flex-col justify-between">
-            <div>
-                <h3 class="text-slate-400 font-bold uppercase tracking-widest text-[10px] mb-4">Premium</h3>
-                <div class="flex items-baseline gap-1 mb-6">
-                    <span class="text-3xl font-black text-slate-100" id="price-package_25">25,00€</span>
-                </div>
-                <p class="text-slate-200 font-bold mb-6 flex items-center gap-2 text-sm">
-                    <span class="material-symbols-outlined text-primary text-lg">corporate_fare</span> <span id="credits-package_25">40 Renders HD</span>
-                </p>
-                <ul class="space-y-3 mb-8">
-                    <li class="flex items-center gap-2 text-xs text-slate-400">
-                        <span class="material-symbols-outlined text-primary text-base">check_circle</span> Uso comercial
-                    </li>
-                    <li class="flex items-center gap-2 text-xs text-slate-400">
-                        <span class="material-symbols-outlined text-primary text-base">check_circle</span> API Access
-                    </li>
-                </ul>
-            </div>
-            <button onclick="window.location.href='modal-compra.html'" class="w-full py-3 bg-slate-800 text-slate-200 font-bold rounded-lg hover:bg-slate-700 text-sm">
-                Elegir Premium
-            </button>
-        </div>
-    </div>
 
-<section class="border-t border-white/5 pt-16">
-<h4 class="text-slate-100 text-xl font-bold text-center mb-10">Pagos Seguros Garantizados</h4>
-<div class="grid grid-cols-3 md:grid-cols-6 gap-4">
-<div class="bg-white/5 backdrop-blur-md rounded-xl p-6 flex flex-col items-center gap-3 border border-white/5 hover:bg-white/10 transition-colors">
-<span class="material-symbols-outlined text-slate-300 text-3xl">credit_card</span>
-<p class="text-xs font-semibold text-slate-400">Visa</p>
-</div>
-<div class="bg-white/5 backdrop-blur-md rounded-xl p-6 flex flex-col items-center gap-3 border border-white/5 hover:bg-white/10 transition-colors">
-<span class="material-symbols-outlined text-slate-300 text-3xl">payments</span>
-<p class="text-xs font-semibold text-slate-400">Mastercard</p>
-</div>
-<div class="bg-white/5 backdrop-blur-md rounded-xl p-6 flex flex-col items-center gap-3 border border-white/5 hover:bg-white/10 transition-colors">
-<span class="material-symbols-outlined text-slate-300 text-3xl">google_plus_reshare</span>
-<p class="text-xs font-semibold text-slate-400">Google Pay</p>
-</div>
-<div class="bg-white/5 backdrop-blur-md rounded-xl p-6 flex flex-col items-center gap-3 border border-white/5 hover:bg-white/10 transition-colors">
-<span class="material-symbols-outlined text-slate-300 text-3xl">ios</span>
-<p class="text-xs font-semibold text-slate-400">Apple Pay</p>
-</div>
-<div class="bg-white/5 backdrop-blur-md rounded-xl p-6 flex flex-col items-center gap-3 border border-white/5 hover:bg-white/10 transition-colors">
-<span class="material-symbols-outlined text-slate-300 text-3xl">account_balance_wallet</span>
-<p class="text-xs font-semibold text-slate-400">PayPal</p>
-</div>
-<div class="bg-white/5 backdrop-blur-md rounded-xl p-6 flex flex-col items-center gap-3 border border-white/5 hover:bg-white/10 transition-colors">
-<span class="material-symbols-outlined text-slate-300 text-3xl">currency_exchange</span>
-<p class="text-xs font-semibold text-slate-400">Revolut</p>
-</div>
-</div>
-</section>
-</main>
-<footer class="bg-background-dark border-t border-white/5 py-12">
-<div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
-<div class="flex items-center gap-3 grayscale opacity-50">
-<span class="material-symbols-outlined text-2xl text-slate-100">deployed_code</span>
-<h2 class="text-lg font-bold text-slate-100">RenderRoom</h2>
-</div>
-<p class="text-slate-500 text-sm">© 2024 RenderRoom AI. Todos los derechos reservados.</p>
-<div class="flex gap-6">
-<a class="text-slate-500 hover:text-primary text-sm" href="#">Privacidad</a>
-<a class="text-slate-500 hover:text-primary text-sm" href="#">Términos</a>
-<a class="text-slate-500 hover:text-primary text-sm" href="#">Contacto</a>
-</div>
-</div>
-</footer>
+            <div id="nav-auth-container" class="flex items-center gap-4">
+                <div id="header-credits-display" class="hidden flex items-center gap-2 px-3 py-1.5 bg-primary/10 border border-primary/20 rounded-full">
+                    <span class="material-symbols-outlined text-primary text-sm">toll</span>
+                    <span id="header-credits-count" class="text-primary text-sm font-bold">--</span>
+                    <span class="text-xs text-text-secondary">créditos</span>
+                </div>
+                <button onclick="handleStart()" class="bg-primary hover:bg-primary/90 text-white px-6 py-2.5 rounded-xl text-sm font-bold tracking-wide transition-all hover:scale-105 shadow-lg shadow-primary/20">
+                    Sube tu Foto
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="pt-32 pb-24 max-w-7xl mx-auto px-6">
+        <header class="text-center mb-20 max-w-3xl mx-auto">
+            <h1 class="text-5xl md:text-6xl font-black text-text-primary tracking-tight leading-tight mb-6">
+                Obtén más renders. <span class="text-primary">Por menos.</span>
+            </h1>
+            <p class="text-text-secondary text-lg">
+                Elige el plan que mejor se adapte a tus necesidades. Desde usuarios ocasionales hasta agencias profesionales.
+            </p>
+        </header>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 items-stretch mb-24">
+            <!-- package_5 -->
+            <div class="bg-white rounded-[2rem] p-8 border border-border shadow-sm flex flex-col justify-between card-hover solar-glow group">
+                <div>
+                    <h3 class="text-text-secondary font-bold uppercase tracking-widest text-[10px] mb-6">Inicial</h3>
+                    <div class="flex items-baseline gap-1 mb-8">
+                        <span class="text-4xl font-black text-text-primary" id="price-package_5">5,00€</span>
+                        <span class="text-text-secondary text-xs">/pago único</span>
+                    </div>
+                    <p class="text-text-primary font-bold mb-6 flex items-center gap-2 text-sm">
+                        <span class="material-symbols-outlined text-primary text-lg">hd</span> <span id="credits-package_5">5 Renders HD</span>
+                    </p>
+                    <ul class="space-y-4 mb-8">
+                        <li class="flex items-center gap-3 text-sm text-text-secondary">
+                            <span class="material-symbols-outlined text-primary text-base">check_circle</span> Sin marcas de agua
+                        </li>
+                        <li class="flex items-center gap-3 text-sm text-text-secondary">
+                            <span class="material-symbols-outlined text-primary text-base">check_circle</span> Entrega instantánea
+                        </li>
+                    </ul>
+                </div>
+                <button onclick="window.location.href='modal-compra.html'" class="w-full py-4 border-2 border-primary/20 text-primary font-black rounded-xl hover:bg-primary/5 transition-all text-sm">
+                    Elegir Inicial
+                </button>
+            </div>
+
+            <!-- package_10 -->
+            <div class="bg-white rounded-[2rem] p-8 border border-border shadow-sm flex flex-col justify-between card-hover solar-glow group">
+                <div>
+                    <h3 class="text-text-secondary font-bold uppercase tracking-widest text-[10px] mb-6">Estándar</h3>
+                    <div class="flex items-baseline gap-1 mb-8">
+                        <span class="text-4xl font-black text-text-primary" id="price-package_10">10,00€</span>
+                    </div>
+                    <p class="text-text-primary font-bold mb-6 flex items-center gap-2 text-sm">
+                        <span class="material-symbols-outlined text-primary text-lg">auto_awesome</span> <span id="credits-package_10">12 Renders HD</span>
+                    </p>
+                    <ul class="space-y-4 mb-8">
+                        <li class="flex items-center gap-3 text-sm text-text-secondary">
+                            <span class="material-symbols-outlined text-primary text-base">check_circle</span> Soporte prioritario
+                        </li>
+                        <li class="flex items-center gap-3 text-sm text-text-secondary">
+                            <span class="material-symbols-outlined text-primary text-base">check_circle</span> Historial guardado
+                        </li>
+                    </ul>
+                </div>
+                <button onclick="window.location.href='modal-compra.html'" class="w-full py-4 border-2 border-primary/20 text-primary font-black rounded-xl hover:bg-primary/5 transition-all text-sm">
+                    Elegir Estándar
+                </button>
+            </div>
+
+            <!-- package_15 - Featured -->
+            <div class="bg-white rounded-[2rem] p-8 border-2 border-primary shadow-2xl relative flex flex-col justify-between scale-105 z-10 solar-glow">
+                <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-white font-black text-[10px] uppercase tracking-widest px-4 py-1.5 rounded-full shadow-lg">
+                    🔥 Recomendado
+                </div>
+                <div>
+                    <h3 class="text-primary font-bold uppercase tracking-widest text-[10px] mb-6">Profesional</h3>
+                    <div class="flex items-baseline gap-1 mb-8">
+                        <span class="text-5xl font-black text-text-primary tracking-tight" id="price-package_15">15,00€</span>
+                    </div>
+                    <p class="text-text-primary font-bold mb-6 flex items-center gap-2 text-base">
+                        <span class="material-symbols-outlined text-primary text-xl">workspace_premium</span> <span id="credits-package_15">20 Renders HD</span>
+                    </p>
+                    <ul class="space-y-4 mb-8">
+                        <li class="flex items-center gap-3 text-sm text-text-primary">
+                            <span class="material-symbols-outlined text-primary text-base">check_circle</span> Todas las funciones
+                        </li>
+                        <li class="flex items-center gap-3 text-sm text-text-primary">
+                            <span class="material-symbols-outlined text-primary text-base">check_circle</span> Calidad 4K
+                        </li>
+                    </ul>
+                </div>
+                <button onclick="window.location.href='modal-compra.html'" class="w-full py-4 bg-gradient-to-r from-primary to-orange-500 text-white font-black text-sm rounded-xl hover:opacity-90 shadow-lg shadow-primary/30 transition-all hover:scale-[1.02]">
+                    ¡Empezar Ya!
+                </button>
+            </div>
+
+            <!-- package_25 -->
+            <div class="bg-white rounded-[2rem] p-8 border border-border shadow-sm flex flex-col justify-between card-hover solar-glow group">
+                <div>
+                    <h3 class="text-text-secondary font-bold uppercase tracking-widest text-[10px] mb-6">Premium</h3>
+                    <div class="flex items-baseline gap-1 mb-8">
+                        <span class="text-4xl font-black text-text-primary" id="price-package_25">25,00€</span>
+                    </div>
+                    <p class="text-text-primary font-bold mb-6 flex items-center gap-2 text-sm">
+                        <span class="material-symbols-outlined text-primary text-lg">corporate_fare</span> <span id="credits-package_25">40 Renders HD</span>
+                    </p>
+                    <ul class="space-y-4 mb-8">
+                        <li class="flex items-center gap-3 text-sm text-text-secondary">
+                            <span class="material-symbols-outlined text-primary text-base">check_circle</span> Uso comercial
+                        </li>
+                        <li class="flex items-center gap-3 text-sm text-text-secondary">
+                            <span class="material-symbols-outlined text-primary text-base">check_circle</span> API Access
+                        </li>
+                    </ul>
+                </div>
+                <button onclick="window.location.href='modal-compra.html'" class="w-full py-4 bg-text-primary text-white font-black rounded-xl hover:bg-black transition-all text-sm">
+                    Elegir Premium
+                </button>
+            </div>
+        </div>
+
+        <!-- Security Section -->
+        <section class="mt-32 pt-16 border-t border-border">
+            <h4 class="text-text-primary text-xl font-bold text-center mb-12">Pagos Seguros Garantizados</h4>
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                <div class="bg-surface rounded-2xl p-6 flex flex-col items-center gap-4 border border-border hover:border-primary/30 transition-all">
+                    <span class="material-symbols-outlined text-text-secondary text-4xl">credit_card</span>
+                    <p class="text-xs font-bold text-text-secondary uppercase tracking-widest">Visa/MC</p>
+                </div>
+                <div class="bg-surface rounded-2xl p-6 flex flex-col items-center gap-4 border border-border hover:border-primary/30 transition-all">
+                    <span class="material-symbols-outlined text-text-secondary text-4xl">contactless</span>
+                    <p class="text-xs font-bold text-text-secondary uppercase tracking-widest">Apple Pay</p>
+                </div>
+                <div class="bg-surface rounded-2xl p-6 flex flex-col items-center gap-4 border border-border hover:border-primary/30 transition-all">
+                    <span class="material-symbols-outlined text-text-secondary text-4xl">wallet</span>
+                    <p class="text-xs font-bold text-text-secondary uppercase tracking-widest">Google Pay</p>
+                </div>
+                <div class="bg-surface rounded-2xl p-6 flex flex-col items-center gap-4 border border-border hover:border-primary/30 transition-all">
+                    <span class="material-symbols-outlined text-text-secondary text-4xl">security</span>
+                    <p class="text-xs font-bold text-text-secondary uppercase tracking-widest">SSL Secure</p>
+                </div>
+                <div class="bg-surface rounded-2xl p-6 flex flex-col items-center gap-4 border border-border hover:border-primary/30 transition-all">
+                    <span class="material-symbols-outlined text-text-secondary text-4xl">lock</span>
+                    <p class="text-xs font-bold text-text-secondary uppercase tracking-widest">Stripped Enabled</p>
+                </div>
+                <div class="bg-surface rounded-2xl p-6 flex flex-col items-center gap-4 border border-border hover:border-primary/30 transition-all">
+                    <span class="material-symbols-outlined text-text-secondary text-4xl">verified_user</span>
+                    <p class="text-xs font-bold text-text-secondary uppercase tracking-widest">3D Secure</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-surface border-t border-border py-20">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex flex-col md:flex-row justify-between items-start gap-20">
+                <div class="max-w-xs">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="size-10 bg-primary rounded-xl flex items-center justify-center text-white">
+                            <span class="material-symbols-outlined font-bold">deployed_code</span>
+                        </div>
+                        <h2 class="text-2xl font-black tracking-tight">RenderRoom</h2>
+                    </div>
+                    <p class="text-text-secondary leading-relaxed mb-8">
+                        La herramienta de IA líder para propietarios y decoradores que buscan visualizaciones rápidas y realistas.
+                    </p>
+                </div>
+                
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-16 flex-1">
+                    <div>
+                        <h5 class="font-bold text-sm mb-6 uppercase tracking-widest text-text-secondary">App</h5>
+                        <ul class="space-y-4 text-sm font-medium">
+                            <li><a href="02-upload-wizard.html" class="hover:text-primary transition-colors">Nuevo Render</a></li>
+                            <li><a href="03-dashboard.html" class="hover:text-primary transition-colors">Mis Proyectos</a></li>
+                            <li><a href="precios.html" class="hover:text-primary transition-colors">Créditos</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h5 class="font-bold text-sm mb-6 uppercase tracking-widest text-text-secondary">Compañía</h5>
+                        <ul class="space-y-4 text-sm font-medium">
+                            <li><a href="07-consejos-decoracion.html" class="hover:text-primary transition-colors">Blog</a></li>
+                            <li><a href="#" class="hover:text-primary transition-colors">Sobre Nosotros</a></li>
+                            <li><a href="#" class="hover:text-primary transition-colors">Soporte</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-span-2 sm:col-span-1">
+                        <h5 class="font-bold text-sm mb-6 uppercase tracking-widest text-text-secondary">Legal</h5>
+                        <ul class="space-y-4 text-sm font-medium">
+                            <li><a href="privacidad.html" class="hover:text-primary transition-colors">Privacidad</a></li>
+                            <li><a href="terminos.html" class="hover:text-primary transition-colors">Términos</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-20 pt-8 border-t border-border flex flex-col sm:flex-row justify-between items-center gap-6">
+                <p class="text-xs text-text-secondary font-bold uppercase tracking-[0.2em]">© 2024 RenderRoom AI. Made with Love & Power.</p>
+                <div class="flex gap-6">
+                    <a href="#" class="text-text-secondary hover:text-primary"><span class="material-symbols-outlined">brand_awareness</span></a>
+                    <a href="#" class="text-text-secondary hover:text-primary"><span class="material-symbols-outlined">alternate_email</span></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
     <script>
         // Firebase Configuration
         const firebaseConfig = {
@@ -244,8 +292,6 @@
 
         auth.onAuthStateChanged((user) => {
             if (user) {
-                document.getElementById('nav-dashboard-link').classList.remove('hidden');
-                
                 // Real-time listener for credits
                 const db = firebase.firestore();
                 db.collection('users').doc(user.uid).onSnapshot(doc => {
@@ -258,7 +304,6 @@
                     }
                 }, err => console.error("Snapshot error:", err));
             } else {
-                document.getElementById('nav-dashboard-link').classList.add('hidden');
                 document.getElementById('header-credits-display')?.classList.add('hidden');
             }
             document.documentElement.classList.add('auth-checked');
@@ -288,9 +333,9 @@
             if (user) {
                 window.location.href = '02-upload-wizard.html';
             } else {
-                // Redirect to landing page to show auth modal
                 window.location.href = '01-landing-page.html?auth=register';
             }
         }
     </script>
-</body></html>
+</body>
+</html>

@@ -1,337 +1,284 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>RenderRoom — Comprar Créditos</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
-<html class="dark" lang="es"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>RenderRoom Quick Purchase Modal</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
+    <script id="tailwind-config">
         tailwind.config = {
-            darkMode: "class",
             theme: {
                 extend: {
                     colors: {
-                        "primary": "#e49f0c",
-                        "background-light": "#f8f7f5",
-                        "background-dark": "#0d1117",
-                        "surface-dark": "#161b22",
-                        "card-dark": "#1c2333",
+                        primary: '#FFB800',
+                        'primary-dark': '#E6A600',
+                        surface: '#F8F9FA',
+                        border: '#E9ECEF',
+                        'text-primary': '#000000',
+                        'text-secondary': '#495057',
+                        'accent-violet': '#6366F1'
                     },
                     fontFamily: {
-                        "display": ["Inter", "sans-serif"]
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
                     },
                     borderRadius: {
-                        "DEFAULT": "0.5rem",
-                        "lg": "1rem",
-                        "xl": "1.5rem",
-                        "2xl": "1.5rem",
-                        "full": "9999px"
-                    },
-                },
-            },
+                        '2xl': '1.25rem',
+                        '3xl': '2.5rem',
+                    }
+                }
+            }
         }
     </script>
     <style>
-        /* FOUC Prevention */
-        body { opacity: 0; transition: opacity 0.3s ease; }
+        :root {
+            --primary: #FFB800;
+            --border: #E9ECEF;
+        }
+        body {
+            background-color: #FFFFFF;
+            color: #000000;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
         .auth-checked body { opacity: 1; }
+        
+        .package-card {
+            background: #FFFFFF;
+            border: 2px solid var(--border);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .package-card.selected {
+            border-color: var(--primary);
+            background: #FFFAF1;
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px -10px rgba(255, 184, 0, 0.15);
+        }
+        .package-card:hover:not(.selected) {
+            border-color: #CED4DA;
+            transform: translateY(-2px);
+        }
     </style>
 </head>
-<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen flex items-center justify-center overflow-hidden">
-<!-- Background Dashboard Blur Mockup -->
-<div class="fixed inset-0 z-0 opacity-40 blur-xl pointer-events-none bg-gradient-to-br from-background-dark via-surface-dark to-black">
-<div class="absolute top-10 left-10 w-64 h-64 bg-primary/20 rounded-full"></div>
-<div class="absolute bottom-20 right-20 w-96 h-96 bg-primary/10 rounded-full"></div>
-</div>
-<!-- Modal Overlay -->
-<div class="fixed inset-0 z-10 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-<!-- Main Modal Container -->
-<div class="relative w-full max-w-[960px] bg-surface-dark rounded-2xl border border-primary/30 shadow-[0_0_50px_-12px_rgba(228,159,12,0.3)] overflow-hidden">
-<!-- Close Button -->
-<button class="absolute top-6 right-6 text-slate-400 hover:text-white transition-colors duration-200">
-<span class="material-symbols-outlined text-2xl">close</span>
-</button>
-<div class="p-8 md:p-12">
-<!-- Header -->
-<div class="flex items-center gap-4 mb-8">
-<div class="size-14 rounded-full bg-primary/20 flex items-center justify-center text-primary border border-primary/30 shadow-[0_0_15px_rgba(228,159,12,0.2)]">
-<span class="material-symbols-outlined text-4xl" style="font-variation-settings: 'FILL' 1">toll</span>
-</div>
-<div>
-<h2 class="text-3xl font-black tracking-tight text-white">Añadir créditos a tu cuenta</h2>
-<p class="text-slate-400 mt-1">Selecciona un paquete para continuar renderizando tus espacios con IA.</p>
-</div>
-</div>
-            <!-- Package Selection Grid -->
-            <div id="packages-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-                <!-- 5 EUR -->
-                <div onclick="selectPackage('package_5')" id="pkg-package_5" class="flex flex-col gap-4 rounded-xl border border-slate-700 bg-card-dark p-4 cursor-pointer hover:border-slate-500 transition-all group package-card">
-                    <div class="flex flex-col gap-1">
-                        <h3 class="text-slate-400 text-xs font-bold uppercase tracking-widest">Inicial</h3>
-                        <div class="flex items-baseline gap-1 mt-1">
-                            <span class="text-white text-2xl font-black">5€</span>
-                            <span class="text-slate-400 text-xs font-medium">5 renders</span>
-                        </div>
-                    </div>
-                    <ul class="space-y-2 mt-1">
-                        <li class="flex items-center gap-2 text-xs text-slate-300">
-                            <span class="material-symbols-outlined text-primary text-base">check_circle</span>
-                            5 créditos
-                        </li>
-                    </ul>
+<body class="min-h-screen flex items-center justify-center p-6 bg-surface">
+    <!-- MODAL CONTAINER -->
+    <div class="relative w-full max-w-5xl bg-white rounded-[3rem] border-2 border-border shadow-2xl overflow-hidden z-10 flex flex-col md:flex-row">
+        <!-- Close Button -->
+        <a href="03-dashboard.html" class="absolute top-8 right-8 w-12 h-12 bg-white hover:bg-surface border-2 border-border rounded-xl flex items-center justify-center text-text-secondary hover:text-primary transition-all z-20 active:scale-90">
+            <span class="material-symbols-outlined font-black">close</span>
+        </a>
+
+        <!-- LEFT SIDE: INFO (Desktop) -->
+        <div class="w-full md:w-1/3 bg-surface p-12 border-r-2 border-border flex flex-col justify-between">
+            <div class="space-y-8">
+                <div class="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center text-white shadow-lg shadow-primary/20 rotate-3">
+                    <span class="material-symbols-outlined text-3xl font-black">toll</span>
                 </div>
-                <!-- 10 EUR -->
-                <div onclick="selectPackage('package_10')" id="pkg-package_10" class="flex flex-col gap-4 rounded-xl border border-slate-700 bg-card-dark p-4 cursor-pointer hover:border-slate-500 transition-all group package-card">
-                    <div class="flex flex-col gap-1">
-                        <h3 class="text-slate-400 text-xs font-bold uppercase tracking-widest">Estándar</h3>
-                        <div class="flex items-baseline gap-1 mt-1">
-                            <span class="text-white text-2xl font-black">10€</span>
-                            <span class="text-slate-400 text-xs font-medium">12 renders</span>
-                        </div>
-                    </div>
-                    <ul class="space-y-2 mt-1">
-                        <li class="flex items-center gap-2 text-xs text-slate-300">
-                            <span class="material-symbols-outlined text-primary text-base">check_circle</span>
-                            12 créditos
-                        </li>
-                    </ul>
-                </div>
-                <!-- 15 EUR (Selected) -->
-                <div onclick="selectPackage('package_15')" id="pkg-package_15" class="relative flex flex-col gap-4 rounded-xl border-2 border-primary bg-card-dark p-4 cursor-pointer shadow-[0_0_30px_rgba(228,159,12,0.15)] ring-1 ring-primary/50 package-card selected">
-                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
-                        <span class="bg-primary text-background-dark text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest flex items-center gap-1 shadow-lg whitespace-nowrap">
-                            <span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1">star</span>
-                            Recomendado
-                        </span>
-                    </div>
-                    <div class="flex flex-col gap-1">
-                        <h3 class="text-primary text-xs font-bold uppercase tracking-widest">Profesional</h3>
-                        <div class="flex items-baseline gap-1 mt-1 text-white">
-                            <span class="text-2xl font-black">15€</span>
-                            <span class="text-primary text-xs font-bold">20 renders</span>
-                        </div>
-                    </div>
-                    <ul class="space-y-2 mt-1">
-                        <li class="flex items-center gap-2 text-xs text-slate-100 font-medium">
-                            <span class="material-symbols-outlined text-primary text-base" style="font-variation-settings: 'FILL' 1">check_circle</span>
-                            20 créditos
-                        </li>
-                    </ul>
-                </div>
-                <!-- 25 EUR -->
-                <div onclick="selectPackage('package_25')" id="pkg-package_25" class="flex flex-col gap-4 rounded-xl border border-slate-700 bg-card-dark p-4 cursor-pointer hover:border-slate-500 transition-all group package-card">
-                    <div class="flex flex-col gap-1">
-                        <h3 class="text-slate-400 text-xs font-bold uppercase tracking-widest">Premium</h3>
-                        <div class="flex items-baseline gap-1 mt-1">
-                            <span class="text-white text-2xl font-black">25€</span>
-                            <span class="text-slate-400 text-xs font-medium">40 renders</span>
-                        </div>
-                    </div>
-                    <ul class="space-y-2 mt-1">
-                        <li class="flex items-center gap-2 text-xs text-slate-300">
-                            <span class="material-symbols-outlined text-primary text-base">check_circle</span>
-                            40 créditos
-                        </li>
-                    </ul>
+                <div>
+                    <h2 class="text-4xl font-black tracking-tighter font-display text-text-primary leading-tight">Créditos de Diseño</h2>
+                    <p class="text-text-secondary font-bold text-lg mt-4">Cada crédito te permite generar una transformación completa de alta calidad.</p>
                 </div>
             </div>
 
-<!-- Summary & Payment -->
-<div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center pt-8 border-t border-slate-800">
-<!-- Glassmorphism Box -->
-<div class="bg-primary/5 border border-primary/20 rounded-2xl p-6 backdrop-blur-md">
-<p class="text-slate-400 text-sm font-medium mb-1">Total a pagar ahora:</p>
-<div class="flex items-center gap-4">
-<h4 id="display-total" class="text-primary text-5xl font-black leading-none">10,00€</h4>
-<div class="flex flex-col">
-<span id="display-credits" class="text-emerald-400 text-sm font-bold flex items-center gap-1">
-<span class="material-symbols-outlined text-sm">add</span>
-                                    5 créditos
-                                </span>
-<span class="text-slate-500 text-xs">IVA incluido</span>
-</div>
-</div>
-</div>
-<!-- Payment Methods & CTA -->
-<div class="flex flex-col gap-6">
-<div class="flex flex-wrap items-center gap-4 opacity-70 grayscale hover:grayscale-0 transition-all duration-300">
-<!-- VISA -->
-<div class="h-6 w-10 bg-slate-800 rounded flex items-center justify-center text-[8px] font-bold text-slate-400 italic">VISA</div>
-<!-- Mastercard -->
-<div class="h-6 w-10 bg-slate-800 rounded flex items-center justify-center gap-1">
-<div class="size-2 rounded-full bg-red-500"></div>
-<div class="size-2 rounded-full bg-amber-500 -ml-1.5 opacity-80"></div>
-</div>
-</div>
-<button id="pay-button" onclick="handleStripePayment()" class="w-full bg-gradient-to-r from-primary to-amber-600 hover:from-amber-500 hover:to-primary text-background-dark font-black py-4 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 group">
-<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1">lock</span>
-                            <span id="btn-text">Pagar con Stripe</span>
-                            <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
-</button>
-<p class="text-center text-slate-500 text-[10px] uppercase tracking-widest flex items-center justify-center gap-2">
-<span class="material-symbols-outlined text-xs">verified_user</span>
-                            Pago procesado de forma segura por Stripe
-                        </p>
-</div>
-</div>
-</div>
-</div>
-</div>
+            <div class="space-y-6">
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 bg-white border-2 border-border rounded-xl flex items-center justify-center text-accent-violet">
+                        <span class="material-symbols-outlined text-xl font-black">timer</span>
+                    </div>
+                    <p class="text-xs font-black uppercase tracking-widest text-text-primary">Entrega Instantánea</p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 bg-white border-2 border-border rounded-xl flex items-center justify-center text-accent-green">
+                        <span class="material-symbols-outlined text-xl font-black">verified</span>
+                    </div>
+                    <p class="text-xs font-black uppercase tracking-widest text-text-primary">Garantía RenderRoom</p>
+                </div>
+            </div>
+        </div>
 
-<script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyDj99qdmDt4GiVeRkvCSfTOSDw3uqD-_Ew",
-        authDomain: "gen-lang-client-0426824151.firebaseapp.com",
-        projectId: "gen-lang-client-0426824151",
-        storageBucket: "gen-lang-client-0426824151.firebasestorage.app",
-        messagingSenderId: "124806819551",
-        appId: "1:124806819551:web:1c90d1154b458fa064036a"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
+        <!-- RIGHT SIDE: PACKAGES -->
+        <div class="flex-grow p-12 md:p-16">
+            <div class="mb-12">
+                <p class="text-[10px] font-black uppercase tracking-[0.2em] text-primary mb-2">Paso 1: Elige tu plan</p>
+                <h3 class="text-3xl font-black tracking-tighter text-text-primary">Selecciona un Paquete</h3>
+            </div>
 
-    auth.onAuthStateChanged(async (user) => {
-        if (!user) {
-            window.location.replace('01-landing-page.html');
-            return;
-        }
-        
-        // Update token in localStorage
-        try {
-            const token = await user.getIdToken();
-            localStorage.setItem('rr_token', token);
-        } catch (e) {
-            console.error("Error getting token:", e);
-        }
-        
-        document.documentElement.classList.add('auth-checked');
+            <div id="packages-container" class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-16">
+                <!-- 5 EUR -->
+                <div onclick="selectPackage('package_5')" id="pkg-package_5" class="package-card p-8 rounded-3xl cursor-pointer relative group">
+                    <div class="space-y-2">
+                        <h4 class="text-[10px] font-black text-text-secondary uppercase tracking-widest">PACK BÁSICO</h4>
+                        <div class="flex items-baseline gap-1">
+                            <span class="text-3xl font-black">5€</span>
+                            <span class="text-text-secondary text-xs font-bold whitespace-nowrap">/ 5 CRÉDITOS</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- 10 EUR -->
+                <div onclick="selectPackage('package_10')" id="pkg-package_10" class="package-card p-8 rounded-3xl cursor-pointer group">
+                    <div class="space-y-2">
+                        <h4 class="text-[10px] font-black text-text-secondary uppercase tracking-widest">PLAN ESTÁNDAR</h4>
+                        <div class="flex items-baseline gap-1">
+                            <span class="text-3xl font-black">10€</span>
+                            <span class="text-text-secondary text-xs font-bold whitespace-nowrap">/ 12 CRÉDITOS</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- 15 EUR (Selected) -->
+                <div onclick="selectPackage('package_15')" id="pkg-package_15" class="package-card selected p-8 rounded-3xl cursor-pointer relative group">
+                    <div class="absolute -top-3 -right-3">
+                        <span class="bg-primary text-white text-[9px] font-black px-4 py-2 rounded-full uppercase tracking-widest shadow-xl border-2 border-white">
+                            RECOMENDADO
+                        </span>
+                    </div>
+                    <div class="space-y-2">
+                        <h4 class="text-[10px] font-black text-primary uppercase tracking-widest">ESTUDIO PRO</h4>
+                        <div class="flex items-baseline gap-1">
+                            <span class="text-3xl font-black">15€</span>
+                            <span class="text-primary-dark text-xs font-bold whitespace-nowrap">/ 20 CRÉDITOS</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- 25 EUR -->
+                <div onclick="selectPackage('package_25')" id="pkg-package_25" class="package-card p-8 rounded-3xl cursor-pointer group">
+                    <div class="space-y-2">
+                        <h4 class="text-[10px] font-black text-text-secondary uppercase tracking-widest">AGENCIA MAX</h4>
+                        <div class="flex items-baseline gap-1">
+                            <span class="text-3xl font-black">25€</span>
+                            <span class="text-text-secondary text-xs font-bold whitespace-nowrap">/ 40 CRÉDITOS</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-        // Check for error parameter
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('error') === 'insufficient_credits') {
-            const header = document.querySelector('h2');
-            const alert = document.createElement('div');
-            alert.className = "mb-6 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl flex items-center gap-3 text-amber-400";
-            alert.innerHTML = `
-                <span class="material-symbols-outlined">warning</span>
-                <p class="text-sm font-medium">¡Vaya! No tienes suficientes créditos para generar ese render. Elige un paquete abajo para continuar.</p>
-            `;
-            header.parentElement.insertBefore(alert, header);
-        }
-    });
+            <!-- FOOTER: SUMMARY & CTA -->
+            <div class="bg-surface rounded-[2.5rem] p-8 border-2 border-border">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-8">
+                    <div class="text-center md:text-left">
+                        <p class="text-[10px] font-black text-text-secondary uppercase tracking-widest mb-1">TOTAL A PAGAR</p>
+                        <div class="flex items-baseline gap-4">
+                            <h4 id="display-total" class="text-5xl font-black text-text-primary">15,00€</h4>
+                            <div id="display-credits" class="text-primary font-black text-xl flex items-center gap-2">
+                                <span class="material-symbols-outlined">add</span> 20
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-col items-center gap-4 w-full md:w-auto">
+                        <button id="pay-button" onclick="handleStripePayment()" class="w-full md:px-12 bg-text-primary hover:bg-primary text-white font-black py-5 rounded-2xl text-lg transition-all shadow-2xl flex items-center justify-center gap-3 active:scale-95">
+                            <span class="material-symbols-outlined text-2xl font-black">credit_card</span>
+                            <span id="btn-text">COMPRAR AHORA</span>
+                        </button>
+                        <div class="flex items-center gap-3">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/b/ba/Stripe_Logo%2C_revised_2016.svg" class="h-5 grayscale opacity-50" alt="Stripe">
+                            <div class="w-px h-3 bg-border"></div>
+                            <p class="text-[9px] font-black text-text-secondary opacity-50 uppercase tracking-widest">Pago Seguro</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    let selectedPkgKey = 'package_15';
-    let availablePackages = {};
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDj99qdmDt4GiVeRkvCSfTOSDw3uqD-_Ew",
+            authDomain: "gen-lang-client-0426824151.firebaseapp.com",
+            projectId: "gen-lang-client-0426824151",
+            storageBucket: "gen-lang-client-0426824151.firebasestorage.app",
+            messagingSenderId: "124806819551",
+            appId: "1:124806819551:web:1c90d1154b458fa064036a"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
 
-    // Initialize UI immediately with fallback data (don't wait for async)
-    document.addEventListener('DOMContentLoaded', () => selectPackage(selectedPkgKey));
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) {
+                window.location.replace('01-landing-page.html');
+                return;
+            }
+            document.documentElement.classList.add('auth-checked');
+        });
 
-    async function fetchPackages() {
-        try {
-            const res = await fetch('/api/admin/pricing');
-            if (!res.ok) throw new Error('pricing fetch failed');
-            const data = await res.json();
-            
-            if (data.packages && data.packages.length > 0) {
-                data.packages.forEach(pkg => {
-                    const uiKey = pkg.id; 
-                    availablePackages[uiKey] = { 
-                        id: pkg.id, 
-                        price: (pkg.price / 100).toFixed(2).replace('.', ',') + '€', 
-                        credits: pkg.creditsAmount 
-                    };
+        let selectedPkgKey = 'package_15';
+        let availablePackages = {
+            'package_5': { id: 'package_5', price: '5,00€', credits: 5 },
+            'package_10': { id: 'package_10', price: '10,00€', credits: 12 },
+            'package_15': { id: 'package_15', price: '15,00€', credits: 20 },
+            'package_25': { id: 'package_25', price: '25,00€', credits: 40 }
+        };
 
-                    const card = document.getElementById(`pkg-${uiKey}`);
-                    if (card) {
-                        const priceEl = card.querySelector('.text-2xl');
-                        const creditsEl = card.querySelector('.text-xs.font-medium');
-                        const listCreditsEl = card.querySelector('li');
-
-                        if (priceEl) priceEl.textContent = availablePackages[uiKey].price;
-                        if (creditsEl) creditsEl.textContent = `${pkg.creditsAmount} renders`;
-                        if (listCreditsEl) listCreditsEl.innerHTML = `<span class="material-symbols-outlined text-primary text-base">check_circle</span> ${pkg.creditsAmount} créditos`;
+        async function fetchPackages() {
+            try {
+                const res = await fetch('/api/admin/pricing');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.packages) {
+                        data.packages.forEach(pkg => {
+                            availablePackages[pkg.id] = {
+                                id: pkg.id,
+                                price: (pkg.price / 100).toFixed(2).replace('.', ',') + '€',
+                                credits: pkg.creditsAmount
+                            };
+                        });
+                        selectPackage(selectedPkgKey);
                     }
-                });
-                
-                // Refresh summary
-                selectPackage(selectedPkgKey);
-            }
-        } catch (e) {
-            console.error("Error fetching packages:", e);
+                }
+            } catch (e) { console.error(e); }
         }
-    }
+        fetchPackages();
 
-    // Call fetchPackages on load
-    fetchPackages();
-
-    function selectPackage(pkg) {
-        if (!availablePackages[pkg]) return;
-        selectedPkgKey = pkg;
-        // Update UI
-        document.querySelectorAll('.package-card').forEach(el => el.classList.remove('selected', 'border-2', 'border-primary', 'shadow-[0_0_30px_rgba(228,159,12,0.15)]', 'ring-1', 'ring-primary/50'));
-        document.getElementById(`pkg-${pkg}`).classList.add('selected', 'border-2', 'border-primary', 'shadow-[0_0_30px_rgba(228,159,12,0.15)]', 'ring-1', 'ring-primary/50');
-        
-        document.getElementById('display-total').textContent = availablePackages[pkg].price;
-        document.getElementById('display-credits').innerHTML = `<span class="material-symbols-outlined text-sm">add</span> ${availablePackages[pkg].credits} créditos`;
-    }
-
-    async function handleStripePayment() {
-        const btn = document.getElementById('pay-button');
-        const btnText = document.getElementById('btn-text');
-        const user = auth.currentUser;
-
-        if (!user) {
-            alert('Por favor, inicia sesión para realizar la compra.');
-            window.location.replace('01-landing-page.html');
-            return;
-        }
-
-        if (!selectedPkgKey || !availablePackages[selectedPkgKey]) {
-            alert('Por favor, selecciona un paquete primero.');
-            return;
-        }
-        try {
-            btn.disabled = true;
-            btnText.textContent = 'Procesando...';
+        function selectPackage(pkg) {
+            selectedPkgKey = pkg;
+            document.querySelectorAll('.package-card').forEach(el => el.classList.remove('selected'));
+            document.getElementById(`pkg-${pkg}`).classList.add('selected');
             
-            const token = await user.getIdToken(true); // force refresh
-            const response = await fetch('/api/checkout', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ packageId: availablePackages[selectedPkgKey].id })
-            });
-
-            const result = await response.json();
-            if (result.url) {
-                window.location.href = result.url;
-            } else {
-                alert('Error: ' + (result.error || 'No se pudo crear la sesión de pago'));
-                btn.disabled = false;
-                btnText.textContent = 'Pagar con Stripe';
-            }
-        } catch (e) {
-            console.error(e);
-            alert('Error en la conexión con el servidor. Por favor, inténtalo de nuevo.');
-            btn.disabled = false;
-            btnText.textContent = 'Pagar con Stripe';
+            document.getElementById('display-total').textContent = availablePackages[pkg].price;
+            document.getElementById('display-credits').innerHTML = `<span class="material-symbols-outlined font-black">add</span> ${availablePackages[pkg].credits}`;
         }
-    }
-</script>
 
-<style>
-    .package-card.selected h3 { color: #f0a400 !important; }
-</style>
+        async function handleStripePayment() {
+            const btn = document.getElementById('pay-button');
+            const btnText = document.getElementById('btn-text');
+            const user = auth.currentUser;
 
-</div>
-</div>
-</div>
-</body></html>
+            if (!user) return;
+
+            try {
+                btn.disabled = true;
+                btnText.textContent = 'PROCESANDO...';
+                const token = await user.getIdToken(true);
+                const response = await fetch('/api/checkout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ packageId: availablePackages[selectedPkgKey].id })
+                });
+
+                const result = await response.json();
+                if (result.url) {
+                    window.location.href = result.url;
+                } else {
+                    alert(result.error || 'Error al procesar pago');
+                    btn.disabled = false;
+                    btnText.textContent = 'COMPRAR AHORA';
+                }
+            } catch (e) {
+                console.error(e);
+                btn.disabled = false;
+                btnText.textContent = 'COMPRAR AHORA';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,21 +1,24 @@
-﻿<html class="dark" lang="es"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>RenderRoom | Créditos &amp; Pagos</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>RenderRoom — Créditos & Pagos</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
         tailwind.config = {
-            darkMode: "class",
             theme: {
                 extend: {
                     colors: {
-                        "primary": "#e49f0c",
-                        "background-light": "#f8f7f5",
-                        "background-dark": "#0d1117",
-                        "soft-charcoal": "#161b22",
+                        "primary": "#F59E0B",
+                        "background": "#FFFFFF",
+                        "surface": "#F8FAFC",
+                        "border": "#F1F5F9",
+                        "text-primary": "#1E293B",
+                        "text-secondary": "#475569",
+                        "accent-violet": "#6366F1"
                     },
                     fontFamily: {
                         "display": ["Inter", "sans-serif"]
@@ -30,292 +33,207 @@
             },
         }
     </script>
-<style>
-        .glass {
-            background: rgba(22, 27, 34, 0.7);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(228, 159, 12, 0.1);
-        }
-        .amber-glow:hover {
-            box-shadow: 0 0 20px rgba(228, 159, 12, 0.15);
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .glass-nav {
+                background: rgba(255, 255, 255, 0.8);
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+            }
+            .solar-glow {
+                box-shadow: 0 10px 40px rgba(245, 158, 11, 0.1);
+            }
         }
     </style>
 </head>
-<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
-<!-- Top Navigation Bar (Sticky Glassmorphism) -->
-<header class="sticky top-0 z-50 glass border-b border-primary/10 px-6 py-3">
-<div class="max-w-7xl mx-auto flex items-center justify-between">
-<div class="flex items-center gap-3">
-<div class="text-primary">
-<span class="material-symbols-outlined text-3xl">deployed_code</span>
-</div>
-<h2 class="text-xl font-bold tracking-tight text-slate-100">RenderRoom</h2>
-</div>
-<nav class="hidden md:flex items-center gap-8">
-<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Galería</a>
-<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Modelos</a>
-<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Precios</a>
-</nav>
-<div class="flex items-center gap-4">
-    <a href="02-upload-wizard.html" class="bg-primary hover:bg-primary/90 text-background-dark px-5 py-2 rounded-lg text-sm font-bold transition-all transform active:scale-95">
-        Crear Render
-    </a>
-    <a href="06-perfil-usuario.html" class="group">
-        <div id="user-initials-nav" class="size-10 rounded-full bg-primary/20 border-2 border-primary/30 flex items-center justify-center text-primary font-bold text-sm">
-            U
+<body class="bg-background font-display text-text-primary antialiased selection:bg-primary/30 min-h-screen">
+    <!-- NAVIGATION -->
+    <nav class="fixed top-0 left-0 right-0 z-50 glass-nav border-b border-border">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <a href="01-landing-page.html" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
+                <div class="size-10 bg-primary rounded-lg flex items-center justify-center text-white">
+                    <span class="material-symbols-outlined font-bold">deployed_code</span>
+                </div>
+                <h2 class="text-xl font-black tracking-tight">Render<span class="text-primary">Room</span></h2>
+            </a>
+            
+            <div class="hidden md:flex items-center space-x-8">
+                <a class="text-sm font-medium text-text-secondary hover:text-primary transition-colors" href="01-landing-page.html">Inicio</a>
+                <a class="text-sm font-medium text-text-secondary hover:text-primary transition-colors" href="03-dashboard.html">Dashboard</a>
+                <a class="text-sm font-medium text-text-secondary hover:text-primary transition-colors" href="07-consejos-decoracion.html">Consejos</a>
+                <a class="text-sm font-medium text-text-secondary hover:text-primary transition-colors" href="precios.html">Precios</a>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <a href="02-upload-wizard.html" class="bg-primary hover:bg-primary/90 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all hover:scale-105 shadow-md shadow-primary/10">
+                    Nuevo Render
+                </a>
+                <div id="user-initials-nav" class="size-10 rounded-full bg-surface border border-border flex items-center justify-center text-text-secondary font-black text-sm">
+                    U
+                </div>
+            </div>
         </div>
-    </a>
-</div>
-</div>
-</header>
-<main class="max-w-7xl mx-auto px-6 py-8 flex flex-col md:flex-row gap-8">
-<!-- Left Sidebar Navigation -->
-<aside class="w-full md:w-64 shrink-0">
-<div class="bg-soft-charcoal rounded-xl p-6 border border-white/5 space-y-8">
-<!-- User Info -->
-<div class="flex flex-col items-center text-center gap-3">
-    <div id="user-avatar-sidebar" class="size-20 rounded-full bg-primary/20 ring-4 ring-primary/10 flex items-center justify-center text-primary text-3xl font-black">
-        U
-    </div>
-    <div>
-        <h3 id="user-name-sidebar" class="font-bold text-lg text-slate-100">Cargando...</h3>
-        <span class="text-xs font-semibold text-primary uppercase tracking-widest bg-primary/10 px-2 py-1 rounded">Plan Estándar</span>
-    </div>
-</div>
-<!-- Menu Links -->
-<nav class="space-y-1">
-    <a class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/5 transition-colors group" href="06-perfil-usuario.html">
-        <span class="material-symbols-outlined text-slate-400 group-hover:text-primary">person</span>
-        <span class="text-sm font-medium">Mi Perfil</span>
-    </a>
-    <a class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/5 transition-colors group" href="03-dashboard.html">
-        <span class="material-symbols-outlined text-slate-400 group-hover:text-primary">view_in_ar</span>
-        <span class="text-sm font-medium">Mis Renders</span>
-    </a>
-    <a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary/10 text-primary border border-primary/20 transition-colors" href="creditos.html">
-        <span class="material-symbols-outlined">payments</span>
-        <span class="text-sm font-bold">Créditos & Pagos</span>
-    </a>
-    <a class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/5 transition-colors group" href="06-perfil-usuario.html#config">
-        <span class="material-symbols-outlined text-slate-400 group-hover:text-primary">settings</span>
-        <span class="text-sm font-medium">Configuración</span>
-    </a>
-    <div class="pt-4 mt-4 border-t border-white/5">
-        <button onclick="logout()" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-500/10 text-slate-400 hover:text-red-400 transition-colors group">
-            <span class="material-symbols-outlined">logout</span>
-            <span class="text-sm font-medium">Cerrar Sesión</span>
-        </button>
-    </div>
-</nav>
-</div>
-</aside>
-<!-- Main Content Area -->
-<section class="flex-1 space-y-8">
-<!-- KPI Card: Credits Summary -->
-<div class="bg-soft-charcoal rounded-xl p-8 border border-primary/30 relative overflow-hidden amber-glow transition-all">
-<div class="absolute top-0 right-0 p-8 opacity-10">
-<span class="material-symbols-outlined text-9xl text-primary">token</span>
-</div>
-<div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-    <div class="space-y-2">
-        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Saldo Disponible</p>
-        <h1 class="text-5xl md:text-6xl font-black text-primary tracking-tight">
-            <span id="user-credits-count">...</span> <span class="text-2xl font-normal text-slate-300">créditos</span>
-        </h1>
-        <p class="text-slate-400 text-sm max-w-sm">Tus créditos te permiten generar renders de alta fidelidad. Cada render consume 1 crédito.</p>
-    </div>
-    <button onclick="window.location.href='modal-compra.html'" class="bg-primary hover:bg-primary/90 text-background-dark px-8 py-4 rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-primary/20 transition-all">
-        <span class="material-symbols-outlined">add_shopping_cart</span>
-        Comprar más créditos
-    </button>
-</div>
-<!-- Progress Bar -->
-<div class="mt-10 space-y-3">
-<div class="flex justify-between items-end">
-<span class="text-sm font-medium text-slate-300">Límite de uso mensual</span>
-<span class="text-sm font-bold text-primary">4 / 10 créditos</span>
-</div>
-<div class="h-3 w-full bg-white/5 rounded-full overflow-hidden">
-<div class="h-full bg-primary rounded-full" style="width: 40%;"></div>
-</div>
-<div class="flex justify-between">
-<p class="text-xs text-slate-500 italic flex items-center gap-1">
-<span class="material-symbols-outlined text-sm">schedule</span>
-                            Se renueva automáticamente en 12 días
-                        </p>
-</div>
-</div>
-</div>
-<!-- Transaction History -->
-<div class="space-y-4">
-<div class="flex items-center justify-between">
-<h2 class="text-2xl font-bold tracking-tight">Historial de Transacciones</h2>
-<button class="text-sm font-medium text-primary hover:underline flex items-center gap-1">
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-6 pt-32 pb-24 flex flex-col md:flex-row gap-12">
+        <!-- SIDEBAR -->
+        <aside class="w-full md:w-72 shrink-0">
+            <div class="bg-surface rounded-3xl p-8 border border-border shadow-sm sticky top-32">
+                <div class="flex flex-col items-center text-center gap-4 border-b border-border pb-8 mb-8">
+                    <div id="user-avatar-sidebar" class="size-20 rounded-full bg-primary/10 ring-4 ring-white flex items-center justify-center text-primary text-3xl font-black shadow-lg">
+                        U
+                    </div>
+                    <div>
+                        <h3 id="user-name-sidebar" class="font-black text-lg">Cargando...</h3>
+                        <p class="text-[10px] font-black text-primary uppercase tracking-widest mt-1">Plan Estándar</p>
+                    </div>
+                </div>
+
+                <nav class="space-y-2">
+                    <a href="06-perfil-usuario.html" class="flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-white hover:shadow-sm transition-all group">
+                        <span class="material-symbols-outlined text-text-secondary group-hover:text-primary transition-colors">person</span>
+                        <span class="text-sm font-bold text-text-secondary group-hover:text-text-primary transition-colors">Mi Perfil</span>
+                    </a>
+                    <a href="03-dashboard.html" class="flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-white hover:shadow-sm transition-all group">
+                        <span class="material-symbols-outlined text-text-secondary group-hover:text-primary transition-colors">grid_view</span>
+                        <span class="text-sm font-bold text-text-secondary group-hover:text-text-primary transition-colors">Mis Renders</span>
+                    </a>
+                    <a href="creditos.html" class="flex items-center gap-4 px-4 py-3 rounded-2xl bg-white shadow-sm border border-border text-primary group">
+                        <span class="material-symbols-outlined text-primary">payments</span>
+                        <span class="text-sm font-black">Créditos & Pagos</span>
+                    </a>
+                    <div class="pt-6 border-t border-border mt-6">
+                        <button onclick="logout()" class="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-red-50 text-red-500 transition-all font-bold text-sm">
+                            <span class="material-symbols-outlined text-red-500">logout</span>
+                            Cerrar Sesión
+                        </button>
+                    </div>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- CONTENT -->
+        <section class="flex-1 space-y-12">
+            <!-- CREDIT CARD -->
+            <div class="bg-white rounded-[2.5rem] p-10 border border-border solar-glow relative overflow-hidden group">
+                <div class="absolute -top-12 -right-12 size-64 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-colors"></div>
+                
+                <div class="relative z-10 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8">
+                    <div class="space-y-2">
+                        <p class="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em]">Saldo Disponible</p>
+                        <h1 class="text-6xl font-black text-text-primary tracking-tight">
+                            <span id="user-credits-count">...</span> 
+                            <span class="text-2xl font-bold text-text-secondary/40">Créditos</span>
+                        </h1>
+                        <p class="text-text-secondary text-sm max-w-sm font-medium pt-2">Cada render profesional consume 1 crédito. Se aplican automáticamente al iniciar una generación.</p>
+                    </div>
+                    <a href="modal-compra.html" class="bg-primary hover:bg-primary/90 text-white px-10 py-5 rounded-2xl font-black text-lg flex items-center gap-3 shadow-xl shadow-primary/20 transition-all hover:scale-105 active:scale-95">
+                        <span class="material-symbols-outlined">add_shopping_cart</span>
+                        Comprar Créditos
+                    </a>
+                </div>
+
+                <!-- Usage Progress -->
+                <div class="mt-12 pt-8 border-t border-border space-y-4">
+                    <div class="flex justify-between items-end">
+                        <span class="text-xs font-black text-text-secondary/60 uppercase tracking-widest">Uso del Mes</span>
+                        <span class="text-sm font-black text-primary">4 / 10 Créditos Consumidos</span>
+                    </div>
+                    <div class="h-3 w-full bg-surface rounded-full overflow-hidden">
+                        <div class="h-full bg-primary rounded-full transition-all duration-700" style="width: 40%"></div>
+                    </div>
+                    <p class="text-[10px] font-black text-text-secondary/40 uppercase tracking-widest flex items-center gap-2">
+                        <span class="material-symbols-outlined text-xs">info</span> Se renueva el 12 de Junio de 2024
+                    </p>
+                </div>
+            </div>
+
+            <!-- HISTORY -->
+            <div class="space-y-6">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-2xl font-black tracking-tight">Historial Reciente</h2>
+                    <button class="text-xs font-black text-primary uppercase tracking-[0.1em] hover:underline flex items-center gap-2">
                         Descargar Facturas <span class="material-symbols-outlined text-sm">download</span>
-</button>
-</div>
-<div class="glass rounded-xl overflow-hidden border border-white/5">
-<div class="overflow-x-auto">
-<table class="w-full text-left border-collapse">
-<thead>
-<tr class="bg-white/5 text-slate-400 text-xs uppercase tracking-widest font-bold">
-<th class="px-6 py-4">Fecha</th>
-<th class="px-6 py-4">Concepto</th>
-<th class="px-6 py-4">Créditos</th>
-<th class="px-6 py-4 text-right">Importe (€)</th>
-<th class="px-6 py-4 text-center">Estado</th>
-</tr>
-</thead>
-<tbody class="divide-y divide-white/5 text-sm">
-<!-- Transaction Row 1 -->
-<tr class="hover:bg-white/5 transition-colors group">
-<td class="px-6 py-4 text-slate-400">14 May 2024</td>
-<td class="px-6 py-4 font-medium">Paquete Pro (+5 Créditos)</td>
-<td class="px-6 py-4 font-bold text-emerald-500">+5</td>
-<td class="px-6 py-4 text-right font-bold text-slate-100">10,00€</td>
-<td class="px-6 py-4 text-center">
-<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
-                                            Completado
-                                        </span>
-</td>
-</tr>
-<!-- Transaction Row 2 -->
-<tr class="hover:bg-white/5 transition-colors group">
-<td class="px-6 py-4 text-slate-400">12 May 2024</td>
-<td class="px-6 py-4 font-medium">Render Estilo Moderno - Sala de Estar</td>
-<td class="px-6 py-4 font-bold text-slate-500">-1</td>
-<td class="px-6 py-4 text-right font-medium text-slate-400">0,00€</td>
-<td class="px-6 py-4 text-center">
-<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-500/10 text-slate-400 border border-slate-500/20">
-                                            Usado
-                                        </span>
-</td>
-</tr>
-<!-- Transaction Row 3 -->
-<tr class="hover:bg-white/5 transition-colors group">
-<td class="px-6 py-4 text-slate-400">10 May 2024</td>
-<td class="px-6 py-4 font-medium">Render Exterior Nocturno - Villa A</td>
-<td class="px-6 py-4 font-bold text-slate-500">-1</td>
-<td class="px-6 py-4 text-right font-medium text-slate-400">0,00€</td>
-<td class="px-6 py-4 text-center">
-<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-500/10 text-slate-400 border border-slate-500/20">
-                                            Usado
-                                        </span>
-</td>
-</tr>
-<!-- Transaction Row 4 -->
-<tr class="hover:bg-white/5 transition-colors group">
-<td class="px-6 py-4 text-slate-400">02 May 2024</td>
-<td class="px-6 py-4 font-medium">Suscripción Mensual Pro (10 Créditos)</td>
-<td class="px-6 py-4 font-bold text-emerald-500">+10</td>
-<td class="px-6 py-4 text-right font-bold text-slate-100">19,90€</td>
-<td class="px-6 py-4 text-center">
-<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
-                                            Completado
-                                        </span>
-</td>
-</tr>
-<!-- Transaction Row 5 -->
-<tr class="hover:bg-white/5 transition-colors group">
-<td class="px-6 py-4 text-slate-400">28 Abr 2024</td>
-<td class="px-6 py-4 font-medium">Render Oficina Coworking - Vista 360</td>
-<td class="px-6 py-4 font-bold text-slate-500">-2</td>
-<td class="px-6 py-4 text-right font-medium text-slate-400">0,00€</td>
-<td class="px-6 py-4 text-center">
-<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-500/10 text-slate-400 border border-slate-500/20">
-                                            Usado
-                                        </span>
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<div class="flex justify-center pt-4">
-<button class="text-sm font-bold text-slate-400 hover:text-primary transition-colors flex items-center gap-2">
-                        Ver más transacciones
-                        <span class="material-symbols-outlined text-sm">expand_more</span>
-</button>
-</div>
-</div>
-<!-- Promotion / Help section -->
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-<div class="bg-primary/5 border border-primary/20 rounded-xl p-6 flex items-start gap-4">
-<div class="bg-primary/10 p-3 rounded-lg text-primary">
-<span class="material-symbols-outlined text-2xl">auto_awesome</span>
-</div>
-<div>
-<h4 class="font-bold text-slate-100">Ahorra con el Plan Anual</h4>
-<p class="text-xs text-slate-400 mt-1">Obtén 2 meses gratis y 50 créditos extra al actualizar a facturación anual.</p>
-<button class="mt-3 text-xs font-bold text-primary hover:underline">Mejorar Plan →</button>
-</div>
-</div>
-<div class="bg-soft-charcoal border border-white/5 rounded-xl p-6 flex items-start gap-4">
-<div class="bg-white/5 p-3 rounded-lg text-slate-400">
-<span class="material-symbols-outlined text-2xl">help_outline</span>
-</div>
-<div>
-<h4 class="font-bold text-slate-100">¿Dudas con tus créditos?</h4>
-<p class="text-xs text-slate-400 mt-1">Consulta nuestra guía de uso o contacta con el equipo de soporte especializado.</p>
-<button class="mt-3 text-xs font-bold text-slate-300 hover:text-primary transition-colors">Centro de Ayuda</button>
-</div>
-</div>
-</div>
-</section>
-</main>
-<footer class="mt-12 py-8 border-t border-white/5 text-center text-slate-500 text-xs">
-<p>© 2024 RenderRoom. Todos los derechos reservados.</p>
-</footer>
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+                    </button>
+                </div>
 
-<script>
-// ── Firebase Config ─────────────────────────────
-const firebaseConfig = {
-  projectId: "gen-lang-client-0426824151",
-  appId: "1:124806819551:web:1c90d1154b458fa064036a",
-  storageBucket: "gen-lang-client-0426824151.firebasestorage.app",
-  apiKey: "AIzaSyDj99qdmDt4GiVeRkvCSfTOSDw3uqD-_Ew",
-  authDomain: "gen-lang-client-0426824151.firebaseapp.com",
-  messagingSenderId: "124806819551"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+                <div class="bg-white rounded-3xl border border-border overflow-hidden shadow-sm">
+                    <div class="overflow-x-auto text-sm">
+                        <table class="w-full text-left">
+                            <thead class="bg-surface/50 border-b border-border">
+                                <tr class="text-[10px] font-black text-text-secondary uppercase tracking-widest">
+                                    <th class="px-8 py-5">Fecha</th>
+                                    <th class="px-8 py-5">Concepto</th>
+                                    <th class="px-8 py-5">Créditos</th>
+                                    <th class="px-8 py-5 text-right">Importe</th>
+                                    <th class="px-8 py-5 text-center">Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-border">
+                                <tr class="hover:bg-surface/30 transition-colors">
+                                    <td class="px-8 py-6 text-text-secondary font-medium">14 May 2024</td>
+                                    <td class="px-8 py-6 font-bold">Pack Especial 10 Créditos</td>
+                                    <td class="px-8 py-6 text-green-600 font-black">+10</td>
+                                    <td class="px-8 py-6 text-right font-black">15,00€</td>
+                                    <td class="px-8 py-6 text-center">
+                                        <span class="px-3 py-1 bg-green-50 text-green-700 text-[10px] font-black uppercase tracking-widest rounded-full">Completado</span>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-surface/30 transition-colors">
+                                    <td class="px-8 py-6 text-text-secondary font-medium">12 May 2024</td>
+                                    <td class="px-8 py-6 font-bold">Render — Salón Minimalista</td>
+                                    <td class="px-8 py-6 text-text-secondary/50 font-black">-1</td>
+                                    <td class="px-8 py-6 text-right font-black">0,00€</td>
+                                    <td class="px-8 py-6 text-center">
+                                        <span class="px-3 py-1 bg-surface text-text-secondary text-[10px] font-black uppercase tracking-widest rounded-full">Usado</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
 
-firebase.auth().onAuthStateChanged(async user => {
-    if (user) {
-        const initials = (user.displayName || user.email || 'U').charAt(0).toUpperCase();
-        const navInitials = document.getElementById('user-initials-nav');
-        const sidebarInitials = document.getElementById('user-avatar-sidebar');
-        const sidebarName = document.getElementById('user-name-sidebar');
-        
-        if (navInitials) navInitials.textContent = initials;
-        if (sidebarInitials) sidebarInitials.textContent = initials;
-        if (sidebarName) sidebarName.textContent = user.displayName || 'Usuario';
+    <!-- FIREBASE & LOGIC -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
-        // Load Credits
-        try {
-            const doc = await db.collection('users').doc(user.uid).get();
-            if (doc.exists) {
-                const credits = doc.data().credits || 0;
-                const creditText = document.getElementById('user-credits-count');
-                if (creditText) creditText.textContent = credits;
-            }
-        } catch (e) {
-            console.error("Error loading credits:", e);
+    <script>
+    const firebaseConfig = {
+      projectId: "gen-lang-client-0426824151",
+      appId: "1:124806819551:web:1c90d1154b458fa064036a",
+      storageBucket: "gen-lang-client-0426824151.firebasestorage.app",
+      apiKey: "AIzaSyDj99qdmDt4GiVeRkvCSfTOSDw3uqD-_Ew",
+      authDomain: "gen-lang-client-0426824151.firebaseapp.com",
+      messagingSenderId: "124806819551"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    firebase.auth().onAuthStateChanged(async user => {
+        if (user) {
+            const initials = (user.displayName || user.email || 'U').charAt(0).toUpperCase();
+            document.getElementById('user-initials-nav').textContent = initials;
+            document.getElementById('user-avatar-sidebar').textContent = initials;
+            document.getElementById('user-name-sidebar').textContent = user.displayName || user.email.split('@')[0];
+
+            try {
+                const doc = await db.collection('users').doc(user.uid).get();
+                if (doc.exists) {
+                    document.getElementById('user-credits-count').textContent = doc.data().credits || 0;
+                }
+            } catch (e) { console.error(e); }
+        } else {
+            window.location.href = '01-landing-page.html';
         }
-    } else {
-        window.location.href = '01-landing-page.html';
-    }
-});
-
-function logout() {
-    firebase.auth().signOut().then(() => {
-        window.location.href = '01-landing-page.html';
     });
-}
-</script>
-</body></html>
+
+    function logout() {
+        firebase.auth().signOut().then(() => window.location.href = '01-landing-page.html');
+    }
+    </script>
+</body>
+</html>
