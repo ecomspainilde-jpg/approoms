@@ -1,1305 +1,210 @@
-﻿<!DOCTYPE html>
-<html class="dark" lang="es">
-<head>
+<!DOCTYPE html>
+
+<html class="dark" lang="es"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>RenderRoom - Crea tu Dise├▒o</title>
+<title>RenderRoom - Paso 1: Sube tu Foto</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <script id="tailwind-config">
-    tailwind.config = {
-        darkMode: "class",
-        theme: {
-            extend: {
-                colors: {
-                    "primary": "#f0a400",
-                    "background-dark": "#0D1117",
-                    "surface-dark": "#161B22",
-                    "border-dark": "#30363D",
-                    "muted-text": "#8B949E",
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f0a400",
+                        "background-light": "#f8f7f5",
+                        "background-dark": "#0D1117",
+                        "surface-dark": "#161B22",
+                        "border-dark": "#484F58",
+                        "muted-text": "#8B949E",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
                 },
-                fontFamily: { "display": ["Inter", "sans-serif"] },
             },
-        },
-    }
-</script>
-<style>
-    .glass { background: rgba(22,27,34,0.85); backdrop-filter: blur(16px); }
-    .style-card { transition: all .25s; border: 2px solid transparent; cursor: pointer; }
-    .style-card:hover { border-color: rgba(240,164,0,.4); transform: translateY(-2px); }
-    .style-card.selected { border-color: #f0a400; box-shadow: 0 0 20px rgba(240,164,0,.3); }
-    .upload-zone { border: 2px dashed #30363D; transition: all .25s; }
-    .upload-zone.dragover { border-color: #f0a400; background: rgba(240,164,0,.05); }
-    .upload-zone.has-image { border-style: solid; border-color: #f0a400; }
-    .progress-step { transition: all .3s; }
-    .progress-step.active .step-num { background: #f0a400; color: #0D1117; }
-    .progress-step.done .step-num { background: #22c55e; color: #fff; }
-    .progress-step.active .step-label { color: #f0a400; }
-    .spin { animation: spin 1s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .fade-in { animation: fadeIn .5s ease; }
-    @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
-    .proposal-section { border-left: 3px solid #f0a400; padding-left: 1rem; }
-    /* Photo selector */
-    .photo-thumb { position: relative; cursor: pointer; border-radius: 0.75rem; overflow: hidden; border: 2px solid transparent; transition: all .2s; }
-    .photo-thumb:hover { border-color: rgba(240,164,0,.4); }
-    .photo-thumb.primary { border-color: #f0a400; box-shadow: 0 0 16px rgba(240,164,0,.35); }
-    .photo-thumb .primary-badge { display: none; position: absolute; top: 6px; left: 6px; background: #f0a400; color: #0D1117; font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 999px; letter-spacing:.04em; }
-    .photo-thumb.primary .primary-badge { display: block; }
-    .photo-thumb .select-hint { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,.7)); text-align:center; padding: 10px 4px 6px; font-size: 10px; color: #ccc; opacity:0; transition:.2s; }
-    .photo-thumb:hover .select-hint { opacity:1; }
-    /* Disclaimer modal */
-    #disclaimer-modal { position:fixed; inset:0; background:rgba(0,0,0,.75); z-index:999; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(4px); }
-    #disclaimer-box { background:#161B22; border:1px solid #30363D; border-radius:1.25rem; max-width:520px; width:90%; padding:2rem; box-shadow:0 25px 60px rgba(0,0,0,.6); }
-    
-    .quality-card { border: 2px solid transparent; transition: all .25s; cursor: pointer; }
-    .quality-card:hover { border-color: rgba(240,164,0,.4); }
-    .quality-card.selected { border-color: #f0a400; background: rgba(240,164,0,0.05); }
-    .quality-card.selected .check-mark { background: #f0a400; border-color: #f0a400; }
-    .quality-card.selected .check-mark::after { opacity: 1; }
-    .check-mark { position: relative; border-radius: 999px; }
-    .check-mark::after { content: 'check'; font-family: 'Material Symbols Outlined'; font-size: 14px; color: #0D1117; opacity: 0; transition: opacity .2s; }
-</style>
-  <style>
-    /* Prevent FOUC: hide body by default */
-    body { opacity: 0; transition: opacity 0.3s ease; }
-    .auth-checked body { opacity: 1; }
-  </style>
+        }
+    </script>
 </head>
-<body class="bg-background-dark font-display text-slate-100 min-h-screen">
-
-<!-- ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ DISCLAIMER MODAL ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ -->
-<div id="disclaimer-modal">
-    <div id="disclaimer-box" class="fade-in">
-        <div class="flex items-center gap-3 mb-4">
-            <div class="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
-                <span class="material-symbols-outlined">privacy_tip</span>
-            </div>
-            <div>
-                <h2 class="font-black text-lg">Aviso sobre tus fotos</h2>
-                <p class="text-xs text-muted-text">Lee antes de continuar</p>
-            </div>
-        </div>
-        <div class="space-y-3 text-sm text-slate-300 leading-relaxed mb-6">
-            <p>Al subir im├ígenes a RenderRoom, confirmas que:</p>
-            <ul class="space-y-2 text-sm">
-                <li class="flex items-start gap-2">
-                    <span class="material-symbols-outlined text-primary text-sm mt-0.5 flex-shrink-0">check_circle</span>
-                    <span>Las fotograf├¡as son de tu propiedad o tienes autorizaci├│n expresa del propietario para utilizarlas.</span>
-                </li>
-                <li class="flex items-start gap-2">
-                    <span class="material-symbols-outlined text-primary text-sm mt-0.5 flex-shrink-0">check_circle</span>
-                    <span>Las im├ígenes no contienen datos personales identificables de terceros sin su consentimiento (<a href="privacidad.html" class="text-primary underline" target="_blank">RGPD</a>).</span>
-                </li>
-                <li class="flex items-start gap-2">
-                    <span class="material-symbols-outlined text-primary text-sm mt-0.5 flex-shrink-0">check_circle</span>
-                    <span>El contenido es apto para todos los p├║blicos y no infringe derechos de autor de terceros.</span>
-                </li>
-                <li class="flex items-start gap-2">
-                    <span class="material-symbols-outlined text-primary text-sm mt-0.5 flex-shrink-0">check_circle</span>
-                    <span>Las im├ígenes se usar├ín exclusivamente para la generaci├│n del render solicitado y no ser├ín compartidas p├║blicamente sin tu permiso.</span>
-                </li>
-            </ul>
-            <p class="text-xs text-muted-text border-t border-border-dark pt-3">Conforme a nuestra <a href="privacidad.html" class="text-primary underline" target="_blank">Pol├¡tica de Privacidad</a> y <a href="terminos.html" class="text-primary underline" target="_blank">T├®rminos de Uso</a>. El tratamiento de datos est├í amparado por el RGPD (UE) 2016/679.</p>
-        </div>
-        <div class="flex items-center gap-3 mb-4">
-            <input type="checkbox" id="disclaimer-check" class="w-4 h-4 accent-primary rounded cursor-pointer">
-            <label for="disclaimer-check" class="text-sm cursor-pointer select-none">He le├¡do y acepto los t├®rminos de uso de im├ígenes</label>
-        </div>
-        <button id="disclaimer-confirm" disabled onclick="acceptDisclaimer()" class="w-full bg-primary/30 text-primary/50 font-bold py-3 rounded-xl transition-all cursor-not-allowed">
-            Continuar ÔåÆ
-        </button>
-    </div>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+<!-- Top Navigation Bar -->
+<header class="flex items-center justify-between border-b border-border-dark px-10 py-4 sticky top-0 bg-background-dark/80 backdrop-blur-md z-50">
+<div class="flex items-center gap-3">
+<div class="size-8 text-primary">
+<svg fill="currentColor" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M44 11.2727C44 14.0109 39.8386 16.3957 33.69 17.6364C39.8386 18.877 44 21.2618 44 24C44 26.7382 39.8386 29.123 33.69 30.3636C39.8386 31.6043 44 33.9891 44 36.7273C44 40.7439 35.0457 44 24 44C12.9543 44 4 40.7439 4 36.7273C4 33.9891 8.16144 31.6043 14.31 30.3636C8.16144 29.123 4 26.7382 4 24C4 21.2618 8.16144 18.877 14.31 17.6364C8.16144 16.3957 4 14.0109 4 11.2727C4 7.25611 12.9543 4 24 4C35.0457 4 44 7.25611 44 11.2727Z"></path>
+</svg>
 </div>
-
-<!-- NAV -->
-<header class="glass sticky top-0 z-50 border-b border-border-dark flex items-center justify-between px-6 md:px-10 py-4">
-    <a href="01-landing-page.html" class="flex items-center gap-3">
-        <div class="size-8 bg-gradient-to-br from-primary to-orange-600 rounded-lg flex items-center justify-center text-background-dark">
-            <span class="material-symbols-outlined text-sm font-bold">deployed_code</span>
-        </div>
-        <h2 class="text-xl font-black tracking-tight">Render<span class="text-primary">Room</span></h2>
-    </a>
-    <!-- Steps progress -->
-    <div class="hidden md:flex items-center gap-2">
-        <div id="step-indicator-1" class="progress-step active flex items-center gap-2">
-            <div class="step-num size-7 rounded-full bg-surface-dark border border-border-dark flex items-center justify-center text-xs font-bold">1</div>
-            <span class="step-label text-sm font-semibold text-muted-text">Foto</span>
-        </div>
-        <div class="w-8 h-px bg-border-dark"></div>
-        <div id="step-indicator-2" class="progress-step flex items-center gap-2">
-            <div class="step-num size-7 rounded-full bg-surface-dark border border-border-dark flex items-center justify-center text-xs font-bold">2</div>
-            <span class="step-label text-sm font-semibold text-muted-text">Estilo</span>
-        </div>
-        <div class="w-8 h-px bg-border-dark"></div>
-        <div id="step-indicator-3" class="progress-step flex items-center gap-2">
-            <div class="step-num size-7 rounded-full bg-surface-dark border border-border-dark flex items-center justify-center text-xs font-bold">3</div>
-            <span class="step-label text-sm font-semibold text-muted-text">Generar</span>
-        </div>
-    </div>
-    <div class="flex items-center gap-4">
-        <!-- Persistent Credits Display -->
-        <div class="flex items-center gap-2 px-3 py-1.5 bg-surface-dark border border-border-dark rounded-full">
-            <span class="material-symbols-outlined text-primary text-[18px]">database</span>
-            <span id="header-credits-count" class="text-sm font-bold">--</span>
-            <span class="text-[10px] text-muted-text font-medium uppercase tracking-wider hidden sm:inline">Cr├®ditos</span>
-            <a href="modal-compra.html" id="header-buy-credits-btn" onclick="window.open(this.href, 'Purchase', 'width=1000,height=800'); return false;" class="ml-1 px-2 py-0.5 bg-primary/10 hover:bg-primary/20 text-primary text-[10px] font-bold rounded-md border border-primary/20 transition-all hidden">
-                COMPRAR
-            </a>
-        </div>
-        
-        <div id="admin-link-container" class="hidden">
-            <a href="admin-dashboard.html" class="text-primary hover:text-primary/80 transition-colors">
-                <span class="material-symbols-outlined">admin_panel_settings</span>
-            </a>
-        </div>
-        <a href="03-dashboard.html" class="text-sm text-muted-text hover:text-primary transition-colors font-medium">Mis Renders</a>
-        <a href="06-perfil-usuario.html" class="flex items-center gap-3">
-            <div id="user-initials" class="w-8 h-8 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-primary font-bold text-xs">
-                U
-            </div>
-        </a>
-    </div>
+<h2 class="text-xl font-black tracking-tight">RenderRoom</h2>
+</div>
+<div class="flex items-center gap-10">
+<nav class="hidden md:flex items-center gap-8">
+<div class="flex flex-col items-center">
+<span class="text-primary text-xs font-bold uppercase tracking-wider">Paso 1</span>
+<span class="text-sm font-semibold">Sube tu Foto</span>
+</div>
+<div class="w-12 h-[2px] bg-border-dark"></div>
+<div class="flex flex-col items-center opacity-50">
+<span class="text-muted-text text-xs font-bold uppercase tracking-wider">Paso 2</span>
+<span class="text-sm font-semibold">Elige Estilo</span>
+</div>
+<div class="w-12 h-[2px] bg-border-dark"></div>
+<div class="flex flex-col items-center opacity-50">
+<span class="text-muted-text text-xs font-bold uppercase tracking-wider">Paso 3</span>
+<span class="text-sm font-semibold">Confirma y Paga</span>
+</div>
+</nav>
+<div class="bg-primary/10 border border-primary/20 rounded-full p-1">
+<div class="size-8 rounded-full bg-cover bg-center" data-alt="Avatar de usuario" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAv2jvQtkEBSlbsIZxQg9x6DxHsVLfzjrM7e4ZKNQMylSQ3MNs-cr1qgBBErLHJh50h9qkdPKLtM-5NFdQlMUqVJ_yc8b28Pbt_koUvr6batQJ13Do7E5il9faDELMaKngLQKrczeakY91rHqHyzt7yUYeC4RG50hU4O8VLhjFj18XDu3RmS4hWJ2G5C42Gmt4LQKzbEHcJ7Vn1Ws3UE1hDY_DxZ7dzyVrmNlHuqLqmwZj-mf8Vou7MbDHxEs1FzGgQQwPJ7TwQqQSh')"></div>
+</div>
+</div>
 </header>
-
-<main class="max-w-4xl mx-auto px-6 py-10 space-y-10">
-
-    <!-- ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ STEP 1: UPLOAD ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ -->
-    <section id="section-upload">
-        <div class="mb-6">
-            <span class="text-primary text-xs font-bold uppercase tracking-widest">Paso 1</span>
-            <h1 class="text-3xl font-black mt-1">Sube tu foto</h1>
-            <p class="text-muted-text mt-1">Nuestra IA analizar├í tu habitaci├│n y generar├í un dise├▒o personalizado</p>
-        </div>
-
-        <!-- Drop Zone -->
-        <div id="upload-zone" class="upload-zone rounded-2xl p-8 flex flex-col items-center justify-center gap-4 text-center cursor-pointer relative min-h-[300px]">
-            <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp" multiple aria-label="Subir fotos de la habitaci├│n" class="hidden"/>
-            <!-- Placeholder state -->
-            <div id="upload-placeholder">
-                <div class="size-20 rounded-full bg-primary/10 flex items-center justify-center text-primary mx-auto mb-4">
-                    <span class="material-symbols-outlined text-5xl">add_photo_alternate</span>
-                </div>
-                <h3 class="text-xl font-bold mb-1">Sube fotos de tu habitaci├│n</h3>
-                <p class="text-muted-text text-sm">Arrastra hasta 3 im├ígenes o haz clic aqu├¡</p>
-                <p class="text-xs text-muted-text/60 mt-2">Varios ├íngulos ayudan a Gemini a entender mejor el espacio</p>
-            </div>
-            <!-- Preview state (hidden) -->
-            <div id="upload-preview" class="hidden w-full">
-                <p class="text-xs text-muted-text mb-3 flex items-center gap-1">
-                    <span class="material-symbols-outlined text-primary text-sm">touch_app</span>
-                    Toca una foto para marcarla como <strong class="text-primary ml-1">foto principal</strong> para el render
-                </p>
-                <div id="preview-grid" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                    <!-- Previews will be injected here -->
-                </div>
-                <button id="change-photo-btn" class="text-xs text-muted-text hover:text-primary transition-colors underline">Cambiar fotos</button>
-            </div>
-        </div>
-
-        <!-- Analysis Panel -->
-        <div id="analysis-panel" class="hidden mt-6 bg-surface-dark rounded-xl border border-border-dark p-6 fade-in">
-            <div id="analysis-loading" class="flex items-center gap-3 text-primary">
-                <svg class="spin size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
-                <span class="text-sm font-semibold">Analizando tu habitaci├│n con Gemini VisionÔÇª</span>
-            </div>
-            <div id="analysis-result" class="hidden">
-                <div class="flex items-center gap-2 mb-3">
-                    <span class="material-symbols-outlined text-primary">home_search</span>
-                    <h3 class="font-bold text-primary">An├ílisis de tu habitaci├│n</h3>
-                </div>
-                <div id="analysis-text" class="text-slate-300 text-sm leading-relaxed whitespace-pre-line max-h-48 overflow-y-auto pr-1"></div>
-
-                <!-- Image Validation Badge -->
-                <div id="image-validation-panel" class="hidden mt-4 pt-4 border-t border-border-dark">
-                    <div class="flex items-center gap-3 mb-3">
-                        <div id="validation-badge" class="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-black">
-                            <span id="validation-icon" class="material-symbols-outlined text-sm"></span>
-                            <span id="validation-label"></span>
-                            <span id="validation-score" class="ml-1 opacity-70"></span>
-                        </div>
-                        <span class="text-xs text-muted-text">Aptitud para render</span>
-                    </div>
-                    <div id="validation-issues" class="hidden space-y-1.5"></div>
-                    <div id="validation-checks" class="grid grid-cols-3 gap-2 mt-3"></div>
-                </div>
-            </div>
-            <div id="analysis-error" class="hidden text-orange-400 text-sm">
-                <span class="material-symbols-outlined text-sm mr-1">warning</span>
-                <span id="analysis-error-text"></span> ÔÇö puedes continuar igualmente con tu descripci├│n manual.
-            </div>
-        </div>
-
-        <!-- Manual description -->
-        <div id="prompt-section" class="mt-6 bg-surface-dark rounded-xl border border-border-dark p-6">
-            <h3 class="font-bold mb-3">┬┐Qu├® imaginas para tu habitaci├│n?</h3>
-            <textarea id="prompt-input" rows="3" placeholder="Ej: Quiero un espacio luminoso, acogedor, con toques de naturaleza y colores tierraÔÇª" class="w-full bg-background-dark/60 border border-border-dark rounded-lg p-3 text-sm text-slate-200 placeholder-muted-text focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"></textarea>
-        </div>
-
-        <div class="mt-4 flex justify-end">
-            <button id="btn-to-style" disabled class="bg-primary/30 text-primary/50 font-bold py-3 px-8 rounded-xl transition-all cursor-not-allowed" onclick="goToStep2()">
-                Elegir estilo ÔåÆ
-            </button>
-        </div>
-    </section>
-
-    <!-- ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ STEP 2: STYLE ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ -->
-    <section id="section-style" class="hidden">
-        <div class="mb-6">
-            <span class="text-primary text-xs font-bold uppercase tracking-widest">Paso 2</span>
-            <h2 class="text-3xl font-black mt-1">Elige tu estilo</h2>
-            <p class="text-muted-text mt-1">Selecciona el look que quieres para tu espacio</p>
-        </div>
-        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-            <!-- Moderno -->
-            <div class="style-card bg-surface-dark rounded-xl overflow-hidden" data-style="moderno" onclick="selectStyle(this)">
-                <div class="aspect-video bg-cover bg-center" style="background-image:url('img/style_moderno.png')"></div>
-                <div class="p-3">
-                    <p class="font-bold text-sm">┬íHazlo Moderno!</p>
-                    <p class="text-xs text-muted-text mt-0.5">L├¡neas limpias y elegancia atemporal</p>
-                    <a href="08-estilo-moderno.html" target="_blank" class="text-xs text-primary hover:underline mt-1 block" onclick="event.stopPropagation()">Explorar look ÔåÆ</a>
-                </div>
-            </div>
-            <!-- N├│rdico -->
-            <div class="style-card bg-surface-dark rounded-xl overflow-hidden" data-style="nordico" onclick="selectStyle(this)">
-                <div class="aspect-video bg-cover bg-center" style="background-image:url('img/style_nordico.png')"></div>
-                <div class="p-3">
-                    <p class="font-bold text-sm">Calidez N├│rdica</p>
-                    <p class="text-xs text-muted-text mt-0.5">Madera natural y luz acogedora</p>
-                    <a href="09-estilo-nordico.html" target="_blank" class="text-xs text-primary hover:underline mt-1 block" onclick="event.stopPropagation()">Ver detalles ÔåÆ</a>
-                </div>
-            </div>
-            <!-- Industrial -->
-            <div class="style-card bg-surface-dark rounded-xl overflow-hidden" data-style="industrial" onclick="selectStyle(this)">
-                <div class="aspect-video bg-cover bg-center" style="background-image:url('img/style_industrial.png')"></div>
-                <div class="p-3">
-                    <p class="font-bold text-sm">Esencia Industrial</p>
-                    <p class="text-xs text-muted-text mt-0.5">Car├ícter urbano y texturas crudas</p>
-                    <a href="10-estilo-industrial.html" target="_blank" class="text-xs text-primary hover:underline mt-1 block" onclick="event.stopPropagation()">Descubrir look ÔåÆ</a>
-                </div>
-            </div>
-            <!-- Minimalista -->
-            <div class="style-card bg-surface-dark rounded-xl overflow-hidden" data-style="minimalista" onclick="selectStyle(this)">
-                <div class="aspect-video bg-cover bg-center" style="background-image:url('img/style_minimalista.png')"></div>
-                <div class="p-3">
-                    <p class="font-bold text-sm">Pura Calma</p>
-                    <p class="text-xs text-muted-text mt-0.5">Espacio libre de ruido visual</p>
-                    <a href="11-estilo-minimalista.html" target="_blank" class="text-xs text-primary hover:underline mt-1 block" onclick="event.stopPropagation()">Ver estilo ÔåÆ</a>
-                </div>
-            </div>
-            <!-- R├║stico -->
-            <div class="style-card bg-surface-dark rounded-xl overflow-hidden" data-style="rustico" onclick="selectStyle(this)">
-                <div class="aspect-video bg-cover bg-center" style="background-image:url('img/style_rustico.png')"></div>
-                <div class="p-3">
-                    <p class="font-bold text-sm">Encanto R├║stico</p>
-                    <p class="text-xs text-muted-text mt-0.5">La calidez de lo natural</p>
-                    <a href="12-estilo-rustico.html" target="_blank" class="text-xs text-primary hover:underline mt-1 block" onclick="event.stopPropagation()">Insp├¡rate ÔåÆ</a>
-                </div>
-            </div>
-            <!-- Bohemio -->
-            <div class="style-card bg-surface-dark rounded-xl overflow-hidden" data-style="bohemio" onclick="selectStyle(this)">
-                <div class="aspect-video bg-cover bg-center" style="background-image:url('img/style_bohemio.png')"></div>
-                <div class="p-3">
-                    <p class="font-bold text-sm">Alma Bohemia</p>
-                    <p class="text-xs text-muted-text mt-0.5">Libre, art├¡stico y lleno de vida</p>
-            </div>
-        </div>
-
-        <!-- Recommendations Section -->
-        <div id="recommendations-section" class="hidden mt-8 fade-in">
-            <div class="bg-surface-dark border border-primary/20 rounded-2xl p-6 shadow-2xl relative overflow-hidden">
-                <div class="absolute top-0 right-0 p-4 opacity-10">
-                    <span class="material-symbols-outlined text-6xl">auto_awesome</span>
-                </div>
-                
-                <div class="flex items-center gap-3 mb-6">
-                    <div class="size-10 rounded-full bg-primary/20 flex items-center justify-center">
-                        <span class="material-symbols-outlined text-primary">psychology</span>
-                    </div>
-                    <div>
-                        <h3 class="font-black text-xl text-slate-100">Sugerencias de Dise├▒o IA</h3>
-                        <p class="text-xs text-muted-text">Basado en el estilo <span id="rec-style-name" class="text-primary font-bold"></span> y el an├ílisis de tu espacio</p>
-                    </div>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Add items -->
-                    <div class="space-y-3">
-                        <p class="text-[10px] font-black text-green-500 uppercase tracking-widest flex items-center gap-2 mb-2">
-                            <span class="size-2 rounded-full bg-green-500 animate-pulse"></span> Recomendado A├▒adir
-                        </p>
-                        <div id="rec-add-list" class="grid grid-cols-1 gap-2">
-                            <!-- Items injected here -->
-                        </div>
-                    </div>
-                    <!-- Remove items -->
-                    <div class="space-y-3">
-                        <p class="text-[10px] font-black text-orange-400 uppercase tracking-widest flex items-center gap-2 mb-2">
-                            <span class="size-2 rounded-full bg-orange-400 animate-pulse"></span> Sugerido Retirar
-                        </p>
-                        <div id="rec-remove-list" class="grid grid-cols-1 gap-2">
-                            <!-- Items injected here -->
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="mt-6 pt-6 border-t border-border-dark flex items-center justify-between">
-                    <p class="text-[11px] text-muted-text italic max-w-[70%]">Desmarca los elementos que NO quieras que la IA aplique en el render final.</p>
-                    <div class="flex items-center gap-1 text-primary text-[10px] font-bold">
-                        <span class="material-symbols-outlined text-sm">verified</span> IA Activa
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="mt-6 flex justify-between">
-            <button onclick="goToStep1()" class="text-muted-text hover:text-slate-100 font-semibold py-2 px-4 transition-colors">ÔåÉ Volver</button>
-            <button id="btn-to-generate" disabled class="bg-primary/30 text-primary/50 font-bold py-3 px-8 rounded-xl transition-all cursor-not-allowed" onclick="goToStep3()">
-                Continuar ÔåÆ
-            </button>
-        </div>
-    </section>
-
-    <!-- ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ STEP 3: GENERATE ÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉÔòÉ -->
-    <section id="section-generate" class="hidden">
-        <div class="mb-6">
-            <span class="text-primary text-xs font-bold uppercase tracking-widest">Paso 3</span>
-            <h2 class="text-3xl font-black mt-1">Genera tu render</h2>
-            <p class="text-muted-text mt-1">Revisi├│n final y generaci├│n con IA</p>
-        </div>
-
-        <!-- Summary before generating -->
-        <div id="generate-summary" class="bg-surface-dark rounded-xl border border-border-dark p-6 mb-6 space-y-4">
-            <div class="flex items-center gap-3">
-                <span class="material-symbols-outlined text-primary">photo_camera</span>
-                <div>
-                    <p class="text-xs text-muted-text">Tus fotos</p>
-                    <div id="summary-photos" class="flex gap-2 mt-1">
-                        <!-- Summary thumbnails injected here -->
-                    </div>
-                </div>
-            </div>
-            <div class="flex items-center gap-3">
-                <span class="material-symbols-outlined text-primary">style</span>
-                <div>
-                    <p class="text-xs text-muted-text">Estilo elegido</p>
-                    <p id="summary-style" class="font-bold text-sm capitalize mt-0.5"></p>
-                </div>
-            </div>
-            <div class="flex items-center gap-3">
-                <span class="material-symbols-outlined text-primary">chat</span>
-                <div>
-                    <p class="text-xs text-muted-text">Tu descripci├│n</p>
-                    <p id="summary-prompt" class="text-sm text-slate-300 mt-0.5 italic"></p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Quality Selection -->
-        <div class="space-y-4 mb-6">
-            <h3 class="font-bold text-sm uppercase tracking-wider text-muted-text">Calidad del Render</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- Normal Quality -->
-                <div class="quality-card selected bg-surface-dark p-5 rounded-2xl border border-border-dark cursor-pointer transition-all hover:border-primary/40" onclick="selectQuality('normal')">
-                    <div class="flex items-start justify-between mb-3">
-                        <div class="flex items-center gap-3">
-                            <div class="check-mark size-6 rounded-md border-2 border-border-dark flex items-center justify-center flex-shrink-0"></div>
-                            <div>
-                                <p class="font-black text-slate-100">Calidad B├ísica</p>
-                                <p class="text-[10px] text-muted-text">Generaci├│n r├ípida</p>
-                            </div>
-                        </div>
-                        <div class="text-right">
-                            <span class="text-xl font-black text-primary">1</span>
-                            <span class="text-xs text-muted-text block -mt-1">cr├®dito</span>
-                        </div>
-                    </div>
-                    <ul class="space-y-1 ml-9">
-                        <li class="text-[11px] text-slate-400 flex items-center gap-1.5"><span class="material-symbols-outlined text-[13px] text-green-400">check</span>Mismo espacio, nuevo estilo</li>
-                        <li class="text-[11px] text-slate-400 flex items-center gap-1.5"><span class="material-symbols-outlined text-[13px] text-green-400">check</span>Resoluci├│n est├índar</li>
-                        <li class="text-[11px] text-slate-400 flex items-center gap-1.5"><span class="material-symbols-outlined text-[13px] text-green-400">check</span>Resultado en ~30 seg</li>
-                    </ul>
-                </div>
-                <!-- High Quality -->
-                <div class="quality-card bg-surface-dark p-5 rounded-2xl border border-primary/20 cursor-pointer transition-all hover:border-primary/60 relative overflow-hidden" onclick="selectQuality('high')">
-                    <div class="absolute top-0 right-0 bg-primary text-background-dark text-[9px] font-black px-2 py-1 rounded-bl-xl">RECOMENDADO</div>
-                    <div class="flex items-start justify-between mb-3">
-                        <div class="flex items-center gap-3">
-                            <div class="check-mark size-6 rounded-md border-2 border-border-dark flex items-center justify-center flex-shrink-0"></div>
-                            <div>
-                                <p class="font-black text-slate-100">Alta Fidelidad</p>
-                                <p class="text-[10px] text-muted-text">4K ┬À Realismo m├íximo</p>
-                            </div>
-                        </div>
-                        <div class="text-right">
-                            <span class="text-xl font-black text-primary">2</span>
-                            <span class="text-xs text-muted-text block -mt-1">cr├®ditos</span>
-                        </div>
-                    </div>
-                    <ul class="space-y-1 ml-9">
-                        <li class="text-[11px] text-slate-400 flex items-center gap-1.5"><span class="material-symbols-outlined text-[13px] text-green-400">check</span>Todo lo de B├ísica +</li>
-                        <li class="text-[11px] text-slate-400 flex items-center gap-1.5"><span class="material-symbols-outlined text-[13px] text-primary">check</span>Texturas ultra-detalladas (madera, tela, cristal)</li>
-                        <li class="text-[11px] text-slate-400 flex items-center gap-1.5"><span class="material-symbols-outlined text-[13px] text-primary">check</span>Iluminaci├│n global precisa</li>
-                        <li class="text-[11px] text-slate-400 flex items-center gap-1.5"><span class="material-symbols-outlined text-[13px] text-primary">check</span>Calidad estudio fotogr├ífico</li>
-                    </ul>
-                </div>
-            </div>
-            <p id="quality-cost-hint" class="text-center text-xs text-muted-text">Selecci├│n actual: <span id="quality-cost-label" class="text-primary font-bold">1 cr├®dito (B├ísica)</span></p>
-        </div>
-
-
-        <button id="btn-generate" class="w-full bg-gradient-to-r from-primary to-orange-500 hover:opacity-90 text-background-dark font-black py-4 rounded-xl text-lg transition-all flex items-center justify-center gap-2" onclick="generateRender()">
-            <span class="material-symbols-outlined">auto_awesome</span> Pagar y Generar Render
-        </button>
-
-        <div class="mt-4 flex justify-start">
-            <button onclick="goToStep2()" class="text-muted-text hover:text-slate-100 font-semibold py-2 px-4 transition-colors">ÔåÉ Volver</button>
-        </div>
-
-        <!-- Generation Progress -->
-        <div id="gen-progress" class="hidden mt-8 space-y-4 fade-in">
-            <div id="gen-step-pay" class="flex items-center gap-3 text-slate-400">
-                <div class="spin-wrap size-5 flex items-center justify-center">
-                    <svg id="spin-pay" class="spin size-5 text-primary hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
-                    <span id="check-pay" class="material-symbols-outlined text-green-500 hidden text-sm">check_circle</span>
-                </div>
-                <span id="label-pay" class="text-sm">Procesando pagoÔÇª</span>
-            </div>
-            <div id="gen-step-ai" class="flex items-center gap-3 text-slate-400">
-                <div class="size-5 flex items-center justify-center">
-                    <svg id="spin-ai" class="spin size-5 text-primary hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
-                    <span id="check-ai" class="material-symbols-outlined text-green-500 hidden text-sm">check_circle</span>
-                </div>
-                <span id="label-ai" class="text-sm">Generando render con Vertex AI ImagenÔÇª</span>
-            </div>
-        </div>
-
-        <!-- RESULT PANEL -->
-        <div id="result-panel" class="hidden mt-10 fade-in space-y-8">
-            <!-- Generated image -->
-            <div class="text-center">
-                <h2 class="text-2xl font-black text-primary mb-4">­ƒÄ¿ Tu render est├í listo</h2>
-                <img id="result-image" src="" alt="Render generado" class="w-full rounded-2xl border-2 border-primary/30 shadow-2xl shadow-primary/10"/>
-                <a id="download-btn" class="mt-4 inline-flex items-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 font-semibold py-2 px-6 rounded-xl transition-all text-sm" download="render-habitacion.png">
-                    <span class="material-symbols-outlined text-sm">download</span> Descargar render
-                </a>
-            </div>
-
-            <!-- Proposal -->
-            <div class="bg-surface-dark rounded-2xl border border-border-dark p-8 space-y-6">
-                <h3 class="text-xl font-black text-slate-100 flex items-center gap-2">
-                    <span class="material-symbols-outlined text-primary">description</span>
-                    Propuesta de Dise├▒o Completa
-                </h3>
-
-                <!-- Room analysis -->
-                <div class="proposal-section fade-in" id="prop-analysis-wrap">
-                    <h4 class="font-bold text-sm uppercase tracking-wider text-muted-text mb-2">­ƒÅá An├ílisis de tu habitaci├│n (Gemini Vision)</h4>
-                    <p id="prop-analysis" class="text-slate-300 text-sm leading-relaxed whitespace-pre-line"></p>
-                </div>
-
-                <!-- Style description -->
-                <div class="proposal-section fade-in">
-                    <h4 class="font-bold text-sm uppercase tracking-wider text-muted-text mb-2">­ƒÄ¿ Estilo aplicado: <span id="prop-style-name" class="text-primary capitalize"></span></h4>
-                    <p id="prop-style-desc" class="text-slate-300 text-sm leading-relaxed"></p>
-                </div>
-
-                <!-- What changes were made -->
-                <div class="proposal-section fade-in">
-                    <h4 class="font-bold text-sm uppercase tracking-wider text-muted-text mb-2">Ô£¿ Cambios propuestos en el render</h4>
-                    <ul id="prop-changes" class="text-slate-300 text-sm space-y-1.5 list-none">
-                    </ul>
-                </div>
-
-                <!-- Full prompt used -->
-                <div class="bg-background-dark/60 rounded-xl p-4">
-                    <h4 class="font-bold text-xs uppercase tracking-wider text-muted-text mb-2">Prompt enviado a Vertex AI Imagen</h4>
-                    <p id="prop-prompt" class="text-xs text-slate-500 leading-relaxed font-mono"></p>
-                </div>
-
-                <!-- Action Buttons: PDF and Share -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-border-dark">
-                    <button id="btn-pdf" onclick="generatePDF()" class="flex items-center justify-center gap-2 bg-slate-100 hover:bg-white text-background-dark font-bold py-3 rounded-xl transition-all">
-                        <span class="material-symbols-outlined">description</span> Descargar Propuesta (PDF)
+<main class="flex-1 flex flex-col items-center justify-start py-12 px-6 max-w-5xl mx-auto w-full">
+<!-- Progress Indicator Mobile -->
+<div class="w-full mb-8 space-y-3 md:hidden">
+<div class="flex justify-between items-end">
+<p class="text-primary font-bold">Paso 1: Sube tu Foto</p>
+<p class="text-muted-text text-sm">33% completado</p>
+</div>
+<div class="h-2 w-full bg-surface-dark rounded-full overflow-hidden">
+<div class="h-full bg-primary w-1/3"></div>
+</div>
+</div>
+<!-- Main Content Step 1 -->
+<div class="w-full flex flex-col items-center text-center mb-12">
+<h1 class="text-4xl md:text-5xl font-black tracking-tighter mb-4 text-slate-100">Sube una foto de tu habitación</h1>
+<p class="text-muted-text text-lg max-w-2xl">Para obtener el mejor renderizado, asegúrate de que la habitación esté bien iluminada y se vea el mayor espacio posible.</p>
+</div>
+<!-- Upload Zone -->
+<div class="w-full bg-surface-dark rounded-xl border-2 border-dashed border-border-dark p-12 flex flex-col items-center justify-center gap-6 hover:border-primary/50 transition-colors group cursor-pointer relative overflow-hidden">
+<div class="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="size-20 rounded-full bg-primary/20 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined !text-5xl">photo_camera</span>
+</div>
+<div class="space-y-2 text-center relative z-10">
+<h3 class="text-xl font-bold">Arrastra tu imagen aquí</h3>
+<p class="text-muted-text">O haz clic para seleccionar un archivo desde tu dispositivo</p>
+<p class="text-xs text-muted-text/60 mt-2">Formatos aceptados: JPG, PNG, WEBP (Máx. 10MB)</p>
+</div>
+<button class="bg-primary hover:bg-primary/90 text-background-dark font-bold py-3 px-8 rounded-lg shadow-lg shadow-primary/20 transition-all relative z-10">
+                        Seleccionar archivo
                     </button>
-                    <!-- Share Dropdown -->
-                    <div class="relative group">
-                        <button class="w-full flex items-center justify-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 font-bold py-3 rounded-xl transition-all">
-                            <span class="material-symbols-outlined">share</span> Compartir Dise├▒o
+</div>
+<!-- Tips Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12 w-full">
+<div class="bg-surface-dark p-6 rounded-xl border border-border-dark flex items-start gap-4">
+<span class="material-symbols-outlined text-primary">light_mode</span>
+<div>
+<h4 class="font-bold text-sm">Buena iluminación</h4>
+<p class="text-xs text-muted-text mt-1">Enciende las luces o abre las cortinas para captar detalles.</p>
+</div>
+</div>
+<div class="bg-surface-dark p-6 rounded-xl border border-border-dark flex items-start gap-4">
+<span class="material-symbols-outlined text-primary">straighten</span>
+<div>
+<h4 class="font-bold text-sm">Ángulo amplio</h4>
+<p class="text-xs text-muted-text mt-1">Toma la foto desde una esquina para mostrar todo el espacio.</p>
+</div>
+</div>
+<div class="bg-surface-dark p-6 rounded-xl border border-border-dark flex items-start gap-4">
+<span class="material-symbols-outlined text-primary">person_off</span>
+<div>
+<h4 class="font-bold text-sm">Sin distracciones</h4>
+<p class="text-xs text-muted-text mt-1">Evita que salgan personas, mascotas u objetos en movimiento.</p>
+</div>
+</div>
+</div>
+<!-- Step 2 Teaser -->
+<div class="w-full mt-24 border-t border-border-dark pt-12">
+<div class="flex justify-between items-end mb-8">
+<div>
+<h2 class="text-2xl font-bold">Paso 2: Elige tu Estilo</h2>
+<p class="text-muted-text">Personaliza el look final de tu habitación</p>
+</div>
+<span class="text-primary font-bold text-sm">Próximo paso</span>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 opacity-50 grayscale hover:grayscale-0 transition-all cursor-not-allowed">
+<div class="space-y-2">
+<div class="aspect-square bg-surface-dark rounded-lg overflow-hidden border border-border-dark shadow-sm">
+<div class="w-full h-full bg-cover bg-center" data-alt="Estilo moderno de interior" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCeD0jph8zKQ1yU-xPc9xOlRAfGHYuQqGRPpz1lxowg2_VHpwHrkDwQpQmnUI-j_Xt__rUCnoS4rltEBnnKQSEX6BtXuPsTA8GQ0YgaGo_kHF16t4G_LquFNWy6a0aZTjxhTH7SiKlANz-JiwucCl5UtIQ43wUr4xZLWK5tlU5kDUoi89YQg7j_y34_6gtXjqe2ntF8is3rxS1o74e0UsGolbIpBIL85Pt1EvIMgB68AghrTwH5a7wZdNb_ReCV0Vp1xbSXaSZU0YkR')"></div>
+</div>
+<p class="text-center text-xs font-bold">Moderno</p>
+</div>
+<div class="space-y-2">
+<div class="aspect-square bg-surface-dark rounded-lg overflow-hidden border border-border-dark shadow-sm">
+<div class="w-full h-full bg-cover bg-center" data-alt="Estilo nórdico de interior" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCfrHfWtmToGg9YE3TKWdI7m2dvlldUoO7KOzn0vNZ_lh3oKPigYkWrcFWokGoOyA5ZhLI8aXnDiqIgDN2j8g9v2CdgF24nKi4Fie3HL93OIbpHWW6kkr2RvuOJgFA5jxSdwSATBLhyQcw2GRxura3cELhdkcgxzLSAj1wvNBm1PQ4nJG44L-KNmJJXelXVatVU2sM6i66k9Dg9IXnEfMMepWG_pUa4dSJ4N0FEa3sEYDtp1kiKnD38fymwbOqWteljmgaymCcguLZ-')"></div>
+</div>
+<p class="text-center text-xs font-bold">Nórdico</p>
+</div>
+<div class="space-y-2">
+<div class="aspect-square bg-surface-dark rounded-lg overflow-hidden border border-border-dark shadow-sm">
+<div class="w-full h-full bg-cover bg-center" data-alt="Estilo industrial de interior" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDbnSBo09PLlYq-m8tkTThdITdXW18xNL3_Bezg09pRGd3CQYFcD9ayzN6yoleZDdAuU715IG_KOVnMs6u8wcJ-SfAJXysUQGrG3PbWsu5N4ycIllZRZAxVbnzssuop5IhRd8eiC3fozSmTvnf9HDnszE29dAZYeJcxKdd_V3EKgeQ1_xdQDYorhUxT-VJZNrZYvbKm8gboXDvftla3F45aUe5d6xxorcNGSsh_e7brUa5EPwA_s9fqT5Xgz-KtEMAhop2tahDPP2wj')"></div>
+</div>
+<p class="text-center text-xs font-bold">Industrial</p>
+</div>
+<div class="space-y-2">
+<div class="aspect-square bg-surface-dark rounded-lg overflow-hidden border border-border-dark shadow-sm">
+<div class="w-full h-full bg-cover bg-center" data-alt="Estilo minimalista de interior" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAKoYAX31IeOBw0iQVNMFQnzKJsTzHDEVcFDJTmYN7DdUxZckDvVJgZKFTgSNovhbELCgwPBuAIMN1mu0P90-xO07jp6sZ32KZBwcrzqldr-ZRFQjCgiohAGmNO2xozuQdYvHscydxsMTEPaQx-SIVTUqg8r25F3zpXHuSiJCDd76rIEadSls50jr5Tg1nZWYOjw0K1KOqfPuqoa0hEvTYI62MuAFy88FKXD8jQOPMA57aBnOgDfHP6PRIbD2wRDMzAoJT33G1pEld5')"></div>
+</div>
+<p class="text-center text-xs font-bold">Minimalista</p>
+</div>
+<div class="space-y-2">
+<div class="aspect-square bg-surface-dark rounded-lg overflow-hidden border border-border-dark shadow-sm">
+<div class="w-full h-full bg-cover bg-center" data-alt="Estilo rústico de interior" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCH9CiGpN4jRdFokgGbL0hCn7_C54CSQ-XDPI23aYWhVPsbSDOCa6mpL265WkYq73afA0OLvScdAbpT8WUmvJTmkBxFApkqUI2vekEH6H0kMZ-8TeVTo0-QNJDfzcoGmCV_qj8ixjNqPgouvTEKPKUQsGRtWTtcqnSjbhnHtVKDAAw1Eh7_KnC0VvnqRg2DLd-lUoEZ4TqbZbyuZAE29YCoF6eCzRfllR-lttChdVVzTrgIvQaK2cR-LChWCv__hcEegmdPkX119rBA')"></div>
+</div>
+<p class="text-center text-xs font-bold">Rústico</p>
+</div>
+<div class="space-y-2">
+<div class="aspect-square bg-surface-dark rounded-lg overflow-hidden border border-border-dark shadow-sm">
+<div class="w-full h-full bg-cover bg-center" data-alt="Estilo bohemio de interior" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBT9WjvXbKujhpaFydJOD2z1Wzcfy91UZoRKXW5Cf1HjLZ1qe1fZofn6PU1LMoIg7zHIZnMH6ENS0nuS67cJgySCmzPkOiCqzD6SSWfiOAFGiHwPWnYPLNXzmlz8ahGXf3BJdHti9Nz3XMqrN1gN7mlvXlwDy-xLoq6q24-IizbXMN1t5iUpX27PvK8Ep6e4NHMRMOvBfApgGViR5JYg3Ul6MuJT30Dg_SRl5iZSHp05fRDk8NGTVcMWt3uoBLd5XbrxeqZQAfRUCF8')"></div>
+</div>
+<p class="text-center text-xs font-bold">Bohemio</p>
+</div>
+</div>
+</div>
+<!-- Step 3 Teaser -->
+<div class="w-full mt-16 flex flex-col md:flex-row items-center gap-8 bg-primary/5 rounded-2xl p-8 border border-primary/20">
+<div class="flex-1">
+<h3 class="text-xl font-bold mb-2">Resumen del servicio</h3>
+<p class="text-muted-text">Renderizado AI de alta fidelidad, exportación 4K y 3 variaciones de iluminación.</p>
+</div>
+<div class="flex flex-col items-center md:items-end gap-3">
+<div class="flex items-baseline gap-1">
+<span class="text-4xl font-black text-primary">2,50€</span>
+<span class="text-muted-text">/ foto</span>
+</div>
+<button class="bg-surface-dark border border-border-dark text-slate-300 font-bold py-2 px-6 rounded-lg flex items-center gap-2 cursor-not-allowed opacity-50">
+<span class="material-symbols-outlined text-sm">credit_card</span>
+                            Pagar con tarjeta
                         </button>
-                        <div class="absolute bottom-full left-0 w-full mb-2 bg-surface-dark border border-border-dark rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10 p-2 grid grid-cols-2 gap-2">
-                            <button onclick="shareResult('twitter')" class="flex flex-col items-center gap-1 p-3 rounded-lg hover:bg-white/5 transition-colors">
-                                <span class="material-symbols-outlined text-sky-400">flutter_dash</span>
-                                <span class="text-[10px] font-bold">Twitter</span>
-                            </button>
-                            <button onclick="shareResult('facebook')" class="flex flex-col items-center gap-1 p-3 rounded-lg hover:bg-white/5 transition-colors">
-                                <span class="material-symbols-outlined text-blue-500">facebook</span>
-                                <span class="text-[10px] font-bold">Facebook</span>
-                            </button>
-                            <button onclick="shareResult('whatsapp')" class="flex flex-col items-center gap-1 p-3 rounded-lg hover:bg-white/5 transition-colors">
-                                <span class="material-symbols-outlined text-green-500">chat</span>
-                                <span class="text-[10px] font-bold">WhatsApp</span>
-                            </button>
-                            <button onclick="shareResult('pinterest')" class="flex flex-col items-center gap-1 p-3 rounded-lg hover:bg-white/5 transition-colors">
-                                <span class="material-symbols-outlined text-red-500">push_pin</span>
-                                <span class="text-[10px] font-bold">Pinterest</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="flex gap-4">
-                <button onclick="goToStep1()" class="flex-1 border border-border-dark hover:border-primary/40 text-muted-text hover:text-primary font-semibold py-3 rounded-xl transition-all">
-                    Nuevo render
-                </button>
-                <a href="03-dashboard.html" class="flex-1 bg-surface-dark hover:bg-border-dark border border-border-dark font-semibold py-3 rounded-xl transition-all text-center">
-                    Ver mis renders
-                </a>
-            </div>
-        </div>
-    </section>
-
+</div>
+</div>
 </main>
-
-<script>
-// ÔöÇÔöÇ Firebase Config ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
-const firebaseConfig = {
-  projectId: "gen-lang-client-0426824151",
-  appId: "1:124806819551:web:1c90d1154b458fa064036a",
-  storageBucket: "gen-lang-client-0426824151.firebasestorage.app",
-  apiKey: "AIzaSyDj99qdmDt4GiVeRkvCSfTOSDw3uqD-_Ew",
-  authDomain: "gen-lang-client-0426824151.firebaseapp.com",
-  messagingSenderId: "124806819551"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-const auth = firebase.auth();
-
-auth.onAuthStateChanged(async (user) => {
-    if (!user) {
-        window.location.replace('01-landing-page.html');
-        return;
-    }
-
-    // Real-time listener for credits
-    db.collection('users').doc(user.uid).onSnapshot(doc => {
-        if (doc.exists) {
-            const credits = doc.data().credits || 0;
-            const creditEl = document.getElementById('header-credits-count');
-            const buyBtn = document.getElementById('header-buy-credits-btn');
-            if (creditEl) creditEl.textContent = credits;
-            if (buyBtn) {
-                // Show buy button if credits are low (e.g., 2 or less)
-                if (credits <= 2) buyBtn.classList.remove('hidden');
-                else buyBtn.classList.add('hidden');
-            }
-        }
-    }, err => console.error("Credit listener error:", err));
-
-    try {
-        const doc = await db.collection('users').doc(user.uid).get();
-        if (doc.exists && doc.data().isAdmin) {
-            const adminLink = document.getElementById('admin-link-container');
-            if (adminLink) adminLink.classList.remove('hidden');
-        }
-    } catch (e) {
-        console.error("Admin check error:", e);
-    }
-
-    // Load dynamic prices
-    fetchPrices();
-
-    const token = await user.getIdToken();
-    localStorage.setItem('rr_token', token);
-    document.documentElement.classList.add('auth-checked');
-});
-
-function getAuthHeaders() {
-    const token = localStorage.getItem('rr_token');
-    return token ? { 'Authorization': `Bearer ${token}` } : {};
-}
-
-// ÔöÇÔöÇ Disclaimer Modal ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
-const disclaimerModal = document.getElementById('disclaimer-modal');
-const disclaimerCheck = document.getElementById('disclaimer-check');
-const disclaimerConfirm = document.getElementById('disclaimer-confirm');
-if (!sessionStorage.getItem('disclaimer_accepted')) {
-    disclaimerModal.style.display = 'flex';
-} else {
-    disclaimerModal.style.display = 'none';
-}
-disclaimerCheck.addEventListener('change', () => {
-    if (disclaimerCheck.checked) {
-        disclaimerConfirm.disabled = false;
-        disclaimerConfirm.classList.remove('bg-primary/30','text-primary/50','cursor-not-allowed');
-        disclaimerConfirm.classList.add('bg-primary','text-background-dark','hover:bg-primary/90','cursor-pointer');
-    } else {
-        disclaimerConfirm.disabled = true;
-        disclaimerConfirm.classList.add('bg-primary/30','text-primary/50','cursor-not-allowed');
-        disclaimerConfirm.classList.remove('bg-primary','text-background-dark','hover:bg-primary/90','cursor-pointer');
-    }
-});
-function acceptDisclaimer() {
-    sessionStorage.setItem('disclaimer_accepted', '1');
-    disclaimerModal.style.display = 'none';
-}
-
-// ÔöÇÔöÇ State ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
-let state = {
-    imagesBase64: [], // Store up to 3 images
-    primaryIndex: 0,  // Index of the main photo for the render
-    roomData: null,   // Store JSON analysis
-    selectedStyle: null,
-    selectedQuality: 'normal',
-    prices: {
-        normal: 2.50,
-        high: 5.00
-    },
-    currentStep: 1,
-};
-
-async function fetchPrices() {
-    try {
-        const res = await fetch('/api/admin/pricing');
-        const data = await res.json();
-        if (data.render_normal) state.prices.normal = data.render_normal.price;
-        if (data.render_high) state.prices.high = data.render_high.price;
-        
-        // Update UI
-        document.getElementById('price-display-normal').textContent = `${state.prices.normal.toFixed(2).replace('.', ',')}Ôé¼`;
-        document.getElementById('price-display-high').textContent = `${state.prices.high.toFixed(2).replace('.', ',')}Ôé¼`;
-    } catch (e) {
-        console.error("Error fetching prices:", e);
-    }
-}
-
-function selectQuality(q) {
-    state.selectedQuality = q;
-    document.querySelectorAll('.quality-card').forEach(c => c.classList.remove('selected'));
-    const cards = document.querySelectorAll('.quality-card');
-    if (q === 'normal') cards[0].classList.add('selected');
-    else cards[1].classList.add('selected');
-}
-
-// ÔöÇÔöÇ Upload Zone ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
-const uploadZone = document.getElementById('upload-zone');
-const fileInput = document.getElementById('file-input');
-const uploadPlaceholder = document.getElementById('upload-placeholder');
-const uploadPreview = document.getElementById('upload-preview');
-const previewGrid = document.getElementById('preview-grid');
-const btnToStyle = document.getElementById('btn-to-style');
-const analysisPanel = document.getElementById('analysis-panel');
-
-uploadZone.addEventListener('click', (e) => {
-    if (e.target.id === 'change-photo-btn' || e.target.closest('.photo-thumb')) return;
-    fileInput.click();
-});
-document.getElementById('change-photo-btn').addEventListener('click', () => {
-    resetUpload();
-    fileInput.click();
-});
-
-uploadZone.addEventListener('dragover', (e) => { e.preventDefault(); uploadZone.classList.add('dragover'); });
-uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
-uploadZone.addEventListener('drop', (e) => {
-    e.preventDefault();
-    uploadZone.classList.remove('dragover');
-    const files = Array.from(e.dataTransfer.files).slice(0, 3);
-    if (files.length > 0) handleFiles(files);
-});
-
-fileInput.addEventListener('change', () => {
-    const files = Array.from(fileInput.files).slice(0, 3);
-    if (files.length > 0) handleFiles(files);
-});
-
-function resetUpload() {
-    state.imagesBase64 = [];
-    state.primaryIndex = 0;
-    state.roomData = null;
-    uploadPlaceholder.classList.remove('hidden');
-    uploadPreview.classList.add('hidden');
-    uploadZone.classList.remove('has-image');
-    analysisPanel.classList.add('hidden');
-    setBtnEnabled(btnToStyle, false);
-    fileInput.value = '';
-    previewGrid.innerHTML = '';
-}
-
-async function handleFiles(files) {
-    state.imagesBase64 = [];
-    state.primaryIndex = 0;
-    previewGrid.innerHTML = '';
-
-    for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        if (file.size > 10 * 1024 * 1024) { alert(`El archivo ${file.name} supera los 10 MB`); continue; }
-
-        const dataUrl = await new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onload = (e) => resolve(e.target.result);
-            reader.readAsDataURL(file);
-        });
-
-        const idx = state.imagesBase64.length;
-        state.imagesBase64.push(dataUrl.split(',')[1]);
-
-        // Build photo-thumb with primary selector
-        const thumb = document.createElement('div');
-        thumb.className = 'photo-thumb' + (idx === 0 ? ' primary' : '');
-        thumb.dataset.idx = idx;
-        thumb.innerHTML = `
-            <img src="${dataUrl}" class="w-full h-40 object-cover" alt="Foto ${idx + 1}">
-            <span class="primary-badge">Ôÿà Principal</span>
-            <span class="select-hint">Usar como principal</span>
-        `;
-        thumb.addEventListener('click', () => setPrimaryPhoto(idx));
-        previewGrid.appendChild(thumb);
-    }
-
-    if (state.imagesBase64.length > 0) {
-        uploadPlaceholder.classList.add('hidden');
-        uploadPreview.classList.remove('hidden');
-        uploadZone.classList.add('has-image');
-        await analyzeImage();
-    }
-}
-
-function setPrimaryPhoto(idx) {
-    state.primaryIndex = idx;
-    document.querySelectorAll('.photo-thumb').forEach(t => t.classList.remove('primary'));
-    const selected = previewGrid.querySelector(`.photo-thumb[data-idx="${idx}"]`);
-    if (selected) selected.classList.add('primary');
-    
-    // RE-ANALIZAR para que la geometr├¡a coincida con la nueva foto principal
-    analyzeImage();
-}
-
-async function analyzeImage() {
-    analysisPanel.classList.remove('hidden');
-    document.getElementById('analysis-loading').classList.remove('hidden');
-    document.getElementById('analysis-result').classList.add('hidden');
-    document.getElementById('analysis-error').classList.add('hidden');
-
-    try {
-        // REORDENAR: Ponemos la foto principal al principio de la lista para el servidor
-        const orderedImages = [...state.imagesBase64];
-        if (state.primaryIndex > 0) {
-            const primary = orderedImages.splice(state.primaryIndex, 1)[0];
-            orderedImages.unshift(primary);
-        }
-
-        const res = await fetch('/api/analyze-image', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                ...getAuthHeaders()
-            },
-            body: JSON.stringify({ images_base64: orderedImages })
-        });
-        const data = await res.json();
-        document.getElementById('analysis-loading').classList.add('hidden');
-        if (res.ok && data.detailed_description_es) {
-            state.roomData = data;
-            const analysisHtml = `
-                <div class="grid grid-cols-2 gap-4 mb-4">
-                    <div class="bg-background-dark/40 p-2 rounded">
-                        <p class="text-[10px] text-muted-text uppercase font-bold">Tipo de Habitaci├│n</p>
-                        <p class="text-sm font-bold text-white">${data.room_type || 'Detectando...'}</p>
-                    </div>
-                    <div class="bg-background-dark/40 p-2 rounded">
-                        <p class="text-[10px] text-muted-text uppercase font-bold">Tama├▒o Estimado</p>
-                        <p class="text-sm font-bold text-white">${data.approx_size || 'Detectando...'}</p>
-                    </div>
-                </div>
-                <p class="text-slate-300 text-sm leading-relaxed">${data.detailed_description_es}</p>
-            `;
-            document.getElementById('analysis-text').innerHTML = analysisHtml;
-            document.getElementById('analysis-result').classList.remove('hidden');
-
-            // ÔöÇÔöÇ Image Validation UI ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
-            const v = data.image_validation;
-            if (v) {
-                const score = v.viability_score ?? 100;
-                const ok = v.viability_ok !== false; // default allow if field missing
-                const issues = v.viability_issues_es || [];
-
-                // Badge color
-                const badge = document.getElementById('validation-badge');
-                const icon = document.getElementById('validation-icon');
-                const label = document.getElementById('validation-label');
-                const scoreEl = document.getElementById('validation-score');
-
-                badge.className = 'flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-black';
-                if (score >= 90) {
-                    badge.classList.add('bg-green-500/15', 'text-green-400', 'border', 'border-green-500/30');
-                    icon.textContent = 'check_circle';
-                    label.textContent = 'Perfecta para render';
-                } else if (score >= 70) {
-                    badge.classList.add('bg-primary/15', 'text-primary', 'border', 'border-primary/30');
-                    icon.textContent = 'warning';
-                    label.textContent = 'V├ílida con advertencias';
-                } else if (score >= 40) {
-                    badge.classList.add('bg-orange-500/15', 'text-orange-400', 'border', 'border-orange-500/30');
-                    icon.textContent = 'report_problem';
-                    label.textContent = 'Calidad baja';
-                } else {
-                    badge.classList.add('bg-red-500/15', 'text-red-400', 'border', 'border-red-500/30');
-                    icon.textContent = 'cancel';
-                    label.textContent = 'No apta para render';
-                }
-                scoreEl.textContent = `(${score}/100)`;
-
-                // Issues list
-                const issuesEl = document.getElementById('validation-issues');
-                if (issues.length > 0) {
-                    issuesEl.innerHTML = issues.map(i =>
-                        `<div class="flex items-start gap-2 text-xs text-orange-300">
-                            <span class="material-symbols-outlined text-sm mt-0.5 flex-shrink-0">info</span>
-                            <span>${i}</span>
-                        </div>`
-                    ).join('');
-                    issuesEl.classList.remove('hidden');
-                } else {
-                    issuesEl.classList.add('hidden');
-                }
-
-                // Mini checks grid
-                const checks = [
-                    { key: 'is_interior_room', label: 'Interior' },
-                    { key: 'has_clear_perspective', label: 'Perspectiva' },
-                    { key: 'is_not_blurry', label: 'Nitidez' },
-                    { key: 'sufficient_coverage', label: 'Cobertura' },
-                    { key: 'no_heavy_distortion', label: 'Sin distorsi├│n' },
-                    { key: 'is_single_room', label: 'Una habitaci├│n' },
-                ];
-                document.getElementById('validation-checks').innerHTML = checks.map(c => {
-                    const pass = v[c.key] !== false;
-                    return `<div class="flex items-center gap-1 text-[10px] ${pass ? 'text-green-400' : 'text-red-400'}">
-                        <span class="material-symbols-outlined text-[11px]">${pass ? 'check' : 'close'}</span>
-                        ${c.label}
-                    </div>`;
-                }).join('');
-
-                document.getElementById('image-validation-panel').classList.remove('hidden');
-
-                // Block or allow advancing
-                if (!ok) {
-                    setBtnEnabled(btnToStyle, false);
-                    // Show specific block message
-                    const errorEl = document.getElementById('analysis-error');
-                    const errorText = document.getElementById('analysis-error-text');
-                    errorText.textContent = 'La imagen no es apta para generar un render con el mismo ├íngulo. Por favor, sube una foto diferente.';
-                    errorEl.classList.remove('hidden');
-                    return; // Don't set btn enabled below
-                }
-            }
-
-        } else {
-            document.getElementById('analysis-error-text').textContent = data.error || 'Error del servicio';
-            document.getElementById('analysis-error').classList.remove('hidden');
-        }
-    } catch (err) {
-        document.getElementById('analysis-loading').classList.add('hidden');
-        document.getElementById('analysis-error-text').textContent = 'Sin conexi├│n al servidor';
-        document.getElementById('analysis-error').classList.remove('hidden');
-    }
-    setBtnEnabled(btnToStyle, true);
-}
-
-// ÔöÇÔöÇ Style selector ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
-function selectStyle(card) {
-    document.querySelectorAll('.style-card').forEach(c => c.classList.remove('selected'));
-    card.classList.add('selected');
-    state.selectedStyle = card.dataset.style;
-    showRecommendations();
-    setBtnEnabled(document.getElementById('btn-to-generate'), true);
-}
-
-function showRecommendations() {
-    if (!state.roomData || !state.roomData.recommendations) return;
-    
-    document.getElementById('rec-style-name').textContent = state.selectedStyle;
-    document.getElementById('recommendations-section').classList.remove('hidden');
-    
-    const addList = document.getElementById('rec-add-list');
-    const removeList = document.getElementById('rec-remove-list');
-    
-    addList.innerHTML = '';
-    removeList.innerHTML = '';
-    
-    state.roomData.recommendations.add_es.forEach((item, i) => {
-        const div = document.createElement('label');
-        div.className = 'flex items-center gap-3 p-3 bg-background-dark/20 border border-white/5 rounded-xl cursor-pointer hover:bg-white/5 transition-all group';
-        div.innerHTML = `
-            <div class="relative flex items-center justify-center">
-                <input type="checkbox" class="peer appearance-none size-5 rounded-md border border-white/20 bg-transparent checked:bg-green-500 checked:border-green-500 transition-all cursor-pointer" data-type="add" data-item="${item}" checked>
-                <span class="material-symbols-outlined text-[14px] text-white absolute opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none">check</span>
-            </div>
-            <span class="text-sm text-slate-300 group-hover:text-white transition-colors capitalize">${item}</span>
-        `;
-        addList.appendChild(div);
-    });
-    
-    state.roomData.recommendations.remove_es.forEach((item, i) => {
-        const div = document.createElement('label');
-        div.className = 'flex items-center gap-3 p-3 bg-background-dark/20 border border-white/5 rounded-xl cursor-pointer hover:bg-white/5 transition-all group';
-        div.innerHTML = `
-            <div class="relative flex items-center justify-center">
-                <input type="checkbox" class="peer appearance-none size-5 rounded-md border border-white/20 bg-transparent checked:bg-orange-500 checked:border-orange-500 transition-all cursor-pointer" data-type="remove" data-item="${item}" checked>
-                <span class="material-symbols-outlined text-[14px] text-white absolute opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none">close</span>
-            </div>
-            <span class="text-sm text-slate-300 group-hover:text-white transition-colors capitalize">${item}</span>
-        `;
-        removeList.appendChild(div);
-    });
-}
-
-// Pre-select style from URL param
-const urlStyle = new URLSearchParams(location.search).get('style');
-if (urlStyle) {
-    const preCard = document.querySelector(`.style-card[data-style="${urlStyle}"]`);
-    if (preCard) selectStyle(preCard);
-}
-
-// ÔöÇÔöÇ Navigation ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
-function setBtnEnabled(btn, on) {
-    if (on) {
-        btn.disabled = false;
-        btn.classList.remove('bg-primary/30','text-primary/50','cursor-not-allowed');
-        btn.classList.add('bg-primary','text-background-dark','hover:bg-primary/90','cursor-pointer');
-    } else {
-        btn.disabled = true;
-        btn.classList.add('bg-primary/30','text-primary/50','cursor-not-allowed');
-        btn.classList.remove('bg-primary','text-background-dark','hover:bg-primary/90','cursor-pointer');
-    }
-}
-
-function goToStep1() {
-    showSection('section-upload');
-    setActiveStep(1);
-}
-function goToStep2() {
-    if (state.imagesBase64.length === 0) { alert('Por favor, sube al menos una foto.'); return; }
-    showSection('section-style');
-    setActiveStep(2);
-}
-function goToStep3() {
-    if (!state.selectedStyle) { alert('Por favor, elige un estilo.'); return; }
-    // Populate summary
-    const summaryGrid = document.getElementById('summary-photos');
-    summaryGrid.innerHTML = '';
-    state.imagesBase64.forEach((imgB64, idx) => {
-        const wrap = document.createElement('div');
-        wrap.className = 'relative';
-        const img = document.createElement('img');
-        img.src = `data:image/jpeg;base64,${imgB64}`;
-        img.className = "h-16 w-16 rounded-lg object-cover";
-        img.alt = `Foto ${idx + 1}`;
-        wrap.appendChild(img);
-        if (idx === state.primaryIndex) {
-            const badge = document.createElement('span');
-            badge.className = 'absolute -top-1 -right-1 bg-primary text-background-dark text-[8px] font-black px-1.5 py-0.5 rounded-full';
-            badge.textContent = 'Ôÿà';
-            wrap.appendChild(badge);
-        }
-        summaryGrid.appendChild(wrap);
-    });
-    document.getElementById('summary-style').textContent = state.selectedStyle.charAt(0).toUpperCase() + state.selectedStyle.slice(1);
-    const roomInfo = state.roomData ? `${state.roomData.room_type} (${state.roomData.approx_size})` : '';
-    document.getElementById('summary-style').innerHTML = `${state.selectedStyle.charAt(0).toUpperCase() + state.selectedStyle.slice(1)} <span class="text-xs text-muted-text ml-2">${roomInfo}</span>`;
-    document.getElementById('summary-prompt').textContent = document.getElementById('prompt-input').value || '(sin descripci├│n adicional)';
-    showSection('section-generate');
-    setActiveStep(3);
-}
-
-function showSection(id) {
-    ['section-upload','section-style','section-generate'].forEach(s => {
-        document.getElementById(s).classList.add('hidden');
-    });
-    document.getElementById(id).classList.remove('hidden');
-}
-
-function setActiveStep(n) {
-    state.currentStep = n;
-    [1,2,3].forEach(i => {
-        const el = document.getElementById(`step-indicator-${i}`);
-        el.classList.remove('active','done');
-        if (i < n) el.classList.add('done');
-        else if (i === n) el.classList.add('active');
-    });
-}
-
-// ÔöÇÔöÇ Generate ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
-async function generateRender() {
-    const btn = document.getElementById('btn-generate');
-    btn.disabled = true;
-    btn.innerHTML = '<svg class="spin size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> ProcesandoÔÇª';
-
-    const prompt = document.getElementById('prompt-input').value || 'Una habitaci├│n bella y acogedora';
-    const primaryImageB64 = state.imagesBase64[state.primaryIndex] || state.imagesBase64[0] || null;
-
-    const progressPanel = document.getElementById('gen-progress');
-    progressPanel.classList.remove('hidden');
-    const errBoxOld = document.getElementById('gen-error-box');
-    if (errBoxOld) errBoxOld.remove();
-
-    // Reset progress UI
-    document.getElementById('check-pay').classList.add('hidden');
-    document.getElementById('spin-pay').classList.remove('hidden');
-    document.getElementById('label-pay').classList.add('text-primary');
-    document.getElementById('label-pay').classList.remove('text-green-500');
-    
-    document.getElementById('check-ai').classList.add('hidden');
-    document.getElementById('spin-ai').classList.add('hidden');
-    document.getElementById('label-ai').classList.remove('text-primary','text-green-500');
-
-    // Gather checked recommendations
-    const selectedAdd = Array.from(document.querySelectorAll('#rec-add-list input:checked')).map(i => i.dataset.item);
-    const selectedRemove = Array.from(document.querySelectorAll('#rec-remove-list input:checked')).map(i => i.dataset.item);
-    
-    let enhancedPrompt = prompt;
-    if (selectedAdd.length > 0) enhancedPrompt += ". PLEASE ADD: " + selectedAdd.join(", ");
-    if (selectedRemove.length > 0) enhancedPrompt += ". PLEASE REMOVE/REPLACE: " + selectedRemove.join(", ");
-
-    try {
-        // Step 1: Real credit check via generation attempt
-        const currentUser = firebase.auth().currentUser;
-        if (currentUser) {
-            const freshToken = await currentUser.getIdToken(true);
-            localStorage.setItem('rr_token', freshToken);
-        }
-
-        const res = await fetch('/api/generate-image', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                ...getAuthHeaders()
-            },
-            body: JSON.stringify({
-                prompt: enhancedPrompt,
-                room_data: state.roomData,
-                style: state.selectedStyle,
-                quality: state.selectedQuality,
-                image_base64: primaryImageB64
-            })
-        });
-        
-        const data = await res.json();
-
-        if (res.status === 402) {
-            // Out of credits
-            document.getElementById('spin-pay').classList.add('hidden');
-            document.getElementById('label-pay').textContent = 'Pago Requerido';
-            document.getElementById('label-pay').classList.replace('text-primary', 'text-amber-500');
-            
-            btn.disabled = false;
-            btn.innerHTML = '<span class="material-symbols-outlined">payments</span> Comprar Cr├®ditos';
-            btn.onclick = () => window.open('modal-compra.html?error=insufficient_credits', 'Purchase', 'width=1000,height=800');
-            
-            const errBox = document.createElement('div');
-            errBox.id = 'gen-error-box';
-            errBox.className = 'mt-4 bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 text-amber-400 text-sm flex items-start gap-2 fade-in';
-            errBox.innerHTML = `<span class="material-symbols-outlined text-sm mt-0.5 flex-shrink-0">toll</span><div><strong>No tienes cr├®ditos suficientes:</strong><br>Necesitas al menos 1 cr├®dito para generar este render. <a href="modal-compra.html?error=insufficient_credits" target="_blank" class="underline font-bold">Haz clic aqu├¡ para a├▒adir cr├®ditos.</a></div>`;
-            progressPanel.after(errBox);
-            return;
-        }
-
-        if (!res.ok) throw new Error(data.error || 'Error generando imagen');
-
-        // Success flow
-        document.getElementById('spin-pay').classList.add('hidden');
-        document.getElementById('check-pay').classList.remove('hidden');
-        document.getElementById('label-pay').classList.replace('text-primary', 'text-green-500');
-        
-        document.getElementById('spin-ai').classList.remove('hidden');
-        document.getElementById('label-ai').classList.add('text-primary');
-
-        // In a real app, the AI part is already done by the time /api/generate-image returns.
-        // We just simulate the feeling of it finishing for the UI steps.
-        setTimeout(() => {
-            document.getElementById('spin-ai').classList.add('hidden');
-            document.getElementById('check-ai').classList.remove('hidden');
-            document.getElementById('label-ai').classList.replace('text-primary', 'text-green-500');
-            showResult(data, prompt);
-            btn.disabled = false;
-            btn.innerHTML = '<span class="material-symbols-outlined">auto_awesome</span> Generar Otro';
-        }, 1500);
-
-    } catch(err) {
-        document.getElementById('spin-pay').classList.add('hidden');
-        document.getElementById('spin-ai').classList.add('hidden');
-        btn.disabled = false;
-        btn.innerHTML = '<span class="material-symbols-outlined">auto_awesome</span> Reintentar';
-        const errBox = document.createElement('div');
-        errBox.id = 'gen-error-box';
-        errBox.className = 'mt-4 bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-red-400 text-sm flex items-start gap-2 fade-in';
-        errBox.innerHTML = `<span class="material-symbols-outlined text-sm mt-0.5 flex-shrink-0">error</span><div><strong>Error al generar:</strong><br>${err.message}</div>`;
-        progressPanel.after(errBox);
-    }
-}
-
-// ÔöÇÔöÇ PDF & Sharing ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
-async function generatePDF() {
-    const btn = document.getElementById('btn-pdf');
-    const originalText = btn.innerHTML;
-    btn.disabled = true;
-    btn.innerHTML = '<span class="material-symbols-outlined spin text-sm">sync</span> Generando propuesta...';
-    
-    try {
-        // Build inline render data as fallback when render wasn't saved to Firestore
-        const inlineRenderData = {
-            room_type: state.roomData ? state.roomData.room_type : 'Habitaci├│n',
-            approx_size: state.roomData ? state.roomData.approx_size : '',
-            style: state.selectedStyle || 'moderno',
-            roomData: state.roomData || {},
-            createdAt: new Date().toISOString()
-        };
-
-        const payload = {
-            renderId: state.lastRenderId || null,
-            // Always send renderData as fallback (used when render is not found in Firestore)
-            renderData: inlineRenderData
-        };
-
-        const res = await fetch('/api/generate-pdf', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
-            body: JSON.stringify(payload)
-        });
-        const data = await res.json();
-        if (data.success) {
-            if (data.pdfUrl) {
-                window.open(data.pdfUrl, '_blank');
-            } else if (data.pdfBase64) {
-                // Fallback: open from base64 when Storage is unavailable
-                const byteChars = atob(data.pdfBase64);
-                const byteArr = new Uint8Array(byteChars.length);
-                for (let i = 0; i < byteChars.length; i++) byteArr[i] = byteChars.charCodeAt(i);
-                const blob = new Blob([byteArr], { type: 'application/pdf' });
-                const url = URL.createObjectURL(blob);
-                window.open(url, '_blank');
-                setTimeout(() => URL.revokeObjectURL(url), 60000);
-            }
-        } else {
-            alert("Error al generar PDF: " + data.error);
-        }
-    } catch (e) {
-        console.error(e);
-        alert("Fallo de conexi├│n al generar PDF");
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = originalText;
-    }
-}
-
-function shareResult(platform) {
-    const url = encodeURIComponent(window.location.origin);
-    const text = encodeURIComponent("┬íMira el nuevo dise├▒o de mi habitaci├│n con RenderRoom AI! Ô£¿ #InteriorDesign #AI");
-    let shareUrl = "";
-    
-    switch(platform) {
-        case 'twitter': shareUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}`; break;
-        case 'facebook': shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`; break;
-        case 'whatsapp': shareUrl = `https://api.whatsapp.com/send?text=${text}%20${url}`; break;
-        case 'pinterest': shareUrl = `https://pinterest.com/pin/create/button/?url=${url}&description=${text}`; break;
-    }
-    
-    if (shareUrl) window.open(shareUrl, '_blank', 'width=600,height=400');
-}
-
-function showResult(data, userPrompt) {
-    state.lastRenderId = data.image_id;
-    const errBoxOld = document.getElementById('gen-error-box');
-    if (errBoxOld) errBoxOld.remove();
-
-    const imgSrc = `data:image/png;base64,${data.image_base64}`;
-    document.getElementById('result-image').src = imgSrc;
-    document.getElementById('download-btn').href = imgSrc;
-    document.getElementById('result-panel').classList.remove('hidden');
-
-    // Proposal panel
-    const desc = state.roomData ? state.roomData.detailed_description_es : '';
-    if (desc) {
-        document.getElementById('prop-analysis').textContent = desc;
-        document.getElementById('prop-analysis-wrap').classList.remove('hidden');
-    } else {
-        document.getElementById('prop-analysis-wrap').classList.add('hidden');
-    }
-
-    const styleName = state.selectedStyle || 'moderno';
-    document.getElementById('prop-style-name').textContent = styleName;
-    document.getElementById('prop-style-desc').textContent = data.style_description || '';
-
-    // Build proposed changes list
-    const changesList = document.getElementById('prop-changes');
-    changesList.innerHTML = '';
-    const changes = buildChangesList(state.selectedStyle, desc, userPrompt);
-    changes.forEach(c => {
-        const li = document.createElement('li');
-        li.className = 'flex items-start gap-2';
-        li.innerHTML = `<span class="material-symbols-outlined text-primary text-sm mt-0.5">arrow_forward</span><span>${c}</span>`;
-        changesList.appendChild(li);
-    });
-
-    document.getElementById('prop-prompt').textContent = data.full_prompt || '';
-
-    // Scroll to result
-    setTimeout(() => document.getElementById('result-panel').scrollIntoView({ behavior: 'smooth' }), 200);
-}
-
-const STYLE_CHANGES = {
-    moderno: ['Paleta de colores neutros: blanco, gris y beige','Muebles de l├¡neas rectas con patas de metal lacado','Iluminaci├│n empotrada + l├ímparas de dise├▒o contempor├íneo','Eliminaci├│n del exceso de ornamentaci├│n','Materiales: hormig├│n pulido, vidrio, acero'],
-    nordico: ['Tonos c├ílidos de madera natural en suelo y muebles','Textiles acogedores: cojines de lana, alfombra de pelo','Iluminaci├│n suave y difusa con bombillas c├ílidas','Plantas de interior como elemento decorativo clave','Paleta blanco-beige con toques de gris y madera clara'],
-    industrial: ['Paredes de ladrillo visto o efecto hormig├│n','Tuber├¡as y vigas de metal a la vista','Iluminaci├│n con bombillas Edison y pantallas met├ílicas','Mobiliario robusto de madera oscura y metal','Paleta de grises, negros y tonos oxidados'],
-    minimalista: ['Reducci├│n dr├ística de elementos decorativos','Un solo color dominante con acentos monocrom├íticos','Almacenaje oculto para mantener superficies despejadas','Muebles de formas simples y funcionales','Protagonismo del vac├¡o y la luz natural'],
-    rustico: ['Vigas de madera en el techo','Suelo de piedra natural o tarima envejecida','Muebles artesanales o de madera maciza recuperada','Chimenea o estufa como elemento central','Textiles de lino, yute y lana en tonos terrosos'],
-    bohemio: ['Capas de textiles coloridos: tapices, cojines, alfombras','Muebles vintage mezclados con piezas artesanales','Gran cantidad de plantas tropicales','Iluminaci├│n c├ílida con farolillos y guirnaldas','Paleta ecl├®ctica: ocre, terracota, verde esmeralda, ├¡ndigo'],
-};
-
-function buildChangesList(style, analysis, prompt) {
-    const base = STYLE_CHANGES[style] || STYLE_CHANGES.moderno;
-    const extras = [];
-    if (analysis) {
-        if (/poca luz|oscur/i.test(analysis)) extras.push('Incorporaci├│n de espejos para ampliar luminosidad');
-        if (/peque├▒/i.test(analysis)) extras.push('Muebles multifuncionales para optimizar el espacio reducido');
-        if (/desordenada|cluttered/i.test(analysis)) extras.push('Sistema de organizaci├│n y almacenaje integrado');
-    }
-    return [...base, ...extras].slice(0, 7);
-}
-
-// ÔöÇÔöÇ Quality selection ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
-function selectQuality(q) {
-    state.selectedQuality = q;
-    document.querySelectorAll('.quality-card').forEach(card => {
-        card.classList.remove('selected', 'border-primary', 'border-primary/60');
-        card.classList.add('border-border-dark');
-        card.querySelector('.check-mark').classList.remove('bg-primary', 'border-primary');
-        card.querySelector('.check-mark').innerHTML = '';
-    });
-    const chosen = event ? event.currentTarget : document.querySelector(`.quality-card[onclick*="${q}"]`);
-    const all = document.querySelectorAll('.quality-card');
-    all.forEach(c => {
-        const isChosen = c.getAttribute('onclick') && c.getAttribute('onclick').includes(`'${q}'`);
-        if (isChosen) {
-            c.classList.add('selected', 'border-primary');
-            c.classList.remove('border-border-dark');
-            const cm = c.querySelector('.check-mark');
-            cm.classList.add('bg-primary', 'border-primary');
-            cm.innerHTML = '<span class="material-symbols-outlined text-[14px] text-background-dark">check</span>';
-        }
-    });
-    const lbl = document.getElementById('quality-cost-label');
-    if (lbl) {
-        lbl.textContent = q === 'high' ? '2 cr├®ditos (Alta Fidelidad)' : '1 cr├®dito (B├ísica)';
-    }
-}
-</script>
-</body>
-</html>
+<!-- Footer Controls -->
+<footer class="sticky bottom-0 bg-background-dark/90 backdrop-blur-xl border-t border-border-dark p-6">
+<div class="max-w-5xl mx-auto flex justify-between items-center w-full">
+<button class="text-muted-text hover:text-slate-100 font-bold px-6 py-2 transition-colors">
+                        Volver
+                    </button>
+<div class="flex items-center gap-4">
+<p class="text-muted-text text-sm hidden md:block">Sube una foto para continuar</p>
+<button class="bg-primary/20 text-primary cursor-not-allowed font-bold py-3 px-10 rounded-xl border border-primary/30 transition-all opacity-60">
+                            Continuar
+                        </button>
+</div>
+</div>
+</footer>
+</div>
+</div>
+</body></html>

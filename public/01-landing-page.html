@@ -1,663 +1,240 @@
-﻿<!DOCTYPE html>
-<html class="dark" lang="es">
-<head>
-
+<html class="dark"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>RenderRoom AI - Transforma tu Habitaci├│n con IA</title>
-<meta name="description" content="Redise├▒a cualquier habitaci├│n con inteligencia artificial. Sube una foto, elige un estilo y recibe un render profesional en segundos por solo 2,50Ôé¼."/>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <script id="tailwind-config">
-    tailwind.config = {
-        darkMode: "class",
-        theme: {
-            extend: {
-                colors: {
-                    "primary": "#f0a400",
-                    "background-light": "#f8f7f5",
-                    "background-dark": "#0D1117",
-                    "charcoal": "#161B22",
-                    "nebula": "#C9D1D9"
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f0a400", // Amber Gold
+                        "background-dark": "#0D1117", // Navy Black
+                        "charcoal": "#161B22",
+                        "nebula": "#C9D1D9", // Nebula Silver
+                        "lunar": "#F0F6FC", // Lunar White
+                        "accent-violet": "#7c3aed"
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
                 },
-                fontFamily: { "display": ["Inter", "sans-serif"] },
-                borderRadius: { "DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px" },
             },
-        },
+        }
+    </script>
+<style type="text/tailwindcss">
+    @layer utilities {
+        .glass-nav {
+            background: rgba(13, 17, 23, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .amber-glow {
+            box-shadow: 0 0 20px rgba(240, 164, 0, 0.15);
+        }
+        .gradient-border-card {
+            position: relative;
+            background: #161B22;
+        }
+        .gradient-border-card::before {
+            content: "";
+            position: absolute;
+            inset: -1px;
+            z-index: -1;
+            background: linear-gradient(45deg, #f0a400, #7c3aed);
+            border-radius: 1.1rem;
+        }
     }
-</script>
-<style>
-    .glass-nav { background: rgba(13,17,23,0.7); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
-    .amber-glow { box-shadow: 0 0 20px rgba(240,164,0,0.15); }
-    .gradient-border { position: relative; background: #161B22; border-radius: 1.5rem; }
-    .gradient-border::before { content:""; position:absolute; inset:-2px; z-index:-1; background:linear-gradient(45deg,#f0a400,#7c3aed); border-radius:1.6rem; }
-    /* Auth modal */
-    #auth-modal { transition: opacity .3s, visibility .3s; }
-    #auth-modal.hidden { opacity:0; visibility:hidden; pointer-events:none; }
-    #auth-modal:not(.hidden) { opacity:1; visibility:visible; }
-    .modal-card { animation: slideUp .35s ease; }
-    @keyframes slideUp { from { opacity:0; transform:translateY(30px) } to { opacity:1; transform:translateY(0) } }
-    .tab-btn.active { color:#f0a400; border-bottom-color:#f0a400; }
-    .tab-btn { border-bottom:2px solid transparent; transition:all .2s; }
-    
-    /* Before/After Interaction */
-    .slider-container { position: relative; width: 100%; height: 100%; overflow: hidden; }
-    .slider-before { position: absolute; inset: 0; background-size: 200% 100%; background-position: 0% center; }
-    .slider-after { position: absolute; inset: 0; background-size: 200% 100%; background-position: 100% center; clip-path: inset(0 0 0 50%); }
-    .slider-line { position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; background: #f0a400; transform: translateX(-50%); z-index: 20; pointer-events: none; box-shadow: 0 0 15px rgba(240,164,0,0.5); }
-    .slider-handle { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 40px; height: 40px; background: #f0a400; border: 2px solid white; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 30; pointer-events: none; color: #0D1117; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
-    .slider-input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: col-resize; z-index: 40; }
-    
-    .label-glass { position: absolute; bottom: 1rem; padding: 0.25rem 0.75rem; border-radius: 0.5rem; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 25; }
 </style>
 </head>
-<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-nebula antialiased selection:bg-primary/30">
-
-<!-- ÔöÇÔöÇ AUTH MODAL ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ -->
-<div id="auth-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
-    <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="closeAuth()"></div>
-    <div class="modal-card relative w-full max-w-md bg-charcoal rounded-2xl border border-white/10 shadow-2xl overflow-hidden">
-        <!-- Close -->
-        <button onclick="closeAuth()" class="absolute top-4 right-4 text-nebula/50 hover:text-nebula transition-colors z-10"><span class="material-symbols-outlined">close</span></button>
-        <!-- Logo -->
-        <div class="p-8 pb-0 text-center">
-            <div class="size-12 bg-gradient-to-br from-primary to-orange-600 rounded-xl flex items-center justify-center text-background-dark mx-auto mb-3">
-                <span class="material-symbols-outlined">deployed_code</span>
-            </div>
-            <h2 class="text-2xl font-black">Render<span class="text-primary">Room</span></h2>
-        </div>
-        <!-- Tabs -->
-        <div class="flex border-b border-white/10 mt-6 px-8">
-            <button id="tab-login" class="tab-btn active flex-1 py-3 text-sm font-semibold" onclick="switchTab('login')">Iniciar sesi├│n</button>
-            <button id="tab-register" class="tab-btn flex-1 py-3 text-sm font-semibold text-nebula/60" onclick="switchTab('register')">Crear cuenta</button>
-        </div>
-        <!-- Login form -->
-        <div id="form-login" class="p-8 space-y-4">
-            <div>
-                <label class="text-xs text-nebula/60 font-semibold uppercase tracking-wider">Email</label>
-                <input id="login-email" type="email" placeholder="tu@email.com" class="w-full mt-1 bg-background-dark border border-white/10 rounded-xl px-4 py-3 text-sm text-nebula placeholder-nebula/30 focus:outline-none focus:ring-2 focus:ring-primary/50"/>
-            </div>
-            <div>
-                <label class="text-xs text-nebula/60 font-semibold uppercase tracking-wider">Contrase├▒a</label>
-                <input id="login-password" type="password" placeholder="ÔÇóÔÇóÔÇóÔÇóÔÇóÔÇóÔÇóÔÇó" class="w-full mt-1 bg-background-dark border border-white/10 rounded-xl px-4 py-3 text-sm text-nebula placeholder-nebula/30 focus:outline-none focus:ring-2 focus:ring-primary/50"/>
-            </div>
-            <button onclick="handleLogin()" class="w-full bg-primary hover:bg-primary/90 text-background-dark font-black py-3 rounded-xl transition-all amber-glow">
-                Entrar
-            </button>
-            <div class="relative py-2">
-                <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-white/10"></div></div>
-                <div class="relative flex justify-center text-xs uppercase"><span class="bg-charcoal px-2 text-nebula/40">O continuar con</span></div>
-            </div>
-            <button onclick="handleGoogleLogin()" class="w-full bg-white hover:bg-slate-100 text-slate-900 font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="size-5" alt="Google"/>
-                Google
-            </button>
-            <p class="text-center text-xs text-nebula/40">┬┐Olvidaste tu contrase├▒a? <a href="privacidad.html" class="text-primary hover:underline">Recup├®rala</a></p>
-            <div id="login-msg" class="text-center text-sm hidden"></div>
-        </div>
-        <!-- Register form -->
-        <div id="form-register" class="hidden p-8 space-y-4">
-            <div>
-                <label class="text-xs text-nebula/60 font-semibold uppercase tracking-wider">Nombre completo</label>
-                <input id="reg-name" type="text" placeholder="Mar├¡a Garc├¡a" class="w-full mt-1 bg-background-dark border border-white/10 rounded-xl px-4 py-3 text-sm text-nebula placeholder-nebula/30 focus:outline-none focus:ring-2 focus:ring-primary/50"/>
-            </div>
-            <div>
-                <label class="text-xs text-nebula/60 font-semibold uppercase tracking-wider">Email</label>
-                <input id="reg-email" type="email" placeholder="tu@email.com" class="w-full mt-1 bg-background-dark border border-white/10 rounded-xl px-4 py-3 text-sm text-nebula placeholder-nebula/30 focus:outline-none focus:ring-2 focus:ring-primary/50"/>
-            </div>
-            <div>
-                <label class="text-xs text-nebula/60 font-semibold uppercase tracking-wider">Contrase├▒a</label>
-                <input id="reg-password" type="password" placeholder="M├¡nimo 8 caracteres" class="w-full mt-1 bg-background-dark border border-white/10 rounded-xl px-4 py-3 text-sm text-nebula placeholder-nebula/30 focus:outline-none focus:ring-2 focus:ring-primary/50"/>
-            </div>
-            <div class="flex items-start gap-3">
-                <input id="reg-terms" type="checkbox" class="mt-1 rounded border-white/20 bg-background-dark text-primary focus:ring-primary/50"/>
-                <label for="reg-terms" class="text-xs text-nebula/60 leading-relaxed">Acepto los <a href="terminos.html" class="text-primary hover:underline">t├®rminos de uso</a> y la <a href="privacidad.html" class="text-primary hover:underline">pol├¡tica de privacidad</a></label>
-            </div>
-            <button onclick="handleRegister()" class="w-full bg-primary hover:bg-primary/90 text-background-dark font-black py-3 rounded-xl transition-all amber-glow">
-                Crear cuenta gratuita
-            </button>
-            <div class="relative py-2">
-                <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-white/10"></div></div>
-                <div class="relative flex justify-center text-xs uppercase"><span class="bg-charcoal px-2 text-nebula/40">O continuar con</span></div>
-            </div>
-            <button onclick="handleGoogleLogin()" class="w-full bg-white hover:bg-slate-100 text-slate-900 font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="size-5" alt="Google"/>
-                Google
-            </button>
-            <div id="reg-msg" class="text-center text-sm hidden"></div>
-        </div>
-    </div>
-</div>
-
-<!-- ÔöÇÔöÇ NAV ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ -->
+<body class="bg-background-dark font-display text-nebula antialiased selection:bg-primary/30">
 <nav class="fixed top-0 left-0 right-0 z-50 glass-nav border-b border-white/10">
-    <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-            <div class="size-10 bg-gradient-to-br from-primary to-orange-600 rounded-lg flex items-center justify-center text-background-dark">
-                <span class="material-symbols-outlined font-bold">deployed_code</span>
-            </div>
-            <h1 class="text-slate-100 text-2xl font-black tracking-tight">Render<span class="text-primary">Room</span></h1>
-        </div>
-        <div class="hidden md:flex items-center gap-10">
-            <a class="text-sm font-medium hover:text-primary transition-colors" href="#como-funciona">C├│mo Funciona</a>
-            <a class="text-sm font-medium hover:text-primary transition-colors" href="#galeria">Galer├¡a</a>
-            <a class="text-sm font-medium hover:text-primary transition-colors" href="#precios">Precios</a>
-            <a class="text-sm font-medium hover:text-primary transition-colors" href="07-consejos-decoracion.html">Blog</a>
-            <a class="text-sm font-medium hover:text-primary transition-colors" href="03-dashboard.html">Mis Renders</a>
-        </div>
-        <div class="flex items-center gap-3">
-            <!-- User status display -->
-            <div id="user-logged-out" class="flex items-center gap-3">
-                <button onclick="openAuth('login')" class="text-sm text-nebula/70 hover:text-primary transition-colors font-medium hidden md:block">Iniciar sesi├│n</button>
-                <button onclick="openAuth('register')" class="bg-primary hover:bg-primary/90 text-background-dark px-5 py-2 rounded-xl text-sm font-bold tracking-wide transition-all hover:scale-105 amber-glow">Crear cuenta</button>
-            </div>
-            <div id="user-logged-in" class="hidden items-center gap-3">
-                <div id="header-credits-display" class="hidden flex items-center gap-2 px-3 py-1.5 bg-primary/10 border border-primary/20 rounded-full">
-                    <span class="material-symbols-outlined text-primary text-sm">toll</span>
-                    <span id="header-credits-count" class="text-primary text-sm font-bold">--</span>
-                    <span class="text-xs text-slate-400">cr├®ditos</span>
-                </div>
-                <div id="admin-link-container" class="hidden">
-                    <a href="admin-dashboard.html" class="text-primary hover:text-primary/80 transition-colors">
-                        <span class="material-symbols-outlined">admin_panel_settings</span>
-                    </a>
-                </div>
-                <span id="user-greeting" class="text-sm text-nebula/70 hidden md:block"></span>
-                <a href="06-perfil-usuario.html" class="flex items-center gap-2 group" title="Ver perfil">
-                    <div id="user-initials" class="w-8 h-8 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-primary font-bold text-xs group-hover:bg-primary/30 transition-colors">
-                        U
-                    </div>
-                </a>
-                <div class="flex flex-col gap-0.5">
-                    <button onclick="handleLogout()" class="text-[10px] text-nebula/40 hover:text-red-400 transition-colors border border-white/5 hover:border-red-500/30 px-2 py-1 rounded leading-tight">Salir</button>
-                    <button onclick="switchAccount()" class="text-[9px] text-nebula/30 hover:text-primary transition-colors leading-tight">Cambiar cuenta</button>
-                </div>
-                <a href="02-upload-wizard.html" class="bg-primary hover:bg-primary/90 text-background-dark px-5 py-2 rounded-xl text-sm font-bold tracking-wide transition-all hover:scale-105 amber-glow">Renderiza Ahora</a>
-            </div>
-        </div>
-    </div>
+<div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="size-10 bg-gradient-to-br from-primary to-orange-600 rounded-lg flex items-center justify-center text-background-dark">
+<span class="material-symbols-outlined font-bold">deployed_code</span>
+</div>
+<h2 class="text-lunar text-2xl font-black tracking-tight">Render<span class="text-primary">Room</span></h2>
+</div>
+<div class="hidden md:flex items-center gap-10">
+<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Cómo Funciona</a>
+<a class="text-sm font-medium text-primary border-b-2 border-primary py-1" href="#">Consejos</a>
+<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Galería</a>
+<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Precios</a>
+</div>
+<button class="bg-primary hover:bg-primary/90 text-background-dark px-6 py-2.5 rounded-xl text-sm font-bold tracking-wide transition-all hover:scale-105 amber-glow">
+            Renderiza Ahora
+        </button>
+</div>
 </nav>
-
-<main class="pt-32">
-    <!-- ÔöÇÔöÇ HERO ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ -->
-    <section class="max-w-7xl mx-auto px-6 py-12 lg:py-20">
-        <div class="grid lg:grid-cols-2 gap-16 items-center">
-            <div class="space-y-8">
-                <div class="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 px-4 py-1.5 rounded-full">
-                    <span class="size-2 bg-primary rounded-full animate-pulse"></span>
-                    <span class="text-primary text-xs font-bold uppercase tracking-widest">Nueva IA Generativa V4</span>
-                </div>
-                <h2 class="text-5xl lg:text-7xl font-black text-slate-100 leading-[1.1] tracking-tight">
-                    Transforma tu Habitaci├│n <br/>
-                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-orange-400">con IA</span>
-                </h2>
-                <div class="flex flex-col gap-4">
-                    <div class="flex items-baseline gap-4">
-                        <span class="text-6xl font-black text-primary" id="hero-price">2,50Ôé¼</span>
-                        <div class="flex flex-col">
-                            <span class="text-slate-500 line-through text-lg font-medium">3,50Ôé¼ precio de un perrito</span>
-                            <span class="bg-white/5 border border-white/10 text-white text-[10px] font-bold px-2 py-0.5 rounded-md w-fit mt-1">┬í1Ôé¼ MENOS!</span>
-                        </div>
-                    </div>
-                    <p class="text-lg text-slate-400 max-w-md">Redise├▒a cualquier espacio en segundos con realismo fotogr├ífico profesional. Sin arquitectos, sin esperas.</p>
-                </div>
-                <div class="flex flex-col sm:flex-row gap-4">
-                    <button onclick="handleStart()" class="bg-gradient-to-r from-primary to-orange-500 hover:opacity-90 text-background-dark px-8 py-4 rounded-xl text-lg font-black transition-all hover:scale-105 amber-glow flex items-center justify-center gap-2">
-                        <span class="material-symbols-outlined">upload_file</span> Sube tu Foto Ahora
-                    </button>
-                    <button onclick="openAuth('register')" class="border border-white/10 hover:border-primary/40 text-nebula px-8 py-4 rounded-xl text-lg font-semibold transition-all hover:scale-105 flex items-center justify-center gap-2">
-                        <span class="material-symbols-outlined text-primary">person_add</span> Crear cuenta gratis
-                    </button>
-                </div>
-            </div>
-            <div class="relative group">
-                <div class="absolute -inset-4 bg-primary/20 blur-3xl rounded-full opacity-30"></div>
-                <div class="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl aspect-[4/3] bg-background-dark">
-                    <div class="slider-container" id="hero-slider">
-                        <!-- Before layer (Messy room) -->
-                        <div class="slider-before bg-[url('img/hero_split.png')]"></div>
-                        
-                        <!-- After layer (Modern room) -->
-                        <div class="slider-after bg-[url('img/hero_split.png')]"></div>
-                        
-                        <!-- Divider Line -->
-                        <div class="slider-line"></div>
-                        
-                        <!-- Handle -->
-                        <div class="slider-handle">
-                            <span class="material-symbols-outlined">compare_arrows</span>
-                        </div>
-
-                        <!-- Labels -->
-                        <div class="label-glass left-4 bg-background-dark/60 text-white">Antes</div>
-                        <div class="label-glass right-4 bg-primary/90 text-background-dark">Despu├®s (IA)</div>
-
-                        <!-- Interaction Input -->
-                        <input type="range" min="0" max="100" value="50" class="slider-input" id="slider-range">
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ÔöÇÔöÇ COMO FUNCIONA ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ -->
-    <section id="como-funciona" class="max-w-7xl mx-auto px-6 py-24 border-t border-white/5">
-        <div class="text-center mb-16 space-y-4">
-            <h2 class="text-3xl lg:text-4xl font-black text-slate-100">C├│mo Funciona</h2>
-            <p class="text-slate-400">Tu nuevo hogar est├í a solo tres pasos</p>
-        </div>
-        <div class="relative">
-            <div class="hidden lg:block absolute top-1/2 left-0 w-full h-px border-t border-dashed border-primary/30 -z-10"></div>
-            <div class="grid md:grid-cols-3 gap-8">
-                <div class="bg-charcoal p-8 rounded-2xl border border-white/5 flex flex-col items-center text-center group hover:border-primary/30 transition-colors">
-                    <div class="size-16 bg-primary/10 text-primary rounded-full flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-background-dark transition-all">
-                        <span class="material-symbols-outlined text-3xl">add_photo_alternate</span>
-                    </div>
-                    <h3 class="text-xl font-bold text-slate-100 mb-2">Sube tu Foto</h3>
-                    <p class="text-slate-400 text-sm">Captura tu habitaci├│n actual. Nuestra IA (Gemini Vision) la analiza autom├íticamente.</p>
-                </div>
-                <div class="bg-charcoal p-8 rounded-2xl border border-white/5 flex flex-col items-center text-center group hover:border-primary/30 transition-colors">
-                    <div class="size-16 bg-primary/10 text-primary rounded-full flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-background-dark transition-all">
-                        <span class="material-symbols-outlined text-3xl">style</span>
-                    </div>
-                    <h3 class="text-xl font-bold text-slate-100 mb-2">Elige tu Estilo</h3>
-                    <p class="text-slate-400 text-sm">Selecciona entre 6 estilos curados: Moderno, N├│rdico, Industrial, Minimalista, R├║stico o Bohemio.</p>
-                </div>
-                <div class="bg-charcoal p-8 rounded-2xl border border-white/5 flex flex-col items-center text-center group hover:border-primary/30 transition-colors">
-                    <div class="size-16 bg-primary/10 text-primary rounded-full flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-background-dark transition-all">
-                        <span class="material-symbols-outlined text-3xl">magic_button</span>
-                    </div>
-                    <h3 class="text-xl font-bold text-slate-100 mb-2">Recibe Propuesta</h3>
-                    <p class="text-slate-400 text-sm">Descarga tu render 4K y lee la propuesta completa: an├ílisis, cambios detallados y prompt exacto.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ÔöÇÔöÇ TENDENCIAS 2025 ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ -->
-    <section class="max-w-7xl mx-auto px-6 py-24 border-t border-white/5 relative overflow-hidden">
-        <div class="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-[500px] h-[500px] bg-primary/5 blur-[120px] rounded-full pointer-events-none"></div>
-        <div class="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
-            <div class="space-y-2">
-                <div class="inline-flex items-center gap-2 text-primary font-bold text-[10px] uppercase tracking-widest bg-primary/10 px-3 py-1 rounded-full border border-primary/20">
-                    <span class="size-1.5 bg-primary rounded-full shadow-[0_0_8px_#f0a400]"></span>
-                    Especial Interiores
-                </div>
-                <h2 class="text-4xl lg:text-5xl font-black text-slate-100 leading-tight">Tendencias <span class="text-primary italic">2025</span></h2>
-                <p class="text-slate-400 max-w-lg">Hemos analizado el futuro del dise├▒o. Descubre c├│mo el lujo silencioso y la tecnolog├¡a invisible est├ín cambiando el hogar.</p>
-            </div>
-            <a href="07-consejos-decoracion.html" class=" group flex items-center gap-3 text-sm font-bold text-nebula hover:text-primary transition-all">
-                Ver todos los consejos
-                <div class="size-8 rounded-full border border-white/10 flex items-center justify-center group-hover:border-primary/40 group-hover:translate-x-1 transition-all">
-                    <span class="material-symbols-outlined text-sm">arrow_forward</span>
-                </div>
-            </a>
-        </div>
-        
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <!-- Sal├│n 2025 -->
-            <a href="07-consejos-decoracion.html" class="group relative aspect-[4/5] rounded-3xl overflow-hidden border border-white/5 hover:border-primary/20 transition-all shadow-2xl">
-                <img src="img/trend_salon.png" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Tendencia Sal├│n 2025"/>
-                <div class="absolute inset-0 bg-gradient-to-t from-background-dark via-background-dark/20 to-transparent"></div>
-                <div class="absolute bottom-0 left-0 p-8 space-y-3">
-                    <span class="bg-primary/90 text-background-dark text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-tighter">Sal├│n</span>
-                    <h3 class="text-2xl font-black text-white leading-tight">Material Drenching & Formas Org├ínicas</h3>
-                    <p class="text-slate-400 text-xs line-clamp-2">La inmersi├│n total en color y la suavidad de las curvas redefinen el espacio social.</p>
-                </div>
-            </a>
-
-            <!-- Cocina 2025 -->
-            <a href="07-consejos-decoracion.html" class="group relative aspect-[4/5] rounded-3xl overflow-hidden border border-white/5 hover:border-primary/20 transition-all shadow-2xl lg:mt-12">
-                <img src="img/trend_cocina.png" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Tendencia Cocina 2025"/>
-                <div class="absolute inset-0 bg-gradient-to-t from-background-dark via-background-dark/20 to-transparent"></div>
-                <div class="absolute bottom-0 left-0 p-8 space-y-3">
-                    <span class="bg-primary/90 text-background-dark text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-tighter">Cocina</span>
-                    <h3 class="text-2xl font-black text-white leading-tight">Tecnolog├¡a Invisible y Nogal</h3>
-                    <p class="text-slate-400 text-xs line-clamp-2">Electrodom├®sticos ocultos y materiales nobles para un coraz├│n del hogar minimalista.</p>
-                </div>
-            </a>
-
-            <!-- Dormitorio 2025 -->
-            <a href="07-consejos-decoracion.html" class="group relative aspect-[4/5] rounded-3xl overflow-hidden border border-white/5 hover:border-primary/20 transition-all shadow-2xl">
-                <img src="img/trend_dormitorio.png" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Tendencia Dormitorio 2025"/>
-                <div class="absolute inset-0 bg-gradient-to-t from-background-dark via-background-dark/20 to-transparent"></div>
-                <div class="absolute bottom-0 left-0 p-8 space-y-3">
-                    <span class="bg-primary/90 text-background-dark text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-tighter">Dormitorio</span>
-                    <h3 class="text-2xl font-black text-white leading-tight">El Refugio de los Nuevos Rom├ínticos</h3>
-                    <p class="text-slate-400 text-xs line-clamp-2">Techos decorados y texturas t├íctiles para una personalizaci├│n emocional m├íxima.</p>
-                </div>
-            </a>
-        </div>
-    </section>
-
-    <!-- ÔöÇÔöÇ GALER├ìA ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ -->
-    <section id="galeria" class="bg-white/5 py-24">
-        <div class="max-w-7xl mx-auto px-6">
-            <div class="flex justify-between items-end mb-12">
-                <div>
-                    <h2 class="text-3xl lg:text-4xl font-black text-slate-100 mb-2">Galer├¡a de Estilos</h2>
-                    <p class="text-slate-400">Haz clic en cada estilo para ver todos los detalles</p>
-                </div>
-            </div>
-            <div class="grid grid-cols-2 lg:grid-cols-3 gap-6">
-                <a href="08-estilo-moderno.html" class="relative group aspect-square rounded-2xl overflow-hidden border border-white/10 hover:border-primary/40 transition-colors">
-                    <img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="img/style_moderno.png" alt="Moderno"/>
-                    <div class="absolute inset-0 bg-gradient-to-t from-background-dark via-transparent to-transparent opacity-80"></div>
-                    <div class="absolute bottom-4 left-4 flex items-center gap-2">
-                        <p class="text-white font-bold">Moderno</p>
-                        <span class="material-symbols-outlined text-primary text-sm">arrow_forward</span>
-                    </div>
-                </a>
-                <a href="09-estilo-nordico.html" class="relative group aspect-square rounded-2xl overflow-hidden border border-white/10 hover:border-primary/40 transition-colors">
-                    <img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="img/style_nordico.png" alt="N├│rdico"/>
-                    <div class="absolute inset-0 bg-gradient-to-t from-background-dark via-transparent to-transparent opacity-80"></div>
-                    <div class="absolute bottom-4 left-4 flex items-center gap-2">
-                        <p class="text-white font-bold">N├│rdico</p>
-                        <span class="material-symbols-outlined text-primary text-sm">arrow_forward</span>
-                    </div>
-                </a>
-                <a href="10-estilo-industrial.html" class="relative group aspect-square rounded-2xl overflow-hidden border border-white/10 hover:border-primary/40 transition-colors">
-                    <img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="img/style_industrial.png" alt="Industrial"/>
-                    <div class="absolute inset-0 bg-gradient-to-t from-background-dark via-transparent to-transparent opacity-80"></div>
-                    <div class="absolute bottom-4 left-4 flex items-center gap-2">
-                        <p class="text-white font-bold">Industrial</p>
-                        <span class="material-symbols-outlined text-primary text-sm">arrow_forward</span>
-                    </div>
-                </a>
-                <a href="11-estilo-minimalista.html" class="relative group aspect-square rounded-2xl overflow-hidden border border-white/10 hover:border-primary/40 transition-colors">
-                    <img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="img/style_minimalista.png" alt="Minimalista"/>
-                    <div class="absolute inset-0 bg-gradient-to-t from-background-dark via-transparent to-transparent opacity-80"></div>
-                    <div class="absolute bottom-4 left-4 flex items-center gap-2">
-                        <p class="text-white font-bold">Minimalista</p>
-                        <span class="material-symbols-outlined text-primary text-sm">arrow_forward</span>
-                    </div>
-                </a>
-                <a href="12-estilo-rustico.html" class="relative group aspect-square rounded-2xl overflow-hidden border border-white/10 hover:border-primary/40 transition-colors">
-                    <img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="img/style_rustico.png" alt="R├║stico"/>
-                    <div class="absolute inset-0 bg-gradient-to-t from-background-dark via-transparent to-transparent opacity-80"></div>
-                    <div class="absolute bottom-4 left-4 flex items-center gap-2">
-                        <p class="text-white font-bold">R├║stico</p>
-                        <span class="material-symbols-outlined text-primary text-sm">arrow_forward</span>
-                    </div>
-                </a>
-                <a href="13-estilo-bohemio.html" class="relative group aspect-square rounded-2xl overflow-hidden border border-white/10 hover:border-primary/40 transition-colors">
-                    <img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" src="img/style_bohemio.png" alt="Bohemio"/>
-                    <div class="absolute inset-0 bg-gradient-to-t from-background-dark via-transparent to-transparent opacity-80"></div>
-                    <div class="absolute bottom-4 left-4 flex items-center gap-2">
-                        <p class="text-white font-bold">Boho</p>
-                        <span class="material-symbols-outlined text-primary text-sm">arrow_forward</span>
-                    </div>
-                </a>
-            </div>
-        </div>
-    </section>
-
-    <!-- ÔöÇÔöÇ PRECIOS ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ -->
-    <section id="precios" class="max-w-7xl mx-auto px-6 py-24 flex justify-center">
-        <div class="w-full max-w-md gradient-border p-12 text-center shadow-2xl">
-            <h3 class="text-2xl font-bold text-slate-100 mb-2">Plan Render ├Ünico</h3>
-            <div class="flex items-center justify-center gap-2 mb-8">
-                <span class="text-5xl font-black text-primary" id="pricing-card-price">2,50Ôé¼</span>
-                <span class="text-slate-500 font-medium">/ render</span>
-            </div>
-            <ul class="text-left space-y-4 mb-10">
-                <li class="flex items-center gap-3"><span class="material-symbols-outlined text-primary">check_circle</span><span class="text-slate-300">An├ílisis IA de tu habitaci├│n (Gemini Vision)</span></li>
-                <li class="flex items-center gap-3"><span class="material-symbols-outlined text-primary">check_circle</span><span class="text-slate-300">Render 4K Ultra HD con Vertex AI Imagen</span></li>
-                <li class="flex items-center gap-3"><span class="material-symbols-outlined text-primary">check_circle</span><span class="text-slate-300">Propuesta de dise├▒o detallada</span></li>
-                <li class="flex items-center gap-3"><span class="material-symbols-outlined text-primary">check_circle</span><span class="text-slate-300">6 estilos ┬À Entrega en &lt; 30 segundos</span></li>
-            </ul>
-            <button onclick="handleStart()" class="w-full block bg-primary hover:bg-primary/90 text-background-dark py-4 rounded-xl font-black text-lg transition-all amber-glow text-center">Comenzar Ahora</button>
-            <p class="mt-4 text-xs text-slate-500 uppercase tracking-widest font-bold">Sin suscripciones mensuales</p>
-        </div>
-    </section>
+<main class="pt-32 pb-24">
+<div class="max-w-7xl mx-auto px-6">
+<header class="mb-12">
+<nav class="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-500 mb-6">
+<a class="hover:text-primary" href="#">Consejos</a>
+<span class="material-symbols-outlined text-[10px]">chevron_right</span>
+<a class="hover:text-primary" href="#">Estilos</a>
+<span class="material-symbols-outlined text-[10px]">chevron_right</span>
+<span class="text-primary">Moderno</span>
+</nav>
+<h1 class="text-4xl lg:text-6xl font-black text-lunar leading-[1.1] tracking-tight mb-8 max-w-4xl">
+                Cómo el Minimalismo Moderno puede ampliar visualmente tu salón
+            </h1>
+<div class="flex items-center gap-4 text-sm text-slate-400">
+<img alt="Author Avatar" class="size-8 rounded-full border border-white/10" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD3QqAZyl5ol3Z0_dFhU4qYJBx9eG97P9Sx-r6_bvsmK9EoWI5a28l1MVaaxrnjMHJCl0zJYKal0cwzZDK9RXscKTSnUx4_JIWwqDtKlnJpNt0u3fCnf5wx1Fcoh_46N8qDuhOx8Knt5_Tg84XhtLJELu72MRh2KdW4YKuhnchknq1hm7V18JoRHUNDN1Mb7SNRi-MiQJvXEKeeHqLFclBXQDtnR0-eztYsIOUpSxzxP471NKht2Gst6tMhZIWELAcAkTXLUtXwF-xd"/>
+<div class="flex items-center gap-4 divide-x divide-white/10">
+<span class="font-medium text-lunar">Por RenderRoom Team</span>
+<span class="pl-4">12 Oct, 2024</span>
+<span class="pl-4 flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">schedule</span> 5 min lectura
+                    </span>
+</div>
+</div>
+<div class="mt-12 rounded-2xl overflow-hidden aspect-[16/9] border border-white/10 shadow-2xl relative">
+<img alt="Moderno Minimalista Room" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBA1qYdoHIRPRAQsKae6k7Y6QTrc5ZlH5k9Ip-dFL6BEJE0IVyM7viZlXseMXtFnEn6wVpkq0S82ZwtyasLdiRjZr1orkSlp_ONsWMYuqOJ99JVt20otdA5sAUxSnDPaLjWXQ80fHst_0rjote5mgjkXaKdyNYdUsg1_Q3L4mJ_B4KBnxj39bfctroxrticbBpUF1H3zVrLdW92gJweHw7zqyfuZWgReFKsOJIMpeCX3dV0kBvjKdKFJzzbZfBDGFzriUrWbGyOAaV8"/>
+<div class="absolute bottom-6 left-6 bg-background-dark/80 backdrop-blur-md px-4 py-2 rounded-lg border border-white/10">
+<span class="text-primary text-xs font-bold uppercase tracking-widest">Estilo Recomendado: Minimalista</span>
+</div>
+</div>
+</header>
+<div class="flex flex-col lg:flex-row gap-16 relative">
+<article class="max-w-[800px] flex-1">
+<div class="prose prose-invert prose-lg max-w-none space-y-8">
+<p class="text-xl leading-relaxed text-nebula">
+                        El minimalismo no es solo una cuestión de estética; es una filosofía de vida que busca la libertad a través de la reducción. Cuando aplicamos este concepto al diseño de interiores de salones pequeños, los resultados son transformadores.
+                    </p>
+<h2 class="text-3xl font-black text-primary mt-12 mb-6 uppercase tracking-tight">La Regla del "Menos es Más"</h2>
+<p class="text-nebula">
+                        Para empezar a ampliar visualmente tu espacio, es crucial entender que cada objeto que no aporta valor está restando amplitud. La IA de RenderRoom utiliza algoritmos avanzados para identificar puntos de saturación visual en tus fotos actuales y proponer alternativas despejadas.
+                    </p>
+<ul class="space-y-4">
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary mt-1">check_circle</span>
+<span>Uso de paletas monocromáticas en tonos neutros.</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary mt-1">check_circle</span>
+<span>Muebles con patas finas que dejan ver el suelo.</span>
+</li>
+<li class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary mt-1">check_circle</span>
+<span>Espejos colocados estratégicamente frente a ventanas.</span>
+</li>
+</ul>
+<blockquote class="border-l-4 border-accent-violet bg-white/5 p-8 my-12 italic rounded-r-xl">
+<p class="text-lunar text-2xl font-light">
+                            "El diseño minimalista moderno no se trata de vivir en un espacio vacío, sino de vivir en un espacio que respira."
+                        </p>
+</blockquote>
+<h2 class="text-3xl font-black text-primary mt-12 mb-6 uppercase tracking-tight">Iluminación: El Elemento Invisible</h2>
+<p class="text-nebula">
+                        Una de las claves que nuestra IA siempre prioriza es la maximización de la luz natural. Un renderizado minimalista suele sustituir cortinas pesadas por estores traslúcidos o simplemente dejar los marcos desnudos para integrar el exterior.
+                    </p>
+</div>
+<div class="my-16 space-y-4">
+<h3 class="text-xl font-bold text-lunar mb-6">Transformación Real con RenderRoom</h3>
+<div class="relative rounded-2xl overflow-hidden border border-white/10 group">
+<img alt="Before and After Slider" class="w-full aspect-[16/9] object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHnar0I75dBNNo0vN3W3BKEtOk48RO5MEEPL2ErhfeILLRyTcNHjtABzi3h24rhR04Xw8fDsn1Se4H8-_x_J13HUyGI4cNTf96lWc9Ts0YvPzY4MJQYcI94QatZTMjALx2Tb8BcnhzoWZvRS299lC_Doq9LzE6HKvaby0uC2WFs27sAVVIR8CRK8MnLjdwOYeXbEBjV95bLL0GAtyMsoKsDRhG-YBoiuEzrnP5Q2wzBZSEehqMP9cI5fUqE7bPT2fQtckr4O0l5VbQ"/>
+<div class="absolute inset-y-0 left-1/2 w-1 bg-white/30 backdrop-blur-sm -translate-x-1/2">
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-10 bg-white rounded-full flex items-center justify-center shadow-xl">
+<span class="material-symbols-outlined text-background-dark font-bold">unfold_more</span>
+</div>
+</div>
+<div class="absolute bottom-4 left-4 bg-background-dark/80 backdrop-blur px-3 py-1 rounded text-[10px] font-black text-white uppercase tracking-tighter border border-white/10">Antes</div>
+<div class="absolute bottom-4 right-4 bg-primary/90 backdrop-blur px-3 py-1 rounded text-[10px] font-black text-background-dark uppercase tracking-tighter">Después (Minimalista)</div>
+</div>
+</div>
+<div class="prose prose-invert prose-lg max-w-none mt-8 text-nebula">
+<p>
+                        Si estás listo para ver cómo tu propio salón podría lucir bajo estas reglas de diseño, nuestra herramienta de IA puede generar una visualización 4K en menos de 30 segundos. Solo necesitas subir una foto y seleccionar el estilo "Minimalista Moderno".
+                    </p>
+</div>
+</article>
+<aside class="w-full lg:w-[320px]">
+<div class="sticky top-28 space-y-6">
+<div class="gradient-border-card p-8 rounded-2xl shadow-2xl amber-glow">
+<div class="size-12 bg-primary/20 rounded-xl flex items-center justify-center text-primary mb-6">
+<span class="material-symbols-outlined">magic_button</span>
+</div>
+<h4 class="text-xl font-bold text-lunar mb-2">Prueba este Estilo</h4>
+<p class="text-sm text-slate-400 mb-6">Transforma tu habitación ahora mismo con IA profesional.</p>
+<div class="flex items-baseline gap-2 mb-8">
+<span class="text-4xl font-black text-primary">2,50€</span>
+<span class="text-slate-500 text-xs uppercase font-bold tracking-widest">por render</span>
+</div>
+<button class="w-full bg-primary hover:bg-primary/90 text-background-dark py-4 rounded-xl font-black text-sm transition-all hover:scale-[1.02] flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-lg">upload_file</span>
+                            SUBIR MI FOTO
+                        </button>
+</div>
+<div class="bg-charcoal/50 border border-white/5 p-6 rounded-2xl">
+<h5 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Compartir Artículo</h5>
+<div class="flex gap-3">
+<button class="size-10 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/5 transition-colors">
+<span class="material-symbols-outlined text-sm">share</span>
+</button>
+<button class="size-10 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/5 transition-colors">
+<span class="material-symbols-outlined text-sm">link</span>
+</button>
+</div>
+</div>
+</div>
+</aside>
+</div>
+<section class="mt-32 pt-16 border-t border-white/5">
+<h2 class="text-2xl font-bold text-lunar mb-10">Artículos Relacionados</h2>
+<div class="grid md:grid-cols-3 gap-8">
+<a class="group block space-y-4" href="#">
+<div class="aspect-[4/3] rounded-xl overflow-hidden border border-white/10">
+<img alt="Related" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDQWUpjKgOEYra8zmJWr2VCifCD-lUnq5hV_HGRMF2wRJdcDMZbtfzFp6m-8aotXqBKz4Jlw4lAu7USRZGkusVadQ_y4fxtiJ8HNQlrzWAquhNvLCyUEXRQr_HKoEjr9LpJrDoURbfpQ0J9pprzJyX9ALY19d6wVKcZCnZ5OVXL6pp68YRSSsENKTY72t1HCeELB7MAZ1ANhhubCP6eIzb_kId0zPn2GaGEM63eEBvnZRYq4y86XsSEneUZBUbycGRHleBuCaqyNYAi"/>
+</div>
+<h4 class="font-bold text-lunar group-hover:text-primary transition-colors">5 Errores comunes al iluminar tu salón</h4>
+<p class="text-sm text-slate-400">Descubre cómo evitar las sombras indeseadas y ganar profundidad.</p>
+</a>
+<a class="group block space-y-4" href="#">
+<div class="aspect-[4/3] rounded-xl overflow-hidden border border-white/10">
+<img alt="Related" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZrrIvKTFLqHxJoHi_FXo04996A9dVLQUHdJ7kfMAxEvI3uqx-hXexqxOj_malhP2RVLFnIQWbxursLuaPSYJhcfmsNLZ3_irqT3sgNhe8dPNxvar25PFaUNGmViLW6J3pG3eZRR5YHNXOQ_egLBFnm7NK0yIhXrQtOJKx3H4UJ1sdHjGGpWBW7rM0k1M6cV_odS0Z5rioDKk1lyJz9N1hsiULKchxrHG1RC-IJIPOrGVYHD20_VTlg_ymPKr9OMSZYrGRfGYTmOhh"/>
+</div>
+<h4 class="font-bold text-lunar group-hover:text-primary transition-colors">Estilo Nórdico: Calidez en espacios fríos</h4>
+<p class="text-sm text-slate-400">La guía definitiva para aplicar el concepto Hygge a tu hogar.</p>
+</a>
+<a class="group block space-y-4" href="#">
+<div class="aspect-[4/3] rounded-xl overflow-hidden border border-white/10">
+<img alt="Related" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuATikHqmuLZezQLfCydfw0_YkgCObP9NFHal9C0rKAw4LXu4Y90TF14gRjlhXi1y-Lp5TOf7xOBA5mkvXIuc2rXHXF5jL0Kr6MP-jbyA24QU4yzL35U-tcyDtA8M2H_dO_-WMdfOJzP9FWVwTEv-CfGguNvScXjrUIsQeGhCe-ktCwQmiC6KiG3yWhXnQHhlaFUzHbtlQlFOYv_qSqC8moqacIAEYmtWtktXRGEvKMsqfGSAUvwzhCo7pGYkNj-yDIazydC8KjMAWfU"/>
+</div>
+<h4 class="font-bold text-lunar group-hover:text-primary transition-colors">El auge del diseño industrial en 2024</h4>
+<p class="text-sm text-slate-400">Vuelve la tendencia de ladrillo visto y techos altos.</p>
+</a>
+</div>
+</section>
+</div>
 </main>
-
 <footer class="border-t border-white/5 py-12">
-    <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
-        <div class="flex items-center gap-3">
-            <div class="size-8 bg-primary/20 rounded-lg flex items-center justify-center text-primary"><span class="material-symbols-outlined text-sm">deployed_code</span></div>
-            <h2 class="text-slate-100 text-lg font-bold tracking-tight">RenderRoom</h2>
-        </div>
-        <p class="text-slate-500 text-sm">Hecho con ÔØñ´©Å e IA ┬À RenderRoom 2024</p>
-        <div class="flex gap-6 text-slate-500">
-            <a class="hover:text-primary transition-colors" href="terminos.html"><span class="material-symbols-outlined">brand_awareness</span></a>
-            <a class="hover:text-primary transition-colors" href="privacidad.html"><span class="material-symbols-outlined">alternate_email</span></a>
-            <a class="hover:text-primary transition-colors" href="privacidad.html"><span class="material-symbols-outlined">policy</span></a>
-        </div>
-    </div>
-    <div class="max-w-7xl mx-auto px-6 mt-8 pt-8 border-t border-white/5 text-center">
-        <p class="text-slate-600 text-[10px] uppercase tracking-[0.2em] font-bold">┬® 2024 RenderRoom AI. Todos los derechos reservados.</p>
-    </div>
+<div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
+<div class="flex items-center gap-3">
+<div class="size-8 bg-primary/20 rounded-lg flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-sm">deployed_code</span>
+</div>
+<h2 class="text-lunar text-lg font-bold tracking-tight">RenderRoom</h2>
+</div>
+<p class="text-slate-500 text-sm">Hecho con ❤️ e IA por el equipo de RenderRoom</p>
+<div class="flex gap-6 text-slate-500">
+<a class="hover:text-primary transition-colors" href="#"><span class="material-symbols-outlined">brand_awareness</span></a>
+<a class="hover:text-primary transition-colors" href="#"><span class="material-symbols-outlined">alternate_email</span></a>
+<a class="hover:text-primary transition-colors" href="#"><span class="material-symbols-outlined">policy</span></a>
+</div>
+</div>
+<div class="max-w-7xl mx-auto px-6 mt-8 pt-8 border-t border-white/5 text-center">
+<p class="text-slate-600 text-[10px] uppercase tracking-[0.2em] font-bold">© 2024 RenderRoom AI. Todos los derechos reservados.</p>
+</div>
 </footer>
 
-<script>
-// ÔöÇÔöÇ Firebase Config ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
-const firebaseConfig = {
-  projectId: "gen-lang-client-0426824151",
-  appId: "1:124806819551:web:1c90d1154b458fa064036a",
-  storageBucket: "gen-lang-client-0426824151.firebasestorage.app",
-  apiKey: "AIzaSyDj99qdmDt4GiVeRkvCSfTOSDw3uqD-_Ew",
-  authDomain: "gen-lang-client-0426824151.firebaseapp.com",
-  messagingSenderId: "124806819551"
-};
-firebase.initializeApp(firebaseConfig);
-
-// ÔöÇÔöÇ Auth Logic ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
-function handleStart() {
-    const user = firebase.auth().currentUser;
-    if (user) {
-        window.location.href = '02-upload-wizard.html';
-    } else {
-        openAuth('register');
-    }
-}
-
-function openAuth(tab) {
-    document.getElementById('auth-modal').classList.remove('hidden');
-    switchTab(tab || 'login');
-    document.body.style.overflow = 'hidden';
-}
-function closeAuth() {
-    document.getElementById('auth-modal').classList.add('hidden');
-    document.body.style.overflow = '';
-}
-document.addEventListener('keydown', e => { if(e.key==='Escape') closeAuth(); });
-
-function switchTab(tab) {
-    const isLogin = tab === 'login';
-    document.getElementById('form-login').classList.toggle('hidden', !isLogin);
-    document.getElementById('form-register').classList.toggle('hidden', isLogin);
-    document.getElementById('tab-login').classList.toggle('active', isLogin);
-    document.getElementById('tab-register').classList.toggle('active', !isLogin);
-    document.getElementById('tab-login').classList.toggle('text-nebula/60', !isLogin);
-    document.getElementById('tab-register').classList.toggle('text-nebula/60', isLogin);
-}
-
-async function handleRegister() {
-    const name = document.getElementById('reg-name').value.trim();
-    const email = document.getElementById('reg-email').value.trim();
-    const password = document.getElementById('reg-password').value;
-    const terms = document.getElementById('reg-terms').checked;
-    const msgEl = document.getElementById('reg-msg');
-    
-    if (!name || !email || !password) { showMsg(msgEl, 'Rellena todos los campos', 'error'); return; }
-    if (!terms) { showMsg(msgEl, 'Debes aceptar los t├®rminos', 'error'); return; }
-    if (password.length < 8) { showMsg(msgEl, 'La contrase├▒a debe tener al menos 8 caracteres', 'error'); return; }
-    
-    try {
-        const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
-        await userCredential.user.updateProfile({ displayName: name });
-        showMsg(msgEl, '┬íCuenta creada con ├®xito!', 'success');
-        setTimeout(() => { closeAuth(); }, 1500);
-    } catch(e) { 
-        showMsg(msgEl, e.message || 'Error al registrar', 'error'); 
-    }
-}
-
-async function handleLogin() {
-    const email = document.getElementById('login-email').value.trim();
-    const password = document.getElementById('login-password').value;
-    const msgEl = document.getElementById('login-msg');
-    
-    if (!email || !password) { showMsg(msgEl, 'Introduce email y contrase├▒a', 'error'); return; }
-    
-    try {
-        await firebase.auth().signInWithEmailAndPassword(email, password);
-        showMsg(msgEl, '┬íBienvenido!', 'success');
-        setTimeout(() => { closeAuth(); }, 1200);
-    } catch(e) { 
-        showMsg(msgEl, e.message || 'Error al iniciar sesi├│n', 'error'); 
-    }
-}
-
-async function handleGoogleLogin() {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    // Force account selection so the user can pick a different account
-    provider.setCustomParameters({ prompt: 'select_account' });
-    try {
-        await firebase.auth().signInWithPopup(provider);
-        closeAuth();
-        window.location.href = '02-upload-wizard.html';
-    } catch (e) {
-        // If popup was blocked, fall back to redirect
-        if (e.code === 'auth/popup-blocked' || e.code === 'auth/popup-closed-by-user') {
-            try {
-                await firebase.auth().signInWithRedirect(provider);
-            } catch(e2) { /* redirect initiated */ }
-            return;
-        }
-        const msgEl = document.getElementById('tab-login').classList.contains('active') ? 
-                      document.getElementById('login-msg') : document.getElementById('reg-msg');
-        showMsg(msgEl, e.message || 'Error con Google Sign-in', 'error');
-    }
-}
-
-async function handleLogout() {
-    localStorage.removeItem('rr_token');
-    sessionStorage.removeItem('disclaimer_accepted');
-    await firebase.auth().signOut();
-    window.location.href = '01-landing-page.html';
-}
-
-// Allow switching to a different account
-async function switchAccount() {
-    localStorage.removeItem('rr_token');
-    await firebase.auth().signOut();
-    openAuth('login');
-}
-
-function updateUserUI(user) {
-    document.getElementById('user-logged-out').style.display = user ? 'none' : 'flex';
-    document.getElementById('user-logged-in').style.display = user ? 'flex' : 'none';
-    if (user) {
-        document.getElementById('user-greeting').textContent = `Hola, ${user.displayName || user.email.split('@')[0]} ­ƒæï`;
-    }
-}
-
-firebase.auth().onAuthStateChanged(async user => {
-    updateUserUI(user);
-    if (user) {
-        // Update UI Initials
-        const initials = (user.displayName || user.email || 'U').charAt(0).toUpperCase();
-        const initialsEl = document.getElementById('user-initials');
-        if (initialsEl) initialsEl.textContent = initials;
-
-        // Save token for API calls
-        const token = await user.getIdToken();
-        localStorage.setItem('rr_token', token);
-        
-        // Sync user data to Firestore
-        syncUserToFirestore(user);
-        
-        // Check Admin
-        const db = firebase.firestore();
-        try {
-            const doc = await db.collection('users').doc(user.uid).get();
-            if (doc.exists && doc.data().isAdmin) {
-                document.getElementById('admin-link-container').classList.remove('hidden');
-            }
-            if (doc.exists) {
-                const credits = doc.data().credits || 0;
-                const headerDisplay = document.getElementById('header-credits-display');
-                const headerCount = document.getElementById('header-credits-count');
-                if (headerDisplay) headerDisplay.classList.remove('hidden');
-                if (headerCount) headerCount.textContent = credits;
-            }
-        } catch (e) {
-            console.error("Admin check error:", e);
-        }
-    } else {
-        localStorage.removeItem('rr_token');
-        document.getElementById('admin-link-container').classList.add('hidden');
-        document.getElementById('header-credits-display')?.classList.add('hidden');
-    }
-    // Always load pricing regardless of auth
-    loadDynamicPricing();
-});
-
-async function loadDynamicPricing() {
-    try {
-        const res = await fetch('/api/admin/pricing');
-        const data = await res.json();
-        
-        if (data.render_normal) {
-            const priceText = data.render_normal.price.toFixed(2).replace('.', ',') + 'Ôé¼';
-            const heroPriceEl = document.getElementById('hero-price');
-            const cardPriceEl = document.getElementById('pricing-card-price');
-            if (heroPriceEl) heroPriceEl.textContent = priceText;
-            if (cardPriceEl) cardPriceEl.textContent = priceText;
-        }
-    } catch (e) {
-        console.error("Error loading dynamic pricing:", e);
-    }
-}
-
-async function syncUserToFirestore(user) {
-    const db = firebase.firestore();
-    const userRef = db.collection('users').doc(user.uid);
-    
-    try {
-        const doc = await userRef.get();
-        if (!doc.exists) {
-            await userRef.set({
-                displayName: user.displayName || '',
-                email: user.email,
-                phone: user.phoneNumber || '',
-                location: '',
-                isAdmin: false,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-        }
-    } catch (e) {
-        console.error("Error syncing user to Firestore:", e);
-    }
-}
-
-function showMsg(el, text, type) {
-    el.textContent = text;
-    el.className = `text-center text-sm mt-1 ${type === 'success' ? 'text-green-400' : 'text-red-400'}`;
-    el.classList.remove('hidden');
-}
-
-// ÔöÇÔöÇ Slider Logic ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
-const sliderRange = document.getElementById('slider-range');
-const sliderAfter = document.querySelector('.slider-after');
-const sliderLine = document.querySelector('.slider-line');
-const sliderHandle = document.querySelector('.slider-handle');
-
-if (sliderRange) {
-    sliderRange.addEventListener('input', (e) => {
-        const val = e.target.value;
-        sliderAfter.style.clipPath = `inset(0 0 0 ${val}%)`;
-        sliderLine.style.left = `${val}%`;
-        sliderHandle.style.left = `${val}%`;
-    });
-}
-</script>
-</body>
-</html>
+</body></html>
