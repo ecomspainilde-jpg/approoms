@@ -1,433 +1,204 @@
 <!DOCTYPE html>
-<html lang="es" class="dark">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perfil de Usuario | RenderRoom AI</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-    <script>
+
+<html lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RenderRoom - Mi Perfil</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
         tailwind.config = {
-            darkMode: 'class',
+            darkMode: "class",
             theme: {
                 extend: {
                     colors: {
-                        primary: '#f0a400',
-                        secondary: '#ffcc00',
-                        dark: '#0a0a0c',
-                        card: '#121217',
-                        accent: '#2a2a35'
+                        "primary": "#f59f0a",
+                        "background-light": "#f8f7f5",
+                        "background-dark": "#221c10",
                     },
                     fontFamily: {
-                        outfit: ['Outfit', 'sans-serif'],
-                    }
-                }
-            }
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+                },
+            },
         }
     </script>
-    <style>
-        /* FOUC Prevention */
-        body { opacity: 0; transition: opacity 0.3s ease; }
-        .auth-checked body { opacity: 1; }
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
     </style>
-    <style>
-        body { font-family: 'Outfit', sans-serif; background-color: #0a0a0c; color: #e1e1e6; }
-        .glass { background: rgba(18, 18, 23, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
-        .active-nav { background: rgba(240, 164, 0, 0.1); border-left: 3px solid #f0a400; color: #f0a400; }
-        .premium-shadow { box-shadow: 0 0 30px rgba(0, 0, 0, 0.5); }
-        .hover-lift { transition: transform 0.3s cubic-bezier(0.2, 0, 0.2, 1); }
-        .hover-lift:hover { transform: translateY(-5px); }
-        .gallery-overlay { background: linear-gradient(0deg, rgba(0,0,0,0.8) 0%, transparent 100%); }
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #0a0a0c; }
-        ::-webkit-scrollbar-thumb { background: #1a1a20; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #2a2a35; }
-    </style>
-</head>
-<body class="min-h-screen bg-dark">
-    <!-- Layout Wrapper -->
-    <div class="flex flex-col lg:flex-row min-h-screen">
-        
-        <!-- Sidebar Navigation -->
-        <aside class="w-full lg:w-72 glass lg:h-screen lg:fixed left-0 top-0 z-50 flex flex-col border-r border-white/5">
-            <div class="p-8 flex items-center justify-between lg:justify-start gap-4">
-                <a href="01-landing-page.html" class="flex items-center gap-3">
-                    <div class="p-2 bg-primary rounded-xl shadow-lg shadow-primary/20">
-                        <iconify-icon icon="lucide:sparkles" class="text-dark text-2xl"></iconify-icon>
-                    </div>
-                    <span class="text-xl font-black tracking-tighter uppercase text-white">RenderRoom</span>
-                </a>
-                <button class="lg:hidden text-white">
-                    <iconify-icon icon="lucide:menu" class="text-3xl"></iconify-icon>
-                </button>
-            </div>
-
-            <nav class="flex-1 px-4 space-y-2 mt-4">
-                <p class="px-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">Navegación</p>
-                <a href="02-upload-wizard.html" class="flex items-center gap-4 px-4 py-3.5 rounded-2xl hover:bg-white/5 transition-all text-sm group">
-                    <iconify-icon icon="lucide:plus-circle" class="text-xl group-hover:text-primary transition-colors"></iconify-icon>
-                    <span>Nuevo Proyecto</span>
-                </a>
-                <a href="03-dashboard.html" class="flex items-center gap-4 px-4 py-3.5 rounded-2xl hover:bg-white/5 transition-all text-sm group">
-                    <iconify-icon icon="lucide:layout" class="text-xl group-hover:text-primary transition-colors"></iconify-icon>
-                    <span>Mis Renders</span>
-                </a>
-                <a href="06-perfil-usuario.html" class="flex items-center gap-4 px-4 py-3.5 rounded-2xl active-nav text-sm transition-all">
-                    <iconify-icon icon="lucide:user" class="text-xl"></iconify-icon>
-                    <span>Perfil Personal</span>
-                </a>
-                <a href="creditos.html" class="flex items-center gap-4 px-4 py-3.5 rounded-2xl hover:bg-white/5 transition-all text-sm group">
-                    <iconify-icon icon="lucide:credit-card" class="text-xl group-hover:text-primary transition-colors"></iconify-icon>
-                    <span>Créditos y Facturación</span>
-                </a>
-            </nav>
-
-            <div class="p-6">
-                <button onclick="switchTab('config')" class="bg-primary hover:bg-primary/90 text-dark px-10 py-5 rounded-2xl font-black text-lg transition-all transform hover:scale-105 shadow-xl shadow-primary/20 flex items-center justify-center gap-3 mb-6">
-                    <span class="material-symbols-outlined">edit</span>
-                    Editar mi perfil
-                </button>
-                <div class="bg-card/80 p-5 rounded-2xl border border-white/5 ring-1 ring-white/5">
-                    <div class="flex items-center justify-between mb-3">
-                        <span class="text-xs font-medium text-gray-400">Balance</span>
-                        <iconify-icon icon="lucide:zap" class="text-primary"></iconify-icon>
-                    </div>
-                    <div class="text-2xl font-bold text-white mb-4" id="credits-balance">-- <span class="text-xs text-gray-500 font-normal">créditos</span></div>
-                    <button onclick="window.location.href='creditos.html'" class="w-full py-3 bg-primary text-black text-xs font-black uppercase tracking-wider rounded-xl hover:scale-[1.02] transition-transform">Recargar</button>
-                </div>
-            </div>
-        </aside>
-
-        <!-- Main Content Area -->
-        <main class="flex-1 lg:ml-72 p-6 lg:p-12 relative">
-            
-            <!-- Welcome Header -->
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
-                <div>
-                    <h1 class="text-3xl lg:text-5xl font-black text-white mb-2" id="welcome-text">Hola, <span class="text-primary" id="user-display-name">...</span></h1>
-                    <p class="text-gray-400 text-lg">Bienvenido a tu centro de control creativo.</p>
-                </div>
-                <div class="flex gap-4">
-                    <button onclick="handleSignOut()" class="p-3 bg-card hover:bg-red-500/10 text-gray-400 hover:text-red-400 border border-white/5 rounded-2xl transition-all" title="Cerrar Sesión">
-                        <iconify-icon icon="lucide:log-out" class="text-xl"></iconify-icon>
-                    </button>
-                    <button onclick="switchTab('config')" class="px-6 py-3 bg-white text-black font-black text-sm uppercase rounded-2xl hover:bg-primary transition-all">Editar Perfil</button>
-                </div>
-            </div>
-
-            <!-- Stats Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-                <div class="glass p-8 rounded-[2rem] border-white/5 flex items-center justify-between">
-                    <div>
-                        <p class="text-gray-500 text-xs font-bold uppercase tracking-widest mb-2">Renders Creados</p>
-                        <h3 class="text-4xl font-black text-white" id="stat-renders">--</h3>
-                    </div>
-                    <div class="w-14 h-14 bg-blue-500/10 rounded-2xl flex items-center justify-center border border-blue-500/20">
-                        <iconify-icon icon="lucide:image" class="text-blue-400 text-2xl"></iconify-icon>
-                    </div>
-                </div>
-                <div class="glass p-8 rounded-[2rem] border-white/5 flex items-center justify-between">
-                    <div>
-                        <p class="text-gray-500 text-xs font-bold uppercase tracking-widest mb-2">Favoritos</p>
-                        <h3 class="text-4xl font-black text-white" id="stat-favs">0</h3>
-                    </div>
-                    <div class="w-14 h-14 bg-red-500/10 rounded-2xl flex items-center justify-center border border-red-500/20">
-                        <iconify-icon icon="lucide:heart" class="text-red-400 text-2xl"></iconify-icon>
-                    </div>
-                </div>
-                <div class="glass p-8 rounded-[2rem] border-white/5 flex items-center justify-between">
-                    <div>
-                        <p class="text-gray-500 text-xs font-bold uppercase tracking-widest mb-2">Total Invertido</p>
-                        <h3 class="text-4xl font-black text-white" id="stat-spent">--€</h3>
-                    </div>
-                    <div class="w-14 h-14 bg-green-500/10 rounded-2xl flex items-center justify-center border border-green-500/20">
-                        <iconify-icon icon="lucide:credit-card" class="text-green-400 text-2xl"></iconify-icon>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tabs Navigation -->
-            <div class="flex border-b border-white/5 mb-10 overflow-x-auto">
-                <button onclick="switchTab('renders')" id="tab-renders" class="px-8 py-5 text-sm font-bold text-primary border-b-2 border-primary">Mis Renders</button>
-                <button onclick="switchTab('originales')" id="tab-originales" class="px-8 py-5 text-sm font-bold text-gray-500 hover:text-white transition-colors">Fotos Usadas</button>
-                <button onclick="switchTab('config')" id="tab-config" class="px-8 py-5 text-sm font-bold text-gray-500 hover:text-white transition-colors">Configuración</button>
-            </div>
-
-            <!-- Gallery Sections -->
-            <div id="section-renders" class="tab-content transition-all duration-300">
-                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8" id="renders-gallery">
-                    <!-- Loading State -->
-                    <div class="col-span-full py-32 flex flex-col items-center justify-center text-gray-500">
-                        <div class="animate-spin mb-4"><iconify-icon icon="lucide:loader-2" class="text-4xl text-primary"></iconify-icon></div>
-                        <p class="text-lg">Cargando tus obras maestras...</p>
-                    </div>
-                </div>
-            </div>
-
-            <div id="section-originales" class="tab-content hidden transition-all duration-300">
-                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8" id="originales-gallery">
-                    <!-- Loaded via JS -->
-                </div>
-            </div>
-
-            <!-- Profile Settings Form -->
-            <div id="section-config" class="tab-content hidden transition-all duration-300">
-                <div class="glass p-10 lg:p-14 rounded-[3rem] max-w-4xl mx-auto">
-                    <h2 class="text-2xl font-black text-white mb-10 flex items-center gap-4">
-                        <iconify-icon icon="lucide:settings" class="text-primary"></iconify-icon>
-                        Ajustes de Perfil
-                    </h2>
-                    <form onsubmit="saveProfile(event)" class="space-y-8">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div class="space-y-3">
-                                <label class="text-xs font-bold text-gray-500 uppercase tracking-widest px-1">Nombre</label>
-                                <input type="text" id="profile-name" class="w-full bg-accent/30 border border-white/5 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-primary/50 text-white outline-none transition-all" placeholder="Tu nombre">
-                            </div>
-                            <div class="space-y-3">
-                                <label class="text-xs font-bold text-gray-500 uppercase tracking-widest px-1">Apellidos</label>
-                                <input type="text" id="profile-lastname" class="w-full bg-accent/30 border border-white/5 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-primary/50 text-white outline-none transition-all" placeholder="Tus apellidos">
-                            </div>
-                        </div>
-                        <div class="space-y-3">
-                            <label class="text-xs font-bold text-gray-500 uppercase tracking-widest px-1">Correo Electrónico</label>
-                            <input type="email" id="profile-email" readonly class="w-full bg-accent/20 border border-white/5 rounded-2xl px-6 py-4 text-gray-500 cursor-not-allowed outline-none">
-                        </div>
-                        <div class="space-y-3">
-                            <label class="text-xs font-bold text-gray-500 uppercase tracking-widest px-1">Biografía</label>
-                            <textarea id="profile-bio" rows="4" class="w-full bg-accent/30 border border-white/5 rounded-2xl px-6 py-4 focus:ring-2 focus:ring-primary/50 text-white outline-none transition-all resize-none" placeholder="Cuéntanos un poco sobre ti..."></textarea>
-                        </div>
-                        <div class="pt-6">
-                            <button type="submit" id="save-btn" class="w-full md:w-auto px-12 py-5 bg-white text-black font-black uppercase tracking-widest rounded-2xl hover:bg-primary transition-all shadow-xl shadow-black/20">
-                                Guardar Cambios
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-        </main>
-    </div>
-
-    <!-- Viewer Modal -->
-    <div id="viewer-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4 bg-black/95">
-        <button onclick="closeViewer()" class="absolute top-8 right-8 text-white p-4 hover:bg-white/10 rounded-full transition-all">
-            <iconify-icon icon="lucide:x" class="text-3xl"></iconify-icon>
-        </button>
-        <div class="max-w-6xl w-full flex flex-col md:flex-row gap-8">
-            <div class="flex-1 bg-black rounded-3xl overflow-hidden shadow-2xl ring-1 ring-white/10">
-                <img id="modal-img" src="" class="w-full h-full object-contain">
-            </div>
-            <div class="w-full md:w-80 space-y-8 py-8 px-4">
-                <div>
-                    <h3 id="modal-title" class="text-3xl font-black text-white mb-2">---</h3>
-                    <p id="modal-date" class="text-gray-500 font-medium tracking-wide">---</p>
-                </div>
-                <div class="p-6 bg-accent/40 rounded-3xl border border-white/5 ring-1 ring-white/5">
-                    <p class="text-[10px] font-black uppercase tracking-widest text-primary mb-3">Prompt Original</p>
-                    <p id="modal-prompt" class="text-sm text-gray-300 italic leading-relaxed">---</p>
-                </div>
-                <div class="flex flex-col gap-4">
-                    <a id="modal-download" href="" download class="w-full py-5 bg-white text-black text-center font-black uppercase rounded-2xl hover:bg-primary transition-all">Descargar HD</a>
-                    <button id="modal-share" class="w-full py-5 bg-accent/40 text-white font-black uppercase rounded-2xl hover:bg-accent transition-all">Compartir</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // Firebase Configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyDj99qdmDt4GiVeRkvCSfTOSDw3uqD-_Ew",
-            authDomain: "gen-lang-client-0426824151.firebaseapp.com",
-            projectId: "gen-lang-client-0426824151",
-            storageBucket: "gen-lang-client-0426824151.firebasestorage.app",
-            messagingSenderId: "124806819551",
-            appId: "1:124806819551:web:1c90d1154b458fa064036a"
-        };
-
-        try {
-            firebase.initializeApp(firebaseConfig);
-        } catch(e) {}
-        
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-        let userRenders = [];
-
-        auth.onAuthStateChanged(async (user) => {
-            if (!user) {
-                window.location.replace('01-landing-page.html');
-                return;
-            }
-            // Add class to reveal body
-            document.documentElement.classList.add('auth-checked');
-            
-            document.getElementById('user-display-name').textContent = user.displayName?.split(' ')[0] || 'Creativo';
-            
-            // Real-time listener for credits
-            db.collection('users').doc(user.uid).onSnapshot(doc => {
-                if (doc.exists) {
-                    const credits = doc.data().credits || 0;
-                    const balanceEl = document.getElementById('credits-balance');
-                    if (balanceEl) balanceEl.innerHTML = `${credits} <span class="text-xs text-gray-500 font-normal">créditos</span>`;
-                }
-            }, err => console.error("Credit listener error:", err));
-
-            await loadUserData(user);
-            await loadRenders(user);
-        });
-
-        async function loadUserData(user) {
-            const doc = await db.collection('users').doc(user.uid).get();
-            const data = doc.exists ? doc.data() : {};
-            
-            document.getElementById('credits-balance').innerHTML = `${data.credits || 0} <span class="text-xs text-gray-500 font-normal">créditos</span>`;
-            document.getElementById('profile-name').value = data.firstName || '';
-            document.getElementById('profile-lastname').value = data.lastName || '';
-            document.getElementById('profile-email').value = user.email || '';
-            document.getElementById('profile-bio').value = data.bio || '';
-        }
-
-        async function loadRenders(user) {
-            const token = await user.getIdToken();
-            try {
-                const res = await fetch('/api/my-renders', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                userRenders = await res.json();
-                
-                document.getElementById('stat-renders').textContent = userRenders.length;
-                document.getElementById('stat-spent').textContent = (userRenders.length * 2.50).toFixed(0) + '€';
-                
-                renderGalleries();
-            } catch (e) {
-                console.error("Error loading renders:", e);
-            }
-        }
-
-        function renderGalleries() {
-            const rendersDiv = document.getElementById('renders-gallery');
-            const originalesDiv = document.getElementById('originales-gallery');
-            
-            rendersDiv.innerHTML = userRenders.length ? '' : '<div class="col-span-full py-20 text-center text-gray-600">No has creado ningún render todavía.</div>';
-            originalesDiv.innerHTML = userRenders.filter(r => r.inputImageUrl).length ? '' : '<div class="col-span-full py-20 text-center text-gray-600">No hay fotos originales guardadas.</div>';
-            
-            userRenders.forEach(render => {
-                // Render Gallery
-                const renderCard = createCard(
-                    `https://storage.googleapis.com/${firebaseConfig.storageBucket}/${render.imageUrl}`,
-                    render.style,
-                    render.createdAt,
-                    render
-                );
-                rendersDiv.appendChild(renderCard);
-                
-                // Original Photos Gallery
-                if (render.inputImageUrl) {
-                    const originalCard = createCard(
-                        `https://storage.googleapis.com/${firebaseConfig.storageBucket}/${render.inputImageUrl}`,
-                        "Foto Original",
-                        render.createdAt,
-                        render,
-                        true
-                    );
-                    originalesDiv.appendChild(originalCard);
-                }
-            });
-        }
-
-        function createCard(url, title, date, fullData, isOriginal = false) {
-            const div = document.createElement('div');
-            div.className = 'group relative aspect-[4/5] rounded-[2rem] overflow-hidden bg-accent/20 border border-white/5 hover-lift cursor-pointer premium-shadow';
-            
-            const displayDate = new Date(date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
-            
-            div.innerHTML = `
-                <img src="${url}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
-                <div class="absolute inset-0 gallery-overlay opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-8">
-                    <span class="text-primary text-xs font-black uppercase tracking-[0.2em] mb-2">${isOriginal ? 'ORIGINAL' : 'RENDER'}</span>
-                    <h4 class="text-white text-2xl font-black mb-1">${title}</h4>
-                    <p class="text-gray-400 text-sm font-medium">${displayDate}</p>
-                </div>
-            `;
-            
-            div.onclick = () => openViewer(url, title, displayDate, fullData.prompt);
-            return div;
-        }
-
-        function openViewer(url, title, date, prompt) {
-            document.getElementById('modal-img').src = url;
-            document.getElementById('modal-title').textContent = title;
-            document.getElementById('modal-date').textContent = date;
-            document.getElementById('modal-prompt').textContent = prompt || 'Sin descripción';
-            document.getElementById('modal-download').href = url;
-            document.getElementById('viewer-modal').classList.remove('hidden');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeViewer() {
-            document.getElementById('viewer-modal').classList.add('hidden');
-            document.body.style.overflow = 'auto';
-        }
-
-        function switchTab(tab) {
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
-            document.getElementById(`section-${tab}`).classList.remove('hidden');
-            
-            document.querySelectorAll('[id^="tab-"]').forEach(t => {
-                t.classList.remove('text-primary', 'border-primary', 'border-b-2');
-                t.classList.add('text-gray-500');
-            });
-            
-            const activeTab = document.getElementById(`tab-${tab}`);
-            activeTab.classList.add('text-primary', 'border-primary', 'border-b-2');
-            activeTab.classList.remove('text-gray-500');
-        }
-
-        async function saveProfile(e) {
-            e.preventDefault();
-            const btn = document.getElementById('save-btn');
-            const originalText = btn.textContent;
-            btn.textContent = 'Guardando...';
-            btn.disabled = true;
-
-            const user = auth.currentUser;
-            const firstName = document.getElementById('profile-name').value;
-            const lastName = document.getElementById('profile-lastname').value;
-
-            try {
-                await db.collection('users').doc(user.uid).set({
-                    firstName,
-                    lastName,
-                    displayName: `${firstName} ${lastName}`.trim(),
-                    bio: document.getElementById('profile-bio').value
-                }, { merge: true });
-                
-                await user.updateProfile({ displayName: `${firstName} ${lastName}`.trim() });
-                
-                btn.textContent = '¡Guardado!';
-                setTimeout(() => {
-                    btn.textContent = originalText;
-                    btn.disabled = false;
-                }, 2000);
-            } catch (e) {
-                console.error(e);
-                btn.textContent = 'Error';
-                btn.disabled = false;
-            }
-        }
-
-        function handleSignOut() {
-            if (confirm('¿Cerrar sesión en RenderRoom?')) {
-                auth.signOut().then(() => {
-                    localStorage.removeItem('rr_token');
-                    window.location.href = '01-landing-page.html';
-                });
-            }
-        }
-    </script>
-</body>
-</html>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display">
+<!-- Main Mobile Container -->
+<div class="relative flex min-h-screen w-full flex-col bg-background-light dark:bg-background-dark overflow-x-hidden max-w-md mx-auto shadow-2xl border-x border-slate-200 dark:border-slate-800">
+<!-- Header Nav -->
+<div class="flex items-center bg-white dark:bg-background-dark/50 backdrop-blur-md p-4 sticky top-0 z-10 border-b border-slate-200 dark:border-slate-800 justify-between">
+<div class="text-slate-900 dark:text-slate-100 flex size-10 items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer">
+<span class="material-symbols-outlined">arrow_back</span>
+</div>
+<h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-tight flex-1 text-center">Configuración</h2>
+<div class="flex w-10 items-center justify-end">
+<button class="flex items-center justify-center rounded-full size-10 text-slate-900 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</div>
+</div>
+<!-- User Profile Header -->
+<div class="flex p-6 @container bg-white dark:bg-background-dark/30">
+<div class="flex w-full flex-col gap-4 items-center">
+<div class="flex gap-4 flex-col items-center">
+<div class="relative">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-24 w-24 border-4 border-white dark:border-slate-800 shadow-lg" data-alt="User profile picture showing a smiling professional man" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCDVMl3rGn_YCGaqWf12dVn_251TdNtWEank_ndiG78SmPfzZ1RA6rW04Qyse4itTAInPSoFuK5K6wpB3_kBdpnI2LUkRqClunLk572R5inzr7pdoAu2KLvX39Hn7bxRH00FVKCVl6KQDfZdi2h-jM8d2U1idmYs7I7AgAhJk29Q-PNGtK3TEIbYnSEknvcETaID7Txshv897d4QGb5BCBifMVAnqLz-RUU_N22ub-oY02I1V67A3kxM5HBH-pWJPanp7nJ8MDGsBjC");'>
+</div>
+<div class="absolute bottom-0 right-0 bg-primary text-white p-1.5 rounded-full border-2 border-white dark:border-slate-800">
+<span class="material-symbols-outlined text-xs">edit</span>
+</div>
+</div>
+<div class="flex flex-col items-center justify-center">
+<p class="text-slate-900 dark:text-slate-100 text-xl font-bold tracking-tight text-center">Usuario RenderRoom</p>
+<div class="flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-primary text-sm fill-1">verified</span>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium text-center">Plan Premium • Miembro desde 2023</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Section Navigation Tabs -->
+<div class="sticky top-[72px] bg-white dark:bg-background-dark z-10">
+<div class="flex border-b border-slate-200 dark:border-slate-800 px-4 gap-6 overflow-x-auto no-scrollbar">
+<a class="flex flex-col items-center justify-center border-b-2 border-primary text-primary pb-3 pt-4 whitespace-nowrap" href="#">
+<p class="text-sm font-bold">Mi Cuenta</p>
+</a>
+<a class="flex flex-col items-center justify-center border-b-2 border-transparent text-slate-500 dark:text-slate-400 pb-3 pt-4 whitespace-nowrap" href="#">
+<p class="text-sm font-semibold">Créditos</p>
+</a>
+<a class="flex flex-col items-center justify-center border-b-2 border-transparent text-slate-500 dark:text-slate-400 pb-3 pt-4 whitespace-nowrap" href="#">
+<p class="text-sm font-semibold">Seguridad</p>
+</a>
+</div>
+</div>
+<!-- Content Area -->
+<div class="flex flex-col gap-6 p-4 pb-32">
+<!-- Account Information Card -->
+<section class="flex flex-col gap-4">
+<div class="flex items-center justify-between px-1">
+<h3 class="text-slate-900 dark:text-slate-100 text-lg font-bold tracking-tight">Información Personal</h3>
+<button class="text-primary text-sm font-bold">Guardar</button>
+</div>
+<div class="bg-white dark:bg-background-dark/40 rounded-xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col gap-4">
+<div class="flex flex-col gap-2">
+<label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Nombre Completo</label>
+<input class="w-full bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" type="text" value="Usuario RenderRoom"/>
+</div>
+<div class="flex flex-col gap-2">
+<label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Email</label>
+<input class="w-full bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" type="email" value="usuario@renderroom.com"/>
+</div>
+</div>
+</section>
+<!-- Credits Card -->
+<section class="flex flex-col gap-4">
+<h3 class="text-slate-900 dark:text-slate-100 text-lg font-bold tracking-tight px-1">Balance de Créditos</h3>
+<div class="bg-white dark:bg-background-dark/40 rounded-xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex items-center justify-between mb-6">
+<div class="flex flex-col">
+<span class="text-slate-500 text-xs font-bold uppercase tracking-wider">Disponibles</span>
+<span class="text-3xl font-black text-slate-900 dark:text-slate-100">10 <span class="text-primary text-lg font-bold">Créditos</span></span>
+</div>
+<button class="bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-xl shadow-md shadow-primary/20 transition-all text-sm">
+                            Recargar
+                        </button>
+</div>
+<div class="border-t border-slate-100 dark:border-slate-800 pt-4">
+<p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Transacciones Recientes</p>
+<div class="flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="bg-primary/10 p-2 rounded-lg">
+<span class="material-symbols-outlined text-primary text-lg">image</span>
+</div>
+<div class="flex flex-col">
+<span class="text-sm font-semibold">Render Interior AI</span>
+<span class="text-[10px] text-slate-400">12 Oct, 2023</span>
+</div>
+</div>
+<span class="text-sm font-bold text-red-500">-2 pts</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="bg-green-100 p-2 rounded-lg">
+<span class="material-symbols-outlined text-green-600 text-lg">add_shopping_cart</span>
+</div>
+<div class="flex flex-col">
+<span class="text-sm font-semibold">Compra de Pack</span>
+<span class="text-[10px] text-slate-400">08 Oct, 2023</span>
+</div>
+</div>
+<span class="text-sm font-bold text-green-600">+10 pts</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Security Section -->
+<section class="flex flex-col gap-4">
+<h3 class="text-slate-900 dark:text-slate-100 text-lg font-bold tracking-tight px-1">Seguridad</h3>
+<div class="bg-white dark:bg-background-dark/40 rounded-xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col gap-4">
+<button class="flex items-center justify-between w-full p-4 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-slate-500">lock</span>
+<span class="text-sm font-semibold">Cambiar Contraseña</span>
+</div>
+<span class="material-symbols-outlined text-slate-400 text-sm">chevron_right</span>
+</button>
+<button class="flex items-center justify-between w-full p-4 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-red-500">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined">delete_forever</span>
+<span class="text-sm font-semibold">Desactivar Cuenta</span>
+</div>
+</button>
+</div>
+</section>
+</div>
+<!-- Bottom Navigation Bar -->
+<div class="fixed bottom-0 w-full max-w-md bg-white/90 dark:bg-background-dark/90 backdrop-blur-lg border-t border-slate-200 dark:border-slate-800 px-4 pb-6 pt-2 z-20">
+<div class="flex gap-2 justify-around">
+<a class="flex flex-1 flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined">home</span>
+</div>
+<p class="text-[10px] font-bold uppercase tracking-widest">Inicio</p>
+</a>
+<a class="flex flex-1 flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined">folder</span>
+</div>
+<p class="text-[10px] font-bold uppercase tracking-widest">Proyectos</p>
+</a>
+<a class="flex flex-1 flex-col items-center gap-1 text-slate-400 hover:text-primary transition-colors" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+</div>
+<p class="text-[10px] font-bold uppercase tracking-widest">Créditos</p>
+</a>
+<a class="flex flex-1 flex-col items-center gap-1 text-primary" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined fill-1">person</span>
+</div>
+<p class="text-[10px] font-bold uppercase tracking-widest">Perfil</p>
+</a>
+</div>
+</div>
+</div>
+</body></html>

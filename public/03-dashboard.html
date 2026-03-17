@@ -1,27 +1,21 @@
-<html class="dark" lang="es"><head>
+<!DOCTYPE html>
 
+<html class="light" lang="es"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
             theme: {
                 extend: {
                     colors: {
-                        "primary": "#e49f0c",
-                        "background-light": "#f8f7f5",
-                        "background-dark": "#0D1117",
-                        "card-dark": "rgba(34, 28, 16, 0.4)",
-                        "lunar-white": "#E6EDF3",
-                        "nebula-silver": "#8B949E"
+                        "primary": "#f59f0a",
+                        "background-light": "#ffffff",
+                        "background-dark": "#221c10",
                     },
                     fontFamily: {
                         "display": ["Inter"]
@@ -32,276 +26,137 @@
         }
     </script>
 <style>
-        .glass {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .amber-glow:hover {
-            box-shadow: 0 0 20px rgba(228, 159, 12, 0.2);
-            border-color: rgba(228, 159, 12, 0.4);
-        }
-        .glass-nav { background: rgba(13, 17, 23, 0.7); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(228, 159, 12, 0.1); }
-        .tab-btn.active { color: #e49f0c; border-bottom: 2px solid #e49f0c; }
-        
-        /* Prevent FOUC: hide body by default */
-        body { opacity: 0; transition: opacity 0.3s ease; }
-        .auth-checked body { opacity: 1; }
-    </style>
-</head>
-<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
-<!-- Top Navigation -->
-<nav class="sticky top-0 z-50 glass border-b border-white/10 px-6 py-3 flex items-center justify-between">
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased">
+<!-- Header Navigation -->
+<header class="sticky top-0 z-50 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-100 dark:border-slate-800">
+<div class="flex items-center justify-between px-4 h-16 max-w-lg mx-auto">
 <div class="flex items-center gap-2">
-<span class="material-symbols-outlined text-primary text-3xl">layers</span>
-<h1 class="text-xl font-black tracking-tight text-lunar-white">RenderRoom</h1>
-</div>
-<div class="hidden md:flex items-center gap-8">
-<a class="text-sm font-medium text-primary border-b-2 border-primary pb-1" href="03-dashboard.html">Dashboard</a>
-<a class="text-sm font-medium text-nebula-silver hover:text-lunar-white" href="01-landing-page.html#galeria">Galería</a>
-<a class="text-sm font-medium text-nebula-silver hover:text-lunar-white" href="01-landing-page.html#precios">Precios</a>
-<a class="text-sm font-medium text-nebula-silver hover:text-lunar-white" href="07-consejos-decoracion.html">Blog</a>
+<span class="material-symbols-outlined text-primary text-3xl">auto_awesome</span>
+<h1 class="text-xl font-bold tracking-tight text-slate-900 dark:text-white">RenderRoom</h1>
 </div>
 <div class="flex items-center gap-4">
-    <!-- Persistent Credits Display -->
-    <div class="flex items-center gap-2 px-3 py-1.5 bg-background-dark/50 border border-white/10 rounded-full">
-        <span class="material-symbols-outlined text-primary text-[18px]">database</span>
-        <span id="header-credits-count" class="text-sm font-bold">--</span>
-        <span class="text-[10px] text-nebula-silver font-medium uppercase tracking-wider hidden sm:inline">Créditos</span>
-        <a href="modal-compra.html" id="header-buy-credits-btn" onclick="window.open(this.href, 'Purchase', 'width=1000,height=800'); return false;" class="ml-1 px-2 py-0.5 bg-primary/10 hover:bg-primary/20 text-primary text-[10px] font-bold rounded-md border border-primary/20 transition-all hidden">
-            COMPRAR
-        </a>
-    </div>
-
-    <a href="02-upload-wizard.html" class="bg-primary hover:bg-primary/90 text-background-dark px-5 py-2 rounded-lg font-bold text-sm transition-all flex items-center gap-2">
-        <span class="material-symbols-outlined text-sm">add_circle</span>
-        Nuevo Render
-    </a>
-    <div id="admin-link-container" class="hidden">
-        <a href="admin-dashboard.html" class="text-primary hover:text-primary/80 transition-colors">
-            <span class="material-symbols-outlined">admin_panel_settings</span>
-        </a>
-    </div>
-    <a href="06-perfil-usuario.html" class="flex items-center gap-3 group">
-        <div id="user-initials" class="w-10 h-10 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-primary font-bold">
-            U
-        </div>
-    </a>
-</div>
-</nav>
-<main class="max-w-7xl mx-auto px-6 py-10">
-<!-- Header & Stats -->
-<div class="mb-10">
-<div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
-<div>
-<h2 class="text-4xl font-black text-lunar-white mb-2">Mis Renders</h2>
-<p class="text-nebula-silver text-lg">Gestiona y visualiza tus transformaciones de espacios con IA</p>
+<button class="flex items-center justify-center size-10 rounded-full bg-slate-100 dark:bg-slate-800">
+<span class="material-symbols-outlined text-slate-600 dark:text-slate-300">notifications</span>
+</button>
+<div class="size-10 rounded-full bg-primary/20 overflow-hidden border-2 border-primary/30">
+<img class="w-full h-full object-cover" data-alt="User profile avatar close up" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCKGReQBHbWTBf2hzqO1BkiEcbNyAPokhKWwdrQzdas2XFAsqkLKMa2KVLh1h30wih3rsCTbnYFovC0vW8fxnareREcE3ROOww35D0LUFGcszBqj8gIyMfe6DO4w8QPVPkVqgegFwO9edN11dNOn8vgM5ICVuPLWSesju4GAKXu7RQDtOWeE1sLTdajVcKcLlQSrNdPD0gKO3NJ4dFeVWXUe75GdMSmt_rWXxvMl6f9nxwAvOUcxwMhFd30gZXHuidkDxWa21IrHmo_"/>
 </div>
 </div>
-<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
-<div class="glass p-6 rounded-xl flex items-center gap-4">
-<div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-<span class="material-symbols-outlined text-primary">collections</span>
 </div>
-<div>
-<p class="text-nebula-silver text-sm uppercase tracking-wider font-semibold">Total Renders</p>
-<p id="total-renders-count" class="text-2xl font-bold text-lunar-white">0</p>
+<!-- Sub-navigation Tabs -->
+<div class="flex border-b border-slate-100 dark:border-slate-800 px-4 max-w-lg mx-auto">
+<a class="flex-1 py-3 text-center text-sm font-semibold border-b-2 border-transparent text-slate-500" href="#">Galería</a>
+<a class="flex-1 py-3 text-center text-sm font-semibold border-b-2 border-transparent text-slate-500" href="#">Precios</a>
+<a class="flex-1 py-3 text-center text-sm font-semibold border-b-2 border-primary text-primary" href="#">Dashboard</a>
 </div>
-</div>
-<div class="glass p-6 rounded-xl flex items-center gap-4">
-<div class="w-12 h-12 rounded-lg bg-purple-500/10 flex items-center justify-center">
-<span class="material-symbols-outlined text-purple-400">sync</span>
-</div>
-<div>
-<p class="text-nebula-silver text-sm uppercase tracking-wider font-semibold">En Proceso</p>
-<p id="pending-renders-count" class="text-2xl font-bold text-lunar-white">0</p>
-</div>
-</div>
-<a href="creditos.html" class="glass p-6 rounded-xl flex items-center gap-4 hover:bg-white/5 transition-all amber-glow">
-    <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-        <span class="material-symbols-outlined text-primary">payments</span>
-    </div>
-    <div>
-        <p class="text-nebula-silver text-sm uppercase tracking-wider font-semibold">Mis Créditos</p>
-        <p id="user-credits-count" class="text-2xl font-bold text-lunar-white">...</p>
-    </div>
-</a>
+</header>
+<main class="max-w-lg mx-auto pb-24">
+<!-- Stats Overview -->
+<div class="grid grid-cols-1 gap-4 p-4">
+<div class="flex flex-col gap-1 p-5 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+<p class="text-slate-500 text-xs font-semibold uppercase tracking-wider">Total Renders</p>
+<div class="flex items-end justify-between">
+<p class="text-3xl font-bold text-slate-900 dark:text-white">12</p>
+<span class="text-green-500 text-xs font-bold mb-1 flex items-center gap-0.5">
+<span class="material-symbols-outlined text-sm">trending_up</span> +2
+                    </span>
 </div>
 </div>
-<!-- Filter Bar -->
-<div class="flex flex-col lg:flex-row gap-4 items-center justify-between mb-8 border-b border-white/10 pb-4">
-<div class="flex gap-8">
-<button class="text-lunar-white font-bold border-b-2 border-primary pb-4 px-1">Todos</button>
-<button class="text-nebula-silver hover:text-lunar-white font-medium pb-4 px-1">Completados</button>
-<button class="text-nebula-silver hover:text-lunar-white font-medium pb-4 px-1">En Proceso</button>
-<button class="text-nebula-silver hover:text-lunar-white font-medium pb-4 px-1">Borradores</button>
-</div>
-<div class="flex gap-4 w-full lg:w-auto">
-<div class="relative flex-1 lg:w-64">
-<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-nebula-silver">search</span>
-<input class="w-full bg-white/5 border-white/10 rounded-lg pl-10 text-sm text-lunar-white focus:ring-primary focus:border-primary" placeholder="Buscar renders..." type="text"/>
-</div>
-<button class="glass px-4 py-2 rounded-lg text-sm flex items-center gap-2 text-lunar-white">
-<span class="material-symbols-outlined text-sm">sort</span>
-                    Más recientes
-                </button>
+<div class="flex flex-col gap-1 p-5 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+<p class="text-slate-500 text-xs font-semibold uppercase tracking-wider">Créditos</p>
+<div class="flex items-center justify-between">
+<p class="text-3xl font-bold text-slate-900 dark:text-white">4</p>
+<span class="px-3 py-1 bg-primary text-white text-[10px] font-bold rounded-full uppercase tracking-widest shadow-lg shadow-primary/20">Solar Amber</span>
 </div>
 </div>
-<!-- Renders Grid -->
-<div id="renders-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    <!-- Renders will be loaded here -->
-    <div class="col-span-full py-20 text-center text-nebula-silver" id="loading-renders">
-        <svg class="animate-spin h-10 w-10 mx-auto mb-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
-        Cargando tus renders...
-    </div>
+<div class="flex flex-col gap-1 p-5 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+<p class="text-slate-500 text-xs font-semibold uppercase tracking-wider">Última actividad</p>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-xl">schedule</span>
+<p class="text-xl font-semibold text-slate-700 dark:text-slate-300">hace 2h</p>
 </div>
-<!-- Call to Action -->
-<div class="mt-20 text-center pb-20">
-<h3 class="text-2xl font-bold text-lunar-white mb-4">¿Quieres transformar otra habitación?</h3>
-<p class="text-nebula-silver mb-8 max-w-lg mx-auto">Sube una foto de cualquier espacio y deja que nuestra IA haga la magia en segundos.</p>
-<a href="02-upload-wizard.html" class="inline-flex items-center gap-3 bg-gradient-to-r from-primary to-amber-600 hover:from-amber-500 hover:to-primary text-background-dark px-10 py-4 rounded-xl font-black text-lg transition-all transform hover:scale-105 shadow-xl shadow-primary/20">
-<span class="material-symbols-outlined">add_photo_alternate</span>
-                Nuevo Render por 2,50€
-            </a>
+</div>
+</div>
+<!-- Render Grid Section -->
+<div class="px-4 pt-6 pb-2 flex items-center justify-between">
+<h2 class="text-xl font-bold text-slate-900 dark:text-white">Tus Renders</h2>
+<button class="text-primary text-sm font-bold flex items-center">
+                Ver todos <span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</div>
+<div class="grid grid-cols-1 gap-6 p-4">
+<!-- Render Card 1 -->
+<div class="group overflow-hidden rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+<div class="aspect-video relative overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="High fidelity modern minimalist living room render" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAagGPO0Q_FqA0m7H5TyDK3ZxMj0o1QzmHILsKHSmasTUup_kgJziutN4oxJsOPff09qXnBTmwmIkxnA_RUXR8GcrwZchP1Rxvkdn_4lSwlR4TdWOGNQUjdfXRkMegGPYpc0Ta6GREu_6nMjQ44GmReVCFjNH0TV-67EjhgKSvGNmlBZW1zUHJ3uLaS3qsSeK9Eknj_fzWjKZxvsHFnnYW5BI8cr0TbUF99WkZJHnjlrSryOoJ24g3pdX20HlOwvlE7so1nJN_pD213"/>
+<div class="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider text-slate-800">Moderno</div>
+</div>
+<div class="p-4 flex items-center justify-between">
+<button class="flex-1 bg-primary text-white font-bold py-2 rounded-lg flex items-center justify-center gap-2 shadow-md shadow-primary/10">
+<span class="material-symbols-outlined text-lg">download</span> Descargar
+                    </button>
+<button class="ml-3 size-10 flex items-center justify-center rounded-lg border border-slate-100 dark:border-slate-800 text-slate-500">
+<span class="material-symbols-outlined">share</span>
+</button>
+</div>
+</div>
+<!-- Render Card 2 -->
+<div class="group overflow-hidden rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+<div class="aspect-video relative overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Japandi style bedroom interior render" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB067i_pP9bK0GCk0yXMKw0UUrTGGKqv4n4CDbAWkKJiyEVguXbEm1KzssQfgeVhvtiWszpXsTgZVaWUfiyvxwocKM0z5Rep5AWxBcu7Fvvn219EpeskqdXjAu4_HT2re2Djl77tGVbcPnjM1ALH94x8punPe1IyAGIHIe8drt95plbkxIrGzmMA6q4nJVqvXbcBtSUaaRVa02Iwi60KW08PXOWdMhj71N0k-8MA5GcCvxPLSvBNg56pJMkDlETVG2kyeOLUMtTeAsD"/>
+<div class="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider text-slate-800">Japandi</div>
+</div>
+<div class="p-4 flex items-center justify-between">
+<button class="flex-1 bg-primary text-white font-bold py-2 rounded-lg flex items-center justify-center gap-2 shadow-md shadow-primary/10">
+<span class="material-symbols-outlined text-lg">download</span> Descargar
+                    </button>
+<button class="ml-3 size-10 flex items-center justify-center rounded-lg border border-slate-100 dark:border-slate-800 text-slate-500">
+<span class="material-symbols-outlined">share</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Empty State / New Project -->
+<div class="mx-4 mt-8 p-8 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 flex flex-col items-center text-center">
+<div class="size-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-primary text-3xl">add_home</span>
+</div>
+<h3 class="text-lg font-bold text-slate-900 dark:text-white">¿Nueva idea?</h3>
+<p class="text-slate-500 text-sm mt-1 mb-6">Transforma cualquier espacio con un render fotorrealista en segundos.</p>
+<button class="w-full py-4 bg-primary text-white font-bold rounded-xl shadow-xl shadow-primary/30 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">add</span> Comenzar Nuevo Render
+            </button>
 </div>
 </main>
-<!-- Footer -->
-<footer class="bg-black/40 border-t border-white/5 py-12 px-6">
-<div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
-<div class="flex items-center gap-2 opacity-50">
-<span class="material-symbols-outlined text-primary text-2xl">layers</span>
-<span class="text-lunar-white font-bold">RenderRoom</span>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-background-dark border-t border-slate-100 dark:border-slate-800 pb-safe-area-inset-bottom">
+<div class="flex items-center justify-around max-w-lg mx-auto h-16">
+<a class="flex flex-col items-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">home</span>
+<span class="text-[10px] font-medium">Inicio</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined">grid_view</span>
+<span class="text-[10px] font-medium">Galería</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined">payments</span>
+<span class="text-[10px] font-medium">Precios</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[10px] font-medium">Perfil</span>
+</a>
 </div>
-<div class="flex gap-8 text-sm text-nebula-silver">
-  <a class="hover:text-primary transition-colors" href="terminos.html">Términos</a>
-  <a class="hover:text-primary transition-colors" href="privacidad.html">Privacidad</a>
-  <a class="hover:text-primary transition-colors" href="creditos.html">Créditos</a>
-  <button onclick="logout()" class="hover:text-red-400 transition-colors">Cerrar Sesión</button>
-</div>
-<p class="text-nebula-silver text-xs">© 2024 RenderRoom AI. Todos los derechos reservados.</p>
-</div>
-</footer>
-<script>
-// ── Firebase Config ─────────────────────────────
-const firebaseConfig = {
-  projectId: "gen-lang-client-0426824151",
-  appId: "1:124806819551:web:1c90d1154b458fa064036a",
-  storageBucket: "gen-lang-client-0426824151.firebasestorage.app",
-  apiKey: "AIzaSyDj99qdmDt4GiVeRkvCSfTOSDw3uqD-_Ew",
-  authDomain: "gen-lang-client-0426824151.firebaseapp.com",
-  messagingSenderId: "124806819551"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-
-let user; // Declare user globally
-
-firebase.auth().onAuthStateChanged(async (u) => {
-    if (!u) {
-        console.log("No user authenticated. Redirecting to landing page...");
-        window.location.replace('01-landing-page.html');
-        return;
-    }
-    
-    console.log("User authenticated:", u.email);
-    user = u;
-    
-    // Set token for API calls
-    try {
-        const token = await u.getIdToken();
-        localStorage.setItem('rr_token', token);
-    } catch (e) {
-        console.error("Error getting token:", e);
-    }
-
-    document.body.classList.add('auth-checked'); // Add class to body to show content
-
-    // Update UI
-    const initials = (user.displayName || user.email || 'U').charAt(0).toUpperCase();
-    const initialsEl = document.getElementById('user-initials');
-    if (initialsEl) initialsEl.textContent = initials;
-    
-    // Load Credits & User Info
-    try {
-        const doc = await db.collection('users').doc(u.uid).get();
-        if (doc.exists) {
-            const data = doc.data();
-            if (data.isAdmin) {
-                const adminLink = document.getElementById('admin-link-container');
-                if (adminLink) adminLink.classList.remove('hidden');
-            }
+</nav>
+<style>
+        .pb-safe-area-inset-bottom {
+            padding-bottom: env(safe-area-inset-bottom);
         }
-        
-        // Real-time listener for credits
-        db.collection('users').doc(u.uid).onSnapshot(doc => {
-            if (doc.exists) {
-                const credits = doc.data().credits || 0;
-                const creditText = document.getElementById('user-credits-count');
-                const headerCreditEl = document.getElementById('header-credits-count');
-                const buyBtn = document.getElementById('header-buy-credits-btn');
-                
-                if (creditText) creditText.textContent = credits;
-                if (headerCreditEl) headerCreditEl.textContent = credits;
-                if (buyBtn) {
-                    if (credits <= 2) buyBtn.classList.remove('hidden');
-                    else buyBtn.classList.add('hidden');
-                }
-            }
-        }, err => console.error("Credit listener error:", err));
-
-        loadRenders();
-    } catch (e) {
-        console.error("Error loading user data:", e);
-    }
-});
-
-function logout() {
-    firebase.auth().signOut().then(() => {
-        window.location.href = '01-landing-page.html';
-    });
-}
-
-async function loadRenders() {
-    const grid = document.getElementById('renders-grid');
-    try {
-        const res = await fetch('/api/my-renders', {
-            headers: { 'Authorization': `Bearer ${localStorage.getItem('rr_token')}` }
-        });
-        const data = await res.json();
-        
-        grid.innerHTML = '';
-        if (data.length === 0) {
-            grid.innerHTML = '<div class="col-span-full py-20 text-center text-nebula-silver">Aún no tienes renders. ¡Crea el primero!</div>';
-            return;
-        }
-
-        data.forEach(render => {
-            const date = new Date(render.createdAt).toLocaleDateString();
-            const card = `
-                <div class="glass rounded-xl overflow-hidden amber-glow transition-all group">
-                    <div class="relative h-56 overflow-hidden">
-                        <img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" src="${render.imageUrl}" alt="${render.style}"/>
-                        <div class="absolute top-3 left-3 bg-green-500/90 text-white text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded">Completado</div>
-                    </div>
-                    <div class="p-5">
-                        <h3 class="text-lunar-white font-bold text-lg mb-1">Estilo ${render.style}</h3>
-                        <p class="text-nebula-silver text-xs mb-4 flex items-center gap-1">
-                            <span class="material-symbols-outlined text-xs">calendar_today</span> ${date}
-                        </p>
-                        <a href="${render.imageUrl}" target="_blank" download class="w-full bg-primary/20 hover:bg-primary text-primary hover:text-background-dark py-2.5 rounded-lg font-bold text-sm transition-colors flex items-center justify-center gap-2">
-                            <span class="material-symbols-outlined text-sm">download</span>
-                            Descargar HD
-                        </a>
-                    </div>
-                </div>
-            `;
-            grid.innerHTML += card;
-        });
-
-    } catch (e) {
-        grid.innerHTML = '<div class="col-span-full py-20 text-center text-red-400">Error al cargar renders.</div>';
-    }
-}
-</script>
-</body>
-</html>
+    </style>
+</body></html>
