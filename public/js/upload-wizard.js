@@ -214,27 +214,27 @@ async function analyzeImage() {
             body: JSON.stringify({ images_base64: orderedImages })
         });
         const data = await res.json();
-        document.getElementById('analysis-loading').classList.add('hidden');
+        if (loading) loading.classList.add('hidden');
+        
         if (res.ok && data.detailed_description_es) {
             state.roomData = data;
             const analysisHtml = `
                 <div class="grid grid-cols-2 gap-4 mb-4">
-                    <div class="bg-background-dark/40 p-2 rounded">
-                        <p class="text-[10px] text-muted-text uppercase font-bold">Tipo de Habitaci├│n</p>
-                        <p class="text-sm font-bold text-white">${data.room_type || 'Detectando...'}</p>
+                    <div class="bg-primary/5 p-4 rounded-2xl border border-primary/10">
+                        <p class="text-[10px] text-text-secondary uppercase font-black tracking-widest mb-1">Tipo de Habitación</p>
+                        <p class="text-sm font-black text-text-primary capitalize">${data.room_type || 'Detectando...'}</p>
                     </div>
-                    <div class="bg-background-dark/40 p-2 rounded">
-                        <p class="text-[10px] text-muted-text uppercase font-bold">Tama├▒o Estimado</p>
-                        <p class="text-sm font-bold text-white">${data.approx_size || 'Detectando...'}</p>
+                    <div class="bg-primary/5 p-4 rounded-2xl border border-primary/10">
+                        <p class="text-[10px] text-text-secondary uppercase font-black tracking-widest mb-1">Tamaño Estimado</p>
+                        <p class="text-sm font-black text-text-primary capitalize">${data.approx_size || data.dimensions_est || 'Detectando...'}</p>
                     </div>
                 </div>
-                <p class="text-slate-300 text-sm leading-relaxed">${data.detailed_description_es}</p>
+                <p class="text-text-secondary text-sm leading-relaxed">${data.detailed_description_es}</p>
             `;
             document.getElementById('analysis-text').innerHTML = analysisHtml;
-            document.getElementById('analysis-result').classList.remove('hidden');
             document.getElementById('analysis-panel').classList.remove('hidden');
 
-            // ÔöÇÔöÇ Image Validation UI ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+            // ── Image Validation UI ──────────────────────────────────────────────────────────
             const v = data.image_validation;
             if (v) {
                 const score = v.viability_score ?? 100;
@@ -247,74 +247,61 @@ async function analyzeImage() {
                 const label = document.getElementById('validation-label');
                 const scoreEl = document.getElementById('validation-score');
 
-                badge.className = 'flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-black';
+                badge.className = 'flex items-center gap-2 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest';
                 if (score >= 90) {
-                    badge.classList.add('bg-green-500/15', 'text-green-400', 'border', 'border-green-500/30');
+                    badge.classList.add('bg-green-500/10', 'text-green-600', 'border', 'border-green-500/20');
                     icon.textContent = 'check_circle';
                     label.textContent = 'Perfecta para render';
                 } else if (score >= 70) {
-                    badge.classList.add('bg-primary/15', 'text-primary', 'border', 'border-primary/30');
+                    badge.classList.add('bg-primary/10', 'text-primary', 'border', 'border-primary/20');
                     icon.textContent = 'warning';
-                    label.textContent = 'V├ílida con advertencias';
+                    label.textContent = 'Válida con advertencias';
                 } else if (score >= 40) {
-                    badge.classList.add('bg-orange-500/15', 'text-orange-400', 'border', 'border-orange-500/30');
+                    badge.classList.add('bg-orange-500/10', 'text-orange-600', 'border', 'border-orange-500/20');
                     icon.textContent = 'report_problem';
                     label.textContent = 'Calidad baja';
                 } else {
-                    badge.classList.add('bg-red-500/15', 'text-red-400', 'border', 'border-red-500/30');
+                    badge.classList.add('bg-red-500/10', 'text-red-600', 'border', 'border-red-500/20');
                     icon.textContent = 'cancel';
                     label.textContent = 'No apta para render';
                 }
-                scoreEl.textContent = `(${score}/100)`;
+                scoreEl.textContent = `${score}%`;
 
                 // Issues list
                 const issuesEl = document.getElementById('validation-issues');
-                if (issues.length > 0) {
-                    issuesEl.innerHTML = issues.map(i =>
-                        `<div class="flex items-start gap-2 text-xs text-orange-300">
-                            <span class="material-symbols-outlined text-sm mt-0.5 flex-shrink-0">info</span>
-                            <span>${i}</span>
-                        </div>`
-                    ).join('');
-                    issuesEl.classList.remove('hidden');
-                } else {
-                    issuesEl.classList.add('hidden');
+                if (issuesEl) {
+                    if (issues.length > 0) {
+                        issuesEl.innerHTML = issues.map(i =>
+                            `<div class="flex items-start gap-2 text-[11px] font-bold text-orange-600 bg-orange-500/5 px-3 py-2 rounded-lg border border-orange-500/10">
+                                <span class="material-symbols-outlined text-sm mt-0.5 flex-shrink-0">info</span>
+                                <span>${i}</span>
+                            </div>`
+                        ).join('');
+                        issuesEl.classList.remove('hidden');
+                    } else {
+                        issuesEl.innerHTML = '';
+                        issuesEl.classList.add('hidden');
+                    }
                 }
-
-                // Mini checks grid
-                const checks = [
-                    { key: 'is_interior_room', label: 'Interior' },
-                    { key: 'has_clear_perspective', label: 'Perspectiva' },
-                    { key: 'is_not_blurry', label: 'Nitidez' },
-                    { key: 'sufficient_coverage', label: 'Cobertura' },
-                    { key: 'no_heavy_distortion', label: 'Sin distorsi├│n' },
-                    { key: 'is_single_room', label: 'Una habitaci├│n' },
-                ];
-                document.getElementById('validation-checks').innerHTML = checks.map(c => {
-                    const pass = v[c.key] !== false;
-                    return `<div class="flex items-center gap-1 text-[10px] ${pass ? 'text-green-400' : 'text-red-400'}">
-                        <span class="material-symbols-outlined text-[11px]">${pass ? 'check' : 'close'}</span>
-                        ${c.label}
-                    </div>`;
-                }).join('');
 
                 document.getElementById('image-validation-panel').classList.remove('hidden');
 
                 // Block or allow advancing
                 if (!ok) {
                     setBtnEnabled(nextBtn, false);
-                    // Show specific block message
                     const errorEl = document.getElementById('analysis-error');
                     const errorText = document.getElementById('analysis-error-text');
-                    errorText.textContent = 'La imagen no es apta para generar un render con el mismo ├íngulo. Por favor, sube una foto diferente.';
+                    errorText.textContent = 'La imagen no es apta para generar un render. Por favor, sube una foto diferente siguiendo los consejos de abajo.';
                     errorEl.classList.remove('hidden');
-                    return; // Don't set btn enabled below
+                    return;
                 }
             }
-
+            setBtnEnabled(nextBtn, true);
         } else {
+            if (loading) loading.classList.add('hidden');
             document.getElementById('analysis-error-text').textContent = data.error || 'Error del servicio';
             document.getElementById('analysis-error').classList.remove('hidden');
+            setBtnEnabled(nextBtn, false);
         }
     } catch (err) {
         document.getElementById('analysis-loading').classList.add('hidden');

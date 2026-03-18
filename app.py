@@ -183,12 +183,12 @@ STYLE_DESCRIPTIONS = {
 
 def analyze_room_image(images_base64: list) -> dict:
     """RoomChic Engine: 3D Triangulation and Perspective Analysis using Gemini via AI Studio."""
-    models_to_try = ["gemini-2.0-flash-exp", "gemini-1.5-flash", "gemini-1.5-pro"]
+    # Using more stable and specific model names for AI Studio
+    models_to_try = ["gemini-2.0-flash", "gemini-1.5-flash"]
     
     # Validation and Analysis Prompt
     analysis_prompt = """You are the RoomChic Architectural AI. 
     Evaluate the MASTER IMAGE (first image) for viability.
-    Perform PERSPECTIVE TRIANGULATION if valid.
     Return ONLY valid JSON:
     {
       "image_validation": {
@@ -203,12 +203,8 @@ def analyze_room_image(images_base64: list) -> dict:
         "is_single_room": true
       },
       "room_type": "string",
-      "architecture_en": "string",
-      "dimensions_est": "string",
-      "inventory_en": "string",
-      "blind_spot_data": "string",
+      "approx_size": "string",
       "detailed_description_es": "string",
-      "imagen_prompt_seed_en": "string",
       "recommendations": {
         "add_es": [],
         "remove_es": []
@@ -219,6 +215,10 @@ def analyze_room_image(images_base64: list) -> dict:
     # Prepare multimodal content
     contents = []
     for i, img_b64 in enumerate(images_base64):
+        # Clean base64 if it has metadata prefix
+        if "," in img_b64:
+            img_b64 = img_b64.split(",")[1]
+            
         contents.append({
             "mime_type": "image/jpeg",
             "data": img_b64
@@ -236,6 +236,8 @@ def analyze_room_image(images_base64: list) -> dict:
             )
             
             if response.text:
+                # Log a snippet for debugging (truncated)
+                print(f"Success with {model_name}: {safe_truncate(response.text, 100)}")
                 return {"success": True, "data": json.loads(response.text)}
         except Exception as e:
             last_error = str(e)
@@ -263,55 +265,65 @@ def generate_room_render(
     QUALITY: {quality}
     """
 
-    try:
-        model = genai.GenerativeModel("gemini-2.0-flash-exp")
-        
-        # Prepare contents
-        contents = []
-        if base_image_b64:
-            contents.append({
-                "mime_type": "image/jpeg",
-                "data": base_image_b64
-            })
-        contents.append(edit_instruction)
+    models_to_try = ["gemini-2.0-flash-exp", "gemini-1.5-flash"]
+    last_error = "Unknown"
 
-        # Attempt generation
-        # Note: gemini-2.0-flash-exp can output images in specific modalities,
-        # but for simplicity here we might be expecting it to describe the scene for Imagen.
-        # However, the user's test_api.py suggests they want to use Gemini directly.
-        
-        print(f"Generating render with gemini-2.0-flash-exp ({quality})...")
-        response = model.generate_content(
-            contents,
-            generation_config={
-                "temperature": 0.4 if quality == "normal" else 0.2,
-                "response_modalities": ["IMAGE", "TEXT"]
-            }
-        )
-        
-        # Extract image
-        image_b64 = None
-        for candidate in response.candidates:
-            for part in candidate.content.parts:
-                if part.inline_data and part.inline_data.mime_type.startswith("image/"):
-                    image_b64 = base64.b64encode(part.inline_data.data).decode("utf-8")
-                    break
-            if image_b64: break
+    for model_name in models_to_try:
+        try:
+            print(f"Generating render with {model_name} ({quality})...")
+            model = genai.GenerativeModel(model_name)
             
-        if image_b64:
-            return {
-                "success": True,
-                "image_base64": image_b64,
-                "full_prompt": edit_instruction,
-                "style_description": style_desc
-            }
+            # Prepare contents
+            contents = []
+            if base_image_b64:
+                # Clean base64 if it has metadata prefix
+                if "," in base_image_b64:
+                    base_image_b64 = base_image_b64.split(",")[1]
+                    
+                contents.append({
+                    "mime_type": "image/jpeg",
+                    "data": base_image_b64
+                })
+            contents.append(edit_instruction)
+
+            response = model.generate_content(
+                contents,
+                generation_config={
+                    "temperature": 0.4 if quality == "normal" else 0.2,
+                    "response_modalities": ["IMAGE", "TEXT"]
+                }
+            )
             
-    except Exception as e:
-        print(f"Gemini render error: {safe_truncate(e, 400)}")
+            # Extract image
+            image_b64 = None
+            for candidate in response.candidates:
+                if not hasattr(candidate, 'content') or not candidate.content.parts:
+                    continue
+                for part in candidate.content.parts:
+                    if part.inline_data and part.inline_data.mime_type.startswith("image/"):
+                        image_b64 = base64.b64encode(part.inline_data.data).decode("utf-8")
+                        break
+                if image_b64: break
+                
+            if image_b64:
+                print(f"Success generating render with {model_name}")
+                return {
+                    "success": True,
+                    "image_base64": image_b64,
+                    "full_prompt": edit_instruction,
+                    "style_description": style_desc
+                }
+            else:
+                print(f"Model {model_name} returned no image part.")
+                
+        except Exception as e:
+            last_error = str(e)
+            print(f"Error with {model_name}: {safe_truncate(e, 400)}")
+            continue
 
     return {
         "success": False,
-        "error": "No se pudo generar el render. Por favor, intenta de nuevo."
+        "error": f"No se pudo generar el render. Detalle: {safe_truncate(last_error, 100)}"
     }
 
 
