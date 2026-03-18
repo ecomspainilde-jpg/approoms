@@ -5,7 +5,7 @@ import sys
 
 # Construct the path dynamically
 appdata = os.environ.get('APPDATA')
-server_path = os.path.join(appdata, 'Python', 'Python314', 'Scripts', 'notebooklm-mcp-server.exe')
+server_path = r"c:\imf\habitacion\.venv\Scripts\notebooklm-mcp-server.exe"
 
 if not os.path.exists(server_path):
     # Try alternate location if Python314 isn't right
@@ -20,7 +20,7 @@ print(f"Using server at: {server_path}")
 
 def call_mcp(method, params={}):
     process = subprocess.Popen(
-        [server_path],
+        f'"{server_path}"',
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
