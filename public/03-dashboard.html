@@ -5,380 +5,159 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>Mis Renders — RenderRoom</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
     
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-
     <script id="tailwind-config">
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        primary: '#FFB800',
-                        'primary-dark': '#E6A600',
-                        surface: '#F8F9FA',
-                        border: '#E9ECEF',
-                        'text-primary': '#000000',
-                        'text-secondary': '#495057',
-                        'accent-green': '#2DCE89',
+                        "primary": "#F59E0B",
+                        "background": "#FFFFFF",
+                        "surface": "#F8FAFC",
+                        "border": "#F1F5F9",
+                        "text-primary": "#1E293B",
+                        "text-secondary": "#475569"
                     },
                     fontFamily: {
-                        sans: ['Plus Jakarta Sans', 'sans-serif'],
-                        display: ['Outfit', 'sans-serif'],
+                        "display": ["Inter", "sans-serif"]
                     },
                     borderRadius: {
-                        '2xl': '1.25rem',
-                        '3xl': '2.5rem',
-                    }
-                }
-            }
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "2xl": "2rem",
+                        "3xl": "2.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
         }
     </script>
 
-    <style>
-        :root {
-            --primary: #FFB800;
-            --surface: #F8F9FA;
-            --border: #E9ECEF;
-        }
-
-        body {
-            background-color: #FFFFFF;
-            color: #000000;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            opacity: 0;
-            transition: opacity 0.5s ease;
-        }
-
-        .auth-checked body {
-            opacity: 1;
-        }
-
-        .glass-nav {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-bottom: 2px solid var(--border);
-        }
-
-        .premium-card {
-            background: #FFFFFF;
-            border: 2px solid var(--border);
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .premium-card:hover {
-            border-color: var(--primary);
-            transform: translateY(-8px);
-            box-shadow: 0 30px 60px -12px rgba(255, 184, 0, 0.15);
-        }
-
-        .badge-design {
-            font-family: 'Outfit', sans-serif;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            font-weight: 900;
-        }
-
-        .scrollbar-hide::-webkit-scrollbar {
-            display: none;
-        }
-        .scrollbar-hide {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .fade-in-node {
-            animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .glass-header {
+                background: rgba(255, 255, 255, 0.8);
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+            }
+            .solar-glow {
+                box-shadow: 0 10px 40px rgba(245, 158, 11, 0.08);
+            }
+            .premium-card {
+                @apply bg-white border border-border transition-all duration-500 hover:border-primary/30 hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary/10;
+            }
+            .fade-in {
+                animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(20px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="bg-background font-display text-text-primary antialiased min-h-screen flex flex-col">
     <!-- Navigation -->
-    <nav class="sticky top-0 z-50 glass-nav px-6 py-5">
-        <div class="max-w-7xl mx-auto flex items-center justify-between">
-            <a href="01-landing-page.html" class="flex items-center gap-2 group transition-all active:scale-95">
-                <div class="w-11 h-11 bg-primary rounded-2xl flex items-center justify-center rotate-3 group-hover:rotate-6 transition-transform shadow-lg shadow-primary/20 text-white">
-                    <span class="material-symbols-outlined text-2xl font-black">wb_sunny</span>
+    <header class="fixed top-0 left-0 right-0 z-50 glass-header border-b border-border h-20">
+        <div class="max-w-7xl mx-auto px-6 h-full flex items-center justify-between">
+            <a href="01-landing-page.html" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
+                <div class="size-9 bg-primary rounded-lg flex items-center justify-center text-white">
+                    <span class="material-symbols-outlined font-bold text-xl">deployed_code</span>
                 </div>
-                <div>
-                    <h1 class="text-xl font-black tracking-tight font-display leading-none">RenderRoom</h1>
-                    <span class="text-[10px] font-black uppercase tracking-widest text-primary">STUDIO DASHBOARD</span>
-                </div>
+                <h2 class="text-xl font-black tracking-tight">Render<span class="text-primary">Room</span></h2>
             </a>
             
-            <div class="hidden lg:flex items-center space-x-10">
-                <a class="text-sm font-black text-text-secondary hover:text-primary transition-colors uppercase tracking-widest" href="01-landing-page.html">Inicio</a>
-                <a class="text-sm font-black text-primary transition-colors border-b-2 border-primary pb-1 uppercase tracking-widest" href="03-dashboard.html">Mis Renders</a>
-                <a class="text-sm font-black text-text-secondary hover:text-primary transition-colors uppercase tracking-widest" href="07-consejos-decoracion.html">Blog</a>
+            <div class="hidden lg:flex items-center gap-10">
+                <a class="text-sm font-bold text-text-secondary hover:text-primary transition-colors" href="01-landing-page.html">Inicio</a>
+                <a class="text-sm font-bold text-primary border-b-2 border-primary pb-1" href="03-dashboard.html">Mis Renders</a>
+                <a class="text-sm font-bold text-text-secondary hover:text-primary transition-colors" href="07-consejos-decoracion.html">Inspiración</a>
             </div>
 
             <div class="flex items-center gap-6">
-                <div id="header-credits-display" class="hidden flex items-center gap-2.5 px-5 py-2.5 bg-surface border-2 border-border rounded-2xl shadow-sm">
-                    <span class="material-symbols-outlined text-primary text-xl font-black">toll</span>
-                    <span id="header-credits-count" class="text-text-primary font-black text-sm">--</span>
+                <div id="header-credits-display" class="hidden items-center gap-3 px-4 py-2 bg-primary/5 border border-primary/10 rounded-2xl">
+                    <div class="size-6 bg-primary rounded-lg flex items-center justify-center text-white scale-75">
+                        <span class="material-symbols-outlined text-xs">database</span>
+                    </div>
+                    <span class="text-sm font-black text-text-primary"><span id="header-credits-count" class="text-primary italic">--</span> Créditos</span>
                 </div>
-                <a href="06-perfil-usuario.html" class="w-12 h-12 rounded-2xl bg-surface border-2 border-border flex items-center justify-center overflow-hidden transition-all hover:border-primary active:scale-90">
-                    <img id="user-avatar" alt="User" src="https://ui-avatars.com/api/?name=User&background=FFB800&color=fff"/>
+                <a href="06-perfil-usuario.html" class="size-10 bg-surface rounded-full border border-border flex items-center justify-center text-text-secondary overflow-hidden transition-all hover:border-primary">
+                    <img id="user-avatar" class="size-full object-cover hidden" src="" alt="User"/>
+                    <span id="user-avatar-placeholder" class="material-symbols-outlined">person</span>
                 </a>
             </div>
         </div>
-    </nav>
+    </header>
 
-    <main class="flex-grow pt-16 pb-32">
+    <main class="flex-1 pt-32 pb-24">
         <div class="max-w-7xl mx-auto px-6">
             <!-- HEADER -->
-            <div class="flex flex-col md:flex-row md:items-end justify-between gap-10 mb-20 fade-in-node">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-10 mb-16 fade-in">
                 <div class="space-y-4">
-                    <span class="bg-primary/10 text-primary px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest border border-primary/20">Tu Historial Creativo</span>
-                    <h1 class="text-5xl md:text-6xl font-black tracking-tighter font-display text-text-primary">Mis Transformaciones</h1>
-                    <p class="text-text-secondary text-lg font-bold">Gestiona tus visiones y descarga tus renders terminados.</p>
+                    <div class="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 rounded-full text-primary text-[10px] font-black uppercase tracking-widest">
+                        <span class="material-symbols-outlined text-xs">history</span> Tu Galería
+                    </div>
+                    <h1 class="text-5xl font-black tracking-tight text-text-primary">Mis Transformaciones</h1>
+                    <p class="text-text-secondary text-lg">Gestiona tus visiones y descarga tus renders terminados.</p>
                 </div>
                 
-                <!-- NEW RENDER QUICK ACTION -->
-                <a href="02-upload-wizard.html" class="bg-text-primary hover:bg-primary hover:text-white text-white px-10 py-5 rounded-3xl font-black transition-all hover:-translate-y-1 active:scale-95 shadow-2xl flex items-center gap-3">
-                    <span class="material-symbols-outlined font-black">add</span>
-                    NUEVO PROYECTO
+                <a href="02-upload-wizard.html" class="bg-primary hover:bg-primary/90 text-white px-10 py-5 rounded-[2rem] font-black text-lg transition-all hover:scale-105 shadow-xl shadow-primary/20 flex items-center gap-3">
+                    <span class="material-symbols-outlined">add</span>
+                    Nuevo Proyecto
                 </a>
-            </div>
-
-            <!-- FILTERS & STATS -->
-            <div class="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-16 items-center">
-                <div class="lg:col-span-3">
-                    <div class="flex gap-10 overflow-x-auto w-full pb-4 scrollbar-hide border-b-2 border-border">
-                        <button class="text-text-primary font-black border-b-4 border-primary pb-4 whitespace-nowrap text-sm uppercase tracking-widest">TODOS LOS PROYECTOS</button>
-                        <button class="text-text-secondary hover:text-primary font-black pb-4 transition-colors whitespace-nowrap text-sm uppercase tracking-widest">RECIENTES</button>
-                        <button class="text-text-secondary hover:text-primary font-black pb-4 transition-colors whitespace-nowrap text-sm uppercase tracking-widest">FAVORITOS</button>
-                    </div>
-                </div>
-                <div class="bg-surface border-2 border-border p-5 rounded-3xl flex items-center justify-between">
-                    <div>
-                        <p class="text-[10px] font-black uppercase tracking-widest text-text-secondary">PROYECTOS TOTALES</p>
-                        <p class="text-3xl font-black text-text-primary" id="total-renders-count">0</p>
-                    </div>
-                    <div class="w-14 h-14 bg-white border-2 border-border rounded-2xl flex items-center justify-center text-primary shadow-sm">
-                        <span class="material-symbols-outlined text-3xl font-black">grid_view</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- SEARCH BAR -->
-            <div class="relative mb-12 fade-in-node" style="animation-delay: 0.1s">
-                <span class="material-symbols-outlined absolute left-6 top-1/2 -translate-y-1/2 text-text-secondary text-2xl">search</span>
-                <input type="text" placeholder="Buscar por estilo, habitación o fecha..." class="w-full bg-white border-2 border-border focus:border-primary rounded-3xl pl-16 pr-8 py-6 text-base font-bold transition-all outline-none shadow-sm focus:shadow-xl focus:shadow-primary/5">
             </div>
 
             <!-- PROJECTS GRID -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10" id="projects-grid">
-                <!-- Skeleton Loader -->
-                <div class="animate-pulse bg-surface rounded-3xl border-2 border-border h-[500px]"></div>
-                <div class="animate-pulse bg-surface rounded-3xl border-2 border-border h-[500px]"></div>
-                <div class="animate-pulse bg-surface rounded-3xl border-2 border-border h-[500px]"></div>
+                <!-- Skeletons handled by JS -->
+                <div class="animate-pulse bg-surface border border-border h-96 rounded-[2rem]"></div>
+                <div class="animate-pulse bg-surface border border-border h-96 rounded-[2rem]"></div>
+                <div class="animate-pulse bg-surface border border-border h-96 rounded-[2rem]"></div>
             </div>
 
             <!-- EMPTY STATE -->
-            <div id="empty-state" class="hidden mt-10 py-24 px-10 bg-surface rounded-[4rem] border-4 border-dashed border-border text-center max-w-4xl mx-auto space-y-10 fade-in-node">
-                <div class="w-28 h-28 bg-white border-2 border-border rounded-[2.5rem] mx-auto flex items-center justify-center shadow-xl mb-6">
-                    <span class="material-symbols-outlined text-primary !text-5xl font-black">architecture</span>
+            <div id="empty-state" class="hidden py-24 px-10 bg-surface rounded-[3rem] border-2 border-dashed border-border text-center max-w-2xl mx-auto space-y-8 fade-in">
+                <div class="size-20 bg-white rounded-3xl mx-auto flex items-center justify-center shadow-lg text-primary">
+                    <span class="material-symbols-outlined !text-4xl">architecture</span>
                 </div>
-                <div class="space-y-4">
-                    <h3 class="text-4xl font-black text-text-primary tracking-tighter">¿Aún no has creado nada?</h3>
-                    <p class="text-text-secondary font-bold text-xl max-w-xl mx-auto">Sube una foto de cualquier estancia y visualiza cómo quedaría con los estilos más premium del mercado.</p>
+                <div class="space-y-3">
+                    <h3 class="text-3xl font-black text-text-primary">¿Aún no has creado nada?</h3>
+                    <p class="text-text-secondary font-bold">Sube una foto de cualquier estancia y visualiza cómo quedaría con los estilos más premium.</p>
                 </div>
-                <a href="02-upload-wizard.html" class="inline-flex bg-primary hover:bg-primary-dark text-white px-12 py-5 rounded-3xl font-black transition-all hover:shadow-2xl hover:-translate-y-1 active:scale-95 shadow-xl shadow-primary/20 text-lg">
-                    DISEÑAR MI PRIMER RENDER
+                <a href="02-upload-wizard.html" class="inline-flex bg-primary hover:bg-primary/90 text-white px-12 py-5 rounded-2xl font-black transition-all hover:scale-105 shadow-xl shadow-primary/20">
+                    Diseñar mi primer Render
                 </a>
             </div>
         </div>
     </main>
 
     <!-- Footer -->
-    <footer class="py-24 px-6 bg-white border-t-2 border-border">
-        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-20 mb-20">
-            <div class="col-span-1 md:col-span-2 space-y-8">
-                <a href="01-landing-page.html" class="flex items-center gap-2 group">
-                    <div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center rotate-3 text-white shadow-lg">
-                        <span class="material-symbols-outlined text-xl font-black">wb_sunny</span>
-                    </div>
-                    <span class="text-2xl font-black tracking-tighter font-display">RenderRoom</span>
-                </a>
-                <p class="text-text-secondary font-bold text-lg max-w-md">Transformamos espacios ordinarios en visiones extraordinarias mediante inteligencia artificial de vanguardia.</p>
-            </div>
-            
-            <div class="space-y-6">
-                <h4 class="text-xs font-black uppercase tracking-[0.2em] text-text-primary">Recursos</h4>
-                <div class="flex flex-col gap-4">
-                    <a href="01-landing-page.html" class="text-text-secondary hover:text-primary font-black text-sm transition-colors uppercase">Explorar</a>
-                    <a href="07-consejos-decoracion.html" class="text-text-secondary hover:text-primary font-black text-sm transition-colors uppercase">Blog</a>
-                    <a href="precios.html" class="text-text-secondary hover:text-primary font-black text-sm transition-colors uppercase">Precios</a>
+    <footer class="py-20 px-6 bg-white border-t border-border">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+            <a href="01-landing-page.html" class="flex items-center gap-3">
+                <div class="size-8 bg-primary rounded-lg flex items-center justify-center text-white">
+                    <span class="material-symbols-outlined font-bold text-lg">deployed_code</span>
                 </div>
-            </div>
-
-            <div class="space-y-6">
-                <h4 class="text-xs font-black uppercase tracking-[0.2em] text-text-primary">Empresa</h4>
-                <div class="flex flex-col gap-4">
-                    <a href="privacidad.html" class="text-text-secondary hover:text-primary font-black text-sm transition-colors uppercase">Privacidad</a>
-                    <a href="terminos.html" class="text-text-secondary hover:text-primary font-black text-sm transition-colors uppercase">Términos</a>
-                    <a href="soporte.html" class="text-text-secondary hover:text-primary font-black text-sm transition-colors uppercase">Contacto</a>
-                </div>
-            </div>
-        </div>
-        
-        <div class="max-w-7xl mx-auto pt-10 border-t-2 border-border flex flex-col md:flex-row justify-between items-center gap-8">
-            <p class="text-text-secondary text-[10px] font-black tracking-[0.3em] uppercase">© 2025 RenderRoom AI Studio. All Rights Reserved.</p>
-            <div class="flex gap-8">
-                <a href="#" class="text-text-secondary hover:text-primary transition-colors"><span class="material-symbols-outlined font-black">public</span></a>
-                <a href="#" class="text-text-secondary hover:text-primary transition-colors"><span class="material-symbols-outlined font-black">mail</span></a>
+                <h2 class="text-lg font-black tracking-tight">Render<span class="text-primary">Room</span></h2>
+            </a>
+            <p class="text-text-secondary text-[10px] font-bold uppercase tracking-widest text-center">© 2025 RenderRoom AI Studio. All Rights Reserved.</p>
+            <div class="flex gap-6">
+                <a href="#" class="text-text-secondary hover:text-primary transition-colors"><span class="material-symbols-outlined">public</span></a>
+                <a href="#" class="text-text-secondary hover:text-primary transition-colors"><span class="material-symbols-outlined">mail</span></a>
             </div>
         </div>
     </footer>
 
-    <script>
-        // ── Firebase Config ─────────────────────────────
-        const firebaseConfig = {
-            projectId: "gen-lang-client-0426824151",
-            appId: "1:124806819551:web:1c90d1154b458fa064036a",
-            storageBucket: "gen-lang-client-0426824151.firebasestorage.app",
-            apiKey: "AIzaSyDj99qdmDt4GiVeRkvCSfTOSDw3uqD-_Ew",
-            authDomain: "gen-lang-client-0426824151.firebaseapp.com",
-            messagingSenderId: "124806819551"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
-        // ── Auth Logic ─────────────────────────────────
-        firebase.auth().onAuthStateChanged((user) => {
-            if (!user) {
-                window.location.replace('01-landing-page.html');
-                return;
-            }
-            document.documentElement.classList.add('auth-checked');
-            loadUserData(user);
-            loadUserRenders(user.uid);
-        });
-
-        function loadUserData(user) {
-            const avatar = document.getElementById('user-avatar');
-            if (user.photoURL) avatar.src = user.photoURL;
-            
-            db.collection('users').doc(user.uid).onSnapshot(doc => {
-                if (doc.exists) {
-                    const data = doc.data();
-                    const creditsCount = document.getElementById('header-credits-count');
-                    const creditsDisplay = document.getElementById('header-credits-display');
-                    if (creditsCount) creditsCount.textContent = data.credits || 0;
-                    if (creditsDisplay) creditsDisplay.classList.remove('hidden');
-                }
-            });
-        }
-
-        async function loadUserRenders(uid) {
-            const grid = document.getElementById('projects-grid');
-            const totalCount = document.getElementById('total-renders-count');
-            
-            try {
-                const snapshot = await db.collection('renders')
-                    .where('userId', '==', uid)
-                    .orderBy('createdAt', 'desc')
-                    .get();
-
-                if (snapshot.empty) {
-                    grid.classList.add('hidden');
-                    document.getElementById('empty-state').classList.remove('hidden');
-                    return;
-                }
-
-                totalCount.textContent = snapshot.size;
-                grid.innerHTML = ''; // Clear skeleton
-
-                snapshot.forEach(doc => {
-                    const render = doc.data();
-                    const date = render.createdAt?.toDate().toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }) || 'Reciente';
-                    
-                    const card = `
-                        <div class="premium-card rounded-[2.5rem] overflow-hidden group fade-in-node">
-                            <div class="relative aspect-[4/5] md:aspect-square overflow-hidden bg-surface">
-                                <img src="${render.outputUrl || render.inputUrl}" class="w-full h-full object-cover transition-all duration-1000 group-hover:scale-110" alt="${render.style || 'Habitación'}">
-                                
-                                <!-- OVERLAYS -->
-                                <div class="absolute top-6 left-6 flex flex-col gap-3">
-                                    <div class="bg-white px-4 py-2 rounded-2xl border-2 border-border shadow-sm">
-                                        <p class="text-[10px] font-black uppercase tracking-widest text-text-primary badge-design">${render.style || 'PROYECTO'}</p>
-                                    </div>
-                                    ${render.quality === 'high' ? `
-                                        <div class="bg-primary px-4 py-2 rounded-2xl border-2 border-primary shadow-sm flex items-center gap-2">
-                                            <span class="material-symbols-outlined text-[14px] text-white font-black">verified</span>
-                                            <p class="text-[10px] font-black uppercase tracking-widest text-white badge-design">HIGH FIDELITY</p>
-                                        </div>
-                                    ` : ''}
-                                </div>
-
-                                ${render.status === 'processing' ? `
-                                    <div class="absolute inset-0 bg-white/95 backdrop-blur-md flex flex-col items-center justify-center p-10 text-center">
-                                        <div class="w-16 h-16 border-8 border-primary border-t-transparent rounded-2xl animate-spin mb-6"></div>
-                                        <p class="font-black text-2xl tracking-tighter text-text-primary">CALCULANDO...</p>
-                                        <p class="text-text-secondary text-sm font-bold mt-2">Dando vida a tu visión</p>
-                                    </div>
-                                ` : `
-                                    <div class="absolute bottom-6 left-6 right-6 translate-y-20 group-hover:translate-y-0 transition-transform duration-500">
-                                        <div class="bg-white/90 backdrop-blur-xl p-3 border-2 border-border shadow-2xl rounded-3xl flex gap-3">
-                                            <a href="${render.outputUrl}" download class="flex-1 bg-text-primary text-white p-4 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-primary transition-all">
-                                                <span class="material-symbols-outlined text-sm">download</span> Descargar
-                                            </a>
-                                            <button onclick="shareRender('${doc.id}')" class="bg-surface hover:bg-white border-2 border-border p-4 rounded-2xl transition-all">
-                                                <span class="material-symbols-outlined text-sm">share</span>
-                                            </button>
-                                        </div>
-                                    </div>
-                                `}
-                            </div>
-                            <div class="p-8">
-                                <div class="flex items-center justify-between mb-2">
-                                    <h3 class="text-2xl font-black tracking-tight text-text-primary uppercase">${render.roomType || 'Habitación'}</h3>
-                                    <button class="text-text-secondary hover:text-primary transition-colors">
-                                        <span class="material-symbols-outlined font-black">more_horiz</span>
-                                    </button>
-                                </div>
-                                <div class="flex items-center gap-2 text-text-secondary font-black text-[10px] uppercase tracking-widest">
-                                    <span class="material-symbols-outlined text-sm font-black">schedule</span>
-                                    ${date}
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    grid.innerHTML += card;
-                });
-            } catch (err) {
-                console.error("Error loading renders:", err);
-                grid.innerHTML = '<div class="col-span-3 py-20 bg-primary/5 rounded-[3rem] border-2 border-primary/20 text-center"><p class="text-primary font-black text-xl">Hubo un error al cargar tu galería.</p></div>';
-            }
-        }
-
-        async function shareRender(id) {
-            // Simple share implementation
-            if (navigator.share) {
-                try {
-                    await navigator.share({
-                        title: 'RenderRoom AI Design',
-                        text: '¡Mira este diseño que he creado!',
-                        url: window.location.origin + '/share.html?id=' + id
-                    });
-                } catch (err) {
-                    console.log('User cancelled share');
-                }
-            } else {
-                alert('Función compartir no disponible en este navegador');
-            }
-        }
-    </script>
+    <!-- App Logic -->
+    <script src="js/firebase-config.js"></script>
+    <script src="js/shared-auth.js"></script>
+    <script src="js/dashboard.js"></script>
 </body>
 </html>

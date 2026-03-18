@@ -14,6 +14,10 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Shared Logic -->
+    <script src="js/firebase-config.js"></script>
+    <script src="js/shared-auth.js"></script>
 
     <script id="tailwind-config">
         tailwind.config = {
@@ -232,7 +236,7 @@
                     Rediseña cualquier habitación en segundos con realismo profesional. Sube una foto, elige tu estilo y deja que la magia ocurra.
                 </p>
                 <div class="flex flex-col sm:flex-row gap-5 pt-4">
-                    <button onclick="handleStart()" class="bg-primary hover:bg-primary-dark text-white px-10 py-5 rounded-2xl text-lg font-black transition-all hover:scale-105 solar-glow flex items-center justify-center gap-3 btn-premium">
+                    <button id="start-btn" onclick="handleStart()" class="bg-primary hover:bg-primary-dark text-white px-10 py-5 rounded-2xl text-lg font-black transition-all hover:scale-105 solar-glow flex items-center justify-center gap-3 btn-premium">
                         <span class="material-symbols-outlined font-bold">upload_file</span>
                         Subir mi Foto Ahora
                     </button>
@@ -537,21 +541,9 @@
     </footer>
 
     <script>
-        // ── Firebase Config ─────────────────────────────
-        const firebaseConfig = {
-            projectId: "gen-lang-client-0426824151",
-            appId: "1:124806819551:web:1c90d1154b458fa064036a",
-            storageBucket: "gen-lang-client-0426824151.firebasestorage.app",
-            apiKey: "AIzaSyDj99qdmDt4GiVeRkvCSfTOSDw3uqD-_Ew",
-            authDomain: "gen-lang-client-0426824151.firebaseapp.com",
-            messagingSenderId: "124806819551"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-
-        // ── Auth Logic ─────────────────────────────────
+        // ── Auth UI Helpers ─────────────────────────────
         function handleStart() {
-            const user = firebase.auth().currentUser;
+            const user = auth.currentUser;
             if (user) {
                 window.location.href = '02-upload-wizard.html';
             } else {
@@ -592,7 +584,7 @@
             if (password.length < 8) { showMsg(msgEl, 'Mínimo 8 caracteres', 'error'); return; }
             
             try {
-                const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
                 await userCredential.user.updateProfile({ displayName: name });
                 showMsg(msgEl, '¡Cuenta creada!', 'success');
                 setTimeout(() => { window.location.href = '03-dashboard.html'; }, 1000);
@@ -605,7 +597,7 @@
             const msgEl = document.getElementById('login-msg');
             if (!email || !password) { showMsg(msgEl, 'Ingresa tus credenciales', 'error'); return; }
             try {
-                await firebase.auth().signInWithEmailAndPassword(email, password);
+                await auth.signInWithEmailAndPassword(email, password);
                 showMsg(msgEl, '¡Bienvenido!', 'success');
                 setTimeout(() => { window.location.href = '03-dashboard.html'; }, 800);
             } catch(e) { showMsg(msgEl, e.message, 'error'); }
@@ -614,45 +606,10 @@
         async function handleGoogleLogin() {
             const provider = new firebase.auth.GoogleAuthProvider();
             try {
-                await firebase.auth().signInWithPopup(provider);
+                await auth.signInWithPopup(provider);
                 window.location.href = '03-dashboard.html';
             } catch (e) { console.error(e); }
         }
-
-        function showMsg(el, text, type) {
-            el.textContent = text;
-            el.className = `text-center text-sm mt-4 font-bold ${type === 'success' ? 'text-green-500' : 'text-red-500'}`;
-            el.classList.remove('hidden');
-        }
-
-        // ── Auth Observer ─────────────────────────────
-        firebase.auth().onAuthStateChanged(user => {
-            document.getElementById('user-logged-out').classList.toggle('hidden', !!user);
-            document.getElementById('user-logged-in').classList.toggle('hidden', !user);
-            
-            if (user) {
-                const avatar = document.getElementById('user-avatar');
-                if (user.photoURL) avatar.src = user.photoURL;
-                
-                db.collection('users').doc(user.uid).onSnapshot(doc => {
-                    if (doc.exists) {
-                        const data = doc.data();
-                        const countEl = document.getElementById('header-credits-count');
-                        const displayEl = document.getElementById('header-credits-display');
-                        if (countEl) countEl.textContent = data.credits || 0;
-                        if (displayEl) displayEl.classList.remove('hidden');
-                    } else {
-                        // Create user doc if it doesn't exist
-                        db.collection('users').doc(user.uid).set({
-                            displayName: user.displayName,
-                            email: user.email,
-                            credits: 1, // Welcome credit
-                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                        }, { merge: true });
-                    }
-                });
-            }
-        });
 
         // ── Slider Logic ──────────────────────────────
         const sliderRange = document.getElementById('slider-range');

@@ -5,21 +5,54 @@
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Estilo Nórdico · RenderRoom</title>
 <meta name="description" content="Estilo Nórdico o Escandinavo: madera natural, calidez hygge y funcionalidad. Genera tu render con RenderRoom."/>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<script>tailwind.config={darkMode:"class",theme:{extend:{colors:{"primary":"#f0a400","background-dark":"#0D1117","surface-dark":"#161B22","border-dark":"#30363D","muted-text":"#8B949E"},fontFamily:{display:["Inter","sans-serif"]}}}}</script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    
+    <!-- Firebase SDK (Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Shared Config & Auth -->
+    <script src="js/firebase-config.js"></script>
+    <script src="js/shared-auth.js"></script>
+
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#F59E0B",
+                        "background-dark": "#0D1117",
+                        "surface-dark": "#161B22",
+                        "border-dark": "#30363D",
+                        "muted-text": "#8B949E"
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
 <style>.glass{background:rgba(22,27,34,.85);backdrop-filter:blur(16px)}.amber-glow{box-shadow:0 0 24px rgba(240,164,0,.25)}.char-chip{display:inline-flex;align-items:center;gap:6px;background:rgba(240,164,0,.08);border:1px solid rgba(240,164,0,.2);border-radius:9999px;padding:4px 14px;font-size:.8rem;font-weight:600;color:#f0a400}.gallery-img{transition:transform .4s;cursor:zoom-in}.gallery-img:hover{transform:scale(1.04)}</style>
 </head>
 <body class="bg-background-dark font-display text-slate-100 min-h-screen">
+<!-- NAV -->
 <header class="glass sticky top-0 z-50 border-b border-border-dark flex items-center justify-between px-6 md:px-10 py-4">
     <a href="01-landing-page.html" class="flex items-center gap-3">
-        <div class="size-8 bg-gradient-to-br from-primary to-orange-600 rounded-lg flex items-center justify-center text-background-dark"><span class="material-symbols-outlined text-sm">deployed_code</span></div>
-        <h2 class="text-xl font-black tracking-tight">Render<span class="text-primary">Room</span></h2>
+        <div class="size-8 bg-gradient-to-br from-primary to-orange-600 rounded-lg flex items-center justify-center text-white">
+            <span class="material-symbols-outlined text-sm">deployed_code</span>
+        </div>
+        <h2 class="text-xl font-black tracking-tight text-white">Render<span class="text-primary">Room</span></h2>
     </a>
     <div class="flex items-center gap-6">
         <a href="01-landing-page.html#galeria" class="text-sm text-muted-text hover:text-primary transition-colors hidden md:block">← Galería</a>
-        <a href="02-upload-wizard.html?style=nordico" class="bg-primary hover:bg-primary/90 text-background-dark px-5 py-2 rounded-xl font-bold text-sm transition-all amber-glow">Renderizar en este estilo</a>
+        <div id="auth-buttons" class="flex items-center gap-4">
+            <a href="02-upload-wizard.html?style=nordico" class="bg-primary hover:bg-primary/90 text-white px-5 py-2 rounded-xl font-bold text-sm transition-all amber-glow">Renderizar</a>
+        </div>
     </div>
 </header>
 <main>
@@ -108,6 +141,36 @@
         </div>
     </section>
 </main>
-<footer class="border-t border-white/5 py-8 text-center"><p class="text-slate-600 text-xs">© 2024 RenderRoom AI · <a href="01-landing-page.html" class="hover:text-primary transition-colors">Inicio</a></p></footer>
+<footer class="border-t border-white/5 py-12 text-center bg-surface-dark">
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="flex flex-col items-center gap-6">
+            <a href="01-landing-page.html" class="flex items-center gap-3 opacity-80">
+                <div class="size-8 bg-primary rounded-lg flex items-center justify-center text-white">
+                    <span class="material-symbols-outlined text-sm">deployed_code</span>
+                </div>
+                <h2 class="text-lg font-black tracking-tight text-white">RenderRoom</h2>
+            </a>
+            <p class="text-slate-500 text-xs font-bold uppercase tracking-widest">© 2024 RenderRoom AI · Made with Love</p>
+            <div class="flex gap-8 text-xs font-medium text-muted-text">
+                <a href="01-landing-page.html" class="hover:text-primary transition-colors">Inicio</a>
+                <a href="03-dashboard.html" class="hover:text-primary transition-colors">Dashboard</a>
+                <a href="07-consejos-decoracion.html" class="hover:text-primary transition-colors">Consejos</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script>
+    // Auth State Listener for Style Pages
+    auth.onAuthStateChanged((user) => {
+        const authButtons = document.getElementById('auth-buttons');
+        if (user) {
+            authButtons.innerHTML = `
+                <a href="03-dashboard.html" class="text-sm font-medium text-muted-text hover:text-primary transition-colors hidden sm:block">Mis Renders</a>
+                <a href="02-upload-wizard.html?style=nordico" class="bg-primary hover:bg-primary/90 text-white px-5 py-2 rounded-xl font-bold text-sm transition-all amber-glow">Renderizar</a>
+            `;
+        }
+    });
+</script>
 </body>
 </html>

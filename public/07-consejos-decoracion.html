@@ -8,7 +8,16 @@
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  
+  <!-- Firebase SDK (Compat) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  
+  <!-- Shared Config & Auth -->
+  <script src="js/firebase-config.js"></script>
+  <script src="js/shared-auth.js"></script>
     <style>
         .glass-nav {
             background: rgba(255, 255, 255, 0.82);
@@ -68,9 +77,11 @@
         <a class="text-sm font-medium text-text-secondary hover:text-primary transition-colors" href="06-perfil-usuario.html">Perfil</a>
       </div>
 
-      <a href="02-upload-wizard.html" class="bg-primary hover:bg-primary/90 text-white px-6 py-2.5 rounded-xl text-sm font-bold tracking-wide transition-all hover:scale-105 shadow-lg shadow-primary/20">
-        Renderiza Ahora
-      </a>
+      <div id="auth-buttons-tips" class="flex items-center gap-4">
+          <a href="02-upload-wizard.html" class="bg-primary hover:bg-primary/90 text-white px-6 py-2.5 rounded-xl text-sm font-bold tracking-wide transition-all hover:scale-105 shadow-lg shadow-primary/20">
+            Renderiza Ahora
+          </a>
+      </div>
     </div>
   </nav>
 
@@ -263,5 +274,19 @@
     </div>
   </footer>
 
+  <script>
+    // Auth State Listener for Tips Page
+    auth.onAuthStateChanged((user) => {
+        const authButtons = document.getElementById('auth-buttons-tips');
+        if (user) {
+            authButtons.innerHTML = `
+                <a href="03-dashboard.html" class="text-sm font-medium text-text-secondary hover:text-primary transition-colors hidden sm:block">Mis Proyectos</a>
+                <a href="02-upload-wizard.html" class="bg-primary hover:bg-primary/90 text-white px-6 py-2.5 rounded-xl text-sm font-bold tracking-wide transition-all hover:scale-105 shadow-lg shadow-primary/20">
+                    Renderiza Ahora
+                </a>
+            `;
+        }
+    });
+  </script>
 </body>
 </html>

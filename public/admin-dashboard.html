@@ -4,32 +4,62 @@
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <title>RenderRoom Admin Panel</title>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-    <!-- Firebase SDK -->
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Material Symbols -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    
+    <!-- Firebase SDK (Compat) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
     <script id="tailwind-config">
         tailwind.config = {
-            darkMode: "class",
             theme: {
                 extend: {
-                    colors: {
-                        "primary": "#f0a500",
-                        "background-light": "#fefefe",
-                        "surface-light": "#ffffff",
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
                     },
-                    fontFamily: { "display": ["Inter", "sans-serif"] },
-                },
-            },
+                    colors: {
+                        amber: {
+                            50: '#fffbeb', 100: '#fef3c7', 200: '#fde68a', 300: '#fcd34d',
+                            400: '#fbbf24', 500: '#f59e0b', 600: '#d97706', 700: '#b45309',
+                            800: '#92400e', 900: '#78350f', 950: '#451a03',
+                        }
+                    }
+                }
+            }
         }
     </script>
-    <style>
-        .glass-nav { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(240, 165, 0, 0.1); }
-        .stat-card { background: #ffffff; border: 1px solid rgba(0,0,0,0.05); box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); transition: transform 0.2s; }
-        .stat-card:hover { transform: translateY(-2px); }
+
+    <style type="text/tailwindcss">
+        @layer base {
+            body { @apply bg-white text-slate-600 antialiased; }
+            h1, h2, h3, h4 { @apply font-display text-slate-900; }
+        }
+        @layer components {
+            .glass-nav {
+                @apply fixed top-0 w-full z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200/50;
+            }
+            .stat-card {
+                @apply bg-white rounded-3xl border border-slate-200/60 p-6 transition-all duration-300 hover:shadow-xl hover:shadow-slate-200/50 hover:-translate-y-1;
+            }
+            .admin-tab {
+                @apply px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200;
+            }
+            .admin-tab.active {
+                @apply bg-amber-500 text-white shadow-lg shadow-amber-500/30;
+            }
+            .admin-tab:not(.active) {
+                @apply text-slate-500 hover:bg-slate-100 hover:text-slate-900;
+            }
+        }
         
         /* Prevent FOUC: hide body by default */
         body { opacity: 0; transition: opacity 0.3s ease; }
@@ -38,99 +68,104 @@
 </head>
 <body class="bg-slate-50 font-display text-slate-900 min-h-screen">
     <div id="loading-overlay" class="fixed inset-0 z-[100] bg-white flex flex-col items-center justify-center">
-        <div class="size-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-        <p class="mt-4 text-primary font-bold animate-pulse">Verificando acceso de administrador...</p>
+        <div class="size-12 border-4 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
+        <p class="mt-4 text-amber-500 font-bold animate-pulse">Verificando acceso de administrador...</p>
     </div>
 
     <!-- Top Navigation -->
-    <nav class="fixed top-0 w-full z-50 glass-nav">
-        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-2">
-                <span class="material-symbols-outlined text-primary text-3xl">admin_panel_settings</span>
-                <h1 class="text-xl font-bold tracking-tight text-slate-900">Render<span class="text-primary">Room</span> <span class="text-[10px] uppercase bg-primary/10 text-primary px-2 py-0.5 rounded ml-2 font-black">Admin</span></h1>
-            </div>
-            <div class="flex items-center gap-4">
-                <div class="hidden md:flex items-center gap-4">
-                    <button onclick="switchTab('overview')" class="text-sm font-semibold hover:text-primary transition-colors text-slate-600" id="tab-overview">Resumen</button>
-                    <button onclick="switchTab('users')" class="text-sm font-semibold hover:text-primary transition-colors text-slate-600" id="tab-users">Usuarios</button>
-                    <button onclick="switchTab('pricing')" class="text-sm font-semibold hover:text-primary transition-colors text-slate-600" id="tab-pricing">Precios</button>
-                    <button onclick="switchTab('history')" class="text-sm font-semibold hover:text-primary transition-colors text-slate-600" id="tab-history">Historial</button>
+    <nav class="glass-nav">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="size-10 bg-amber-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-amber-500/20">
+                    <span class="material-symbols-outlined font-bold">admin_panel_settings</span>
                 </div>
-                <div class="h-6 w-px bg-slate-200 mx-1"></div>
-                <a class="text-sm font-bold text-primary hover:underline transition-colors" href="01-landing-page.html">Ir a la Web</a>
-                <button onclick="firebase.auth().signOut()" class="text-xs font-bold text-slate-400 hover:text-red-500 transition-colors">Cerrar Sesión</button>
+                <h1 class="text-2xl font-black tracking-tight text-slate-900">RenderRoom <span class="text-[10px] uppercase bg-amber-500/10 text-amber-600 px-2 py-0.5 rounded ml-2 font-black align-middle">Admin</span></h1>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <div class="hidden lg:flex items-center gap-2 p-1 bg-slate-100 rounded-2xl">
+                    <button onclick="switchTab('overview')" class="admin-tab active" id="tab-overview">Resumen</button>
+                    <button onclick="switchTab('users')" class="admin-tab" id="tab-users">Usuarios</button>
+                    <button onclick="switchTab('pricing')" class="admin-tab" id="tab-pricing">Precios</button>
+                    <button onclick="switchTab('history')" class="admin-tab" id="tab-history">Historial</button>
+                </div>
+                
+                <div class="h-8 w-px bg-slate-200/50 mx-2"></div>
+                
+                <a href="01-landing-page.html" class="p-2 text-slate-400 hover:text-amber-500 transition-colors">
+                    <span class="material-symbols-outlined font-bold">open_in_new</span>
+                </a>
+                
+                <button onclick="firebase.auth().signOut()" class="size-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all">
+                    <span class="material-symbols-outlined font-bold">logout</span>
+                </button>
             </div>
         </div>
     </nav>
 
-    <main class="max-w-7xl mx-auto px-6 pt-24 pb-12">
-        <header class="mb-10">
-            <h2 class="text-3xl font-extrabold text-slate-900">Panel de Control</h2>
-            <p class="text-slate-500 font-medium tracking-tight">Visualiza el estado global de la plataforma y gestiona usuarios.</p>
+    <main class="max-w-7xl mx-auto px-6 pt-32 pb-12">
+        <header class="mb-12">
+            <h2 class="text-4xl font-black tracking-tight text-slate-900 mb-2">Panel de Control</h2>
+            <p class="text-lg text-slate-500 font-medium tracking-tight">Estadísticas globales y gestión de la plataforma.</p>
         </header>
 
         <!-- Stats Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-            <div class="stat-card p-6 rounded-2xl">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="p-3 bg-blue-50 text-blue-600 rounded-xl">
-                        <span class="material-symbols-outlined">group</span>
-                    </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+            <div class="stat-card">
+                <div class="p-3 bg-blue-50 text-blue-600 rounded-2xl w-fit mb-6">
+                    <span class="material-symbols-outlined font-bold text-2xl">group</span>
                 </div>
-                <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest">Total Usuarios</p>
-                <h3 id="stat-total-users" class="text-3xl font-black mt-1 text-slate-900">Cargando...</h3>
+                <p class="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mb-1">Total Usuarios</p>
+                <h3 id="stat-total-users" class="text-4xl font-black text-slate-900">...</h3>
             </div>
-            <div class="stat-card p-6 rounded-2xl">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="p-3 bg-amber-50 text-primary rounded-xl">
-                        <span class="material-symbols-outlined">render_output</span>
-                    </div>
+            
+            <div class="stat-card">
+                <div class="p-3 bg-amber-50 text-amber-600 rounded-2xl w-fit mb-6">
+                    <span class="material-symbols-outlined font-bold text-2xl">camera</span>
                 </div>
-                <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest">Renders Generados</p>
-                <h3 id="stat-total-renders" class="text-3xl font-black mt-1 text-slate-900">Cargando...</h3>
+                <p class="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mb-1">Renders Generados</p>
+                <h3 id="stat-total-renders" class="text-4xl font-black text-slate-900">...</h3>
             </div>
-            <div class="stat-card p-6 rounded-2xl">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
-                        <span class="material-symbols-outlined">payments</span>
-                    </div>
+            
+            <div class="stat-card">
+                <div class="p-3 bg-emerald-50 text-emerald-600 rounded-2xl w-fit mb-6 text-xl">
+                    <span class="material-symbols-outlined font-bold text-2xl">payments</span>
                 </div>
-                <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest">Ingresos Est.</p>
-                <h3 id="stat-total-revenue" class="text-3xl font-black mt-1 text-slate-900">Cargando...</h3>
+                <p class="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mb-1">Ingresos Est.</p>
+                <h3 id="stat-total-revenue" class="text-4xl font-black text-slate-900">...</h3>
             </div>
-            <div class="stat-card p-6 rounded-2xl border-primary/20">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="p-3 bg-violet-50 text-violet-600 rounded-xl">
-                        <span class="material-symbols-outlined">monitoring</span>
-                    </div>
+            
+            <div class="stat-card border-amber-500/20 bg-amber-50/10">
+                <div class="p-3 bg-violet-50 text-violet-600 rounded-2xl w-fit mb-6">
+                    <span class="material-symbols-outlined font-bold text-2xl">monitoring</span>
                 </div>
-                <p class="text-slate-400 text-[10px] font-black uppercase tracking-widest">Conversión</p>
-                <h3 id="stat-conversion" class="text-3xl font-black mt-1 text-slate-900">--%</h3>
+                <p class="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mb-1">Conversión</p>
+                <h3 id="stat-conversion" class="text-4xl font-black text-slate-900">--%</h3>
             </div>
         </div>
 
         <!-- Users Table -->
-        <section id="section-users" class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                <h3 class="text-lg font-bold flex items-center gap-2 text-slate-800">
-                    <span class="material-symbols-outlined text-primary">manage_accounts</span>
+        <section id="section-users" class="bg-white rounded-3xl border border-slate-200/60 overflow-hidden shadow-sm shadow-slate-200/50">
+            <div class="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50/30">
+                <h3 class="text-xl font-black flex items-center gap-3 text-slate-900">
+                    <span class="material-symbols-outlined text-amber-500 font-bold">manage_accounts</span>
                     Usuarios Registrados
                 </h3>
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full text-left">
                     <thead>
-                        <tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 bg-slate-50/30">
-                            <th class="px-6 py-4">Usuario</th>
-                            <th class="px-6 py-4">Email</th>
-                            <th class="px-6 py-4">Último Render</th>
-                            <th class="px-6 py-4">Rol</th>
-                            <th class="px-6 py-4 text-right">Acciones</th>
+                        <tr class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-slate-100 bg-slate-50/20">
+                            <th class="px-8 py-5">Usuario</th>
+                            <th class="px-8 py-5">Email</th>
+                            <th class="px-8 py-5">Último Render</th>
+                            <th class="px-8 py-5">Rol</th>
+                            <th class="px-8 py-5 text-right">Acciones</th>
                         </tr>
                     </thead>
-                    <tbody id="user-table-body" class="divide-y divide-slate-50 font-medium text-slate-600">
+                    <tbody id="user-table-body" class="divide-y divide-slate-100 font-medium text-slate-600">
                         <tr>
-                            <td colspan="5" class="px-6 py-12 text-center text-slate-400 italic">Cargando base de datos...</td>
+                            <td colspan="5" class="px-8 py-20 text-center text-slate-400 italic font-medium">Cargando base de datos...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -138,159 +173,171 @@
         </section>
 
         <!-- Pricing Management -->
-        <section id="section-pricing" class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm mb-12" style="display:none;">
-            <div class="p-6 border-b border-slate-100 bg-slate-50/50">
-                <h3 class="text-lg font-bold flex items-center gap-2 text-slate-800">
-                    <span class="material-symbols-outlined text-primary">sell</span>
+        <section id="section-pricing" class="bg-white rounded-3xl border border-slate-200/60 overflow-hidden shadow-sm shadow-slate-200/50 mb-12" style="display:none;">
+            <div class="p-8 border-b border-slate-100 bg-slate-50/30">
+                <h3 class="text-xl font-black flex items-center gap-3 text-slate-900">
+                    <span class="material-symbols-outlined text-amber-500 font-bold">sell</span>
                     Gestión de Precios
                 </h3>
-                <p class="text-slate-500 text-xs font-medium mt-1">Modifica los precios de los renders y packs de créditos.</p>
+                <p class="text-slate-500 text-sm font-medium mt-1">Configuración global de tarifas y paquetes comerciales.</p>
             </div>
-            <div class="p-6">
+            <div class="p-8">
                 <!-- Render Prices -->
-                <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6">Precios por Render (Individual)</h4>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+                <div class="flex items-center gap-4 mb-8">
+                    <div class="h-px bg-slate-100 flex-1"></div>
+                    <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-4 whitespace-nowrap">Precios por Render Individual</h4>
+                    <div class="h-px bg-slate-100 flex-1"></div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
                     <!-- Render Normal Price -->
-                    <div class="p-6 bg-slate-50 rounded-2xl border border-slate-100">
-                        <div class="flex items-center justify-between mb-4">
-                            <h4 class="text-sm font-bold text-slate-900">Render Normal</h4>
-                            <span class="px-3 py-1 bg-primary/10 text-primary text-[10px] font-black rounded-full uppercase">ESTÁNDAR</span>
+                    <div class="p-8 bg-slate-50/50 rounded-3xl border border-slate-100 transition-all hover:bg-white hover:shadow-xl hover:shadow-slate-200/50 group">
+                        <div class="flex items-center justify-between mb-6">
+                            <h4 class="text-lg font-black text-slate-900">Render Normal</h4>
+                            <span class="px-3 py-1 bg-amber-500/10 text-amber-600 text-[10px] font-black rounded-full uppercase tracking-tighter">ESTÁNDAR</span>
                         </div>
-                        <p class="text-slate-500 text-xs mb-6">Precio para renders en calidad estándar.</p>
+                        <p class="text-slate-500 text-sm mb-8 font-medium">Precio base para renders en calidad balanceada.</p>
                         <div class="flex items-center gap-4">
                             <div class="relative flex-1">
-                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">€</span>
-                                <input type="number" id="price-render-normal" step="0.01" min="0" class="w-full bg-white border border-slate-200 rounded-xl pl-8 pr-4 py-3 text-slate-900 font-bold text-xl focus:border-primary focus:ring-0 outline-none" placeholder="2.50">
+                                <span class="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xl">€</span>
+                                <input type="number" id="price-render-normal" step="0.01" min="0" class="w-full bg-white border border-slate-200 rounded-2xl pl-12 pr-6 py-4 text-slate-900 font-black text-2xl focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 outline-none transition-all" placeholder="2.50">
                             </div>
-                            <button onclick="updatePrice('render_normal')" class="px-6 py-3 bg-primary text-white font-bold rounded-xl hover:scale-105 transition-transform shadow-lg shadow-primary/20">
-                                Guardar
+                            <button onclick="updatePrice('render_normal')" class="size-14 bg-amber-500 text-white flex items-center justify-center rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-lg shadow-amber-500/20">
+                                <span class="material-symbols-outlined font-bold">check</span>
                             </button>
                         </div>
-                        <p id="render-normal-price-status" class="text-xs mt-3 font-medium text-emerald-600"></p>
+                        <p id="render-normal-price-status" class="text-xs mt-4 font-bold text-emerald-600 flex items-center gap-2"></p>
                     </div>
 
                     <!-- Render High Price -->
-                    <div class="p-6 bg-slate-50 rounded-2xl border border-slate-100">
-                        <div class="flex items-center justify-between mb-4">
-                            <h4 class="text-sm font-bold text-slate-900">Render Alta Calidad</h4>
-                            <span class="px-3 py-1 bg-primary/10 text-primary text-[10px] font-black rounded-full uppercase">PREMIUM</span>
+                    <div class="p-8 bg-slate-50/50 rounded-3xl border border-slate-100 transition-all hover:bg-white hover:shadow-xl hover:shadow-slate-200/50 group">
+                        <div class="flex items-center justify-between mb-6">
+                            <h4 class="text-lg font-black text-slate-900">Render High-End</h4>
+                            <span class="px-3 py-1 bg-amber-500/10 text-amber-600 text-[10px] font-black rounded-full uppercase tracking-tighter">PREMIUM</span>
                         </div>
-                        <p class="text-slate-500 text-xs mb-6">Precio para renders en alta fidelidad.</p>
+                        <p class="text-slate-500 text-sm mb-8 font-medium">Precio para renders con máxima fidelidad visual.</p>
                         <div class="flex items-center gap-4">
                             <div class="relative flex-1">
-                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">€</span>
-                                <input type="number" id="price-render-high" step="0.01" min="0" class="w-full bg-white border border-slate-200 rounded-xl pl-8 pr-4 py-3 text-slate-900 font-bold text-xl focus:border-primary focus:ring-0 outline-none" placeholder="5.00">
+                                <span class="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xl">€</span>
+                                <input type="number" id="price-render-high" step="0.01" min="0" class="w-full bg-white border border-slate-200 rounded-2xl pl-12 pr-6 py-4 text-slate-900 font-black text-2xl focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 outline-none transition-all" placeholder="5.00">
                             </div>
-                            <button onclick="updatePrice('render_high')" class="px-6 py-3 bg-primary text-white font-bold rounded-xl hover:scale-105 transition-transform shadow-lg shadow-primary/20">
-                                Guardar
+                            <button onclick="updatePrice('render_high')" class="size-14 bg-amber-500 text-white flex items-center justify-center rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-lg shadow-amber-500/20">
+                                <span class="material-symbols-outlined font-bold">check</span>
                             </button>
                         </div>
-                        <p id="render-high-price-status" class="text-xs mt-3 font-medium text-emerald-600"></p>
+                        <p id="render-high-price-status" class="text-xs mt-4 font-bold text-emerald-600 flex items-center gap-2"></p>
                     </div>
                 </div>
 
                 <!-- Credit Packs -->
-                <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6 px-1">Packs de Créditos (Tienda)</h4>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="flex items-center gap-4 mb-8">
+                    <div class="h-px bg-slate-100 flex-1"></div>
+                    <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-4 whitespace-nowrap">Configuración de Packs de Créditos</h4>
+                    <div class="h-px bg-slate-100 flex-1"></div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                     <!-- package_5 -->
-                    <div class="stat-card p-5 rounded-2xl bg-white border border-slate-100">
-                        <div class="flex items-center justify-between mb-4">
-                            <h4 class="text-sm font-bold text-slate-900">Pack Inicial</h4>
-                            <span class="text-[9px] font-black text-slate-300 bg-slate-50 px-1.5 py-0.5 rounded uppercase">pkg_5</span>
+                    <div class="stat-card group">
+                        <div class="flex items-center justify-between mb-8">
+                            <h4 class="text-base font-black text-slate-900">Pack Inicial</h4>
+                            <span class="text-[9px] font-black text-slate-400 bg-slate-100 px-2 py-1 rounded-lg uppercase">pkg_5</span>
                         </div>
-                        <div class="space-y-4">
-                            <div class="space-y-1">
-                                <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Precio (€)</label>
+                        <div class="space-y-6">
+                            <div class="space-y-2">
+                                <label class="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Precio Final (€)</label>
                                 <div class="relative">
                                     <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">€</span>
-                                    <input type="number" id="price-package_5" step="0.01" min="0" class="w-full bg-slate-50 border border-slate-100 rounded-xl pl-8 pr-4 py-2.5 text-slate-900 font-bold focus:border-primary outline-none" placeholder="0.00">
+                                    <input type="number" id="price-package_5" step="0.01" min="0" class="w-full bg-slate-50 border border-slate-100 rounded-2xl pl-8 pr-4 py-4 text-slate-900 font-black focus:border-amber-500 focus:ring-4 focus:ring-amber-500/5 outline-none transition-all" placeholder="0.00">
                                 </div>
                             </div>
-                            <div class="space-y-1">
-                                <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Cant. Créditos</label>
+                            <div class="space-y-2">
+                                <label class="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Volumen Créditos</label>
                                 <div class="relative">
                                     <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">Cr.</span>
-                                    <input type="number" id="credits-package_5" step="1" min="1" class="w-full bg-slate-50 border border-slate-100 rounded-xl pl-10 pr-4 py-2.5 text-primary font-bold focus:border-primary outline-none" placeholder="0">
+                                    <input type="number" id="credits-package_5" step="1" min="1" class="w-full bg-slate-50 border border-slate-100 rounded-2xl pl-10 pr-4 py-4 text-amber-600 font-black focus:border-amber-500 focus:ring-4 focus:ring-amber-500/5 outline-none transition-all" placeholder="0">
                                 </div>
                             </div>
-                            <button onclick="updatePackage('package_5', 'price-package_5', 'credits-package_5', 'Inicial')" class="w-full py-3 bg-primary text-white font-bold rounded-xl hover:scale-[1.02] transition-all shadow-lg shadow-primary/10 text-xs mt-2">Guardar Cambios</button>
+                            <button onclick="updatePackage('package_5', 'price-package_5', 'credits-package_5', 'Inicial')" class="w-full py-4 bg-slate-900 text-white font-black rounded-2xl hover:bg-amber-500 transition-all shadow-lg shadow-slate-900/10 text-xs tracking-tight uppercase">Guardar</button>
                         </div>
                     </div>
+
                     <!-- package_10 -->
-                    <div class="stat-card p-5 rounded-2xl bg-white border border-slate-100">
-                        <div class="flex items-center justify-between mb-4">
-                            <h4 class="text-sm font-bold text-slate-900">Pack Estándar</h4>
-                            <span class="text-[9px] font-black text-slate-300 bg-slate-50 px-1.5 py-0.5 rounded uppercase">pkg_10</span>
+                    <div class="stat-card group">
+                        <div class="flex items-center justify-between mb-8">
+                            <h4 class="text-base font-black text-slate-900">Pack Estándar</h4>
+                            <span class="text-[9px] font-black text-slate-400 bg-slate-100 px-2 py-1 rounded-lg uppercase">pkg_10</span>
                         </div>
-                        <div class="space-y-4">
-                            <div class="space-y-1">
-                                <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Precio (€)</label>
+                        <div class="space-y-6">
+                            <div class="space-y-2">
+                                <label class="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Precio Final (€)</label>
                                 <div class="relative">
                                     <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">€</span>
-                                    <input type="number" id="price-package_10" step="0.01" min="0" class="w-full bg-slate-50 border border-slate-100 rounded-xl pl-8 pr-4 py-2.5 text-slate-900 font-bold focus:border-primary outline-none" placeholder="0.00">
+                                    <input type="number" id="price-package_10" step="0.01" min="0" class="w-full bg-slate-50 border border-slate-100 rounded-2xl pl-8 pr-4 py-4 text-slate-900 font-black focus:border-amber-500 focus:ring-4 focus:ring-amber-500/5 outline-none transition-all" placeholder="0.00">
                                 </div>
                             </div>
-                            <div class="space-y-1">
-                                <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Cant. Créditos</label>
+                            <div class="space-y-2">
+                                <label class="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Volumen Créditos</label>
                                 <div class="relative">
                                     <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">Cr.</span>
-                                    <input type="number" id="credits-package_10" step="1" min="1" class="w-full bg-slate-50 border border-slate-100 rounded-xl pl-10 pr-4 py-2.5 text-primary font-bold focus:border-primary outline-none" placeholder="0">
+                                    <input type="number" id="credits-package_10" step="1" min="1" class="w-full bg-slate-50 border border-slate-100 rounded-2xl pl-10 pr-4 py-4 text-amber-600 font-black focus:border-amber-500 focus:ring-4 focus:ring-amber-500/5 outline-none transition-all" placeholder="0">
                                 </div>
                             </div>
-                            <button onclick="updatePackage('package_10', 'price-package_10', 'credits-package_10', 'Estándar')" class="w-full py-3 bg-primary text-white font-bold rounded-xl hover:scale-[1.02] transition-all shadow-lg shadow-primary/10 text-xs mt-2">Guardar Cambios</button>
+                            <button onclick="updatePackage('package_10', 'price-package_10', 'credits-package_10', 'Estándar')" class="w-full py-4 bg-slate-900 text-white font-black rounded-2xl hover:bg-amber-500 transition-all shadow-lg shadow-slate-900/10 text-xs tracking-tight uppercase">Guardar</button>
                         </div>
                     </div>
+
                     <!-- package_15 -->
-                    <div class="stat-card p-5 rounded-2xl bg-white border-2 border-primary/20 bg-amber-50/5 relative overflow-hidden">
-                        <div class="absolute top-0 right-0 bg-primary text-white text-[8px] font-black px-3 py-1 rounded-bl-xl uppercase tracking-tighter">MÁS VENDIDO</div>
-                        <div class="flex items-center justify-between mb-4">
-                            <h4 class="text-sm font-bold text-slate-900">Pack Pro</h4>
-                            <span class="text-[9px] font-black text-slate-300 bg-slate-50 px-1.5 py-0.5 rounded uppercase">pkg_15</span>
+                    <div class="stat-card border-amber-500/30 bg-amber-50/5 relative overflow-hidden ring-4 ring-amber-500/5">
+                        <div class="absolute top-0 right-0 bg-amber-500 text-white text-[8px] font-black px-4 py-1.5 rounded-bl-2xl uppercase tracking-[0.1em]">BEST SELLER</div>
+                        <div class="flex items-center justify-between mb-8">
+                            <h4 class="text-base font-black text-slate-900">Pack Pro</h4>
+                            <span class="text-[9px] font-black text-amber-500 bg-amber-500/10 px-2 py-1 rounded-lg uppercase">pkg_15</span>
                         </div>
-                        <div class="space-y-4">
-                            <div class="space-y-1">
-                                <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Precio (€)</label>
+                        <div class="space-y-6">
+                            <div class="space-y-2">
+                                <label class="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Precio Final (€)</label>
                                 <div class="relative">
                                     <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">€</span>
-                                    <input type="number" id="price-package_15" step="0.01" min="0" class="w-full bg-white border border-slate-200 rounded-xl pl-8 pr-4 py-2.5 text-slate-900 font-bold focus:border-primary outline-none" placeholder="0.00">
+                                    <input type="number" id="price-package_15" step="0.01" min="0" class="w-full bg-white border border-slate-200 rounded-2xl pl-8 pr-4 py-4 text-slate-900 font-black focus:border-amber-500 focus:ring-4 focus:ring-amber-500/5 outline-none transition-all" placeholder="0.00">
                                 </div>
                             </div>
-                            <div class="space-y-1">
-                                <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Cant. Créditos</label>
+                            <div class="space-y-2">
+                                <label class="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Volumen Créditos</label>
                                 <div class="relative">
                                     <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">Cr.</span>
-                                    <input type="number" id="credits-package_15" step="1" min="1" class="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-primary font-bold focus:border-primary outline-none" placeholder="0">
+                                    <input type="number" id="credits-package_15" step="1" min="1" class="w-full bg-white border border-slate-200 rounded-2xl pl-10 pr-4 py-4 text-amber-600 font-black focus:border-amber-500 focus:ring-4 focus:ring-amber-500/5 outline-none transition-all" placeholder="0">
                                 </div>
                             </div>
-                            <button onclick="updatePackage('package_15', 'price-package_15', 'credits-package_15', 'Profesional')" class="w-full py-3 bg-primary text-white font-bold rounded-xl hover:scale-[1.02] transition-all shadow-xl shadow-primary/30 text-xs mt-2">Actualizar Pack</button>
+                            <button onclick="updatePackage('package_15', 'price-package_15', 'credits-package_15', 'Pro')" class="w-full py-4 bg-amber-500 text-white font-black rounded-2xl hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-amber-500/30 text-xs tracking-tight uppercase">Actualizar</button>
                         </div>
                     </div>
+
                     <!-- package_25 -->
-                    <div class="stat-card p-5 rounded-2xl bg-white border border-slate-100">
-                        <div class="flex items-center justify-between mb-4">
-                            <h4 class="text-sm font-bold text-slate-900">Pack Premium</h4>
-                            <span class="text-[9px] font-black text-slate-300 bg-slate-50 px-1.5 py-0.5 rounded uppercase">pkg_25</span>
+                    <div class="stat-card group">
+                        <div class="flex items-center justify-between mb-8">
+                            <h4 class="text-base font-black text-slate-900">Pack Premium</h4>
+                            <span class="text-[9px] font-black text-slate-400 bg-slate-100 px-2 py-1 rounded-lg uppercase">pkg_25</span>
                         </div>
-                        <div class="space-y-4">
-                            <div class="space-y-1">
-                                <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Precio (€)</label>
+                        <div class="space-y-6">
+                            <div class="space-y-2">
+                                <label class="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Precio Final (€)</label>
                                 <div class="relative">
                                     <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">€</span>
-                                    <input type="number" id="price-package_25" step="0.01" min="0" class="w-full bg-slate-50 border border-slate-100 rounded-xl pl-8 pr-4 py-2.5 text-slate-900 font-bold focus:border-primary outline-none" placeholder="0.00">
+                                    <input type="number" id="price-package_25" step="0.01" min="0" class="w-full bg-slate-50 border border-slate-100 rounded-2xl pl-8 pr-4 py-4 text-slate-900 font-black focus:border-amber-500 focus:ring-4 focus:ring-amber-500/5 outline-none transition-all" placeholder="0.00">
                                 </div>
                             </div>
-                            <div class="space-y-1">
-                                <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest ml-1">Cant. Créditos</label>
+                            <div class="space-y-2">
+                                <label class="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Volumen Créditos</label>
                                 <div class="relative">
                                     <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">Cr.</span>
-                                    <input type="number" id="credits-package_25" step="1" min="1" class="w-full bg-slate-50 border border-slate-100 rounded-xl pl-10 pr-4 py-2.5 text-primary font-bold focus:border-primary outline-none" placeholder="0">
+                                    <input type="number" id="credits-package_25" step="1" min="1" class="w-full bg-slate-50 border border-slate-100 rounded-2xl pl-10 pr-4 py-4 text-amber-600 font-black focus:border-amber-500 focus:ring-4 focus:ring-amber-500/5 outline-none transition-all" placeholder="0">
                                 </div>
                             </div>
-                            <button onclick="updatePackage('package_25', 'price-package_25', 'credits-package_25', 'Premium')" class="w-full py-3 bg-primary text-white font-bold rounded-xl hover:scale-[1.02] transition-all shadow-lg shadow-primary/10 text-xs mt-2">Guardar Cambios</button>
+                            <button onclick="updatePackage('package_25', 'price-package_25', 'credits-package_25', 'Premium')" class="w-full py-4 bg-slate-900 text-white font-black rounded-2xl hover:bg-amber-500 transition-all shadow-lg shadow-slate-900/10 text-xs tracking-tight uppercase">Guardar</button>
                         </div>
                     </div>
                 </div>
-
             </div>
         </section>
 
@@ -298,10 +345,10 @@
         <section id="section-history" class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm mb-12" style="display:none;">
             <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                 <h3 class="text-lg font-bold flex items-center gap-2 text-slate-800">
-                    <span class="material-symbols-outlined text-primary">history</span>
+                    <span class="material-symbols-outlined text-amber-500">history</span>
                     Historial de Cambios de Precio
                 </h3>
-                <button onclick="loadPriceHistory()" class="text-[10px] font-black uppercase tracking-widest text-primary hover:underline hover:scale-105 transition-all">Actualizar Lista</button>
+                <button onclick="loadPriceHistory()" class="text-[10px] font-black uppercase tracking-widest text-amber-600 hover:underline hover:scale-105 transition-all">Actualizar Lista</button>
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full text-left">
@@ -327,7 +374,7 @@
     <!-- Edit User Modal -->
     <div id="edit-user-modal" class="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center hidden p-4">
         <div class="bg-white w-full max-w-md p-8 rounded-3xl border border-white shadow-2xl relative overflow-hidden">
-            <div class="absolute top-0 left-0 w-full h-1 bg-primary"></div>
+            <div class="absolute top-0 left-0 w-full h-1 bg-amber-500"></div>
             <div class="flex justify-between items-center mb-6">
                 <div>
                     <h3 class="text-2xl font-black text-slate-900">Editar Usuario</h3>
@@ -343,28 +390,28 @@
                 <div class="space-y-6">
                     <div class="space-y-1">
                         <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nombre Completo</label>
-                        <input type="text" id="edit-name" class="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 font-bold text-slate-900 focus:border-primary outline-none transition-all">
+                        <input type="text" id="edit-name" class="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 font-bold text-slate-900 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/5 outline-none transition-all">
                     </div>
                     <div class="space-y-1">
                         <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Saldo de Créditos</label>
-                        <input type="number" id="edit-credits" class="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 font-bold text-primary text-xl focus:border-primary outline-none transition-all">
+                        <input type="number" id="edit-credits" class="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 font-bold text-amber-600 text-xl focus:border-amber-500 focus:ring-4 focus:ring-amber-500/5 outline-none transition-all">
                     </div>
-                    <div class="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-50 transition-colors hover:border-primary/20 cursor-pointer">
-                        <input type="checkbox" id="edit-is-admin" class="size-5 rounded border-slate-300 text-primary focus:ring-primary bg-white">
+                    <div class="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-50 transition-colors hover:border-amber-500/20 cursor-pointer">
+                        <input type="checkbox" id="edit-is-admin" class="size-5 rounded border-slate-300 text-amber-600 focus:ring-amber-500 bg-white">
                         <label for="edit-is-admin" class="text-sm font-bold text-slate-700 select-none cursor-pointer">Privilegios de Administrador</label>
                     </div>
                 </div>
                 
                 <div class="mt-10 flex gap-3">
                     <button type="button" onclick="closeEditModal()" class="flex-1 px-6 py-4 bg-slate-100 text-slate-500 font-bold rounded-2xl hover:bg-slate-200 transition-all">Cancelar</button>
-                    <button type="submit" id="save-user-btn" class="flex-1 px-6 py-4 bg-primary text-white font-bold rounded-2xl hover:scale-[1.05] transition-transform shadow-xl shadow-primary/20">Guardar</button>
+                    <button type="submit" id="save-user-btn" class="flex-1 px-6 py-4 bg-amber-500 text-white font-black rounded-2xl hover:scale-[1.05] transition-transform shadow-xl shadow-amber-500/20 uppercase text-xs tracking-widest">Guardar</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <footer class="max-w-7xl mx-auto px-6 py-12 text-center text-slate-400 border-t border-slate-100 mt-12 text-xs font-bold uppercase tracking-widest">
-        <p>© 2024 RenderRoom Admin System v1.1.0 • <span class="text-primary">Light Edition</span></p>
+    <footer class="max-w-7xl mx-auto px-6 py-12 text-center text-slate-400 border-t border-slate-100 mt-12 text-xs font-black uppercase tracking-[0.2em]">
+        <p>© 2024 RenderRoom Admin System v1.2.0 • <span class="text-amber-500">Solar Light Edition</span></p>
     </footer>
 
     <script>
@@ -467,7 +514,7 @@
                                         .get();
                     if (!rSnap.empty) {
                         const r = rSnap.docs[0].data();
-                        lastRenderInfo = `<span class="text-primary font-bold">${r.room_type || 'Hab.'}</span> <span class="text-[10px]">(${r.approx_size || '?'})</span>`;
+                        lastRenderInfo = `<span class="text-amber-600 font-bold">${r.room_type || 'Hab.'}</span> <span class="text-[10px]">(${r.approx_size || '?'})</span>`;
                     }
                 } catch(e) {}
 
@@ -475,21 +522,21 @@
                     <tr class="hover:bg-slate-50 transition-colors">
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-3">
-                                <div class="size-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">
+                                <div class="size-8 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-600 font-black text-[10px]">
                                     ${(user.displayName || user.email).charAt(0).toUpperCase()}
                                 </div>
-                                <span class="font-bold text-slate-800">${user.displayName || 'Sin nombre'}</span>
+                                <span class="font-bold text-slate-800 text-sm tracking-tight">${user.displayName || 'Sin nombre'}</span>
                             </div>
                         </td>
                         <td class="px-6 py-4 text-slate-400 text-xs font-medium">${user.email}</td>
                         <td class="px-6 py-4 text-slate-500 text-xs">${lastRenderInfo}</td>
                         <td class="px-6 py-4">
-                            <span class="px-2 py-1 ${isAdmin ? 'bg-primary/10 text-primary' : 'bg-slate-100 text-slate-400'} text-[10px] font-black uppercase rounded">
+                            <span class="px-2 py-1 ${isAdmin ? 'bg-amber-500/10 text-amber-600' : 'bg-slate-100 text-slate-400'} text-[8px] font-black uppercase rounded-lg tracking-wider">
                                 ${isAdmin ? 'Admin' : 'Usuario'}
                             </span>
                         </td>
                         <td class="px-6 py-4 text-right">
-                            <button onclick="openEditModal('${uid}', '${user.displayName || ''}', ${user.credits || 0}, ${isAdmin})" class="size-9 bg-slate-50 rounded-lg flex items-center justify-center text-slate-400 hover:text-primary hover:bg-primary/10 transition-all">
+                            <button onclick="openEditModal('${uid}', '${user.displayName || ''}', ${user.credits || 0}, ${isAdmin})" class="size-9 bg-white border border-slate-100 shadow-sm rounded-xl flex items-center justify-center text-slate-400 hover:text-amber-500 hover:border-amber-200 hover:scale-110 transition-all">
                                 <span class="material-symbols-outlined text-lg">edit</span>
                             </button>
                         </td>
@@ -552,20 +599,25 @@
         const tabs = ['overview', 'users', 'pricing', 'history'];
         tabs.forEach(t => {
             const btn = document.getElementById('tab-' + t);
-            btn.classList.remove('text-primary');
-            btn.classList.add('text-slate-600');
+            if (btn) {
+                btn.classList.remove('text-amber-600');
+                btn.classList.add('text-slate-400');
+            }
         });
         
         if (tab === 'overview' || tab === 'users') {
             document.getElementById('section-users').style.display = 'block';
-            document.getElementById('tab-' + tab).classList.add('text-primary');
+            document.getElementById('tab-' + tab).classList.add('text-amber-600');
+            document.getElementById('tab-' + tab).classList.remove('text-slate-400');
         } else if (tab === 'pricing') {
             document.getElementById('section-pricing').style.display = 'block';
-            document.getElementById('tab-pricing').classList.add('text-primary');
+            document.getElementById('tab-pricing').classList.add('text-amber-600');
+            document.getElementById('tab-pricing').classList.remove('text-slate-400');
             loadPrices();
         } else if (tab === 'history') {
             document.getElementById('section-history').style.display = 'block';
-            document.getElementById('tab-history').classList.add('text-primary');
+            document.getElementById('tab-history').classList.add('text-amber-600');
+            document.getElementById('tab-history').classList.remove('text-slate-400');
             loadPriceHistory();
         }
     }
@@ -659,9 +711,9 @@
                 tbody.innerHTML += `
                     <tr class="hover:bg-slate-50 transition-colors">
                         <td class="px-6 py-4 text-slate-400 text-xs">${date}</td>
-                        <td class="px-6 py-4 font-bold text-slate-800 text-xs uppercase">${h.pricingId}</td>
+                        <td class="px-6 py-4 font-black text-slate-900 text-[10px] uppercase tracking-wider">${h.pricingId}</td>
                         <td class="px-6 py-4 text-slate-400 font-bold text-xs">€${h.oldPrice || '-'}</td>
-                        <td class="px-6 py-4 text-primary font-bold text-xs">€${h.newPrice}</td>
+                        <td class="px-6 py-4 text-amber-600 font-black text-xs">€${h.newPrice}</td>
                         <td class="px-6 py-4 text-slate-400 text-[10px] font-bold">${h.changedBy ? h.changedBy.substring(0,6) : 'SYS'}</td>
                     </tr>
                 `;

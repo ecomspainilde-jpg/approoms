@@ -36,20 +36,36 @@
     </style>
 </head>
 <body class="bg-background font-display text-text-secondary min-h-screen antialiased">
-    <nav class="sticky top-0 z-50 glass-nav border-b border-border px-6 py-4">
-    <div class="max-w-4xl mx-auto flex items-center justify-between">
-      <a href="01-landing-page.html" class="flex items-center gap-3">
-        <div class="size-8 bg-gradient-to-br from-primary to-orange-600 rounded-lg flex items-center justify-center text-background-dark">
-          <span class="material-symbols-outlined text-sm">deployed_code</span>
+    <!-- Navigation (Solar Light) -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200/60 transition-all">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <a href="01-landing-page.html" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
+                <div class="size-10 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-amber-500/20">
+                    <span class="material-symbols-outlined font-bold">wb_sunny</span>
+                </div>
+                <h2 class="text-2xl font-black tracking-tight text-slate-900">Render<span class="text-amber-500">Room</span></h2>
+            </a>
+            
+            <div id="nav-auth-container" class="flex items-center gap-4">
+                <div id="header-credits-display" class="hidden items-center gap-2 px-3 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-full">
+                    <span class="material-symbols-outlined text-amber-500 text-sm">toll</span>
+                    <span id="header-credits-count" class="text-amber-500 text-sm font-bold">--</span>
+                    <span class="text-[10px] text-amber-500/80 font-black uppercase tracking-wider">créditos</span>
+                </div>
+
+                <div id="user-logged-in" class="hidden items-center gap-3">
+                    <button onclick="window.location.href='06-perfil-usuario.html'" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                        <img id="user-avatar" src="https://ui-avatars.com/api/?name=User&background=F59E0B&color=fff" class="size-8 rounded-full border-2 border-amber-500/20" alt="Avatar">
+                        <span id="nav-user-name" class="hidden lg:block text-xs font-bold text-slate-800">--</span>
+                    </button>
+                </div>
+
+                <a id="user-logged-out" href="01-landing-page.html?auth=login" class="hidden bg-amber-500 hover:bg-amber-600 text-white px-6 py-2.5 rounded-xl text-sm font-bold tracking-wide transition-all shadow-lg shadow-amber-500/20">
+                    Entrar
+                </a>
+            </div>
         </div>
-        <h2 class="text-xl font-black tracking-tight">Render<span class="text-primary">Room</span></h2>
-      </a>
-      <a href="01-landing-page.html" class="text-sm font-medium hover:text-primary transition-colors flex items-center gap-2">
-        <span class="material-symbols-outlined text-sm">arrow_back</span>
-        Volver al inicio
-      </a>
-    </div>
-  </nav>
+    </nav>
 
   <main class="max-w-4xl mx-auto px-6 py-16">
     <h1 class="text-4xl font-black text-text-primary mb-8 tracking-tight">Política de Privacidad</h1>
@@ -120,19 +136,37 @@
     </div>
   </main>
 
-  <footer class="bg-surface border-t border-border py-20 mt-12">
-    <div class="max-w-4xl mx-auto px-6 text-center">
-        <p class="text-xs text-text-secondary font-bold uppercase tracking-[0.2em] mb-4">© 2024 RenderRoom AI. All Rights Reserved.</p>
-        <div class="flex justify-center gap-8 text-[10px] font-black text-text-secondary uppercase tracking-widest">
-            <a href="01-landing-page.html" class="hover:text-primary">Inicio</a>
-            <a href="precios.html" class="hover:text-primary">Precios</a>
-            <a href="07-consejos-decoracion.html" class="hover:text-primary">Blog</a>
+    <!-- Footer (Solar Light) -->
+    <footer class="bg-slate-50 border-t border-slate-200 py-20 mt-20">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-12">
+                <div class="flex items-center gap-3">
+                    <div class="size-10 bg-amber-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-amber-500/20">
+                        <span class="material-symbols-outlined font-bold">wb_sunny</span>
+                    </div>
+                    <h2 class="text-2xl font-black tracking-tight text-slate-900">RenderRoom</h2>
+                </div>
+                
+                <div class="flex flex-wrap justify-center gap-8 text-sm font-bold text-slate-500">
+                    <a href="01-landing-page.html" class="hover:text-amber-500 transition-colors">Inicio</a>
+                    <a href="03-dashboard.html" class="hover:text-amber-500 transition-colors">Mi Panel</a>
+                    <a href="precios.html" class="hover:text-amber-500 transition-colors">Precios</a>
+                    <a href="privacidad.html" class="hover:text-amber-500 transition-colors">Privacidad</a>
+                    <a href="terminos.html" class="hover:text-amber-500 transition-colors">Términos</a>
+                </div>
+                
+                <p class="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">© 2024 RenderRoom AI Studio</p>
+            </div>
         </div>
-    </div>
-  </footer>
+    </footer>
 
-  <style>
-    .glass { background: rgba(22,27,34,0.8); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
-  </style>
+    <!-- Firebase SDK (Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Shared Logic -->
+    <script src="js/firebase-config.js"></script>
+    <script src="js/shared-auth.js"></script>
 </body>
 </html>

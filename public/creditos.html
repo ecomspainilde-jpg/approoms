@@ -47,30 +47,36 @@
     </style>
 </head>
 <body class="bg-background font-display text-text-primary antialiased selection:bg-primary/30 min-h-screen">
-    <!-- NAVIGATION -->
-    <nav class="fixed top-0 left-0 right-0 z-50 glass-nav border-b border-border">
+    <!-- Navigation (Solar Light) -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200/60 transition-all">
         <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
             <a href="01-landing-page.html" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
-                <div class="size-10 bg-primary rounded-lg flex items-center justify-center text-white">
-                    <span class="material-symbols-outlined font-bold">deployed_code</span>
+                <div class="size-10 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-amber-500/20">
+                    <span class="material-symbols-outlined font-bold">wb_sunny</span>
                 </div>
-                <h2 class="text-xl font-black tracking-tight">Render<span class="text-primary">Room</span></h2>
+                <h2 class="text-2xl font-black tracking-tight text-slate-900">Render<span class="text-amber-500">Room</span></h2>
             </a>
             
-            <div class="hidden md:flex items-center space-x-8">
-                <a class="text-sm font-medium text-text-secondary hover:text-primary transition-colors" href="01-landing-page.html">Inicio</a>
-                <a class="text-sm font-medium text-text-secondary hover:text-primary transition-colors" href="03-dashboard.html">Dashboard</a>
-                <a class="text-sm font-medium text-text-secondary hover:text-primary transition-colors" href="07-consejos-decoracion.html">Consejos</a>
-                <a class="text-sm font-medium text-text-secondary hover:text-primary transition-colors" href="precios.html">Precios</a>
-            </div>
-
-            <div class="flex items-center gap-4">
-                <a href="02-upload-wizard.html" class="bg-primary hover:bg-primary/90 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all hover:scale-105 shadow-md shadow-primary/10">
-                    Nuevo Render
-                </a>
-                <div id="user-initials-nav" class="size-10 rounded-full bg-surface border border-border flex items-center justify-center text-text-secondary font-black text-sm">
-                    U
+            <div id="nav-auth-container" class="flex items-center gap-4">
+                <div id="header-credits-display" class="hidden items-center gap-2 px-3 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-full">
+                    <span class="material-symbols-outlined text-amber-500 text-sm">toll</span>
+                    <span id="header-credits-count" class="text-amber-500 text-sm font-bold">--</span>
+                    <span class="text-[10px] text-amber-500/80 font-black uppercase tracking-wider">créditos</span>
                 </div>
+
+                <div id="user-logged-in" class="hidden items-center gap-3">
+                    <button onclick="window.location.href='06-perfil-usuario.html'" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                        <img id="user-avatar" src="https://ui-avatars.com/api/?name=User&background=F59E0B&color=fff" class="size-8 rounded-full border-2 border-amber-500/20" alt="Avatar">
+                        <span id="nav-user-name" class="hidden lg:block text-xs font-bold text-slate-800">--</span>
+                    </button>
+                    <button onclick="handleSignOut()" class="p-2 text-slate-400 hover:text-red-500 transition-colors" title="Cerrar Sesión">
+                        <span class="material-symbols-outlined text-xl">logout</span>
+                    </button>
+                </div>
+
+                <a id="user-logged-out" href="01-landing-page.html?auth=login" class="hidden bg-amber-500 hover:bg-amber-600 text-white px-6 py-2.5 rounded-xl text-sm font-bold tracking-wide transition-all shadow-lg shadow-amber-500/20">
+                    Entrar
+                </a>
             </div>
         </div>
     </nav>
@@ -78,33 +84,33 @@
     <main class="max-w-7xl mx-auto px-6 pt-32 pb-24 flex flex-col md:flex-row gap-12">
         <!-- SIDEBAR -->
         <aside class="w-full md:w-72 shrink-0">
-            <div class="bg-surface rounded-3xl p-8 border border-border shadow-sm sticky top-32">
-                <div class="flex flex-col items-center text-center gap-4 border-b border-border pb-8 mb-8">
-                    <div id="user-avatar-sidebar" class="size-20 rounded-full bg-primary/10 ring-4 ring-white flex items-center justify-center text-primary text-3xl font-black shadow-lg">
-                        U
+            <div class="bg-slate-50 rounded-3xl p-8 border border-slate-200/60 shadow-sm sticky top-32">
+                <div class="flex flex-col items-center text-center gap-4 border-b border-slate-100 pb-8 mb-8">
+                    <div id="sidebar-avatar-placeholder" class="size-20 rounded-full bg-amber-500/10 ring-4 ring-white flex items-center justify-center text-amber-500 text-3xl font-black shadow-lg shadow-amber-500/10">
+                        <span class="material-symbols-outlined text-4xl">person</span>
                     </div>
                     <div>
-                        <h3 id="user-name-sidebar" class="font-black text-lg">Cargando...</h3>
-                        <p class="text-[10px] font-black text-primary uppercase tracking-widest mt-1">Plan Estándar</p>
+                        <h3 id="user-name-display" class="font-black text-lg text-slate-900">Cargando...</h3>
+                        <p id="user-email-display" class="text-xs font-medium text-slate-500">...</p>
                     </div>
                 </div>
 
                 <nav class="space-y-2">
                     <a href="06-perfil-usuario.html" class="flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-white hover:shadow-sm transition-all group">
-                        <span class="material-symbols-outlined text-text-secondary group-hover:text-primary transition-colors">person</span>
-                        <span class="text-sm font-bold text-text-secondary group-hover:text-text-primary transition-colors">Mi Perfil</span>
+                        <span class="material-symbols-outlined text-slate-400 group-hover:text-amber-500 transition-colors">person</span>
+                        <span class="text-sm font-bold text-slate-600 group-hover:text-slate-900 transition-colors">Mi Perfil</span>
                     </a>
                     <a href="03-dashboard.html" class="flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-white hover:shadow-sm transition-all group">
-                        <span class="material-symbols-outlined text-text-secondary group-hover:text-primary transition-colors">grid_view</span>
-                        <span class="text-sm font-bold text-text-secondary group-hover:text-text-primary transition-colors">Mis Renders</span>
+                        <span class="material-symbols-outlined text-slate-400 group-hover:text-amber-500 transition-colors">grid_view</span>
+                        <span class="text-sm font-bold text-slate-600 group-hover:text-slate-900 transition-colors">Mis Renders</span>
                     </a>
-                    <a href="creditos.html" class="flex items-center gap-4 px-4 py-3 rounded-2xl bg-white shadow-sm border border-border text-primary group">
-                        <span class="material-symbols-outlined text-primary">payments</span>
-                        <span class="text-sm font-black">Créditos & Pagos</span>
+                    <a href="creditos.html" class="flex items-center gap-4 px-4 py-3 rounded-2xl bg-white shadow-sm border border-amber-500/20 text-amber-600 transition-all font-bold group">
+                        <span class="material-symbols-outlined text-amber-500">payments</span>
+                        <span class="text-sm">Créditos & Pagos</span>
                     </a>
-                    <div class="pt-6 border-t border-border mt-6">
-                        <button onclick="logout()" class="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-red-50 text-red-500 transition-all font-bold text-sm">
-                            <span class="material-symbols-outlined text-red-500">logout</span>
+                    <div class="pt-6 border-t border-slate-100 mt-6">
+                        <button onclick="handleSignOut()" class="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-red-50 text-red-500 transition-all font-bold text-sm">
+                            <span class="material-symbols-outlined">logout</span>
                             Cerrar Sesión
                         </button>
                     </div>
@@ -122,12 +128,12 @@
                     <div class="space-y-2">
                         <p class="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em]">Saldo Disponible</p>
                         <h1 class="text-6xl font-black text-text-primary tracking-tight">
-                            <span id="user-credits-count">...</span> 
+                            <span id="main-credits-count">...</span> 
                             <span class="text-2xl font-bold text-text-secondary/40">Créditos</span>
                         </h1>
                         <p class="text-text-secondary text-sm max-w-sm font-medium pt-2">Cada render profesional consume 1 crédito. Se aplican automáticamente al iniciar una generación.</p>
                     </div>
-                    <a href="modal-compra.html" class="bg-primary hover:bg-primary/90 text-white px-10 py-5 rounded-2xl font-black text-lg flex items-center gap-3 shadow-xl shadow-primary/20 transition-all hover:scale-105 active:scale-95">
+                    <a href="precios.html" class="bg-primary hover:bg-primary/90 text-white px-10 py-5 rounded-2xl font-black text-lg flex items-center gap-3 shadow-xl shadow-primary/20 transition-all hover:scale-105 active:scale-95">
                         <span class="material-symbols-outlined">add_shopping_cart</span>
                         Comprar Créditos
                     </a>
@@ -136,15 +142,12 @@
                 <!-- Usage Progress -->
                 <div class="mt-12 pt-8 border-t border-border space-y-4">
                     <div class="flex justify-between items-end">
-                        <span class="text-xs font-black text-text-secondary/60 uppercase tracking-widest">Uso del Mes</span>
-                        <span class="text-sm font-black text-primary">4 / 10 Créditos Consumidos</span>
+                        <span class="text-xs font-black text-text-secondary/60 uppercase tracking-widest">Estado del Saldo</span>
+                        <span id="credits-status-text" class="text-sm font-black text-primary">Cargando...</span>
                     </div>
                     <div class="h-3 w-full bg-surface rounded-full overflow-hidden">
-                        <div class="h-full bg-primary rounded-full transition-all duration-700" style="width: 40%"></div>
+                        <div id="credits-progress-bar" class="h-full bg-primary rounded-full transition-all duration-700" style="width: 0%"></div>
                     </div>
-                    <p class="text-[10px] font-black text-text-secondary/40 uppercase tracking-widest flex items-center gap-2">
-                        <span class="material-symbols-outlined text-xs">info</span> Se renueva el 12 de Junio de 2024
-                    </p>
                 </div>
             </div>
 
@@ -169,23 +172,11 @@
                                     <th class="px-8 py-5 text-center">Estado</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-border">
-                                <tr class="hover:bg-surface/30 transition-colors">
-                                    <td class="px-8 py-6 text-text-secondary font-medium">14 May 2024</td>
-                                    <td class="px-8 py-6 font-bold">Pack Especial 10 Créditos</td>
-                                    <td class="px-8 py-6 text-green-600 font-black">+10</td>
-                                    <td class="px-8 py-6 text-right font-black">15,00€</td>
-                                    <td class="px-8 py-6 text-center">
-                                        <span class="px-3 py-1 bg-green-50 text-green-700 text-[10px] font-black uppercase tracking-widest rounded-full">Completado</span>
-                                    </td>
-                                </tr>
-                                <tr class="hover:bg-surface/30 transition-colors">
-                                    <td class="px-8 py-6 text-text-secondary font-medium">12 May 2024</td>
-                                    <td class="px-8 py-6 font-bold">Render — Salón Minimalista</td>
-                                    <td class="px-8 py-6 text-text-secondary/50 font-black">-1</td>
-                                    <td class="px-8 py-6 text-right font-black">0,00€</td>
-                                    <td class="px-8 py-6 text-center">
-                                        <span class="px-3 py-1 bg-surface text-text-secondary text-[10px] font-black uppercase tracking-widest rounded-full">Usado</span>
+                            <tbody id="transactions-body" class="divide-y divide-border">
+                                <!-- Dynamic transactions here -->
+                                <tr id="no-transactions" class="">
+                                    <td colspan="5" class="px-8 py-12 text-center text-text-secondary/50 font-medium italic">
+                                        No hay transacciones recientes para mostrar.
                                     </td>
                                 </tr>
                             </tbody>
@@ -196,44 +187,114 @@
         </section>
     </main>
 
-    <!-- FIREBASE & LOGIC -->
+    <!-- Firebase SDK (Compat) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Shared Logic -->
+    <script src="js/firebase-config.js"></script>
+    <script src="js/shared-auth.js"></script>
 
     <script>
-    const firebaseConfig = {
-      projectId: "gen-lang-client-0426824151",
-      appId: "1:124806819551:web:1c90d1154b458fa064036a",
-      storageBucket: "gen-lang-client-0426824151.firebasestorage.app",
-      apiKey: "AIzaSyDj99qdmDt4GiVeRkvCSfTOSDw3uqD-_Ew",
-      authDomain: "gen-lang-client-0426824151.firebaseapp.com",
-      messagingSenderId: "124806819551"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+        // Page specific logic for credits display
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                // Initial credit fetch if snapshot doesn't trigger immediately
+                db.collection('users').doc(user.uid).get().then(doc => {
+                    if (doc.exists) updateCreditsUI(doc.data().credits || 0);
+                });
 
-    firebase.auth().onAuthStateChanged(async user => {
-        if (user) {
-            const initials = (user.displayName || user.email || 'U').charAt(0).toUpperCase();
-            document.getElementById('user-initials-nav').textContent = initials;
-            document.getElementById('user-avatar-sidebar').textContent = initials;
-            document.getElementById('user-name-sidebar').textContent = user.displayName || user.email.split('@')[0];
+                // Listen for updates
+                db.collection('users').doc(user.uid).onSnapshot(doc => {
+                    if (doc.exists) updateCreditsUI(doc.data().credits || 0);
+                });
 
-            try {
-                const doc = await db.collection('users').doc(user.uid).get();
-                if (doc.exists) {
-                    document.getElementById('user-credits-count').textContent = doc.data().credits || 0;
-                }
-            } catch (e) { console.error(e); }
-        } else {
-            window.location.href = '01-landing-page.html';
+                // Fetch transactions
+                fetchTransactions(user.uid);
+            }
+        });
+
+        function updateCreditsUI(credits) {
+            const countEl = document.getElementById('main-credits-count');
+            const statusText = document.getElementById('credits-status-text');
+            const progressBar = document.getElementById('credits-progress-bar');
+            
+            if (countEl) countEl.textContent = credits;
+            if (statusText) statusText.textContent = `${credits} Créditos disponibles`;
+            
+            // Artificial progress bar (e.g. out of 50 for visualization)
+            if (progressBar) {
+                const percentage = Math.min((credits / 50) * 100, 100);
+                progressBar.style.width = `${percentage}%`;
+            }
         }
-    });
 
-    function logout() {
-        firebase.auth().signOut().then(() => window.location.href = '01-landing-page.html');
-    }
+        async function fetchTransactions(uid) {
+            const tbody = document.getElementById('transactions-body');
+            const noTransactions = document.getElementById('no-transactions');
+            
+            try {
+                // We'll try both paths since the structure might vary: users/{uid}/payments OR payments (filtered by userId)
+                // Common pattern in this app seems to be subcollections
+                const snapshot = await db.collection('users').doc(uid).collection('payments').orderBy('createdAt', 'desc').limit(15).get();
+                
+                if (!snapshot.empty) {
+                    if (noTransactions) noTransactions.classList.add('hidden');
+                    tbody.innerHTML = '';
+                    
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        const date = data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleDateString() : 'N/A';
+                        const concept = data.concept || (data.creditsAmount ? `Compra de ${data.creditsAmount} créditos` : 'Pago de servicios');
+                        const credits = data.creditsAmount || '--';
+                        const amount = data.amount ? `${(data.amount / 100).toFixed(2).replace('.', ',')}€` : '--€';
+                        const status = data.status || 'Completado';
+                        const statusColor = status.toLowerCase() === 'completado' || status.toLowerCase() === 'paid' ? 'emerald' : 'amber';
+
+                        tbody.innerHTML += `
+                            <tr class="hover:bg-surface/30 transition-colors">
+                                <td class="px-8 py-5 text-text-secondary font-medium">${date}</td>
+                                <td class="px-8 py-5 font-bold">${concept}</td>
+                                <td class="px-8 py-5 font-black text-primary">+${credits}</td>
+                                <td class="px-8 py-5 text-right font-bold">${amount}</td>
+                                <td class="px-8 py-5 text-center">
+                                    <span class="inline-flex px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-${statusColor}-50 text-${statusColor}-600 border border-${statusColor}-100">
+                                        ${status.toUpperCase()}
+                                    </span>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                }
+            } catch (error) {
+                console.warn("Error fetching transactions, possibly permissions or empty collection:", error);
+                // Keep the "no transactions" message visible if error or empty
+            }
+        }
     </script>
+    <!-- Footer (Solar Light) -->
+    <footer class="bg-slate-50 border-t border-slate-200 py-20 mt-20">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-12">
+                <div class="flex items-center gap-3">
+                    <div class="size-10 bg-amber-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-amber-500/20">
+                        <span class="material-symbols-outlined font-bold">wb_sunny</span>
+                    </div>
+                    <h2 class="text-2xl font-black tracking-tight text-slate-900">RenderRoom</h2>
+                </div>
+                
+                <div class="flex flex-wrap justify-center gap-8 text-sm font-bold text-slate-500">
+                    <a href="01-landing-page.html" class="hover:text-amber-500 transition-colors">Inicio</a>
+                    <a href="03-dashboard.html" class="hover:text-amber-500 transition-colors">Mi Panel</a>
+                    <a href="precios.html" class="hover:text-amber-500 transition-colors">Precios</a>
+                    <a href="privacidad.html" class="hover:text-amber-500 transition-colors">Privacidad</a>
+                    <a href="terminos.html" class="hover:text-amber-500 transition-colors">Términos</a>
+                </div>
+                
+                <p class="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">© 2024 RenderRoom AI Studio</p>
+            </div>
+        </div>
+    </footer>
 </body>
 </html>

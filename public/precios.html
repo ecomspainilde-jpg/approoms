@@ -7,15 +7,19 @@
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <!-- Firebase & Configuration -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/shared-auth.js"></script>
+
     <script id="tailwind-config">
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        "primary": "#F59E0B", // Ámbar Solar
+                        "primary": "#F59E0B",
                         "background": "#FFFFFF",
                         "surface": "#F8FAFC",
                         "border": "#F1F5F9",
@@ -33,9 +37,7 @@
     <style type="text/tailwindcss">
         @layer utilities {
             .glass-nav {
-                background: rgba(255, 255, 255, 0.8);
-                backdrop-filter: blur(12px);
-                -webkit-backdrop-filter: blur(12px);
+                @apply bg-white/80 backdrop-blur-xl border-b border-slate-200/60;
             }
             .solar-glow {
                 box-shadow: 0 10px 40px rgba(245, 158, 11, 0.12);
@@ -44,38 +46,50 @@
                 @apply transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-primary/10 hover:border-primary/20;
             }
         }
-        /* FOUC Prevention */
         body { opacity: 0; transition: opacity 0.3s ease; }
-        .auth-checked body { opacity: 1; }
+        .auth-initialized body { opacity: 1; }
     </style>
 </head>
 <body class="bg-background font-display text-text-primary antialiased">
-    <!-- NAVIGATION -->
-    <nav class="fixed top-0 left-0 right-0 z-50 glass-nav border-b border-border">
+    <!-- NAVIGATION (Unified) -->
+    <nav class="fixed top-0 left-0 right-0 z-50 glass-nav">
         <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
             <a href="01-landing-page.html" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
-                <div class="size-10 bg-gradient-to-br from-primary to-orange-500 rounded-lg flex items-center justify-center text-white">
+                <div class="size-10 bg-gradient-to-br from-primary to-orange-500 rounded-lg flex items-center justify-center text-white shadow-lg shadow-primary/20">
                     <span class="material-symbols-outlined font-bold">deployed_code</span>
                 </div>
                 <h2 class="text-2xl font-black tracking-tight">Render<span class="text-primary">Room</span></h2>
             </a>
             
             <div class="hidden md:flex items-center space-x-8">
-                <a class="text-sm font-medium text-text-secondary hover:text-primary transition-colors" href="01-landing-page.html">Inicio</a>
-                <a class="text-sm font-medium text-text-secondary hover:text-primary transition-colors" href="03-dashboard.html">Dashboard</a>
-                <a class="text-sm font-medium text-text-secondary hover:text-primary transition-colors" href="07-consejos-decoracion.html">Consejos</a>
-                <a class="text-sm font-medium text-text-secondary hover:text-primary transition-colors" href="06-perfil-usuario.html">Perfil</a>
+                <a class="text-sm font-semibold text-text-secondary hover:text-primary transition-colors" href="01-landing-page.html">Inicio</a>
+                <a class="text-sm font-semibold text-text-secondary hover:text-primary transition-colors" href="03-dashboard.html">Mi Panel</a>
+                <a class="text-sm font-semibold text-primary transition-colors underline decoration-2 underline-offset-8" href="precios.html">Precios</a>
+                <a class="text-sm font-semibold text-text-secondary hover:text-primary transition-colors" href="07-consejos-decoracion.html">Blog</a>
             </div>
 
             <div id="nav-auth-container" class="flex items-center gap-4">
-                <div id="header-credits-display" class="hidden flex items-center gap-2 px-3 py-1.5 bg-primary/10 border border-primary/20 rounded-full">
+                <!-- Credits Display (Managed by shared-auth.js) -->
+                <div id="header-credits-display" class="hidden items-center gap-2 px-3 py-1.5 bg-primary/10 border border-primary/20 rounded-full">
                     <span class="material-symbols-outlined text-primary text-sm">toll</span>
                     <span id="header-credits-count" class="text-primary text-sm font-bold">--</span>
-                    <span class="text-xs text-text-secondary">créditos</span>
+                    <span class="text-[10px] text-primary/80 font-black uppercase tracking-wider">créditos</span>
                 </div>
-                <button onclick="handleStart()" class="bg-primary hover:bg-primary/90 text-white px-6 py-2.5 rounded-xl text-sm font-bold tracking-wide transition-all hover:scale-105 shadow-lg shadow-primary/20">
-                    Sube tu Foto
-                </button>
+
+                <!-- User Dropdown (Managed by shared-auth.js) -->
+                <div id="user-logged-in" class="hidden items-center gap-3">
+                    <button onclick="window.location.href='06-perfil-usuario.html'" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                        <img id="user-avatar" src="https://ui-avatars.com/api/?name=User&background=F59E0B&color=fff" class="size-8 rounded-full border-2 border-primary/20" alt="Avatar">
+                        <span id="nav-user-name" class="hidden lg:block text-xs font-bold text-text-primary">--</span>
+                    </button>
+                    <button onclick="handleSignOut()" class="p-2 text-text-secondary hover:text-red-500 transition-colors" title="Cerrar Sesión">
+                        <span class="material-symbols-outlined text-xl">logout</span>
+                    </button>
+                </div>
+
+                <a id="user-logged-out" href="01-landing-page.html?auth=login" class="hidden bg-primary hover:bg-primary/90 text-white px-6 py-2.5 rounded-xl text-sm font-bold tracking-wide transition-all shadow-lg shadow-primary/20">
+                    Entrar
+                </a>
             </div>
         </div>
     </nav>
@@ -83,7 +97,7 @@
     <main class="pt-32 pb-24 max-w-7xl mx-auto px-6">
         <header class="text-center mb-20 max-w-3xl mx-auto">
             <h1 class="text-5xl md:text-6xl font-black text-text-primary tracking-tight leading-tight mb-6">
-                Obtén más renders. <span class="text-primary">Por menos.</span>
+                Obtén más renders. <span class="bg-gradient-to-r from-primary to-orange-600 bg-clip-text text-transparent">Por menos.</span>
             </h1>
             <p class="text-text-secondary text-lg">
                 Elige el plan que mejor se adapte a tus necesidades. Desde usuarios ocasionales hasta agencias profesionales.
@@ -92,50 +106,50 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 items-stretch mb-24">
             <!-- package_5 -->
-            <div class="bg-white rounded-[2rem] p-8 border border-border shadow-sm flex flex-col justify-between card-hover solar-glow group">
+            <div class="bg-white rounded-[2rem] p-8 border border-slate-200 shadow-sm flex flex-col justify-between card-hover solar-glow group">
                 <div>
-                    <h3 class="text-text-secondary font-bold uppercase tracking-widest text-[10px] mb-6">Inicial</h3>
+                    <h3 class="text-slate-400 font-black uppercase tracking-widest text-[10px] mb-6">Inicial</h3>
                     <div class="flex items-baseline gap-1 mb-8">
                         <span class="text-4xl font-black text-text-primary" id="price-package_5">5,00€</span>
-                        <span class="text-text-secondary text-xs">/pago único</span>
+                        <span class="text-text-secondary text-xs font-medium">/pago único</span>
                     </div>
-                    <p class="text-text-primary font-bold mb-6 flex items-center gap-2 text-sm">
-                        <span class="material-symbols-outlined text-primary text-lg">hd</span> <span id="credits-package_5">5 Renders HD</span>
+                    <p class="text-text-primary font-bold mb-6 flex items-center gap-2 text-sm bg-slate-50 p-3 rounded-xl border border-dashed border-slate-200">
+                        <span class="material-symbols-outlined text-primary text-xl">hd</span> <span id="credits-package_5">5 Renders HD</span>
                     </p>
                     <ul class="space-y-4 mb-8">
                         <li class="flex items-center gap-3 text-sm text-text-secondary">
-                            <span class="material-symbols-outlined text-primary text-base">check_circle</span> Sin marcas de agua
+                            <span class="material-symbols-outlined text-primary text-lg">check_circle</span> Sin marcas de agua
                         </li>
                         <li class="flex items-center gap-3 text-sm text-text-secondary">
-                            <span class="material-symbols-outlined text-primary text-base">check_circle</span> Entrega instantánea
+                            <span class="material-symbols-outlined text-primary text-lg">check_circle</span> Entrega instantánea
                         </li>
                     </ul>
                 </div>
-                <button onclick="window.location.href='modal-compra.html'" class="w-full py-4 border-2 border-primary/20 text-primary font-black rounded-xl hover:bg-primary/5 transition-all text-sm">
+                <button onclick="buyPlan('package_5')" class="w-full py-4 border-2 border-primary/20 text-primary font-black rounded-xl hover:bg-primary/5 transition-all text-sm">
                     Elegir Inicial
                 </button>
             </div>
 
             <!-- package_10 -->
-            <div class="bg-white rounded-[2rem] p-8 border border-border shadow-sm flex flex-col justify-between card-hover solar-glow group">
+            <div class="bg-white rounded-[2rem] p-8 border border-slate-200 shadow-sm flex flex-col justify-between card-hover solar-glow group">
                 <div>
-                    <h3 class="text-text-secondary font-bold uppercase tracking-widest text-[10px] mb-6">Estándar</h3>
+                    <h3 class="text-slate-400 font-black uppercase tracking-widest text-[10px] mb-6">Estándar</h3>
                     <div class="flex items-baseline gap-1 mb-8">
                         <span class="text-4xl font-black text-text-primary" id="price-package_10">10,00€</span>
                     </div>
-                    <p class="text-text-primary font-bold mb-6 flex items-center gap-2 text-sm">
-                        <span class="material-symbols-outlined text-primary text-lg">auto_awesome</span> <span id="credits-package_10">12 Renders HD</span>
+                    <p class="text-text-primary font-bold mb-6 flex items-center gap-2 text-sm bg-slate-50 p-3 rounded-xl border border-dashed border-slate-200">
+                        <span class="material-symbols-outlined text-primary text-xl">auto_awesome</span> <span id="credits-package_10">12 Renders HD</span>
                     </p>
                     <ul class="space-y-4 mb-8">
                         <li class="flex items-center gap-3 text-sm text-text-secondary">
-                            <span class="material-symbols-outlined text-primary text-base">check_circle</span> Soporte prioritario
+                            <span class="material-symbols-outlined text-primary text-lg">check_circle</span> Soporte prioritario
                         </li>
                         <li class="flex items-center gap-3 text-sm text-text-secondary">
-                            <span class="material-symbols-outlined text-primary text-base">check_circle</span> Historial guardado
+                            <span class="material-symbols-outlined text-primary text-lg">check_circle</span> Historial guardado
                         </li>
                     </ul>
                 </div>
-                <button onclick="window.location.href='modal-compra.html'" class="w-full py-4 border-2 border-primary/20 text-primary font-black rounded-xl hover:bg-primary/5 transition-all text-sm">
+                <button onclick="buyPlan('package_10')" class="w-full py-4 border-2 border-primary/20 text-primary font-black rounded-xl hover:bg-primary/5 transition-all text-sm">
                     Elegir Estándar
                 </button>
             </div>
@@ -146,79 +160,79 @@
                     🔥 Recomendado
                 </div>
                 <div>
-                    <h3 class="text-primary font-bold uppercase tracking-widest text-[10px] mb-6">Profesional</h3>
+                    <h3 class="text-primary font-black uppercase tracking-widest text-[10px] mb-6">Profesional</h3>
                     <div class="flex items-baseline gap-1 mb-8">
                         <span class="text-5xl font-black text-text-primary tracking-tight" id="price-package_15">15,00€</span>
                     </div>
-                    <p class="text-text-primary font-bold mb-6 flex items-center gap-2 text-base">
-                        <span class="material-symbols-outlined text-primary text-xl">workspace_premium</span> <span id="credits-package_15">20 Renders HD</span>
+                    <p class="text-text-primary font-bold mb-6 flex items-center gap-2 text-base bg-primary/5 p-3 rounded-xl border border-dashed border-primary/20">
+                        <span class="material-symbols-outlined text-primary text-2xl">workspace_premium</span> <span id="credits-package_15">20 Renders HD</span>
                     </p>
                     <ul class="space-y-4 mb-8">
-                        <li class="flex items-center gap-3 text-sm text-text-primary">
-                            <span class="material-symbols-outlined text-primary text-base">check_circle</span> Todas las funciones
+                        <li class="flex items-center gap-3 text-sm text-text-primary font-semibold">
+                            <span class="material-symbols-outlined text-primary text-lg">check_circle</span> Todas las funciones
                         </li>
-                        <li class="flex items-center gap-3 text-sm text-text-primary">
-                            <span class="material-symbols-outlined text-primary text-base">check_circle</span> Calidad 4K
+                        <li class="flex items-center gap-3 text-sm text-text-primary font-semibold">
+                            <span class="material-symbols-outlined text-primary text-lg">check_circle</span> Calidad 4K
                         </li>
                     </ul>
                 </div>
-                <button onclick="window.location.href='modal-compra.html'" class="w-full py-4 bg-gradient-to-r from-primary to-orange-500 text-white font-black text-sm rounded-xl hover:opacity-90 shadow-lg shadow-primary/30 transition-all hover:scale-[1.02]">
+                <button onclick="buyPlan('package_15')" class="w-full py-4 bg-gradient-to-r from-primary to-orange-500 text-white font-black text-sm rounded-xl hover:opacity-90 shadow-lg shadow-primary/30 transition-all hover:scale-[1.02]">
                     ¡Empezar Ya!
                 </button>
             </div>
 
             <!-- package_25 -->
-            <div class="bg-white rounded-[2rem] p-8 border border-border shadow-sm flex flex-col justify-between card-hover solar-glow group">
+            <div class="bg-white rounded-[2rem] p-8 border border-slate-200 shadow-sm flex flex-col justify-between card-hover solar-glow group">
                 <div>
-                    <h3 class="text-text-secondary font-bold uppercase tracking-widest text-[10px] mb-6">Premium</h3>
+                    <h3 class="text-slate-400 font-black uppercase tracking-widest text-[10px] mb-6">Premium</h3>
                     <div class="flex items-baseline gap-1 mb-8">
                         <span class="text-4xl font-black text-text-primary" id="price-package_25">25,00€</span>
                     </div>
-                    <p class="text-text-primary font-bold mb-6 flex items-center gap-2 text-sm">
-                        <span class="material-symbols-outlined text-primary text-lg">corporate_fare</span> <span id="credits-package_25">40 Renders HD</span>
+                    <p class="text-text-primary font-bold mb-6 flex items-center gap-2 text-sm bg-slate-50 p-3 rounded-xl border border-dashed border-slate-200">
+                        <span class="material-symbols-outlined text-primary text-xl">corporate_fare</span> <span id="credits-package_25">40 Renders HD</span>
                     </p>
                     <ul class="space-y-4 mb-8">
                         <li class="flex items-center gap-3 text-sm text-text-secondary">
-                            <span class="material-symbols-outlined text-primary text-base">check_circle</span> Uso comercial
+                            <span class="material-symbols-outlined text-primary text-lg">check_circle</span> Uso comercial
                         </li>
                         <li class="flex items-center gap-3 text-sm text-text-secondary">
-                            <span class="material-symbols-outlined text-primary text-base">check_circle</span> API Access
+                            <span class="material-symbols-outlined text-primary text-lg">check_circle</span> API Access
                         </li>
                     </ul>
                 </div>
-                <button onclick="window.location.href='modal-compra.html'" class="w-full py-4 bg-text-primary text-white font-black rounded-xl hover:bg-black transition-all text-sm">
+                <button onclick="buyPlan('package_25')" class="w-full py-4 bg-text-primary text-white font-black rounded-xl hover:bg-black transition-all text-sm">
                     Elegir Premium
                 </button>
             </div>
         </div>
 
         <!-- Security Section -->
-        <section class="mt-32 pt-16 border-t border-border">
-            <h4 class="text-text-primary text-xl font-bold text-center mb-12">Pagos Seguros Garantizados</h4>
+        <section class="mt-32 pt-16 border-t border-slate-100">
+            <h4 class="text-text-primary text-xl font-black text-center mb-12 uppercase tracking-wide">Pagos Seguros Garantizados</h4>
             <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
-                <div class="bg-surface rounded-2xl p-6 flex flex-col items-center gap-4 border border-border hover:border-primary/30 transition-all">
-                    <span class="material-symbols-outlined text-text-secondary text-4xl">credit_card</span>
-                    <p class="text-xs font-bold text-text-secondary uppercase tracking-widest">Visa/MC</p>
+                <div class="bg-surface rounded-2xl p-6 flex flex-col items-center justify-center gap-4 border border-border hover:border-primary/30 transition-all group">
+                    <span class="material-symbols-outlined text-text-secondary group-hover:text-primary text-4xl transition-colors">credit_card</span>
+                    <p class="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em]">Visa/MC</p>
                 </div>
-                <div class="bg-surface rounded-2xl p-6 flex flex-col items-center gap-4 border border-border hover:border-primary/30 transition-all">
-                    <span class="material-symbols-outlined text-text-secondary text-4xl">contactless</span>
-                    <p class="text-xs font-bold text-text-secondary uppercase tracking-widest">Apple Pay</p>
+                <div class="bg-surface rounded-2xl p-6 flex flex-col items-center justify-center gap-4 border border-border hover:border-primary/30 transition-all group">
+                    <span class="material-symbols-outlined text-text-secondary group-hover:text-primary text-4xl transition-colors">contactless</span>
+                    <p class="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em]">Apple Pay</p>
                 </div>
-                <div class="bg-surface rounded-2xl p-6 flex flex-col items-center gap-4 border border-border hover:border-primary/30 transition-all">
-                    <span class="material-symbols-outlined text-text-secondary text-4xl">wallet</span>
-                    <p class="text-xs font-bold text-text-secondary uppercase tracking-widest">Google Pay</p>
+                <div class="bg-surface rounded-2xl p-6 flex flex-col items-center justify-center gap-4 border border-border hover:border-primary/30 transition-all group">
+                    <span class="material-symbols-outlined text-text-secondary group-hover:text-primary text-4xl transition-colors">wallet</span>
+                    <p class="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em]">Google Pay</p>
                 </div>
-                <div class="bg-surface rounded-2xl p-6 flex flex-col items-center gap-4 border border-border hover:border-primary/30 transition-all">
-                    <span class="material-symbols-outlined text-text-secondary text-4xl">security</span>
-                    <p class="text-xs font-bold text-text-secondary uppercase tracking-widest">SSL Secure</p>
+                <div class="bg-surface rounded-2xl p-6 flex flex-col items-center justify-center gap-4 border border-border hover:border-primary/30 transition-all group">
+                    <span class="material-symbols-outlined text-text-secondary group-hover:text-primary text-4xl transition-colors">security</span>
+                    <p class="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em]">SSL Secure</p>
                 </div>
-                <div class="bg-surface rounded-2xl p-6 flex flex-col items-center gap-4 border border-border hover:border-primary/30 transition-all">
-                    <span class="material-symbols-outlined text-text-secondary text-4xl">lock</span>
-                    <p class="text-xs font-bold text-text-secondary uppercase tracking-widest">Stripped Enabled</p>
+                <div class="bg-surface rounded-2xl p-6 flex flex-col items-center justify-center gap-4 border border-border hover:border-primary/30 transition-all group">
+                    <span class="material-symbols-outlined text-text-secondary group-hover:text-primary text-4xl transition-colors">lock</span>
+                    <p class="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em]">Stripe</p>
                 </div>
-                <div class="bg-surface rounded-2xl p-6 flex flex-col items-center gap-4 border border-border hover:border-primary/30 transition-all">
-                    <span class="material-symbols-outlined text-text-secondary text-4xl">verified_user</span>
-                    <p class="text-xs font-bold text-text-secondary uppercase tracking-widest">3D Secure</p>
+                <div class="bg-surface rounded-2xl p-6 flex flex-col items-center justify-center gap-4 border border-border hover:border-primary/30 transition-all group">
+                    <span class="material-symbols-outlined text-text-secondary group-hover:text-primary text-4xl transition-colors">verified_user</span>
+                    <p class="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em]">3D Secure</p>
                 </div>
             </div>
         </section>
@@ -229,36 +243,36 @@
             <div class="flex flex-col md:flex-row justify-between items-start gap-20">
                 <div class="max-w-xs">
                     <div class="flex items-center gap-3 mb-6">
-                        <div class="size-10 bg-primary rounded-xl flex items-center justify-center text-white">
+                        <div class="size-10 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/20">
                             <span class="material-symbols-outlined font-bold">deployed_code</span>
                         </div>
                         <h2 class="text-2xl font-black tracking-tight">RenderRoom</h2>
                     </div>
-                    <p class="text-text-secondary leading-relaxed mb-8">
+                    <p class="text-text-secondary leading-relaxed mb-8 font-medium">
                         La herramienta de IA líder para propietarios y decoradores que buscan visualizaciones rápidas y realistas.
                     </p>
                 </div>
                 
                 <div class="grid grid-cols-2 sm:grid-cols-3 gap-16 flex-1">
                     <div>
-                        <h5 class="font-bold text-sm mb-6 uppercase tracking-widest text-text-secondary">App</h5>
-                        <ul class="space-y-4 text-sm font-medium">
+                        <h5 class="font-black text-xs mb-6 uppercase tracking-widest text-slate-400">App</h5>
+                        <ul class="space-y-4 text-sm font-bold">
                             <li><a href="02-upload-wizard.html" class="hover:text-primary transition-colors">Nuevo Render</a></li>
                             <li><a href="03-dashboard.html" class="hover:text-primary transition-colors">Mis Proyectos</a></li>
-                            <li><a href="precios.html" class="hover:text-primary transition-colors">Créditos</a></li>
+                            <li><a href="precios.html" class="text-primary">Créditos</a></li>
                         </ul>
                     </div>
                     <div>
-                        <h5 class="font-bold text-sm mb-6 uppercase tracking-widest text-text-secondary">Compañía</h5>
-                        <ul class="space-y-4 text-sm font-medium">
+                        <h5 class="font-black text-xs mb-6 uppercase tracking-widest text-slate-400">Compañía</h5>
+                        <ul class="space-y-4 text-sm font-bold">
                             <li><a href="07-consejos-decoracion.html" class="hover:text-primary transition-colors">Blog</a></li>
                             <li><a href="#" class="hover:text-primary transition-colors">Sobre Nosotros</a></li>
                             <li><a href="#" class="hover:text-primary transition-colors">Soporte</a></li>
                         </ul>
                     </div>
                     <div class="col-span-2 sm:col-span-1">
-                        <h5 class="font-bold text-sm mb-6 uppercase tracking-widest text-text-secondary">Legal</h5>
-                        <ul class="space-y-4 text-sm font-medium">
+                        <h5 class="font-black text-xs mb-6 uppercase tracking-widest text-slate-400">Legal</h5>
+                        <ul class="space-y-4 text-sm font-bold">
                             <li><a href="privacidad.html" class="hover:text-primary transition-colors">Privacidad</a></li>
                             <li><a href="terminos.html" class="hover:text-primary transition-colors">Términos</a></li>
                         </ul>
@@ -266,53 +280,27 @@
                 </div>
             </div>
             
-            <div class="mt-20 pt-8 border-t border-border flex flex-col sm:flex-row justify-between items-center gap-6">
-                <p class="text-xs text-text-secondary font-bold uppercase tracking-[0.2em]">© 2024 RenderRoom AI. Made with Love & Power.</p>
+            <div class="mt-20 pt-8 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-6">
+                <p class="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">© 2024 RenderRoom AI. Made with Love & Power.</p>
                 <div class="flex gap-6">
-                    <a href="#" class="text-text-secondary hover:text-primary"><span class="material-symbols-outlined">brand_awareness</span></a>
-                    <a href="#" class="text-text-secondary hover:text-primary"><span class="material-symbols-outlined">alternate_email</span></a>
+                    <a href="#" class="text-slate-400 hover:text-primary transition-colors"><span class="material-symbols-outlined">brand_awareness</span></a>
+                    <a href="#" class="text-slate-400 hover:text-primary transition-colors"><span class="material-symbols-outlined">alternate_email</span></a>
                 </div>
             </div>
         </div>
     </footer>
 
     <script>
-        // Firebase Configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyDj99qdmDt4GiVeRkvCSfTOSDw3uqD-_Ew",
-            authDomain: "gen-lang-client-0426824151.firebaseapp.com",
-            projectId: "gen-lang-client-0426824151",
-            storageBucket: "gen-lang-client-0426824151.firebasestorage.app",
-            messagingSenderId: "124806819551",
-            appId: "1:124806819551:web:1c90d1154b458fa064036a"
-        };
-
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                // Real-time listener for credits
-                const db = firebase.firestore();
-                db.collection('users').doc(user.uid).onSnapshot(doc => {
-                    if (doc.exists) {
-                        const credits = doc.data().credits || 0;
-                        const headerDisplay = document.getElementById('header-credits-display');
-                        const headerCount = document.getElementById('header-credits-count');
-                        if (headerDisplay) headerDisplay.classList.remove('hidden');
-                        if (headerCount) headerCount.textContent = credits;
-                    }
-                }, err => console.error("Snapshot error:", err));
-            } else {
-                document.getElementById('header-credits-display')?.classList.add('hidden');
-            }
-            document.documentElement.classList.add('auth-checked');
-            loadPricing();
+        // Use initialized event from shared-auth.js if needed, or just run
+        document.addEventListener('DOMContentLoaded', () => {
+             loadPricing();
+             document.documentElement.classList.add('auth-initialized');
         });
 
         async function loadPricing() {
             try {
                 const res = await fetch('/api/admin/pricing');
+                if (!res.ok) throw new Error('Failed to fetch pricing');
                 const data = await res.json();
                 
                 if (data.packages) {
@@ -324,16 +312,18 @@
                     });
                 }
             } catch (e) {
-                console.error("Error loading pricing:", e);
+                console.warn("Pricing failed to load, using fallbacks:", e);
+                // Fallbacks are already in HTML
             }
         }
 
-        function handleStart() {
+        function buyPlan(planId) {
             const user = auth.currentUser;
             if (user) {
-                window.location.href = '02-upload-wizard.html';
+                // Redirect to specialized payment modal or direct checkout
+                window.location.href = `modal-compra.html?plan=${planId}`;
             } else {
-                window.location.href = '01-landing-page.html?auth=register';
+                window.location.href = '01-landing-page.html?auth=login&redirect=precios.html';
             }
         }
     </script>

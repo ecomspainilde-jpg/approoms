@@ -1,258 +1,291 @@
 <!DOCTYPE html>
-
-<html class="dark" lang="es"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-<script id="tailwind-config">
+<html lang="es">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Confirmar Pago Bizum — RenderRoom</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    
+    <script id="tailwind-config">
         tailwind.config = {
-            darkMode: "class",
             theme: {
                 extend: {
                     colors: {
-                        "primary": "#e49f0c",
-                        "background-light": "#f8f7f5",
-                        "background-dark": "#0D1117",
-                        "bizum": "#00aaad",
+                        "primary": "#F59E0B",
+                        "background": "#FFFFFF",
+                        "surface": "#F8FAFC",
+                        "border": "#F1F5F9",
+                        "text-primary": "#1E293B",
+                        "text-secondary": "#475569",
+                        "bizum": "#00aaad"
                     },
                     fontFamily: {
                         "display": ["Inter", "sans-serif"]
                     },
-                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "2xl": "2rem",
+                        "3xl": "2.5rem",
+                        "full": "9999px"
+                    },
                 },
             },
         }
     </script>
-    <style>
-        .glass {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .glass-header {
+                background: rgba(255, 255, 255, 0.8);
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+            }
+            .solar-glow {
+                box-shadow: 0 10px 40px rgba(245, 158, 11, 0.08);
+            }
+            .premium-card {
+                @apply bg-white border border-border transition-all duration-300 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5;
+            }
         }
-        /* Prevent FOUC: hide body by default */
         body { opacity: 0; transition: opacity 0.3s ease; }
         .auth-checked body { opacity: 1; }
     </style>
 </head>
-<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
-<!-- Top Navigation -->
-<nav class="sticky top-0 z-50 glass border-b border-white/10 px-6 py-4">
-<div class="max-w-7xl mx-auto flex items-center justify-between">
-<div class="flex items-center gap-3">
-<div class="bg-primary p-2 rounded-lg">
-<span class="material-symbols-outlined text-background-dark font-bold">layers</span>
-</div>
-<h1 class="text-xl font-bold tracking-tight text-primary">RenderRoom</h1>
-</div>
-<div class="flex items-center gap-6">
-<a class="text-sm font-medium hover:text-primary transition-colors flex items-center gap-2" href="02-upload-wizard.html">
-<span class="material-symbols-outlined text-sm">arrow_back</span>
-                    Volver al wizard
+<body class="bg-background font-display text-text-primary antialiased min-h-screen">
+    <!-- Navigation (Solar Light) -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200/60">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <a href="01-landing-page.html" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
+                <div class="size-10 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-amber-500/20">
+                    <span class="material-symbols-outlined font-bold">wb_sunny</span>
+                </div>
+                <h2 class="text-2xl font-black tracking-tight text-slate-900">Render<span class="text-amber-500">Room</span></h2>
+            </a>
+            
+            <div id="nav-auth-container" class="flex items-center gap-4">
+                <div id="header-credits-display" class="hidden items-center gap-2 px-3 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-full">
+                    <span class="material-symbols-outlined text-amber-500 text-sm">toll</span>
+                    <span id="header-credits-count" class="text-amber-500 text-sm font-bold">--</span>
+                    <span class="text-[10px] text-amber-500/80 font-black uppercase tracking-wider">créditos</span>
+                </div>
+
+                <div id="user-logged-in" class="hidden items-center gap-3">
+                    <button onclick="window.location.href='06-perfil-usuario.html'" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                        <img id="user-avatar" src="https://ui-avatars.com/api/?name=User&background=F59E0B&color=fff" class="size-8 rounded-full border-2 border-amber-500/20" alt="Avatar">
+                        <span id="nav-user-name" class="hidden lg:block text-xs font-bold text-slate-800">--</span>
+                    </button>
+                    <button onclick="handleSignOut()" class="p-2 text-slate-400 hover:text-red-500 transition-colors" title="Cerrar Sesión">
+                        <span class="material-symbols-outlined text-xl">logout</span>
+                    </button>
+                </div>
+
+                <a id="user-logged-out" href="01-landing-page.html?auth=login" class="hidden bg-amber-500 hover:bg-amber-600 text-white px-6 py-2.5 rounded-xl text-sm font-bold tracking-wide transition-all shadow-lg shadow-amber-500/20">
+                    Entrar
                 </a>
-<a href="03-dashboard.html" class="h-8 w-8 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center">
-<span class="material-symbols-outlined text-primary text-sm">person</span>
-</a>
-</div>
-</div>
-</nav>
-<main class="max-w-6xl mx-auto px-6 py-12">
-<!-- Progress Bar -->
-<div class="mb-12">
-<div class="flex justify-between mb-4">
-<div class="flex items-center gap-2 text-emerald-500">
-<span class="material-symbols-outlined text-sm bg-emerald-500/10 rounded-full p-1">check</span>
-<span class="text-xs font-semibold uppercase tracking-wider">Paso 1: Diseño</span>
-</div>
-<div class="flex items-center gap-2 text-emerald-500">
-<span class="material-symbols-outlined text-sm bg-emerald-500/10 rounded-full p-1">check</span>
-<span class="text-xs font-semibold uppercase tracking-wider">Paso 2: Detalles</span>
-</div>
-<div class="flex items-center gap-2 text-primary">
-<span class="text-xs font-bold bg-primary text-background-dark rounded-full w-6 h-6 flex items-center justify-center">3</span>
-<span class="text-xs font-bold uppercase tracking-wider">Paso 3: Confirma y Paga</span>
-</div>
-</div>
-<div class="w-full h-1.5 bg-white/5 rounded-full overflow-hidden flex">
-<div class="h-full bg-emerald-500 w-1/3"></div>
-<div class="h-full bg-emerald-500 w-1/3 border-l border-background-dark"></div>
-<div class="h-full bg-primary w-1/3 border-l border-background-dark"></div>
-</div>
-</div>
-<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-<!-- Left Column: Order Summary -->
-<div class="lg:col-span-5 space-y-6">
-<div class="bg-white/5 border border-white/10 rounded-xl p-6">
-<div class="flex items-center justify-between mb-6">
-<h2 class="text-lg font-bold">Resumen del pedido</h2>
-<span class="text-xs font-mono text-slate-400">#161B22</span>
-</div>
-<div class="flex gap-4 mb-8">
-<div class="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 border border-white/10">
-<img class="w-full h-full object-cover" data-alt="Modern minimalist living room interior 3D render" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBeawNLGI9JROZf42Zcup6-H6T_K88SvUaLlQ4wI3UpPNiNI4HIeGj3i3XNi3I0qXeVxfXz2jcd2YhykYRqA07q2ets8OeYn6o5EP8AvFNOWWi2nipVcUOiiFJpngkXg_fQkLE2rxUofIgpJhZcOm3XSTxVfJcZGg8XqrEHyDdo3zXUrfxvDAB_yJVO_Y4WuDjDTqB4IuTleEcVD4D_gIFkb8K9dmosN3Z_uCRwW6T8TY4aXr9McUsyolAhmRqkvrFiL21EStuu33UV"/>
-</div>
-<div class="flex flex-col justify-center">
-<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary/10 text-primary mb-2 w-fit">
-                                Estilo Moderno
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto px-6 pt-32 pb-24">
+        <!-- Breadcrumbs / Steps -->
+        <div class="mb-12 flex flex-wrap items-center gap-4 text-[10px] font-black uppercase tracking-widest text-text-secondary/40">
+            <span class="flex items-center gap-2 text-emerald-500"><span class="material-symbols-outlined text-xs">check_circle</span> Diseño</span>
+            <span class="w-4 h-px bg-border"></span>
+            <span class="flex items-center gap-2 text-emerald-500"><span class="material-symbols-outlined text-xs">check_circle</span> Detalles</span>
+            <span class="w-4 h-px bg-border"></span>
+            <span class="flex items-center gap-2 text-primary"><span class="material-symbols-outlined text-xs">payments</span> Pago Seguro</span>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+            <!-- Summary Column -->
+            <div class="lg:col-span-5 space-y-8">
+                <div class="premium-card rounded-3xl p-8 space-y-6">
+                    <h2 class="text-lg font-black tracking-tight flex items-center justify-between">
+                        Resumen del pedido
+                        <span class="text-[10px] text-text-secondary font-mono">#RR-2024</span>
+                    </h2>
+                    
+                    <div class="flex gap-4 p-4 bg-surface rounded-2xl border border-border">
+                        <div class="size-20 bg-white rounded-xl overflow-hidden border border-border shrink-0">
+                            <img id="item-preview" class="w-full h-full object-cover" src="img/style-modern.jpg" alt="Preview"/>
+                        </div>
+                        <div class="flex flex-col justify-center">
+                            <span id="quality-badge" class="inline-flex px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest bg-primary/10 text-primary mb-1 w-fit">
+                                Calidad Normal
                             </span>
-<p class="font-semibold">Renderizado IA Premium</p>
-<p class="text-xs text-slate-400">Entrega instantánea por email</p>
-</div>
-</div>
-<div class="space-y-3 border-t border-white/10 pt-6">
-<div class="flex justify-between text-sm">
-<span class="text-slate-400">Subtotal</span>
-<span id="subtotal-display">2,07€</span>
-</div>
-<div class="flex justify-between text-sm">
-<span class="text-slate-400">IVA (21%)</span>
-<span id="iva-display">0,43€</span>
-</div>
-<div class="flex justify-between items-end pt-4">
-<span class="font-bold">Total a pagar</span>
-<span class="text-3xl font-bold text-primary" id="total-display">2,50€</span>
-</div>
-</div>
-</div>
-<!-- Trust Badges -->
-<div class="grid grid-cols-2 gap-4">
-<div class="glass p-3 rounded-lg flex items-center gap-3">
-<span class="material-symbols-outlined text-emerald-500">lock</span>
-<span class="text-[10px] leading-tight font-medium text-slate-300 uppercase tracking-wider">Encriptación SSL 256-bit</span>
-</div>
-<div class="glass p-3 rounded-lg flex items-center gap-3">
-<span class="material-symbols-outlined text-primary">verified</span>
-<span class="text-[10px] leading-tight font-medium text-slate-300 uppercase tracking-wider">Satisfacción garantizada</span>
-</div>
-</div>
-</div>
-<!-- Right Column: Payment Method -->
-<div class="lg:col-span-7">
-<div class="bg-white/5 border-2 border-primary/50 rounded-xl p-8 relative overflow-hidden ring-4 ring-primary/5">
-<div class="absolute top-0 right-0 p-3 bg-primary text-background-dark text-[10px] font-bold uppercase tracking-widest rounded-bl-lg">
+                            <p class="font-black text-sm">Renderizado IA Premium</p>
+                            <p class="text-xs text-text-secondary">Entrega instantánea</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4 pt-4 border-t border-border">
+                        <div class="flex justify-between text-xs font-bold">
+                            <span class="text-text-secondary">Subtotal</span>
+                            <span id="subtotal-display">0,00€</span>
+                        </div>
+                        <div class="flex justify-between text-xs font-bold">
+                            <span class="text-text-secondary">IVA (21%)</span>
+                            <span id="iva-display">0,00€</span>
+                        </div>
+                        <div class="flex justify-between items-end pt-4 border-t border-dashed border-border">
+                            <span class="text-sm font-black">Total a pagar</span>
+                            <span class="text-4xl font-black text-primary" id="total-display">0,00€</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Trust Badges -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="bg-emerald-50/50 border border-emerald-100 p-4 rounded-2xl flex items-center gap-3">
+                        <span class="material-symbols-outlined text-emerald-500">lock</span>
+                        <div class="flex flex-col">
+                            <span class="text-[9px] font-black text-emerald-600 uppercase tracking-widest">Seguridad SSL</span>
+                            <span class="text-[10px] font-bold text-emerald-800/60">Pago protegido</span>
+                        </div>
+                    </div>
+                    <div class="bg-primary/5 border border-primary/10 p-4 rounded-2xl flex items-center gap-3">
+                        <span class="material-symbols-outlined text-primary">verified</span>
+                        <div class="flex flex-col">
+                            <span class="text-[9px] font-black text-primary uppercase tracking-widest">Garantía</span>
+                            <span class="text-[10px] font-bold text-primary/60">Sello de Calidad</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Column -->
+            <div class="lg:col-span-7">
+                <div class="premium-card rounded-[2.5rem] p-10 relative overflow-hidden ring-4 ring-primary/5">
+                    <div class="absolute top-0 right-0 px-4 py-2 bg-primary text-white text-[9px] font-black uppercase tracking-[0.2em] rounded-bl-2xl">
                         Recomendado
                     </div>
-<div class="flex items-center gap-3 mb-8">
-<div class="h-10 w-24 bg-gradient-to-r from-bizum to-bizum/80 rounded flex items-center justify-center">
-<span class="text-white font-black italic tracking-tighter text-xl">bizum</span>
-</div>
-<h3 class="text-xl font-bold">Pagar con Bizum</h3>
-</div>
-<div class="space-y-6">
-<div>
-<label class="block text-sm font-medium text-slate-300 mb-2">Número de teléfono</label>
-<div class="relative">
-<span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">+34</span>
-<input class="w-full bg-background-dark/50 border border-white/20 rounded-lg py-4 pl-14 pr-4 text-lg focus:ring-primary focus:border-primary transition-all" placeholder="600 000 000" type="tel"/>
-</div>
-<p class="mt-2 text-xs text-slate-500 flex items-center gap-1">
-<span class="material-symbols-outlined text-sm">info</span>
-                                Recibirás una notificación en tu app bancaria para autorizar el pago.
+
+                    <div class="flex items-center gap-4 mb-10">
+                        <div class="h-10 w-24 bg-bizum rounded-xl flex items-center justify-center shrink-0">
+                            <span class="text-white font-black italic tracking-tighter text-xl">bizum</span>
+                        </div>
+                        <h3 class="text-2xl font-black tracking-tight">Pagar con Bizum</h3>
+                    </div>
+
+                    <form id="bizum-form" class="space-y-8" onsubmit="event.preventDefault(); window.location.href='05-gracias.html';">
+                        <div class="space-y-3">
+                            <label class="block text-[10px] font-black text-text-secondary uppercase tracking-widest">Número de teléfono móvil</label>
+                            <div class="relative">
+                                <span class="absolute left-5 top-1/2 -translate-y-1/2 text-text-secondary font-black">+34</span>
+                                <input id="phone-input" required class="w-full bg-surface border-2 border-border rounded-2xl py-5 pl-16 pr-6 text-xl font-black focus:ring-primary focus:border-primary transition-all placeholder:text-text-secondary/20" placeholder="600 000 000" type="tel"/>
+                            </div>
+                            <p class="text-[10px] text-text-secondary/60 flex items-center gap-2 font-bold px-1">
+                                <span class="material-symbols-outlined text-sm">info</span>
+                                Recibirás una notificación en tu app bancaria para autorizar.
                             </p>
-</div>
-<a href="05-gracias.html" class="w-full block bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary text-background-dark font-bold py-5 rounded-xl flex items-center justify-center gap-3 shadow-lg shadow-primary/20 transition-all active:scale-[0.98]">
-<span class="material-symbols-outlined font-bold">lock</span>
-                            Pagar <span id="pay-btn-price">2,50</span>€ con Bizum
-                        </a>
-</div>
-<!-- Other methods -->
-<div class="mt-10 space-y-3">
-<p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4 text-center">Otras formas de pago</p>
-<div class="group flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-lg cursor-pointer hover:bg-white/10 transition-colors">
-<div class="flex items-center gap-3">
-<span class="material-symbols-outlined text-slate-400 group-hover:text-primary">credit_card</span>
-<span class="text-sm font-medium">Tarjeta de crédito o débito</span>
-</div>
-<span class="material-symbols-outlined text-slate-500 text-sm">chevron_right</span>
-</div>
-<div class="group flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-lg cursor-pointer hover:bg-white/10 transition-colors">
-<div class="flex items-center gap-3">
-<span class="material-symbols-outlined text-slate-400 group-hover:text-primary">account_balance_wallet</span>
-<span class="text-sm font-medium">PayPal</span>
-</div>
-<span class="material-symbols-outlined text-slate-500 text-sm">chevron_right</span>
-</div>
-<div class="group flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-lg cursor-pointer hover:bg-white/10 transition-colors">
-<div class="flex items-center gap-3">
-<span class="material-symbols-outlined text-slate-400 group-hover:text-primary">payments</span>
-<span class="text-sm font-medium">Google Pay</span>
-</div>
-<span class="material-symbols-outlined text-slate-500 text-sm">chevron_right</span>
-</div>
-</div>
-</div>
-<p class="mt-6 text-center text-xs text-slate-500">
-                    Al confirmar el pago, aceptamos nuestros <a class="underline" href="terminos.html">Términos de Servicio</a> y <a class="underline" href="privacidad.html">Política de Privacidad</a>.
+                        </div>
+
+                        <button type="submit" class="w-full bg-primary hover:bg-primary/90 text-white font-black py-6 rounded-2xl flex items-center justify-center gap-4 shadow-xl shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98] text-lg">
+                            <span class="material-symbols-outlined font-bold">lock_open</span>
+                            Confirmar Pago <span id="pay-btn-price">0,00</span>€
+                        </button>
+                    </form>
+
+                    <!-- Other methods -->
+                    <div class="mt-12 space-y-4">
+                        <p class="text-[9px] font-black text-text-secondary/30 uppercase tracking-[0.3em] text-center mb-6">Otros métodos de pago</p>
+                        <div class="group flex items-center justify-between p-5 bg-surface border border-border rounded-2xl cursor-pointer hover:bg-white hover:shadow-md transition-all">
+                            <div class="flex items-center gap-4">
+                                <div class="size-10 bg-white rounded-xl flex items-center justify-center border border-border group-hover:border-primary/30 transition-colors">
+                                    <span class="material-symbols-outlined text-text-secondary group-hover:text-primary">credit_card</span>
+                                </div>
+                                <span class="text-sm font-black text-text-secondary group-hover:text-text-primary transition-colors">Tarjeta Bancaria</span>
+                            </div>
+                            <span class="material-symbols-outlined text-text-secondary/20 group-hover:text-primary transition-all">chevron_right</span>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="mt-8 text-center text-[10px] text-text-secondary/40 font-bold max-w-sm mx-auto leading-relaxed">
+                    Al confirmar, aceptas nuestros <a class="text-text-secondary hover:text-primary underline" href="terminos.html">Términos</a> y la <a class="text-text-secondary hover:text-primary underline" href="privacidad.html">Privacidad</a>.
                 </p>
-</div>
-</div>
-</main>
-<!-- Security Footer -->
-<footer class="max-w-6xl mx-auto px-6 py-8 border-t border-white/5 flex flex-col items-center gap-4">
-<div class="flex items-center gap-8 opacity-40 grayscale">
-<span class="text-sm font-bold tracking-widest uppercase">Visa</span>
-<span class="text-sm font-bold tracking-widest uppercase">Mastercard</span>
-<span class="text-sm font-bold tracking-widest uppercase">Stripe Secure</span>
-</div>
-<p class="text-[10px] text-slate-600 uppercase tracking-[0.2em]">RenderRoom AI © 2024 • Pagos seguros procesados por Stripe</p>
-</footer>
-<script>
-    // ── Firebase Config ─────────────────────────────
-    const firebaseConfig = {
-      projectId: "gen-lang-client-0426824151",
-      appId: "1:124806819551:web:1c90d1154b458fa064036a",
-      storageBucket: "gen-lang-client-0426824151.firebasestorage.app",
-      apiKey: "AIzaSyDj99qdmDt4GiVeRkvCSfTOSDw3uqD-_Ew",
-      authDomain: "gen-lang-client-0426824151.firebaseapp.com",
-      messagingSenderId: "124806819551"
-    };
-    firebase.initializeApp(firebaseConfig);
+            </div>
+        </div>
+    </main>
 
-    // Auth Logic with FOUC prevention
-    firebase.auth().onAuthStateChanged((u) => {
-      if (!u) {
-        console.log("No user authenticated. Redirecting to landing page...");
-        window.location.replace('01-landing-page.html');
-      } else {
-        console.log("User authenticated:", u.email);
-        document.documentElement.classList.add('auth-checked');
-        loadData();
-      }
-    });
+    <!-- Footer (Solar Light) -->
+    <footer class="bg-slate-50 border-t border-slate-200 py-20 mt-20">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-12">
+                <div class="flex items-center gap-3">
+                    <div class="size-10 bg-amber-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-amber-500/20">
+                        <span class="material-symbols-outlined font-bold">wb_sunny</span>
+                    </div>
+                    <h2 class="text-2xl font-black tracking-tight text-slate-900">RenderRoom</h2>
+                </div>
+                
+                <div class="flex flex-wrap justify-center gap-8 text-sm font-bold text-slate-500">
+                    <a href="01-landing-page.html" class="hover:text-amber-500 transition-colors">Inicio</a>
+                    <a href="03-dashboard.html" class="hover:text-amber-500 transition-colors">Mi Panel</a>
+                    <a href="precios.html" class="hover:text-amber-500 transition-colors">Precios</a>
+                    <a href="privacidad.html" class="hover:text-amber-500 transition-colors">Privacidad</a>
+                    <a href="terminos.html" class="hover:text-amber-500 transition-colors">Términos</a>
+                </div>
+                
+                <p class="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">© 2024 RenderRoom AI Studio</p>
+            </div>
+        </div>
+    </footer>
 
-    async function loadData() {
-        try {
-            const res = await fetch('/api/admin/pricing');
-            const pricing = await res.json();
-            
-            // Get quality from URL if present
-            const urlParams = new URLSearchParams(window.location.search);
-            const quality = urlParams.get('quality') || 'normal';
-            
-            let price = 2.50;
-            if (quality === 'high' && pricing.render_high) {
-                price = pricing.render_high.price;
-            } else if (pricing.render_normal) {
-                price = pricing.render_normal.price;
+    <!-- Firebase SDK (Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Shared Logic -->
+    <script src="js/firebase-config.js"></script>
+    <script src="js/shared-auth.js"></script>
+
+    <script>
+        // Auth Check for redirect
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                document.documentElement.classList.add('auth-checked');
+                loadPricing();
             }
-            
-            const subtotal = price / 1.21;
-            const iva = price - subtotal;
-            
-            document.getElementById('subtotal-display').textContent = subtotal.toFixed(2).replace('.', ',') + '€';
-            document.getElementById('iva-display').textContent = iva.toFixed(2).replace('.', ',') + '€';
-            document.getElementById('total-display').textContent = price.toFixed(2).replace('.', ',') + '€';
-            document.getElementById('pay-btn-price').textContent = price.toFixed(2).replace('.', ',');
-            
-        } catch (e) {
-            console.error("Error loading pricing data:", e);
+        });
+
+        async function loadPricing() {
+            try {
+                const res = await fetch('/api/admin/pricing');
+                if (!res.ok) throw new Error('API Error');
+                const pricing = await res.json();
+                
+                const urlParams = new URLSearchParams(window.location.search);
+                const quality = urlParams.get('quality') || 'normal';
+                
+                let price = 2.50;
+                if (quality === 'high' && pricing.render_high) {
+                    price = pricing.render_high.price;
+                    document.getElementById('quality-badge').textContent = 'Calidad Alta';
+                } else if (pricing.render_normal) {
+                    price = pricing.render_normal.price;
+                }
+                
+                const subtotal = price / 1.21;
+                const iva = price - subtotal;
+                
+                document.getElementById('subtotal-display').textContent = subtotal.toFixed(2).replace('.', ',') + '€';
+                document.getElementById('iva-display').textContent = iva.toFixed(2).replace('.', ',') + '€';
+                const formattedPrice = price.toFixed(2).replace('.', ',');
+                document.getElementById('total-display').textContent = formattedPrice + '€';
+                document.getElementById('pay-btn-price').textContent = formattedPrice;
+                
+            } catch (e) {
+                console.error("Pricing error:", e);
+                // Fallback defaults already in HTML if needed, but better to show error or default
+                document.getElementById('total-display').textContent = '2,50€';
+            }
         }
-    }
-</script>
-</body></html>
+    </script>
+</body>
+</html>

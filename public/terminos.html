@@ -1,138 +1,196 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Términos de Uso - RenderRoom</title>
-  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-    <script id="tailwind-config">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Términos de Uso - RenderRoom</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Material Symbols -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    
+    <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    colors: {
-                        "primary": "#F59E0B",
-                        "background": "#FFFFFF",
-                        "surface": "#F8FAFC",
-                        "border": "#F1F5F9",
-                        "text-primary": "#1E293B",
-                        "text-secondary": "#475569"
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
                     },
-                    fontFamily: { "display": ["Inter", "sans-serif"] },
-                },
-            },
+                    colors: {
+                        amber: {
+                            50: '#fffbeb', 100: '#fef3c7', 200: '#fde68a', 300: '#fcd34d',
+                            400: '#fbbf24', 500: '#f59e0b', 600: '#d97706', 700: '#b45309',
+                            800: '#92400e', 900: '#78350f', 950: '#451a03',
+                        }
+                    }
+                }
+            }
         }
     </script>
-</head>
+
     <style type="text/tailwindcss">
-        @layer utilities {
+        @layer base {
+            body { @apply bg-white text-slate-600; }
+            h1, h2, h3 { @apply font-display text-slate-900; }
+        }
+        @layer components {
             .glass-nav {
-                background: rgba(255, 255, 255, 0.8);
-                backdrop-filter: blur(12px);
-                -webkit-backdrop-filter: blur(12px);
+                @apply sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200/50;
             }
         }
     </style>
 </head>
-<body class="bg-background font-display text-text-secondary min-h-screen antialiased">
-    <nav class="sticky top-0 z-50 glass-nav border-b border-border px-6 py-4">
-    <div class="max-w-4xl mx-auto flex items-center justify-between">
-      <a href="01-landing-page.html" class="flex items-center gap-3">
-        <div class="size-8 bg-gradient-to-br from-primary to-orange-600 rounded-lg flex items-center justify-center text-background-dark">
-          <span class="material-symbols-outlined text-sm">deployed_code</span>
-        </div>
-        <h2 class="text-xl font-black tracking-tight">Render<span class="text-primary">Room</span></h2>
-      </a>
-      <a href="01-landing-page.html" class="text-sm font-medium hover:text-primary transition-colors flex items-center gap-2">
-        <span class="material-symbols-outlined text-sm">arrow_back</span>
-        Volver al inicio
-      </a>
-    </div>
-  </nav>
+<body class="min-h-screen">
+    <!-- Navigation (Solar Light) -->
+    <nav class="glass-nav">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <a href="01-landing-page.html" class="flex items-center gap-3">
+                <div class="size-10 bg-amber-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-amber-500/20">
+                    <span class="material-symbols-outlined font-bold">wb_sunny</span>
+                </div>
+                <h1 class="text-2xl font-black tracking-tight text-slate-900">RenderRoom</h1>
+            </a>
 
-  <main class="max-w-4xl mx-auto px-6 py-16">
-    <h1 class="text-4xl font-black text-text-primary mb-8 tracking-tight">Términos de Uso</h1>
+            <div class="flex items-center gap-6">
+                <a href="01-landing-page.html" class="text-sm font-bold text-slate-500 hover:text-amber-600 transition-colors flex items-center gap-2">
+                    <span class="material-symbols-outlined text-lg">arrow_back</span>
+                    Volver al inicio
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto px-6 py-20">
+        <header class="mb-16">
+            <h1 class="text-5xl font-black tracking-tight mb-4">Términos de Uso</h1>
+            <p class="text-lg text-slate-500 font-medium tracking-tight">Última actualización: 18 de Marzo, 2024</p>
+        </header>
+        
+        <div class="space-y-16">
+            <section class="group">
+                <div class="flex items-start gap-6">
+                    <div class="size-10 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600 shrink-0 font-black text-lg">1</div>
+                    <div class="pt-1">
+                        <h2 class="text-2xl font-black mb-4 tracking-tight">Aceptación de Términos</h2>
+                        <p class="text-lg leading-relaxed text-slate-500 font-medium">
+                            Al acceder y utilizar RenderRoom, aceptas estos términos de uso. Si no estás de acuerdo con alguna parte de estos términos, por favor no utilices nuestros servicios. El uso continuado del sitio tras cualquier cambio constituye la aceptación de los mismos.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="group">
+                <div class="flex items-start gap-6">
+                    <div class="size-10 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600 shrink-0 font-black text-lg">2</div>
+                    <div class="pt-1">
+                        <h2 class="text-2xl font-black mb-4 tracking-tight">Descripción del Servicio</h2>
+                        <p class="text-lg leading-relaxed text-slate-500 font-medium">
+                            RenderRoom proporciona una plataforma de visualización arquitectónica y diseño de interiores potenciada por IA. Permitimos a los usuarios transformar fotografías de espacios reales en representaciones fotorrealistas con diversos estilos decorativos.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="group">
+                <div class="flex items-start gap-6">
+                    <div class="size-10 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600 shrink-0 font-black text-lg">3</div>
+                    <div class="pt-1">
+                        <h2 class="text-2xl font-black mb-4 tracking-tight">Precios y Créditos</h2>
+                        <p class="text-lg leading-relaxed text-slate-500 font-medium">
+                            El servicio funciona mediante un sistema de créditos o pago por uso. Los precios están claramente indicados en nuestra página de precios. Nos reservamos el derecho de modificar las tarifas en cualquier momento, aunque los créditos ya adquiridos mantendrán su valor.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="group">
+                <div class="flex items-start gap-6">
+                    <div class="size-10 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600 shrink-0 font-black text-lg">4</div>
+                    <div class="pt-1">
+                        <h2 class="text-2xl font-black mb-4 tracking-tight">Uso Responsable</h2>
+                        <p class="text-lg leading-relaxed text-slate-500 font-medium mb-6">
+                            Los usuarios se comprometen a utilizar la plataforma de buena fe. Queda estrictamente prohibido:
+                        </p>
+                        <ul class="space-y-4">
+                            <li class="flex items-center gap-3 text-slate-600 font-bold">
+                                <span class="size-1.5 rounded-full bg-amber-500"></span>
+                                Subir contenido que infrinja derechos de autor.
+                            </li>
+                            <li class="flex items-center gap-3 text-slate-600 font-bold">
+                                <span class="size-1.5 rounded-full bg-amber-500"></span>
+                                Intentar realizar ingeniería inversa sobre nuestra tecnología.
+                            </li>
+                            <li class="flex items-center gap-3 text-slate-600 font-bold">
+                                <span class="size-1.5 rounded-full bg-amber-500"></span>
+                                Utilizar procesos automatizados para extraer datos (scraping).
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section class="group">
+                <div class="flex items-start gap-6">
+                    <div class="size-10 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600 shrink-0 font-black text-lg">5</div>
+                    <div class="pt-1">
+                        <h2 class="text-2xl font-black mb-4 tracking-tight">Propiedad Intelectual</h2>
+                        <p class="text-lg leading-relaxed text-slate-500 font-medium">
+                            El usuario mantiene la propiedad de las imágenes originales subidas. RenderRoom posee todos los derechos sobre la tecnología de IA y la interfaz. Los renders generados otorgan al usuario una licencia de uso personal y comercial sobre el resultado final.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="group">
+                <div class="flex items-start gap-6">
+                    <div class="size-10 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600 shrink-0 font-black text-lg">6</div>
+                    <div class="pt-1">
+                        <h2 class="text-2xl font-black mb-4 tracking-tight">Limitación de Responsabilidad</h2>
+                        <p class="text-lg leading-relaxed text-slate-500 font-medium">
+                            RenderRoom no se hace responsable de las interpretaciones creativas de la IA que puedan diferir de las expectativas del usuario. El servicio se proporciona "tal cual" y no garantizamos una disponibilidad del 100% en todo momento.
+                        </p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer (Solar Light) -->
+    <footer class="bg-slate-50 border-t border-slate-200 py-20 mt-20">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-12">
+                <div class="flex items-center gap-3">
+                    <div class="size-10 bg-amber-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-amber-500/20">
+                        <span class="material-symbols-outlined font-bold">wb_sunny</span>
+                    </div>
+                    <h2 class="text-2xl font-black tracking-tight text-slate-900">RenderRoom</h2>
+                </div>
+                
+                <div class="flex flex-wrap justify-center gap-8 text-sm font-bold text-slate-500">
+                    <a href="01-landing-page.html" class="hover:text-amber-500 transition-colors">Inicio</a>
+                    <a href="03-dashboard.html" class="hover:text-amber-500 transition-colors">Mi Panel</a>
+                    <a href="precios.html" class="hover:text-amber-500 transition-colors">Precios</a>
+                    <a href="privacidad.html" class="hover:text-amber-500 transition-colors">Privacidad</a>
+                    <a href="terminos.html" class="hover:text-amber-500 transition-colors">Términos</a>
+                </div>
+                
+                <p class="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">© 2024 RenderRoom AI Studio</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Firebase SDK (Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     
-    <div class="space-y-12">
-      <section>
-        <h2 class="text-xl font-bold text-text-primary mb-4 flex items-center gap-2">
-            <span class="size-2 bg-primary rounded-full"></span> 1. Aceptación de Términos
-        </h2>
-        <p class="leading-relaxed">
-          Al acceder y utilizar RenderRoom, aceptas estos términos de uso. Si no estás de acuerdo, por favor no utilices nuestros servicios.
-        </p>
-      </section>
-
-      <section>
-        <h2 class="text-xl font-bold text-text-primary mb-4 flex items-center gap-2">
-            <span class="size-2 bg-primary rounded-full"></span> 2. Descripción del Servicio
-        </h2>
-        <p class="leading-relaxed">
-          RenderRoom es una plataforma de renderizado de interiores asistida por inteligencia artificial. 
-          Los usuarios pueden subir fotografías de sus habitaciones y recibir renders profesionales en diferentes estilos de decoración.
-        </p>
-      </section>
-
-      <section>
-        <h2 class="text-xl font-bold text-text-primary mb-4 flex items-center gap-2">
-            <span class="size-2 bg-primary rounded-full"></span> 3. Precios y Pagos
-        </h2>
-        <p class="leading-relaxed">
-          El servicio tiene un coste de pago por render. Los pagos se procesan de forma segura a través de Stripe. 
-          No nos responsabilizamos de interrupciones del servicio por causas ajenas a nuestro control.
-        </p>
-      </section>
-
-      <section>
-        <h2 class="text-xl font-bold text-text-primary mb-4 flex items-center gap-2">
-            <span class="size-2 bg-primary rounded-full"></span> 4. Uso Responsable
-        </h2>
-        <p class="leading-relaxed">
-          Te comprometes a utilizar el servicio de forma lawful y respetuosa. No está permitido:
-        </p>
-        <ul class="list-disc list-inside mt-4 space-y-2">
-          <li>Subir contenido ofensivo o ilegal</li>
-          <li>Intentar acceder a sistemas terceros sin autorización</li>
-          <li>Reproducir o redistribuir los renders sin autorización</li>
-        </ul>
-      </section>
-
-      <section>
-        <h2 class="text-xl font-bold text-text-primary mb-4 flex items-center gap-2">
-            <span class="size-2 bg-primary rounded-full"></span> 5. Propiedad Intelectual
-        </h2>
-        <p class="leading-relaxed">
-          Los renders generados son para uso personal del usuario. Nos reservamos el derecho de utilizar 
-          imágenes generadas de forma anónima con fines promocionales.
-        </p>
-      </section>
-
-      <section>
-        <h2 class="text-xl font-bold text-text-primary mb-4 flex items-center gap-2">
-            <span class="size-2 bg-primary rounded-full"></span> 6. Limitación de Responsabilidad
-        </h2>
-        <p class="leading-relaxed">
-          El servicio se proporciona "tal cual". No garantizamos que los renders sean exactamente como se esperan. 
-          Nuestra responsabilidad se limita al importe pagado.
-        </p>
-      </section>
-    </div>
-  </main>
-
-  <footer class="bg-surface border-t border-border py-20 mt-12">
-    <div class="max-w-4xl mx-auto px-6 text-center">
-        <p class="text-xs text-text-secondary font-bold uppercase tracking-[0.2em] mb-4">© 2024 RenderRoom AI. All Rights Reserved.</p>
-        <div class="flex justify-center gap-8 text-[10px] font-black text-text-secondary uppercase tracking-widest">
-            <a href="01-landing-page.html" class="hover:text-primary">Inicio</a>
-            <a href="precios.html" class="hover:text-primary">Precios</a>
-            <a href="07-consejos-decoracion.html" class="hover:text-primary">Blog</a>
-        </div>
-    </div>
-  </footer>
-
-  <style>
-    .glass { background: rgba(22,27,34,0.8); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
-  </style>
+    <!-- Shared Logic -->
+    <script src="js/firebase-config.js"></script>
+    <script src="js/shared-auth.js"></script>
 </body>
 </html>

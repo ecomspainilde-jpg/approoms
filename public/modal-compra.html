@@ -11,6 +11,10 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Shared Logic -->
+    <script src="js/firebase-config.js"></script>
+    <script src="js/shared-auth.js"></script>
 
     <script id="tailwind-config">
         tailwind.config = {
@@ -189,23 +193,12 @@
     </div>
 
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyDj99qdmDt4GiVeRkvCSfTOSDw3uqD-_Ew",
-            authDomain: "gen-lang-client-0426824151.firebaseapp.com",
-            projectId: "gen-lang-client-0426824151",
-            storageBucket: "gen-lang-client-0426824151.firebasestorage.app",
-            messagingSenderId: "124806819551",
-            appId: "1:124806819551:web:1c90d1154b458fa064036a"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-
+        // No need for separate auth listener here as shared-auth handles redirection
+        // But we keep the auth-checked class for FOUC prevention if needed
         auth.onAuthStateChanged(async (user) => {
-            if (!user) {
-                window.location.replace('01-landing-page.html');
-                return;
+            if (user) {
+                document.documentElement.classList.add('auth-checked');
             }
-            document.documentElement.classList.add('auth-checked');
         });
 
         let selectedPkgKey = 'package_15';

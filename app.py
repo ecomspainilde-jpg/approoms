@@ -18,7 +18,12 @@ def safe_truncate(text: Any, limit: int = 500) -> str:
     return text_val[0:limit] + "... [TRUNCATED]"  # type: ignore
 
 # Load environment variables from .env
-load_dotenv()
+env_path = os.path.join(os.path.dirname(__file__), ".env")
+if os.path.exists(env_path):
+    load_dotenv(env_path)
+    print(f"Loaded .env from {env_path}")
+else:
+    print(f"Warning: .env file not found at {env_path}")
 
 import vertexai  # type: ignore
 from vertexai.preview import vision_models  # type: ignore
@@ -33,7 +38,16 @@ import stripe  # type: ignore
 from fpdf import FPDF # type: ignore
 
 app = Flask(__name__, static_folder="public", static_url_path="")
-stripe.api_key = os.environ.get("STRIPE_SECRET_KEY", "sk_test_placeholder")
+
+# Stripe Initialization with explicit check
+STRIPE_KEY = os.environ.get("STRIPE_SECRET_KEY")
+if not STRIPE_KEY or "placeholder" in STRIPE_KEY.lower():
+    print("WARNING: STRIPE_SECRET_KEY is missing or invalid in .env")
+    stripe.api_key = "invalid_key_placeholder"
+else:
+    stripe.api_key = STRIPE_KEY
+    print(f"Stripe initialized with key: {STRIPE_KEY[:10]}...")
+
 webhook_secret = os.environ.get("STRIPE_WEBHOOK_SECRET", "whsec_placeholder")
 
 # Initialize Vertex AI
@@ -62,13 +76,27 @@ try:
             "projectId": project_id,
             "storageBucket": storage_bucket
         })
+        print(f"Firebase Admin initialized: {project_id}")
     db = firestore.client()
     bucket = storage.bucket()
-    print(f"Firebase initialized successfully for project: {project_id}")
+    print(f"Firestore and Storage clients initialized successfully.")
 except Exception as e:
-    print(f"Error initializing Firebase Admin for project {project_id}:", e)
+    print(f"CRITICAL ERROR initializing Firebase Admin: {safe_truncate(e, 500)}")
     db = None
     bucket = None
+
+@app.route("/api/health")
+def health_check():
+    """Health check endpoint for diagnostics"""
+    status = {
+        "status": "online",
+        "firebase": db is not None,
+        "storage": bucket is not None,
+        "stripe": stripe.api_key and "placeholder" not in stripe.api_key.lower(),
+        "project_id": project_id,
+        "env_loaded": os.path.exists(env_path)
+    }
+    return jsonify(status)
 
 
 def get_render_price(quality: str = "normal"):

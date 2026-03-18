@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    
     <script id="tailwind-config">
         tailwind.config = {
             theme: {
@@ -18,7 +19,6 @@
                         "border": "#F1F5F9",
                         "text-primary": "#1E293B",
                         "text-secondary": "#475569",
-                        "accent-violet": "#6366F1"
                     },
                     fontFamily: {
                         "display": ["Inter", "sans-serif"]
@@ -27,6 +27,8 @@
                         "DEFAULT": "0.5rem",
                         "lg": "1rem",
                         "xl": "1.5rem",
+                        "2xl": "2rem",
+                        "3xl": "2.5rem",
                         "full": "9999px"
                     },
                 },
@@ -40,208 +42,179 @@
                 backdrop-filter: blur(12px);
                 -webkit-backdrop-filter: blur(12px);
             }
-            .profile-header-bg {
-                background: linear-gradient(135deg, #FFFBEB 0%, #FFFFFF 100%);
-            }
             .solar-glow {
                 box-shadow: 0 10px 40px rgba(245, 158, 11, 0.1);
+            }
+            .fade-in {
+                animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(20px); }
+                to { opacity: 1; transform: translateY(0); }
             }
         }
     </style>
 </head>
-<body class="bg-background font-display text-text-primary antialiased selection:bg-primary/30 min-h-screen">
-    <!-- NAVIGATION -->
-    <nav class="fixed top-0 left-0 right-0 z-50 glass-nav border-b border-border">
+<body class="bg-background font-display text-text-primary antialiased min-h-screen flex flex-col">
+    <!-- Navigation (Solar Light) -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200/60 transition-all">
         <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
             <a href="01-landing-page.html" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
-                <div class="size-10 bg-primary rounded-lg flex items-center justify-center text-white">
-                    <span class="material-symbols-outlined font-bold">deployed_code</span>
+                <div class="size-10 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-amber-500/20">
+                    <span class="material-symbols-outlined font-bold">wb_sunny</span>
                 </div>
-                <h2 class="text-xl font-black tracking-tight">Render<span class="text-primary">Room</span></h2>
+                <h2 class="text-2xl font-black tracking-tight text-slate-900">Render<span class="text-amber-500">Room</span></h2>
             </a>
             
-            <div class="hidden md:flex items-center space-x-8">
-                <a class="text-sm font-medium text-text-secondary hover:text-primary transition-colors" href="01-landing-page.html">Inicio</a>
-                <a class="text-sm font-medium text-text-secondary hover:text-primary transition-colors" href="03-dashboard.html">Dashboard</a>
-                <a class="text-sm font-medium text-text-secondary hover:text-primary transition-colors" href="07-consejos-decoracion.html">Consejos</a>
-                <a class="text-sm font-medium text-text-secondary hover:text-primary transition-colors" href="precios.html">Precios</a>
-            </div>
-
-            <div class="flex items-center gap-4">
-                <button class="size-10 rounded-full bg-surface border border-border flex items-center justify-center text-text-secondary hover:text-primary transition-colors relative">
-                    <span class="material-symbols-outlined">notifications</span>
-                    <span class="absolute top-2 right-2 size-2 bg-primary rounded-full"></span>
-                </button>
-                <div class="h-10 w-10 rounded-full border-2 border-primary overflow-hidden">
-                    <img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB7NllOaVYjtYFTeGnTokZe5-lw0PAFfbI8NUqLR7c5Ep7HACjfDinxkfgKyC2PDliU_vFqp_mizszhdG-a6ZGaPJoMytTHTRTYmsZO-Gq-w5UhKWIZ0GNeVVYQYG_KObaQnl5Nd5x-yb-q79YvX3IAsTSaNASInKJeoFtgL8WTEuteJ-3hVH8SceCYwiQo2KFohHvsX7wPywWMNN4Nqz1ktCdQ2xKATYCxu66y2GsPJtRiP1A6d_gRVaWw2MG7D9T8-uaPDPH75wxC" alt="Usuario">
+            <div id="nav-auth-container" class="flex items-center gap-4">
+                <div id="header-credits-display" class="hidden items-center gap-2 px-3 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-full">
+                    <span class="material-symbols-outlined text-amber-500 text-sm">toll</span>
+                    <span id="header-credits-count" class="text-amber-500 text-sm font-bold">--</span>
+                    <span class="text-[10px] text-amber-500/80 font-black uppercase tracking-wider">créditos</span>
                 </div>
+
+                <div id="user-logged-in" class="hidden items-center gap-3">
+                    <button onclick="window.location.href='06-perfil-usuario.html'" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                        <img id="user-avatar" src="https://ui-avatars.com/api/?name=User&background=F59E0B&color=fff" class="size-8 rounded-full border-2 border-amber-500/20" alt="Avatar">
+                        <span id="nav-user-name" class="hidden lg:block text-xs font-bold text-slate-800">--</span>
+                    </button>
+                    <button onclick="handleSignOut()" class="p-2 text-slate-400 hover:text-red-500 transition-colors" title="Cerrar Sesión">
+                        <span class="material-symbols-outlined text-xl">logout</span>
+                    </button>
+                </div>
+
+                <a id="user-logged-out" href="01-landing-page.html?auth=login" class="hidden bg-amber-500 hover:bg-amber-600 text-white px-6 py-2.5 rounded-xl text-sm font-bold tracking-wide transition-all shadow-lg shadow-amber-500/20">
+                    Entrar
+                </a>
             </div>
         </div>
     </nav>
 
-    <!-- HEADER -->
-    <header class="pt-20 profile-header-bg border-b border-border">
-        <div class="max-w-7xl mx-auto px-6 py-16">
-            <div class="flex flex-col md:flex-row items-center md:items-end gap-10">
-                <div class="relative group">
-                    <div class="w-32 h-32 rounded-full border-4 border-white p-1 bg-white shadow-2xl solar-glow">
-                        <img class="w-full h-full rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBDjGylHy9MVJYWH4RRsWCEiYEyGiQJG8cuLwxBvHrAx9iauBN8KusDo8HEZuHLEPj9eSFwIG0RHaC5pj8SmadkRM6MHpcrUWTUOdbFMM7vemsyuZ2pDWVK5R0Iiy8CwKtKfOSXtTJoCXh7TAmoRTLR8xenys5729Vfx5-EjFHUCcYpoNQiiFGTbhj_04zv77sMqNyaCuDS1xPAw50VHITlNBi3845Yjqzg3ngC3a6nNQqouQeWEALH1YqLBgVHicWQFbLChxRrjutr" alt="Emilio Martínez">
-                    </div>
-                    <button class="absolute bottom-1 right-1 bg-primary text-white p-2 rounded-full shadow-lg hover:scale-110 transition-transform">
-                        <span class="material-symbols-outlined text-sm font-bold">edit</span>
-                    </button>
-                </div>
-                <div class="flex-1 text-center md:text-left">
-                    <div class="flex flex-col md:flex-row items-center gap-4 mb-4">
-                        <h1 class="text-4xl font-black tracking-tight">Emilio Martínez</h1>
-                        <span class="px-3 py-1 bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest rounded-full border border-primary/20">Usuario Premium</span>
-                    </div>
-                    <p class="text-text-secondary flex items-center justify-center md:justify-start gap-2 text-sm font-medium">
-                        <span class="material-symbols-outlined text-sm text-primary">verified_user</span>
-                        Miembro desde Enero 2024 • Madrid, ES
-                    </p>
-                </div>
-                <div class="grid grid-cols-3 gap-6 w-full md:w-auto">
-                    <div class="bg-white border border-border rounded-2xl p-6 text-center shadow-sm">
-                        <p class="text-2xl font-black text-primary">24</p>
-                        <p class="text-[10px] font-black text-text-secondary uppercase tracking-widest">Renders</p>
-                    </div>
-                    <div class="bg-white border border-border rounded-2xl p-6 text-center shadow-sm">
-                        <p class="text-2xl font-black text-primary">3</p>
-                        <p class="text-[10px] font-black text-text-secondary uppercase tracking-widest">Favoritos</p>
-                    </div>
-                    <div class="bg-white border border-border rounded-2xl p-6 text-center shadow-sm">
-                        <p class="text-2xl font-black text-primary">12,50€</p>
-                        <p class="text-[10px] font-black text-text-secondary uppercase tracking-widest">Gastados</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <main class="max-w-7xl mx-auto px-6 py-12">
-        <!-- TABS -->
-        <div class="flex gap-10 mb-12 border-b border-border">
-            <button class="pb-6 border-b-2 border-primary text-primary font-black text-xs uppercase tracking-widest">Perfil</button>
-            <button class="pb-6 border-b-2 border-transparent text-text-secondary hover:text-primary font-black text-xs uppercase tracking-widest transition-colors">Seguridad</button>
-            <button class="pb-6 border-b-2 border-transparent text-text-secondary hover:text-primary font-black text-xs uppercase tracking-widest transition-colors">Suscripción</button>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
-            <!-- LEFT COLUMN -->
-            <div class="lg:col-span-7 space-y-12">
-                <!-- PERSONAL INFO -->
-                <section class="bg-white rounded-[2rem] border border-border overflow-hidden solar-glow">
-                    <div class="p-8 border-b border-border flex justify-between items-center bg-surface/30">
-                        <h3 class="text-lg font-black flex items-center gap-3">
-                            <span class="material-symbols-outlined text-primary">person</span>
-                            Datos Personales
-                        </h3>
-                        <button class="text-xs font-black text-primary uppercase tracking-widest hover:underline">Guardar Cambios</button>
-                    </div>
-                    <div class="p-10 grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div class="space-y-3">
-                            <label class="text-[10px] font-black text-text-secondary/60 uppercase tracking-widest">Nombre Completo</label>
-                            <input type="text" value="Emilio Martínez" class="w-full bg-surface border-border rounded-xl px-4 py-3 text-sm font-medium focus:ring-primary focus:border-primary transition-all">
-                        </div>
-                        <div class="space-y-3">
-                            <label class="text-[10px] font-black text-text-secondary/60 uppercase tracking-widest">Correo Electrónico</label>
-                            <input type="email" value="emilio.mtz@renderroom.ai" class="w-full bg-surface border-border rounded-xl px-4 py-3 text-sm font-medium focus:ring-primary focus:border-primary transition-all">
-                        </div>
-                        <div class="space-y-3">
-                            <label class="text-[10px] font-black text-text-secondary/60 uppercase tracking-widest">Teléfono</label>
-                            <input type="text" value="+34 612 345 678" class="w-full bg-surface border-border rounded-xl px-4 py-3 text-sm font-medium focus:ring-primary focus:border-primary transition-all">
-                        </div>
-                        <div class="space-y-3">
-                            <label class="text-[10px] font-black text-text-secondary/60 uppercase tracking-widest">Idioma</label>
-                            <select class="w-full bg-surface border-border rounded-xl px-4 py-3 text-sm font-medium focus:ring-primary focus:border-primary transition-all">
-                                <option>Español</option>
-                                <option>English</option>
-                            </select>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- PAYMENT METHODS -->
-                <section class="bg-white rounded-[2rem] border border-border overflow-hidden solar-glow">
-                    <div class="p-8 border-b border-border bg-surface/30">
-                        <h3 class="text-lg font-black flex items-center gap-3">
-                            <span class="material-symbols-outlined text-primary">payments</span>
-                            Métodos de Pago
-                        </h3>
-                    </div>
-                    <div class="p-10">
-                        <div class="flex items-center justify-between p-6 bg-surface rounded-2xl border border-primary/20">
-                            <div class="flex items-center gap-5">
-                                <div class="size-12 bg-white rounded-xl flex items-center justify-center shadow-sm">
-                                    <span class="material-symbols-outlined text-primary">credit_card</span>
-                                </div>
-                                <div>
-                                    <p class="font-bold">Visa terminada en 4242</p>
-                                    <p class="text-xs text-text-secondary">Expira 12/26</p>
-                                </div>
+    <main class="flex-1 pt-32 pb-24">
+        <div class="max-w-4xl mx-auto px-6 flex flex-col md:flex-row gap-12">
+            <div class="fade-in space-y-12 flex-1">
+                <!-- PROFILE HEADER -->
+                <div class="flex flex-col md:flex-row items-center gap-8 pb-12 border-b border-border">
+                    <div class="relative group">
+                        <div class="size-32 rounded-3xl bg-surface border-2 border-border p-1 overflow-hidden solar-glow">
+                            <img id="profile-picture" class="size-full object-cover rounded-2xl hidden" src="" alt="Profile"/>
+                            <div id="profile-picture-placeholder" class="size-full flex items-center justify-center text-text-secondary/20">
+                                <span class="material-symbols-outlined !text-6xl">account_circle</span>
                             </div>
-                            <span class="px-3 py-1 bg-green-100 text-green-700 text-[10px] font-black uppercase tracking-widest rounded-full">Principal</span>
                         </div>
-                        <button class="w-full mt-6 py-4 border-2 border-dashed border-border rounded-2xl text-text-secondary text-sm font-bold hover:border-primary/50 hover:text-primary transition-all">
-                            + Añadir Nuevo Método
+                        <button class="absolute -bottom-2 -right-2 size-10 bg-primary text-white rounded-xl shadow-lg flex items-center justify-center hover:scale-110 transition-transform">
+                            <span class="material-symbols-outlined text-xl">photo_camera</span>
                         </button>
                     </div>
-                </section>
-            </div>
-
-            <!-- RIGHT COLUMN -->
-            <div class="lg:col-span-5 space-y-12">
-                <!-- PREFERENCES -->
-                <section class="bg-white rounded-[2rem] border border-border overflow-hidden solar-glow">
-                    <div class="p-8 border-b border-border bg-surface/30">
-                        <h3 class="text-lg font-black flex items-center gap-3">
-                            <span class="material-symbols-outlined text-accent-violet">settings_input_component</span>
-                            Preferencias de IA
-                        </h3>
-                    </div>
-                    <div class="p-10 space-y-8">
-                        <div class="space-y-4">
-                            <label class="text-[10px] font-black text-text-secondary/60 uppercase tracking-widest">Resolución por Defecto</label>
-                            <div class="grid grid-cols-2 gap-3">
-                                <button class="py-3 px-4 rounded-xl border-2 border-primary bg-primary/5 text-primary text-xs font-black uppercase tracking-widest transition-all">Ultra HD 4K</button>
-                                <button class="py-3 px-4 rounded-xl border-2 border-border text-text-secondary text-xs font-black uppercase tracking-widest hover:border-primary/30 transition-all">Standard HD</button>
-                            </div>
-                        </div>
-                        <div class="flex items-center justify-between py-2">
-                            <div>
-                                <p class="font-bold text-sm">Notificaciones Real-time</p>
-                                <p class="text-xs text-text-secondary">Avisa cuando el render esté listo</p>
-                            </div>
-                            <div class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" checked class="sr-only peer">
-                                <div class="w-11 h-6 bg-surface peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-                            </div>
+                    <div class="flex-1 text-center md:text-left space-y-2">
+                        <h1 id="user-name-display" class="text-4xl font-black tracking-tight text-text-primary">Cargando...</h1>
+                        <p id="user-email-display" class="text-text-secondary font-medium">---</p>
+                        <div class="pt-2">
+                            <span class="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 rounded-full text-primary text-[10px] font-black uppercase tracking-widest">
+                                <span class="material-symbols-outlined text-xs">verified</span> Miembro Premium
+                            </span>
                         </div>
                     </div>
-                </section>
+                </div>
 
-                <!-- DANGER ZONE -->
-                <section class="bg-red-50/50 rounded-[2rem] border border-red-100 p-8 text-center">
-                    <h4 class="text-red-600 font-black mb-2">Zona de Peligro</h4>
-                    <p class="text-xs text-red-500/70 mb-6">Al eliminar tu cuenta perderás todos tus renders y créditos acumulados de forma permanente.</p>
-                    <button class="w-full py-3 bg-white border border-red-200 text-red-600 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all">
-                        Eliminar Cuenta Permanente
+                <!-- PROFILE FORM -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="space-y-3">
+                        <label class="text-[10px] font-black text-text-secondary uppercase tracking-widest px-1">Nombre Completo</label>
+                        <input id="input-name" type="text" class="w-full bg-surface border border-border rounded-2xl px-5 py-4 font-bold text-text-primary focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none" value="">
+                    </div>
+                    <div class="space-y-3">
+                        <label class="text-[10px] font-black text-text-secondary uppercase tracking-widest px-1">Correo Electrónico</label>
+                        <input id="input-email" type="email" disabled class="w-full bg-surface/50 border border-border rounded-2xl px-5 py-4 font-bold text-text-secondary/50 cursor-not-allowed outline-none" value="">
+                    </div>
+                    <div class="space-y-3">
+                        <label class="text-[10px] font-black text-text-secondary uppercase tracking-widest px-1">Teléfono</label>
+                        <input id="input-phone" type="text" class="w-full bg-surface border border-border rounded-2xl px-5 py-4 font-bold text-text-primary focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none" value="">
+                    </div>
+                    <div class="space-y-3">
+                        <label class="text-[10px] font-black text-text-secondary uppercase tracking-widest px-1">Ciudad / País</label>
+                        <input id="input-location" type="text" class="w-full bg-surface border border-border rounded-2xl px-5 py-4 font-bold text-text-primary focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none" value="">
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center pt-8 border-t border-border">
+                    <button onclick="handleLogout()" class="text-sm font-black text-red-500 hover:bg-red-50 px-6 py-3 rounded-xl transition-colors flex items-center gap-2">
+                        <span class="material-symbols-outlined">logout</span> Cerrar Sesión
                     </button>
-                </section>
+                    <button onclick="saveProfile()" id="btn-save" class="bg-primary hover:bg-primary/90 text-white px-10 py-4 rounded-2xl font-black transition-all hover:scale-105 shadow-xl shadow-primary/20 flex items-center gap-3">
+                        Guardar Cambios
+                    </button>
+                </div>
+
+                <!-- STATS & SETTINGS -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-12">
+                    <div class="bg-surface border border-border p-6 rounded-3xl text-center space-y-2">
+                        <p id="stat-renders" class="text-3xl font-black text-primary italic">0</p>
+                        <p class="text-[10px] font-black text-text-secondary uppercase tracking-widest">Renders Creados</p>
+                    </div>
+                    <div class="bg-surface border border-border p-6 rounded-3xl text-center space-y-2">
+                        <p id="stat-credits" class="text-3xl font-black text-primary italic">--</p>
+                        <p class="text-[10px] font-black text-text-secondary uppercase tracking-widest">Créditos de Regalo</p>
+                    </div>
+                    <div class="bg-surface border border-border p-6 rounded-3xl text-center space-y-2">
+                        <p class="text-3xl font-black text-primary italic">2025</p>
+                        <p class="text-[10px] font-black text-text-secondary uppercase tracking-widest">Año de Registro</p>
+                    </div>
+                </div>
             </div>
+            <!-- SIDEBAR -->
+            <aside class="w-full md:w-72 shrink-0">
+                <div class="bg-surface rounded-3xl p-8 border border-border shadow-sm sticky top-32">
+                    <div class="flex flex-col items-center text-center gap-4 border-b border-border pb-8 mb-8">
+                        <div id="sidebar-avatar-placeholder" class="size-20 rounded-full bg-amber-500/10 ring-4 ring-white flex items-center justify-center text-amber-500 text-3xl font-black shadow-lg shadow-amber-500/10">
+                            <span class="material-symbols-outlined text-4xl">person</span>
+                        </div>
+                        <div>
+                            <h3 id="user-name-display" class="font-black text-lg text-slate-900">Cargando...</h3>
+                            <p id="user-email-display" class="text-xs font-medium text-slate-500">...</p>
+                        </div>
+                    </div>
+
+                    <nav class="space-y-2">
+                        <a href="06-perfil-usuario.html" class="flex items-center gap-4 px-4 py-3 rounded-2xl bg-white shadow-sm border border-amber-500/20 text-amber-600 transition-all font-bold group">
+                            <span class="material-symbols-outlined text-amber-500">person</span>
+                            <span class="text-sm">Mi Perfil</span>
+                        </a>
+                        <a href="03-dashboard.html" class="flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-white hover:shadow-sm transition-all group">
+                            <span class="material-symbols-outlined text-slate-400 group-hover:text-amber-500 transition-colors">grid_view</span>
+                            <span class="text-sm font-bold text-slate-600 group-hover:text-slate-900 transition-colors">Mis Renders</span>
+                        </a>
+                        <a href="creditos.html" class="flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-white hover:shadow-sm transition-all group">
+                            <span class="material-symbols-outlined text-slate-400 group-hover:text-amber-500 transition-colors">payments</span>
+                            <span class="text-sm font-bold text-slate-600 group-hover:text-slate-900 transition-colors">Créditos & Pagos</span>
+                        </a>
+                        <div class="pt-6 border-t border-slate-100 mt-6">
+                            <button onclick="handleSignOut()" class="w-full flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-red-50 text-red-500 transition-all font-bold text-sm">
+                                <span class="material-symbols-outlined">logout</span>
+                                Cerrar Sesión
+                            </button>
+                        </div>
+                    </nav>
+                </div>
+            </aside>
         </div>
     </main>
 
-    <footer class="py-12 border-t border-border">
+    <!-- Footer -->
+    <footer class="py-12 border-t border-border mt-auto">
         <div class="max-w-7xl mx-auto px-6 text-center">
-            <p class="text-xs text-text-secondary/50 font-black uppercase tracking-[0.3em] mb-4">© 2024 RenderRoom — Design Intelligence</p>
-            <div class="flex justify-center gap-8 text-[10px] font-black text-text-secondary uppercase tracking-widest">
-                <a href="privacidad.html" class="hover:text-primary transition-colors">Privacidad</a>
-                <a href="terminos.html" class="hover:text-primary transition-colors">Términos</a>
-                <a href="#" class="hover:text-primary transition-colors">Cookies</a>
-            </div>
+            <p class="text-[10px] font-bold text-text-secondary uppercase tracking-widest">© 2025 RenderRoom AI Studio. All Rights Reserved.</p>
         </div>
     </footer>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <!-- App Logic -->
+    <script src="js/firebase-config.js"></script>
+    <script src="js/shared-auth.js"></script>
+    <script src="js/profile.js"></script>
 </body>
 </html>
