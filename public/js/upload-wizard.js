@@ -151,15 +151,29 @@ function resetUpload() {
 }
 
 async function handleFiles(files) {
+    if (files.length === 0) return;
+    
     state.imagesBase64 = [];
     state.primaryIndex = 0;
-
-    if (state.imagesBase64.length > 0) {
-        uploadPlaceholder.classList.add('hidden');
-        uploadPreview.classList.remove('hidden');
-        uploadZone.classList.add('has-image');
+    
+    const file = files[0];
+    const reader = new FileReader();
+    
+    reader.onload = async (e) => {
+        const base64 = e.target.result.split(',')[1];
+        state.imagesBase64 = [base64];
+        
+        // Update Preview
+        const previewImg = document.getElementById('preview-img');
+        if (previewImg) {
+            previewImg.src = e.target.result;
+            document.getElementById('image-preview').classList.remove('hidden');
+            document.getElementById('dropzone-content').classList.add('hidden');
+        }
+        
         await analyzeImage();
-    }
+    };
+    reader.readAsDataURL(file);
 }
 
 function setPrimaryPhoto(idx) {
@@ -173,10 +187,15 @@ function setPrimaryPhoto(idx) {
 }
 
 async function analyzeImage() {
-    analysisPanel.classList.remove('hidden');
-    document.getElementById('analysis-loading').classList.remove('hidden');
-    document.getElementById('analysis-result').classList.add('hidden');
-    document.getElementById('analysis-error').classList.add('hidden');
+    const loading = document.getElementById('analysis-loading');
+    const resultPanel = document.getElementById('analysis-result');
+    const errorPanel = document.getElementById('analysis-error');
+    const panel = document.getElementById('analysis-panel');
+
+    if (panel) panel.classList.remove('hidden');
+    if (loading) loading.classList.remove('hidden');
+    if (resultPanel) resultPanel.classList.add('hidden');
+    if (errorPanel) errorPanel.classList.add('hidden');
 
     try {
         // REORDENAR: Ponemos la foto principal al principio de la lista para el servidor

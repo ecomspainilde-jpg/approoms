@@ -126,11 +126,55 @@
                         <span class="material-symbols-outlined text-xs">info</span> Empieza Aquí
                     </div>
                     <h1 class="text-4xl md:text-5xl font-black tracking-tight mb-4">Sube tu Habitación</h1>
-                        <div class="size-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
-                        <p class="text-sm font-bold text-text-secondary">Analizando espacio con Gemini Vision...</p>
+                    <p class="text-text-secondary text-lg mb-12">Para obtener el mejor resultado, asegúrate de que el espacio esté bien iluminado.</p>
+                </div>
+
+                <div class="max-w-2xl mx-auto">
+                    <!-- UPLOAD ZONE -->
+                    <div id="dropzone" class="relative group bg-white/40 backdrop-blur-xl border-2 border-dashed border-primary/30 rounded-[3rem] p-12 text-center hover:border-primary/60 transition-all cursor-pointer solar-glow">
+                        <input type="file" id="file-input" class="hidden" accept="image/*">
+                        
+                        <div id="dropzone-content" class="space-y-6">
+                            <div class="size-20 bg-primary/10 rounded-3xl flex items-center justify-center text-primary mx-auto group-hover:scale-110 transition-transform duration-500">
+                                <span class="material-symbols-outlined text-4xl">add_photo_alternate</span>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-black mb-2">Suelte su foto aquí</h3>
+                                <p class="text-text-secondary font-bold">o haga clic para explorar sus archivos</p>
+                            </div>
+                            <div class="flex items-center justify-center gap-4 pt-4">
+                                <span class="px-3 py-1 bg-surface rounded-full text-[10px] font-black uppercase text-text-secondary border border-border">JPG, PNG</span>
+                                <span class="px-3 py-1 bg-surface rounded-full text-[10px] font-black uppercase text-text-secondary border border-border">Máx 10MB</span>
+                            </div>
+                        </div>
+
+                        <!-- Image Preview Overlay -->
+                        <div id="image-preview" class="hidden absolute inset-0 rounded-[3rem] overflow-hidden group">
+                            <img src="" class="w-full h-full object-cover" id="preview-img">
+                            <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button id="change-photo-btn" class="px-6 py-3 bg-white text-background-dark font-black rounded-2xl flex items-center gap-2 hover:scale-105 transition-transform shadow-xl">
+                                    <span class="material-symbols-outlined">refresh</span>
+                                    Cambiar Foto
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Analysis Overlay -->
+                        <div id="analysis-loading" class="hidden absolute inset-0 bg-white/80 backdrop-blur-md flex flex-col items-center justify-center animate-pulse">
+                            <div class="size-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin mb-4"></div>
+                            <p class="font-black text-primary uppercase tracking-widest text-sm">Analizando Espacio...</p>
+                        </div>
+                        
+                        <!-- Error Overlay -->
+                        <div id="analysis-error" class="hidden absolute inset-0 bg-red-50/90 backdrop-blur-md flex flex-col items-center justify-center p-8 text-center text-red-500">
+                            <span class="material-symbols-outlined text-4xl mb-4">report_problem</span>
+                            <h4 class="font-black mb-2">Error de Análisis</h4>
+                            <p id="analysis-error-text" class="text-sm font-bold opacity-80 mb-6"></p>
+                            <button onclick="resetUpload()" class="px-6 py-2 bg-red-500 text-white font-black rounded-xl text-sm">Intentar de Nuevo</button>
+                        </div>
                     </div>
-                    
-                    <div id="analysis-result" class="hidden space-y-6">
+
+                    <div id="analysis-panel" class="hidden mt-8 space-y-6 fade-in">
                         <div class="flex items-center gap-3">
                             <div class="size-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
                                 <span class="material-symbols-outlined">analytics</span>

@@ -1,0 +1,105 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  annotations:
+    run.googleapis.com/client-name: gcloud
+    run.googleapis.com/client-version: 560.0.0
+    run.googleapis.com/ingress: all
+    run.googleapis.com/ingress-status: all
+    run.googleapis.com/invoker-iam-disabled: 'true'
+    run.googleapis.com/maxScale: '5'
+    run.googleapis.com/operation-id: 9c67fcbf-1c45-42c7-9292-9b70d0e17405
+    run.googleapis.com/urls: '["https://roomchicversionantigravity-124806819551.europe-southwest1.run.app","https://roomchicversionantigravity-h4mqlbka2q-no.a.run.app"]'
+    serving.knative.dev/creator: ecomspainilde@gmail.com
+    serving.knative.dev/lastModifier: ecomspainilde@gmail.com
+  creationTimestamp: '2026-03-10T13:50:13.160163Z'
+  generation: 83
+  labels:
+    cloud.googleapis.com/location: europe-southwest1
+    commit-sha: 0393bd1c25bdef2d65ce38dc73e70ae4a8f08c7d
+    created-by: cloud-run-mcp
+    deployment-type: with-build
+    gcb-build-id: 0111b858-e57a-49e3-91a4-db493f13cdad
+    gcb-trigger-id: d3e30747-8363-4993-927c-09c9aa0f604a
+    managed-by: gcp-cloud-build-deploy-cloud-run
+    run.googleapis.com/satisfiesPzs: 'true'
+    runtime: undefined
+  name: roomchicversionantigravity
+  namespace: '124806819551'
+  resourceVersion: AAZNU37AODc
+  selfLink: /apis/serving.knative.dev/v1/namespaces/124806819551/services/roomchicversionantigravity
+  uid: dd428d10-a324-400d-8dd9-f54cc0522e65
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/maxScale: '5'
+        run.googleapis.com/client-name: gcloud
+        run.googleapis.com/client-version: 560.0.0
+      labels:
+        client.knative.dev/nonce: wlicnjyrkg
+        commit-sha: 0393bd1c25bdef2d65ce38dc73e70ae4a8f08c7d
+        created-by: cloud-run-mcp
+        deployment-type: with-build
+        gcb-build-id: 0111b858-e57a-49e3-91a4-db493f13cdad
+        gcb-trigger-id: d3e30747-8363-4993-927c-09c9aa0f604a
+        managed-by: gcp-cloud-build-deploy-cloud-run
+        run.googleapis.com/startupProbeType: Default
+        runtime: undefined
+    spec:
+      containerConcurrency: 80
+      containers:
+      - env:
+        - name: STRIPE_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              key: latest
+              name: STRIPE_SECRET_KEY
+        - name: STRIPE_WEBHOOK_SECRET
+          valueFrom:
+            secretKeyRef:
+              key: latest
+              name: STRIPE_WEBHOOK_SECRET
+        - name: GEMINI_API_KEY
+          value: projects/124806819551/secrets/GEMINI_API_KEY/versions/latest
+        image: europe-southwest1-docker.pkg.dev/gen-lang-client-0426824151/cloud-run-source-deploy/approoms/roomchicversionantigravity:0393bd1c25bdef2d65ce38dc73e70ae4a8f08c7d
+        name: roomchicversionantigravity-1
+        ports:
+        - containerPort: 8080
+          name: http1
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 512Mi
+        startupProbe:
+          failureThreshold: 1
+          periodSeconds: 240
+          tcpSocket:
+            port: 8080
+          timeoutSeconds: 240
+      serviceAccountName: 124806819551-compute@developer.gserviceaccount.com
+      timeoutSeconds: 300
+  traffic:
+  - latestRevision: true
+    percent: 100
+status:
+  address:
+    url: https://roomchicversionantigravity-h4mqlbka2q-no.a.run.app
+  conditions:
+  - lastTransitionTime: '2026-03-18T21:54:24.414775Z'
+    status: 'True'
+    type: Ready
+  - lastTransitionTime: '2026-03-18T21:54:19.240053Z'
+    status: 'True'
+    type: ConfigurationsReady
+  - lastTransitionTime: '2026-03-18T21:54:24.377360Z'
+    status: 'True'
+    type: RoutesReady
+  latestCreatedRevisionName: roomchicversionantigravity-00082-59m
+  latestReadyRevisionName: roomchicversionantigravity-00082-59m
+  observedGeneration: 83
+  traffic:
+  - latestRevision: true
+    percent: 100
+    revisionName: roomchicversionantigravity-00082-59m
+  url: https://roomchicversionantigravity-h4mqlbka2q-no.a.run.app
