@@ -596,28 +596,22 @@
         document.getElementById('section-pricing').style.display = 'none';
         document.getElementById('section-history').style.display = 'none';
         
-        const tabs = ['overview', 'users', 'pricing', 'history'];
-        tabs.forEach(t => {
-            const btn = document.getElementById('tab-' + t);
-            if (btn) {
-                btn.classList.remove('text-amber-600');
-                btn.classList.add('text-slate-400');
-            }
+        const tabIds = ['overview', 'users', 'pricing', 'history'];
+        tabIds.forEach(id => {
+            const btn = document.getElementById('tab-' + id);
+            if (btn) btn.classList.remove('active');
         });
         
+        const activeBtn = document.getElementById('tab-' + tab);
+        if (activeBtn) activeBtn.classList.add('active');
+
         if (tab === 'overview' || tab === 'users') {
             document.getElementById('section-users').style.display = 'block';
-            document.getElementById('tab-' + tab).classList.add('text-amber-600');
-            document.getElementById('tab-' + tab).classList.remove('text-slate-400');
         } else if (tab === 'pricing') {
             document.getElementById('section-pricing').style.display = 'block';
-            document.getElementById('tab-pricing').classList.add('text-amber-600');
-            document.getElementById('tab-pricing').classList.remove('text-slate-400');
             loadPrices();
         } else if (tab === 'history') {
             document.getElementById('section-history').style.display = 'block';
-            document.getElementById('tab-history').classList.add('text-amber-600');
-            document.getElementById('tab-history').classList.remove('text-slate-400');
             loadPriceHistory();
         }
     }

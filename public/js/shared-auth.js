@@ -27,7 +27,7 @@ auth.onAuthStateChanged((user) => {
         console.log('User signed in:', user.email);
         updateNavbar(user);
         
-        // Setup Firestore listener for credits
+        // Setup Firestore listener for credits and role
         db.collection('users').doc(user.uid).onSnapshot(doc => {
             if (doc.exists) {
                 const data = doc.data();
@@ -36,6 +36,11 @@ auth.onAuthStateChanged((user) => {
                 
                 countEls.forEach(el => el.textContent = data.credits || 0);
                 displayEls.forEach(el => el.classList.remove('hidden'));
+
+                // Inject Admin Link if applicable
+                if (data.isAdmin) {
+                    injectAdminLink();
+                }
             } else {
                 // Initial user document creation
                 db.collection('users').doc(user.uid).set({
@@ -85,6 +90,42 @@ function updateNavbar(user) {
         if (loggedOutEl) loggedOutEl.classList.remove('hidden');
         if (loggedInEl) loggedInEl.classList.add('hidden');
         if (loggedInEl) loggedInEl.style.display = 'none';
+    }
+}
+
+/**
+ * Injects an Admin Link into the navigation or profile sidebar
+ */
+function injectAdminLink() {
+    // 1. Navigation Link (Desktop)
+    const navContainer = document.querySelector('.hidden.lg\\:flex.items-center.gap-10');
+    if (navContainer && !document.getElementById('nav-admin-link')) {
+        const adminLink = document.createElement('a');
+        adminLink.id = 'nav-admin-link';
+        adminLink.className = 'text-sm font-bold text-amber-600 hover:text-amber-500 transition-colors flex items-center gap-1';
+        adminLink.href = 'admin-dashboard.html';
+        adminLink.innerHTML = '<span class="material-symbols-outlined text-sm">admin_panel_settings</span> Admin';
+        navContainer.appendChild(adminLink);
+    }
+
+    // 2. Profile Sidebar (if we are on profile page)
+    const sidebarNav = document.querySelector('aside nav');
+    if (sidebarNav && !document.getElementById('sidebar-admin-link')) {
+        const adminLink = document.createElement('a');
+        adminLink.id = 'sidebar-admin-link';
+        adminLink.className = 'flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-white hover:shadow-sm transition-all group';
+        adminLink.href = 'admin-dashboard.html';
+        adminLink.innerHTML = `
+            <span class="material-symbols-outlined text-slate-400 group-hover:text-amber-500 transition-colors">admin_panel_settings</span>
+            <span class="text-sm font-bold text-slate-600 group-hover:text-slate-900 transition-colors">Administración</span>
+        `;
+        // Insert before Sign Out (last hidden divider/button)
+        const signOutDiv = sidebarNav.querySelector('.pt-6.border-t');
+        if (signOutDiv) {
+            sidebarNav.insertBefore(adminLink, signOutDiv);
+        } else {
+            sidebarNav.appendChild(adminLink);
+        }
     }
 }
 
