@@ -25,13 +25,8 @@ if os.path.exists(env_path):
 else:
     print(f"Warning: .env file not found at {env_path}")
 
-import vertexai  # type: ignore
-from vertexai.preview import vision_models  # type: ignore
-from vertexai.preview.vision_models import (  # type: ignore
-    ImageGenerationModel,
-    Image as VisionImage,
-)
-from vertexai.generative_models import GenerativeModel, Part, Image as VertexImage  # type: ignore
+import google.generativeai as genai
+from google.generativeai import types as genai_types
 import firebase_admin  # type: ignore
 from firebase_admin import credentials, auth, firestore, storage  # type: ignore
 import stripe  # type: ignore
@@ -50,23 +45,20 @@ else:
 
 webhook_secret = os.environ.get("STRIPE_WEBHOOK_SECRET", "whsec_placeholder")
 
-# Initialize Vertex AI
+# Initialize Google Generative AI (AI Studio)
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
+if GEMINI_API_KEY:
+    genai.configure(api_key=GEMINI_API_KEY)
+    print("Google Generative AI configured successfully.")
+else:
+    print("WARNING: GEMINI_API_KEY is missing in .env")
+
+# GCP / Firebase Configuration
 project_id = os.environ.get("GCP_PROJECT_ID", "gen-lang-client-0426824151")
 location = os.environ.get("GCP_LOCATION", "us-central1")
 storage_bucket = os.environ.get(
     "FIREBASE_STORAGE_BUCKET", f"{project_id}.firebasestorage.app"
 )
-
-# ... (GCP config above)
-
-try:
-    # Explicitly use us-central1 for better model availability
-    vertexai.init(project=project_id, location=location)
-    print(f"Vertex AI initialized: {project_id} in {location}")
-except Exception as e:
-    print(
-        f"Warning: Could not initialize Vertex AI for project {project_id} in {location}: {safe_truncate(e, 200)}"
-    )
 
 # Initialize Firebase Admin
 try:
@@ -142,98 +134,67 @@ STYLE_DESCRIPTIONS = {
 }
 
 def analyze_room_image(images_base64: list) -> dict:
-    """RoomChic Engine: 3D Triangulation and Perspective Analysis using Gemini via Vertex AI."""
-    # Use verified stable models
-    models_to_try = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"]
+    """RoomChic Engine: 3D Triangulation and Perspective Analysis using Gemini via AI Studio."""
+    models_to_try = ["gemini-2.0-flash-exp", "gemini-1.5-flash", "gemini-1.5-pro"]
     
+    # Validation and Analysis Prompt
+    analysis_prompt = """You are the RoomChic Architectural AI. 
+    Evaluate the MASTER IMAGE (first image) for viability.
+    Perform PERSPECTIVE TRIANGULATION if valid.
+    Return ONLY valid JSON:
+    {
+      "image_validation": {
+        "viability_score": 0-100,
+        "viability_ok": true/false,
+        "viability_issues_es": [],
+        "is_interior_room": true,
+        "has_clear_perspective": true,
+        "is_not_blurry": true,
+        "sufficient_coverage": true,
+        "no_heavy_distortion": true,
+        "is_single_room": true
+      },
+      "room_type": "string",
+      "architecture_en": "string",
+      "dimensions_est": "string",
+      "inventory_en": "string",
+      "blind_spot_data": "string",
+      "detailed_description_es": "string",
+      "imagen_prompt_seed_en": "string",
+      "recommendations": {
+        "add_es": [],
+        "remove_es": []
+      }
+    }
+    """
+
+    # Prepare multimodal content
     contents = []
-    # ... (contents setup remains same)
-
-    contents.append("You are the RoomChic Architectural AI, specialized in 3D space reconstruction from multiple 2D angles.")
-
     for i, img_b64 in enumerate(images_base64):
-        role = "PRIMARY MASTER IMAGE (Perspective Source)" if i == 0 else f"DEPTH REFERENCE {i} (Blind Spots & Context)"
-        contents.append(f"ROLE: {role}")
-        try:
-            image_part = Part.from_data(data=base64.b64decode(img_b64), mime_type="image/jpeg")
-            contents.append(image_part)
-        except Exception as e:
-            print(f"Error decoding image {i}: {safe_truncate(e, 100)}")
-
-    analysis_prompt = """You are the RoomChic Architectural AI. Your PRIMARY task before any analysis is to validate the image quality for AI-assisted interior design rendering.
-
-## STEP 1 — IMAGE VALIDATION (CRITICAL)
-Evaluate the MASTER IMAGE (first image) against these criteria for angle-preserving render generation:
-- **is_interior_room**: Is this clearly an interior room (not exterior, not abstract)?
-- **has_clear_perspective**: Is there a single, stable camera perspective (not a panorama, collage, or multi-angle crop)?
-- **is_not_blurry**: Is the image reasonably sharp and in focus (not heavily blurred or pixelated)?
-- **sufficient_coverage**: Does the image show enough of the room (floor, walls, at least one architectural anchor visible)?
-- **no_heavy_distortion**: Is the image free of extreme fisheye/wide-angle distortions that would cause AI deformation?
-- **is_single_room**: Does the image show a single contiguous room (not a collage of different rooms)?
-
-Combine these into:
-- **viability_score**: Integer 0-100. 0=completely invalid, 100=perfect for render.
-  - 90-100: Perfect — proceed with analysis
-  - 70-89: Good — minor issues, warn user but proceed
-  - 40-69: Poor — significant issues, warn clearly
-  - 0-39: Invalid — BLOCK render, must upload new photo
-- **viability_issues_es**: List of issue strings in Spanish (empty if no issues). Be specific and actionable.
-- **viability_ok**: boolean — true if score >= 40 and is_interior_room is true.
-
-## STEP 2 — ROOM ANALYSIS (only if viability_ok is true)
-Use all provided images to perform PERSPECTIVE TRIANGULATION:
-1. Use DEPTH REFERENCES to understand what is behind furniture or in blind spots of the MASTER IMAGE.
-2. Identify the 'Untouchable Structure': walls, windows, doors, floor, and ceiling.
-3. Estimate real-world dimensions by cross-referencing standard objects across all angles.
-4. Detect the current style and potential improvements.
-
-Return ONLY a valid JSON object (all fields required):
-{
-  "image_validation": {
-    "viability_score": 95,
-    "viability_ok": true,
-    "viability_issues_es": [],
-    "is_interior_room": true,
-    "has_clear_perspective": true,
-    "is_not_blurry": true,
-    "sufficient_coverage": true,
-    "no_heavy_distortion": true,
-    "is_single_room": true
-  },
-  "room_type": "Confirmed room type. Leave empty string if viability_ok is false.",
-  "architecture_en": "List of untouchable architectural anchors (walls, windows, layout). Empty if viability_ok false.",
-  "dimensions_est": "Estimated metric size (e.g. 3.5x4.5m). Empty if viability_ok false.",
-  "inventory_en": "List 5-8 main objects detected across all photos. Empty if viability_ok false.",
-  "blind_spot_data": "Details from context images not visible in master. Empty if viability_ok false.",
-  "detailed_description_es": "Descripción profesional. If not viability_ok, explain specifically why the image cannot be used for rendering.",
-  "imagen_prompt_seed_en": "STRUCTURAL_LOCK: Specific geometric description to ensure 100% fidelity to MASTER IMAGE perspective. Empty if viability_ok false.",
-  "recommendations": {
-    "add_es": ["Elemento decorativo 1", "Elemento decorativo 2", "Elemento decorativo 3"],
-    "remove_es": ["Objeto a quitar 1", "Objeto a quitar 2"]
-  }
-}
-CRITICAL: Always return valid JSON. Always include image_validation block. If viability_ok is false, fill other fields with empty values or the issue explanation.
-Note: Recommendations are tailored to the detected room type and style, focusing on high-impact changes.
-"""
+        contents.append({
+            "mime_type": "image/jpeg",
+            "data": img_b64
+        })
     contents.append(analysis_prompt)
 
+    last_error = "Unknown"
     for model_name in models_to_try:
         try:
-            model = GenerativeModel(model_name)
-            response = model.generate_content(contents)
-            resp_text = response.text.strip()
+            print(f"Attempting analysis with {model_name}...")
+            model = genai.GenerativeModel(model_name)
+            response = model.generate_content(
+                contents,
+                generation_config={"response_mime_type": "application/json"}
+            )
             
-            # Clean JSON markdown if present
-            if resp_text.startswith("```json"): resp_text = resp_text[7:]
-            elif resp_text.startswith("```"): resp_text = resp_text[3:]
-            if resp_text.endswith("```"): resp_text = resp_text[:-3]
-            
-            return {"success": True, "data": json.loads(resp_text.strip())}
+            if response.text:
+                return {"success": True, "data": json.loads(response.text)}
         except Exception as e:
-            error_msg = safe_truncate(e, 500)
-            print(f"Error with model {model_name}: {error_msg}")
+            last_error = str(e)
+            print(f"Error with model {model_name}: {safe_truncate(e, 200)}")
             continue
-    return {"success": False, "error": "Fallo en motor RoomChic (Gemini Vertex AI)"}
+            
+    return {"success": False, "error": f"Fallo en motor RoomChic: {last_error}"}
 
 def generate_room_render(
     prompt: str,
@@ -242,172 +203,67 @@ def generate_room_render(
     base_image_b64: Optional[str] = None,
     quality: str = "normal",
 ) -> Dict[str, Any]:
-    """
-    RoomChic Render — Photo-faithful room restyling.
-
-    Strategy:
-    1. PRIMARY: Gemini 2.0 Flash with native image output — sees the original photo
-       and edits ONLY the movable/decorative layer (furniture, lighting, textiles, decor).
-    2. FALLBACK: Imagen 3 Edit API (imagegeneration@006) with the original photo as
-       reference image, using inpainting-free mode.
-    3. LAST RESORT: informative error.
-
-    The structural shell (walls, windows, doors, floor area, ceiling, camera angle)
-    is NEVER modified. The client must recognise the same room after the transformation.
-    """
-    import time
-    import io
-
+    """RoomChic Render — Photo-faithful room restyling using Gemini 2.0."""
     style_desc = STYLE_DESCRIPTIONS.get(style.lower(), STYLE_DESCRIPTIONS["moderno"])
+    
+    # Combined instruction
+    edit_instruction = f"""
+    You are an expert interior designer. Restyle the provided room photo.
+    STRICT: Keep walls, windows, doors, and camera angle identical.
+    STYLE: {style_desc}
+    CLIENT REQUEST: {prompt}
+    QUALITY: {quality}
+    """
 
-    if room_data:
-        arch        = room_data.get("architecture_en", "")
-        room_type   = room_data.get("room_type", "interior room")
-        dims        = room_data.get("dimensions_est", "")
-        inventory   = room_data.get("inventory_en", "")
-    else:
-        arch = room_type = dims = inventory = ""
+    try:
+        model = genai.GenerativeModel("gemini-2.0-flash-exp")
+        
+        # Prepare contents
+        contents = []
+        if base_image_b64:
+            contents.append({
+                "mime_type": "image/jpeg",
+                "data": base_image_b64
+            })
+        contents.append(edit_instruction)
 
-    is_high_quality = quality == "high"
-
-    # ── Shared edit instruction ───────────────────────────────────────────────
-    base_instruction = (
-        f"You are an expert interior designer. I am giving you a photograph of a {room_type}. "
-        "Your task is to DIGITALLY RESTYLE this exact room. "
-        "\n\nSTRICT RULES — NEVER CHANGE THESE:"
-        "\n- Walls: keep the EXACT same surfaces, positions and proportions."
-        "\n- Windows: keep EXACT size, position, frame and natural light."
-        "\n- Doors and door frames: keep EXACT position and size."
-        "\n- Ceiling: shape, height and any beams stay identical."
-        "\n- Camera angle: the perspective, framing and focal length must be 100% identical to the original photo."
-        "\n- Room dimensions and floor plan: do NOT reshape or resize anything structural."
-        f"\n- Architectural details to preserve: {arch}"
-        "\n\nYOU ARE ALLOWED TO CHANGE ONLY THESE DECORATIVE / MOVABLE ELEMENTS:"
-        "\n- Furniture: replace or restyle sofas, chairs, tables, beds, shelves, desks."
-        "\n- Lighting fixtures: replace ceiling lights, floor lamps, pendant lights."
-        "\n- Textiles: replace rugs, curtains, cushions, bedcovers, throws."
-        "\n- Wall art and decorations hanging on the walls."
-        "\n- Decorative accessories: plants, vases, books, mirrors, candles."
-        "\n- Floor finish tone (same floor area, only visual material/color)."
-        f"\n\nSTYLE TO APPLY: {style_desc}"
-        f"\n\nCLIENT SPECIFIC REQUESTS: {prompt}"
-    )
-
-    if is_high_quality:
-        quality_suffix = (
-            "\n\nOUTPUT QUALITY: Ultra-high-fidelity 4K interior design photography. "
-            "Render every surface material with extreme precision: wood grain, fabric weave, glass reflections, metal sheen. "
-            "Perfect global illumination with accurate caustics and soft shadows. "
-            "The result must look like a professional architectural photography studio shot. "
-            "Maximum detail on all decorative elements — every texture must be crisp and photorealistic."
+        # Attempt generation
+        # Note: gemini-2.0-flash-exp can output images in specific modalities,
+        # but for simplicity here we might be expecting it to describe the scene for Imagen.
+        # However, the user's test_api.py suggests they want to use Gemini directly.
+        
+        print(f"Generating render with gemini-2.0-flash-exp ({quality})...")
+        response = model.generate_content(
+            contents,
+            generation_config={
+                "temperature": 0.4 if quality == "normal" else 0.2,
+                "response_modalities": ["IMAGE", "TEXT"]
+            }
         )
-        gen_temperature = 0.2
-    else:
-        quality_suffix = (
-            "\n\nOUTPUT: Photorealistic interior design photo of the SAME room after restyling. "
-            "The client must immediately recognise it as the same physical space."
-        )
-        gen_temperature = 0.5
-
-    edit_instruction = base_instruction + quality_suffix
-
-    # ── PRIMARY: Gemini 2.0 Flash with image output ───────────────────────────
-    if base_image_b64:
-        try:
-            from google import genai as google_genai  # type: ignore
-            from google.genai import types as genai_types  # type: ignore
-
-            genai_client = google_genai.Client(
-                vertexai=True,
-                project=project_id,
-                location=location,
-            )
-
-            # Decode base64 → bytes
-            img_bytes = base64.b64decode(base_image_b64)
-
-            response = genai_client.models.generate_content(
-                model="gemini-2.0-flash-exp",
-                contents=[
-                    genai_types.Part.from_bytes(data=img_bytes, mime_type="image/jpeg"),
-                    genai_types.Part.from_text(text=edit_instruction),
-                ],
-                config=genai_types.GenerateContentConfig(
-                    response_modalities=["IMAGE", "TEXT"],
-                    temperature=gen_temperature,
-                ),
-            )
-            # Extract image from response — pick candidate with most detail
-            best_b64 = None
-            for candidate in response.candidates:
-                for part in candidate.content.parts:
-                    if part.inline_data and part.inline_data.mime_type.startswith("image/"):
-                        best_b64 = base64.b64encode(part.inline_data.data).decode("utf-8")
-                        break  # take first valid candidate (Gemini ranks them)
-                if best_b64:
+        
+        # Extract image
+        image_b64 = None
+        for candidate in response.candidates:
+            for part in candidate.content.parts:
+                if part.inline_data and part.inline_data.mime_type.startswith("image/"):
+                    image_b64 = base64.b64encode(part.inline_data.data).decode("utf-8")
                     break
-            if best_b64:
-                return {
-                    "success": True,
-                    "image_base64": best_b64,
-                    "engine": f"gemini-2.0-flash-exp-{'hq' if is_high_quality else 'normal'}",
-                    "style_description": style_desc,
-                    "full_prompt": edit_instruction,
-                    "quality": quality,
-                }
-            print("Gemini image output: no image part returned, falling back.")
-        except Exception as gemini_err:
-            print(f"Gemini image edit error: {safe_truncate(gemini_err, 400)}")
+            if image_b64: break
+            
+        if image_b64:
+            return {
+                "success": True,
+                "image_base64": image_b64,
+                "full_prompt": edit_instruction,
+                "style_description": style_desc
+            }
+            
+    except Exception as e:
+        print(f"Gemini render error: {safe_truncate(e, 400)}")
 
-    # ── FALLBACK: Imagen Edit API with source image ───────────────────────────
-    if base_image_b64:
-        try:
-            from vertexai.preview.vision_models import ImageGenerationModel  # type: ignore
-            from vertexai.vision_models import Image as VisionImage  # type: ignore
-
-            edit_model = ImageGenerationModel.from_pretrained("imagegeneration@006")
-            src_image  = VisionImage(image_bytes=base64.b64decode(base_image_b64))
-
-            imagen_prompt = (
-                f"Interior design restyling. Apply {style_desc} style. "
-                "ONLY change furniture, lighting, textiles and decorative accessories. "
-                "Keep all walls, windows, doors, ceiling and camera angle IDENTICAL to the source image. "
-                f"Client request: {prompt}"
-            )
-
-            for attempt in range(3):
-                try:
-                    result = edit_model.edit_image(
-                        prompt=imagen_prompt,
-                        base_image=src_image,
-                        edit_mode="inpainting-insert",
-                        number_of_images=1,
-                    )
-                    if result and result.images:
-                        result_b64 = base64.b64encode(result.images[0]._image_bytes).decode("utf-8")
-                        return {
-                            "success": True,
-                            "image_base64": result_b64,
-                            "engine": "imagen-edit-inpainting",
-                            "style_description": style_desc,
-                            "full_prompt": imagen_prompt,
-                        }
-                except Exception as edit_err:
-                    print(f"Imagen Edit attempt {attempt+1}: {safe_truncate(edit_err, 300)}")
-                    if attempt < 2:
-                        time.sleep(2 ** attempt)
-        except ImportError:
-            print("ImageEditingModel not available in this SDK version.")
-        except Exception as fallback_err:
-            print(f"Imagen Edit fallback error: {safe_truncate(fallback_err, 400)}")
-
-    # ── LAST RESORT: text-only Imagen (signals error clearly) ─────────────────
     return {
         "success": False,
-        "error": (
-            "No se pudo aplicar el restyling manteniendo la habitación original. "
-            "Asegúrate de que la imagen original fue enviada correctamente."
-        ),
+        "error": "No se pudo generar el render. Por favor, intenta de nuevo."
     }
 
 
