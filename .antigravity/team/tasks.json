@@ -1,0 +1,40 @@
+{
+  "tasks": [
+    {
+      "id": 1,
+      "title": "Application Recognition (Firebase)",
+      "status": "PENDING",
+      "assigned_to": "Superilde",
+      "dependencies": []
+    },
+    {
+      "id": 2,
+      "title": "Application Recognition (Stripe)",
+      "status": "PENDING",
+      "assigned_to": "Superilde",
+      "dependencies": []
+    },
+    {
+      "id": 3,
+      "title": "Application Recognition (Stitch)",
+      "status": "PENDING",
+      "assigned_to": "Superilde",
+      "dependencies": []
+    },
+    {
+      "id": 4,
+      "title": "System Status Verification",
+      "status": "PENDING",
+      "assigned_to": "Revisor",
+      "dependencies": [1, 2, 3]
+    },
+    {
+      "id": 5,
+      "title": "Blog Generation (NotebookLM)",
+      "status": "PENDING",
+      "assigned_to": "Marketer",
+      "dependencies": [4]
+    }
+  ],
+  "members": ["Superilde", "Architect", "Marketer", "Revisor"]
+}
