@@ -88,7 +88,8 @@ if not STRIPE_KEY or "placeholder" in STRIPE_KEY.lower():
     stripe.api_key = "invalid_key_placeholder"
 else:
     stripe.api_key = STRIPE_KEY
-    print(f"Stripe initialized with key: {STRIPE_KEY[:10]}...")
+    stripe.api_version = "2026-02-25.clover"
+    print(f"Stripe initialized with key: {STRIPE_KEY[:10]}... and version 2026-02-25.clover")
 
 webhook_secret = os.environ.get("STRIPE_WEBHOOK_SECRET", "whsec_placeholder")
 
