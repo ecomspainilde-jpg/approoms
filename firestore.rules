@@ -3,41 +3,58 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Users collection - users can read/write their own document
+    // Helper to check if the user is an admin based on the users collection
+    function isAdmin() {
+      return request.auth != null && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+    }
+    
+    // Users collection
     match /users/{userId} {
-      allow read, write: if request.auth != null && (request.auth.uid == userId || request.auth.token.admin == true);
-      // Admins can read all users
-      allow list: if request.auth != null && request.auth.token.admin == true;
+      // Users can read/write their own document
+      // Admins can read and write ALL user documents
+      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      allow write: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      allow list: if isAdmin();
     }
     
     // Renders collection - users can read their own renders, create new ones, delete their own
     match /renders/{renderId} {
-      allow read, delete: if request.auth != null && (request.auth.uid == resource.data.userId || request.auth.token.admin == true);
+      allow read, delete: if request.auth != null && (request.auth.uid == resource.data.userId || isAdmin());
       allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
       // Admins can read all renders
-      allow list: if request.auth != null && request.auth.token.admin == true;
+      allow list: if isAdmin();
     }
 
     // Purchases collection
     match /purchases/{purchaseId} {
-      allow read: if request.auth != null && (request.auth.uid == resource.data.userId || request.auth.token.admin == true);
-      allow list: if request.auth != null && request.auth.token.admin == true;
+      allow read: if request.auth != null && (request.auth.uid == resource.data.userId || isAdmin());
+      allow list: if isAdmin();
+      // Allow creation by anyone (though usually handled server-side via webhook, 
+      // sometimes clients log initiation)
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
     }
     
     // Pricing - anyone can read, only admins can write
     match /pricing/{docId} {
       allow read: if true;
-      allow write: if request.auth != null && request.auth.token.admin == true;
+      allow write: if isAdmin();
+    }
+    
+    // Packages - anyone can read, only admins can write
+    match /packages/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
     }
     
     // Price history - only admins can read/write
     match /priceHistory/{docId} {
-      allow read, write: if request.auth != null && request.auth.token.admin == true;
+      allow read, write: if isAdmin();
     }
     
     // Admin stats
     match /stats/{docId} {
-      allow read: if request.auth != null && request.auth.token.admin == true;
+      allow read: if isAdmin();
     }
   }
 }

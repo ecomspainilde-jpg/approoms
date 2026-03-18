@@ -779,18 +779,29 @@ def stripe_webhook():
 
 
 def verify_admin():
-    """Verify if the user is an admin."""
+    """Verify if the user is an admin by checking Firestore."""
     user = verify_token()
     if not user:
         return None
-    # Check custom claims for admin role
+    
+    if not db:
+        return None
+
     try:
+        # Source of truth: Firestore users collection
+        user_doc = db.collection("users").document(user["uid"]).get()
+        if user_doc.exists and user_doc.to_dict().get("isAdmin") == True:
+            # Optionally sync claim if missing for faster subsequent checks if needed
+            # but for now, we just return the user
+            return user
+            
+        # Fallback: check custom claims (old method)
         user_record = auth.get_user(user["uid"])
         claims = user_record.custom_claims
         if claims and claims.get("admin") == True:
             return user
     except Exception as e:
-        print("Error checking admin claims:", e)
+        print("Error checking admin status:", e)
     return None
 
 
@@ -819,7 +830,7 @@ def admin_get_users():
 
 @app.route("/api/admin/users/<uid>", methods=["PATCH"])
 def admin_update_user(uid):
-    """Update user data (admin only)."""
+    """Update user data and sync admin claims (admin only)."""
     admin = verify_admin()
     if not admin:
         return jsonify({"error": "Unauthorized - Admin access required"}), 403
@@ -836,8 +847,18 @@ def admin_update_user(uid):
         if not update_data:
             return jsonify({"error": "No valid fields to update"}), 400
 
+        # Update Firestore
         db.collection("users").document(uid).update(update_data)
         
+        # Sync Firebase Auth Custom Claims if isAdmin is changed
+        if "isAdmin" in update_data:
+            is_admin_val = update_data["isAdmin"]
+            try:
+                auth.set_custom_user_claims(uid, {"admin": is_admin_val})
+                print(f"Synced custom claims for user {uid}: admin={is_admin_val}")
+            except Exception as e:
+                print(f"Warning: failed to sync custom claims for {uid}: {e}")
+
         return jsonify({"success": True, "message": f"User {uid} updated successfully"})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
