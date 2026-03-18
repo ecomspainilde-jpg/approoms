@@ -107,18 +107,17 @@ function selectQuality(q) {
     else cards[1].classList.add('selected');
 }
 
-// ÔöÇÔöÇ Upload Zone ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
-const uploadZone = document.getElementById('upload-zone');
+// ————— Upload Zone ————————————————————————————————————————————————————————————
+const dropzone = document.getElementById('dropzone');
 const fileInput = document.getElementById('file-input');
-const uploadPlaceholder = document.getElementById('upload-placeholder');
-const uploadPreview = document.getElementById('upload-preview');
-const previewGrid = document.getElementById('preview-grid');
+const dropzoneContent = document.getElementById('dropzone-content');
+const imagePreview = document.getElementById('image-preview');
 const nextBtn = document.getElementById('next-btn');
 const backBtn = document.getElementById('back-btn');
 const analysisPanel = document.getElementById('analysis-panel');
 
-uploadZone.addEventListener('click', (e) => {
-    if (e.target.id === 'change-photo-btn' || e.target.closest('.photo-thumb')) return;
+dropzone.addEventListener('click', (e) => {
+    if (e.target.id === 'change-photo-btn') return;
     fileInput.click();
 });
 document.getElementById('change-photo-btn').addEventListener('click', () => {
@@ -126,17 +125,17 @@ document.getElementById('change-photo-btn').addEventListener('click', () => {
     fileInput.click();
 });
 
-uploadZone.addEventListener('dragover', (e) => { e.preventDefault(); uploadZone.classList.add('dragover'); });
-uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
-uploadZone.addEventListener('drop', (e) => {
+dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('border-primary'); });
+dropzone.addEventListener('dragleave', () => dropzone.classList.remove('border-primary'));
+dropzone.addEventListener('drop', (e) => {
     e.preventDefault();
-    uploadZone.classList.remove('dragover');
-    const files = Array.from(e.dataTransfer.files).slice(0, 3);
+    dropzone.classList.remove('border-primary');
+    const files = Array.from(e.dataTransfer.files).slice(0, 1);
     if (files.length > 0) handleFiles(files);
 });
 
 fileInput.addEventListener('change', () => {
-    const files = Array.from(fileInput.files).slice(0, 3);
+    const files = Array.from(fileInput.files).slice(0, 1);
     if (files.length > 0) handleFiles(files);
 });
 
@@ -144,45 +143,16 @@ function resetUpload() {
     state.imagesBase64 = [];
     state.primaryIndex = 0;
     state.roomData = null;
-    uploadPlaceholder.classList.remove('hidden');
-    uploadPreview.classList.add('hidden');
-    uploadZone.classList.remove('has-image');
+    dropzoneContent.classList.remove('hidden');
+    imagePreview.classList.add('hidden');
     analysisPanel.classList.add('hidden');
     setBtnEnabled(nextBtn, false);
     fileInput.value = '';
-    previewGrid.innerHTML = '';
 }
 
 async function handleFiles(files) {
     state.imagesBase64 = [];
     state.primaryIndex = 0;
-    previewGrid.innerHTML = '';
-
-    for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        if (file.size > 10 * 1024 * 1024) { alert(`El archivo ${file.name} supera los 10 MB`); continue; }
-
-        const dataUrl = await new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onload = (e) => resolve(e.target.result);
-            reader.readAsDataURL(file);
-        });
-
-        const idx = state.imagesBase64.length;
-        state.imagesBase64.push(dataUrl.split(',')[1]);
-
-        // Build photo-thumb with primary selector
-        const thumb = document.createElement('div');
-        thumb.className = 'photo-thumb' + (idx === 0 ? ' primary' : '');
-        thumb.dataset.idx = idx;
-        thumb.innerHTML = `
-            <img src="${dataUrl}" class="w-full h-40 object-cover" alt="Foto ${idx + 1}">
-            <span class="primary-badge">Ôÿà Principal</span>
-            <span class="select-hint">Usar como principal</span>
-        `;
-        thumb.addEventListener('click', () => setPrimaryPhoto(idx));
-        previewGrid.appendChild(thumb);
-    }
 
     if (state.imagesBase64.length > 0) {
         uploadPlaceholder.classList.add('hidden');
@@ -243,6 +213,7 @@ async function analyzeImage() {
             `;
             document.getElementById('analysis-text').innerHTML = analysisHtml;
             document.getElementById('analysis-result').classList.remove('hidden');
+            document.getElementById('analysis-panel').classList.remove('hidden');
 
             // ÔöÇÔöÇ Image Validation UI ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
             const v = data.image_validation;
@@ -453,13 +424,35 @@ function goToStep3() {
     backBtn.classList.remove('invisible');
 }
 
+function updateStepper() {
+    for (let i = 1; i <= 3; i++) {
+        const indicator = document.getElementById(`step-indicator-${i}`);
+        const text = indicator.nextElementSibling;
+        
+        indicator.classList.remove('step-active', 'step-done', 'step-inactive');
+        
+        if (i < state.currentStep) {
+            indicator.classList.add('step-done');
+            indicator.innerHTML = '<span class="material-symbols-outlined text-sm">check</span>';
+        } else if (i === state.currentStep) {
+            indicator.classList.add('step-active');
+            indicator.innerHTML = i;
+        } else {
+            indicator.classList.add('step-inactive');
+            indicator.innerHTML = i;
+        }
+    }
+}
+
 function showSection(id) {
-    ['section-upload','section-style','section-generate','result-panel'].forEach(s => {
-        const el = document.getElementById(s);
-        if (el) el.classList.add('hidden');
+    [1, 2, 3, 4, 5].forEach(num => {
+        const el = document.getElementById(`step-${num}`);
+        if (el) {
+            if (`step-${num}` === id) el.classList.remove('hidden');
+            else el.classList.add('hidden');
+        }
     });
-    const target = document.getElementById(id);
-    if (target) target.classList.remove('hidden');
+    updateStepper();
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -480,15 +473,16 @@ function setActiveStep(n) {
             el.closest('.flex').classList.add('opacity-40');
         }
     });
+    updateStepper(); // Call the new stepper update function
 }
 
-// ÔöÇÔöÇ Generate ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+// Generate
 async function generateRender() {
     const btn = document.getElementById('btn-generate');
     btn.disabled = true;
-    btn.innerHTML = '<svg class="spin size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> ProcesandoÔÇª';
+    btn.innerHTML = '<svg class="spin size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> Procesando…';
 
-    const prompt = document.getElementById('prompt-input').value || 'Una habitaci├│n bella y acogedora';
+    const prompt = document.getElementById('prompt-input').value || 'Una habitación bella y acogedora';
     const primaryImageB64 = state.imagesBase64[state.primaryIndex] || state.imagesBase64[0] || null;
 
     const progressPanel = document.getElementById('gen-progress');
@@ -546,13 +540,13 @@ async function generateRender() {
             document.getElementById('label-pay').classList.replace('text-primary', 'text-amber-500');
             
             btn.disabled = false;
-            btn.innerHTML = '<span class="material-symbols-outlined">payments</span> Comprar Cr├®ditos';
+            btn.innerHTML = '<span class="material-symbols-outlined">payments</span> Comprar Créditos';
             btn.onclick = () => window.open('modal-compra.html?error=insufficient_credits', 'Purchase', 'width=1000,height=800');
             
             const errBox = document.createElement('div');
             errBox.id = 'gen-error-box';
             errBox.className = 'mt-4 bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 text-amber-400 text-sm flex items-start gap-2 fade-in';
-            errBox.innerHTML = `<span class="material-symbols-outlined text-sm mt-0.5 flex-shrink-0">toll</span><div><strong>No tienes cr├®ditos suficientes:</strong><br>Necesitas al menos 1 cr├®dito para generar este render. <a href="modal-compra.html?error=insufficient_credits" target="_blank" class="underline font-bold">Haz clic aqu├¡ para a├▒adir cr├®ditos.</a></div>`;
+            errBox.innerHTML = `<span class="material-symbols-outlined text-sm mt-0.5 flex-shrink-0">toll</span><div><strong>No tienes créditos suficientes:</strong><br>Necesitas al menos 1 crédito para generar este render. <a href="modal-compra.html?error=insufficient_credits" target="_blank" class="underline font-bold">Haz clic aquí para añadir créditos.</a></div>`;
             progressPanel.after(errBox);
             return;
         }
@@ -591,7 +585,7 @@ async function generateRender() {
     }
 }
 
-// ÔöÇÔöÇ PDF & Sharing ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+// PDF & Sharing
 async function generatePDF() {
     const btn = document.getElementById('btn-pdf');
     const originalText = btn.innerHTML;
@@ -601,7 +595,7 @@ async function generatePDF() {
     try {
         // Build inline render data as fallback when render wasn't saved to Firestore
         const inlineRenderData = {
-            room_type: state.roomData ? state.roomData.room_type : 'Habitaci├│n',
+            room_type: state.roomData ? state.roomData.room_type : 'Habitación',
             approx_size: state.roomData ? state.roomData.approx_size : '',
             style: state.selectedStyle || 'moderno',
             roomData: state.roomData || {},
@@ -638,7 +632,7 @@ async function generatePDF() {
         }
     } catch (e) {
         console.error(e);
-        alert("Fallo de conexi├│n al generar PDF");
+        alert("Fallo de conexión al generar PDF");
     } finally {
         btn.disabled = false;
         btn.innerHTML = originalText;
@@ -647,7 +641,7 @@ async function generatePDF() {
 
 function shareResult(platform) {
     const url = encodeURIComponent(window.location.origin);
-    const text = encodeURIComponent("┬íMira el nuevo dise├▒o de mi habitaci├│n con RenderRoom AI! Ô£¿ #InteriorDesign #AI");
+    const text = encodeURIComponent("¡Mira el nuevo diseño de mi habitación con RenderRoom AI! ✨ #InteriorDesign #AI");
     let shareUrl = "";
     
     switch(platform) {
@@ -669,6 +663,16 @@ function showResult(data, userPrompt) {
     document.getElementById('result-image').src = imgSrc;
     document.getElementById('download-btn').href = imgSrc;
     document.getElementById('result-panel').classList.remove('hidden');
+    nextBtn.classList.add('hidden');
+    backBtn.classList.add('hidden');
+    
+    // Smooth progress update
+    let progress = 0;
+    const interval = setInterval(() => {
+        progress += Math.random() * 5;
+        if (progress > 95) progress = 95;
+        document.getElementById('render-progress').style.width = `${progress}%`;
+    }, 1000);
 
     // Proposal panel
     const desc = state.roomData ? state.roomData.detailed_description_es : '';

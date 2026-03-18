@@ -52,48 +52,51 @@
             .step-inactive {
                 @apply bg-surface text-text-secondary border border-border opacity-40;
             }
-            .fade-in {
-                animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            .animate-scan {
+                animation: scan 3s ease-in-out infinite;
             }
-            @keyframes fadeIn {
-                from { opacity: 0; transform: translateY(20px); }
-                to { opacity: 1; transform: translateY(0); }
+            @keyframes scan {
+                0%, 100% { transform: translateY(-100%); opacity: 0; }
+                50% { transform: translateY(100%); opacity: 1; }
+            }
+            .animate-spin-slow {
+                animation: spin 8s linear infinite;
             }
             .style-card.selected {
-                @apply border-primary ring-4 ring-primary/10 scale-[1.02] shadow-2xl shadow-primary/20;
+                @apply border-primary ring-4 ring-primary/10 scale-[1.02] shadow-2xl shadow-primary/20 bg-primary/5;
             }
             .quality-card.selected {
-                @apply border-primary bg-primary/5 ring-4 ring-primary/10;
+                @apply border-primary bg-primary/5 ring-8 ring-primary/5 scale-[1.02] shadow-2xl shadow-primary/20;
             }
         }
     </style>
 </head>
-<body class="bg-background font-display text-text-primary antialiased min-h-screen flex flex-col">
+<body class="bg-[#FDFCFB] font-display text-text-primary antialiased min-h-screen flex flex-col">
     <!-- TOP NAVIGATION -->
     <header class="fixed top-0 left-0 right-0 z-50 glass-header border-b border-border h-20">
         <div class="max-w-7xl mx-auto px-6 h-full flex items-center justify-between">
             <a href="01-landing-page.html" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
-                <div class="size-9 bg-primary rounded-lg flex items-center justify-center text-white">
-                    <span class="material-symbols-outlined font-bold text-xl">deployed_code</span>
+                <div class="size-9 bg-primary rounded-lg flex items-center justify-center text-white shadow-lg shadow-primary/20">
+                    <span class="material-symbols-outlined font-black text-xl">deployed_code</span>
                 </div>
                 <h2 class="text-xl font-black tracking-tight">Render<span class="text-primary">Room</span></h2>
             </a>
 
             <!-- Stepper Desktop -->
-            <nav class="hidden lg:flex items-center gap-12">
+            <nav class="hidden lg:flex items-center gap-8">
                 <div class="flex items-center gap-3">
-                    <div id="step-indicator-1" class="size-8 rounded-full flex items-center justify-center text-xs font-black step-active">1</div>
-                    <span class="text-sm font-bold">Subida</span>
+                    <div id="step-indicator-1" class="size-9 rounded-xl flex items-center justify-center text-xs font-black step-active">1</div>
+                    <span class="text-xs font-black uppercase tracking-widest text-primary">Subida</span>
                 </div>
-                <div class="w-12 h-px bg-border"></div>
-                <div class="flex items-center gap-3 opacity-40">
-                    <div id="step-indicator-2" class="size-8 rounded-full flex items-center justify-center text-xs font-black step-inactive">2</div>
-                    <span class="text-sm font-bold">Estilo</span>
+                <div class="w-8 h-px bg-border/50"></div>
+                <div class="flex items-center gap-3">
+                    <div id="step-indicator-2" class="size-9 rounded-xl flex items-center justify-center text-xs font-black step-inactive">2</div>
+                    <span class="text-xs font-black uppercase tracking-widest text-text-secondary">Estilo</span>
                 </div>
-                <div class="w-12 h-px bg-border"></div>
-                <div class="flex items-center gap-3 opacity-40">
-                    <div id="step-indicator-3" class="size-8 rounded-full flex items-center justify-center text-xs font-black step-inactive">3</div>
-                    <span class="text-sm font-bold">Pago</span>
+                <div class="w-8 h-px bg-border/50"></div>
+                <div class="flex items-center gap-3">
+                    <div id="step-indicator-3" class="size-9 rounded-xl flex items-center justify-center text-xs font-black step-inactive">3</div>
+                    <span class="text-xs font-black uppercase tracking-widest text-text-secondary">Generar</span>
                 </div>
             </nav>
 
@@ -123,34 +126,6 @@
                         <span class="material-symbols-outlined text-xs">info</span> Empieza Aquí
                     </div>
                     <h1 class="text-4xl md:text-5xl font-black tracking-tight mb-4">Sube tu Habitación</h1>
-                    <p class="text-text-secondary text-lg">Captura una foto clara para que nuestra IA pueda analizar el potencial de tu espacio.</p>
-                </div>
-
-                <!-- DROPZONE -->
-                <div class="relative group" id="dropzone-container">
-                    <input type="file" id="file-input" class="hidden" accept="image/*">
-                    <div class="absolute -inset-1 bg-gradient-to-r from-primary/20 to-orange-500/20 rounded-[2rem] blur-xl opacity-0 group-hover:opacity-100 transition duration-500"></div>
-                    <div id="dropzone" class="relative bg-white border-2 border-dashed border-border group-hover:border-primary/50 rounded-[2rem] p-16 flex flex-col items-center justify-center gap-8 transition-all solar-glow cursor-pointer overflow-hidden">
-                        <img id="image-preview" class="hidden absolute inset-0 w-full h-full object-cover z-0" src="" alt="Vista previa">
-                        <div id="dropzone-content" class="relative z-10 flex flex-col items-center justify-center gap-8">
-                            <div class="size-24 bg-primary/10 rounded-3xl flex items-center justify-center text-primary group-hover:scale-110 transition-transform duration-500">
-                                <span class="material-symbols-outlined !text-5xl">cloud_upload</span>
-                            </div>
-                            <div class="text-center space-y-2">
-                                <h2 class="text-2xl font-black">Arrastra tu imagen aquí</h2>
-                                <p class="text-text-secondary">O haz clic para explorar tus archivos</p>
-                                <p class="text-[10px] font-bold text-text-secondary/50 uppercase tracking-widest pt-4">JPG, PNG o WEBP • MÁX 10MB</p>
-                            </div>
-                            <button id="select-btn" class="bg-primary hover:bg-primary/90 text-white px-10 py-4 rounded-2xl font-black text-lg transition-all hover:scale-105 shadow-xl shadow-primary/20">
-                                Seleccionar Archivo
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- UPLOAD STATUS / ANALYSIS -->
-                <div id="analysis-panel" class="hidden mt-8 p-8 bg-surface border border-border rounded-[2rem] fade-in">
-                    <div id="analysis-loading" class="flex flex-col items-center gap-4 py-4">
                         <div class="size-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
                         <p class="text-sm font-bold text-text-secondary">Analizando espacio con Gemini Vision...</p>
                     </div>
