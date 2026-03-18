@@ -21,12 +21,12 @@ El equipo utiliza una carpeta oculta en la raíz del proyecto para comunicarse:
 ## Protocolo de Orquestación Avanzada
 
 ### 1. Modo de Planificación (Gatekeeping)
-Antes de realizar cambios significativos, cada agente debe enviar un **Plan de Acción** al buzón de Alejabot.
-- El agente se mantiene en modo `READ_ONLY` o `PLANNING` hasta que Alejabot responda con un mensaje de `APPROVED`.
+Antes de realizar cambios significativos, cada agente debe enviar un **Plan de Acción** al buzón de Superilde.
+- El agente se mantiene en modo `READ_ONLY` o `PLANNING` hasta que Superilde responda con un mensaje de `APPROVED`.
 
 ### 2. Mensajería y Difusión (Broadcast)
 - **Mensaje Directo**: Coordinación 1 a 1 entre especialistas.
-- **Broadcast**: Alejabot puede escribir en `broadcast.msg` para dar nuevas directrices a todo el equipo simultáneamente.
+- **Broadcast**: Superilde puede escribir en `broadcast.msg` para dar nuevas directrices a todo el equipo simultáneamente.
 
 ### 3. Sincronización de Tareas y Dependencias
 - Las tareas en `tasks.json` pueden tener una lista de `dependencies`. Una IA no debe reclamar una tarea si sus dependencias no están en estado `COMPLETED`.

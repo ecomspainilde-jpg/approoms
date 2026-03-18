@@ -7,6 +7,8 @@ from datetime import timezone
 from typing import List, Dict, Any, Optional, Union
 from flask import Flask, request, jsonify, send_from_directory  # type: ignore
 from dotenv import load_dotenv  # type: ignore
+import io
+from PIL import Image
 
 def safe_truncate(text: Any, limit: int = 500) -> str:
     """Safely truncate text to avoid massive log payloads."""
@@ -16,6 +18,51 @@ def safe_truncate(text: Any, limit: int = 500) -> str:
     if len(text_val) <= limit:
         return text_val
     return text_val[0:limit] + "... [TRUNCATED]"  # type: ignore
+
+def optimize_image_data(image_base64, max_dim=1280, quality=75):
+    """
+    Decodes base64 image, resizes if necessary, and compresses as JPEG.
+    Returns the optimized binary data and the new content type.
+    """
+    try:
+        # Decode base64 to bytes
+        img_data = base64.b64decode(image_base64)
+        img = Image.open(io.BytesIO(img_data))
+        
+        # Convert to RGB (removes alpha channel, required for JPEG)
+        if img.mode in ("RGBA", "P"):
+            img = img.convert("RGB")
+        
+        # Resize if too large
+        width, height = img.size
+        if width > max_dim or height > max_dim:
+            if width > height:
+                new_width = max_dim
+                new_height = int(max_dim * height / width)
+            else:
+                new_height = max_dim
+                new_width = int(max_dim * width / height)
+            img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
+        
+        # Save to buffer
+        buffer = io.BytesIO()
+        img.save(buffer, format="JPEG", quality=quality, optimize=True)
+        return buffer.getvalue(), "image/jpeg"
+    except Exception as e:
+        print(f"Error optimizing image: {e}")
+        # Fallback to original data if optimization fails
+        # Attempt to determine original content type if possible, otherwise default to png
+        try:
+            # This is a heuristic, not foolproof
+            if image_base64.startswith("/9j/"): # JPEG magic number
+                return base64.b64decode(image_base64), "image/jpeg"
+            elif image_base64.startswith("iVBORw0KGgo"): # PNG magic number
+                return base64.b64decode(image_base64), "image/png"
+            else:
+                return base64.b64decode(image_base64), "application/octet-stream" # Generic fallback
+        except Exception:
+            return base64.b64decode(image_base64), "application/octet-stream"
+
 
 # Load environment variables from .env
 env_path = os.path.join(os.path.dirname(__file__), ".env")
@@ -399,20 +446,24 @@ def api_generate_image():
             )
 
         try:
-            # Save Input Image to Firebase Storage if provided
+            # Save Input Image to Firebase Storage if provided (Optimized)
             input_image_filename = None
             if image_base64:
                 input_image_id = f"{str(uuid.uuid4())}_input"
-                input_image_filename = f"uploads/{user['uid']}/{input_image_id}.png"
+                input_image_filename = f"uploads/{user['uid']}/{input_image_id}.jpg"
                 input_blob = bucket.blob(input_image_filename)
-                input_data = base64.b64decode(image_base64)
-                input_blob.upload_from_string(input_data, content_type="image/png")
+                
+                # Optimize input image
+                optimized_input_data, content_type_input = optimize_image_data(image_base64)
+                input_blob.upload_from_string(optimized_input_data, content_type=content_type_input)
 
-            # Save Generated Render to Firebase Storage (image_id already set above)
-            filename = f"renders/{user['uid']}/{image_id}.png"
+            # Save Generated Render to Firebase Storage (Optimized)
+            filename = f"renders/{user['uid']}/{image_id}.jpg"
             blob = bucket.blob(filename)
-            image_data = base64.b64decode(image_b64)
-            blob.upload_from_string(image_data, content_type="image/png")
+            
+            # Optimize generated image
+            optimized_gen_data, content_type_gen = optimize_image_data(image_b64)
+            blob.upload_from_string(optimized_gen_data, content_type=content_type_gen)
 
             # Save metadata to Firestore
             if not db:
