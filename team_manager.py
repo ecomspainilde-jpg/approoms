@@ -51,4 +51,15 @@ def send_message(sender, receiver, text):
 if __name__ == "__main__":
     if len(sys.argv) > 1:
         cmd = sys.argv[1]
-        if cmd == "init": init_team()
+        if cmd == "init":
+            init_team()
+        elif cmd == "assign" and len(sys.argv) >= 4:
+            # Usage: python team_manager.py assign "Task Title" "assigned_to" ["dep1,dep2"]
+            deps = sys.argv[4].split(",") if len(sys.argv) > 4 else []
+            assign_task(sys.argv[2], sys.argv[3], deps)
+        elif cmd == "broadcast" and len(sys.argv) >= 4:
+            # Usage: python team_manager.py broadcast "sender" "message"
+            broadcast(sys.argv[2], sys.argv[3])
+        elif cmd == "send" and len(sys.argv) >= 5:
+            # Usage: python team_manager.py send "sender" "receiver" "message"
+            send_message(sys.argv[2], sys.argv[3], sys.argv[4])

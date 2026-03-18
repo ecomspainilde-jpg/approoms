@@ -26,15 +26,58 @@
       "title": "System Status Verification",
       "status": "COMPLETED",
       "assigned_to": "Revisor",
-      "dependencies": [1, 2, 3]
+      "dependencies": [
+        1,
+        2,
+        3
+      ]
     },
     {
       "id": 5,
       "title": "Blog Generation (NotebookLM)",
       "status": "COMPLETED",
       "assigned_to": "Marketer",
-      "dependencies": [4]
+      "dependencies": [
+        4
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Diagnosticar Blog",
+      "status": "PENDING",
+      "plan_approved": false,
+      "assigned_to": "Investigador",
+      "dependencies": []
+    },
+    {
+      "id": 7,
+      "title": "Depurar Generaci\u00f3n de Im\u00e1genes",
+      "status": "PENDING",
+      "plan_approved": false,
+      "assigned_to": "Backend",
+      "dependencies": []
+    },
+    {
+      "id": 8,
+      "title": "Revisar Stripe y API Keys",
+      "status": "PENDING",
+      "plan_approved": false,
+      "assigned_to": "Revisor",
+      "dependencies": []
+    },
+    {
+      "id": 9,
+      "title": "Reparar UI y Botones",
+      "status": "PENDING",
+      "plan_approved": false,
+      "assigned_to": "Frontend",
+      "dependencies": []
     }
   ],
-  "members": ["Superilde", "Architect", "Marketer", "Revisor"]
+  "members": [
+    "Superilde",
+    "Architect",
+    "Marketer",
+    "Revisor"
+  ]
 }

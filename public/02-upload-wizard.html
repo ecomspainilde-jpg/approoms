@@ -82,17 +82,17 @@
             <!-- Stepper Desktop -->
             <nav class="hidden lg:flex items-center gap-12">
                 <div class="flex items-center gap-3">
-                    <div class="size-8 rounded-full flex items-center justify-center text-xs font-black step-active">1</div>
+                    <div id="step-indicator-1" class="size-8 rounded-full flex items-center justify-center text-xs font-black step-active">1</div>
                     <span class="text-sm font-bold">Subida</span>
                 </div>
                 <div class="w-12 h-px bg-border"></div>
                 <div class="flex items-center gap-3 opacity-40">
-                    <div class="size-8 rounded-full flex items-center justify-center text-xs font-black step-inactive">2</div>
+                    <div id="step-indicator-2" class="size-8 rounded-full flex items-center justify-center text-xs font-black step-inactive">2</div>
                     <span class="text-sm font-bold">Estilo</span>
                 </div>
                 <div class="w-12 h-px bg-border"></div>
                 <div class="flex items-center gap-3 opacity-40">
-                    <div class="size-8 rounded-full flex items-center justify-center text-xs font-black step-inactive">3</div>
+                    <div id="step-indicator-3" class="size-8 rounded-full flex items-center justify-center text-xs font-black step-inactive">3</div>
                     <span class="text-sm font-bold">Pago</span>
                 </div>
             </nav>
@@ -523,7 +523,7 @@
     <!-- STICKY FOOTER CONTROLS -->
     <footer class="sticky bottom-0 bg-white/90 backdrop-blur-xl border-t border-border py-6 z-40">
         <div class="max-w-7xl mx-auto px-6 flex items-center justify-between">
-            <button onclick="prevStep()" id="back-btn" class="flex items-center gap-2 text-text-secondary hover:text-primary font-bold transition-colors">
+            <button onclick="prevStep()" id="back-btn" class="flex items-center gap-2 text-text-secondary hover:text-primary font-bold transition-colors invisible">
                 <span class="material-symbols-outlined">arrow_back</span> Atrás
             </button>
             <div class="flex items-center gap-6">

@@ -1,4 +1,4 @@
-﻿const db = firebase.firestore();
+const db = firebase.firestore();
 const auth = firebase.auth();
 
 auth.onAuthStateChanged(async (user) => {
@@ -113,7 +113,8 @@ const fileInput = document.getElementById('file-input');
 const uploadPlaceholder = document.getElementById('upload-placeholder');
 const uploadPreview = document.getElementById('upload-preview');
 const previewGrid = document.getElementById('preview-grid');
-const btnToStyle = document.getElementById('btn-to-style');
+const nextBtn = document.getElementById('next-btn');
+const backBtn = document.getElementById('back-btn');
 const analysisPanel = document.getElementById('analysis-panel');
 
 uploadZone.addEventListener('click', (e) => {
@@ -147,7 +148,7 @@ function resetUpload() {
     uploadPreview.classList.add('hidden');
     uploadZone.classList.remove('has-image');
     analysisPanel.classList.add('hidden');
-    setBtnEnabled(btnToStyle, false);
+    setBtnEnabled(nextBtn, false);
     fileInput.value = '';
     previewGrid.innerHTML = '';
 }
@@ -311,7 +312,7 @@ async function analyzeImage() {
 
                 // Block or allow advancing
                 if (!ok) {
-                    setBtnEnabled(btnToStyle, false);
+                    setBtnEnabled(nextBtn, false);
                     // Show specific block message
                     const errorEl = document.getElementById('analysis-error');
                     const errorText = document.getElementById('analysis-error-text');
@@ -330,7 +331,7 @@ async function analyzeImage() {
         document.getElementById('analysis-error-text').textContent = 'Sin conexi├│n al servidor';
         document.getElementById('analysis-error').classList.remove('hidden');
     }
-    setBtnEnabled(btnToStyle, true);
+    setBtnEnabled(nextBtn, true);
 }
 
 // ÔöÇÔöÇ Style selector ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
@@ -339,7 +340,7 @@ function selectStyle(card) {
     card.classList.add('selected');
     state.selectedStyle = card.dataset.style;
     showRecommendations();
-    setBtnEnabled(document.getElementById('btn-to-generate'), true);
+    setBtnEnabled(nextBtn, true);
 }
 
 function showRecommendations() {
@@ -401,58 +402,83 @@ function setBtnEnabled(btn, on) {
     }
 }
 
+function nextStep() {
+    if (state.currentStep === 1) {
+        goToStep2();
+    } else if (state.currentStep === 2) {
+        goToStep3();
+    }
+}
+
+function prevStep() {
+    if (state.currentStep === 2) {
+        goToStep1();
+    } else if (state.currentStep === 3) {
+        goToStep2();
+    }
+}
+
 function goToStep1() {
     showSection('section-upload');
     setActiveStep(1);
+    setBtnEnabled(nextBtn, state.imagesBase64.length > 0);
+    backBtn.classList.add('invisible');
 }
+
 function goToStep2() {
     if (state.imagesBase64.length === 0) { alert('Por favor, sube al menos una foto.'); return; }
     showSection('section-style');
     setActiveStep(2);
+    setBtnEnabled(nextBtn, !!state.selectedStyle);
+    backBtn.classList.remove('invisible');
+    nextBtn.classList.remove('hidden');
 }
+
 function goToStep3() {
     if (!state.selectedStyle) { alert('Por favor, elige un estilo.'); return; }
-    // Populate summary
-    const summaryGrid = document.getElementById('summary-photos');
-    summaryGrid.innerHTML = '';
-    state.imagesBase64.forEach((imgB64, idx) => {
-        const wrap = document.createElement('div');
-        wrap.className = 'relative';
-        const img = document.createElement('img');
-        img.src = `data:image/jpeg;base64,${imgB64}`;
-        img.className = "h-16 w-16 rounded-lg object-cover";
-        img.alt = `Foto ${idx + 1}`;
-        wrap.appendChild(img);
-        if (idx === state.primaryIndex) {
-            const badge = document.createElement('span');
-            badge.className = 'absolute -top-1 -right-1 bg-primary text-background-dark text-[8px] font-black px-1.5 py-0.5 rounded-full';
-            badge.textContent = 'Ôÿà';
-            wrap.appendChild(badge);
-        }
-        summaryGrid.appendChild(wrap);
-    });
+    // Update summary preview
+    const summaryPreview = document.getElementById('summary-preview');
+    if (summaryPreview && state.imagesBase64.length > 0) {
+        summaryPreview.src = `data:image/jpeg;base64,${state.imagesBase64[state.primaryIndex]}`;
+    }
+
     document.getElementById('summary-style').textContent = state.selectedStyle.charAt(0).toUpperCase() + state.selectedStyle.slice(1);
     const roomInfo = state.roomData ? `${state.roomData.room_type} (${state.roomData.approx_size})` : '';
-    document.getElementById('summary-style').innerHTML = `${state.selectedStyle.charAt(0).toUpperCase() + state.selectedStyle.slice(1)} <span class="text-xs text-muted-text ml-2">${roomInfo}</span>`;
-    document.getElementById('summary-prompt').textContent = document.getElementById('prompt-input').value || '(sin descripci├│n adicional)';
+    document.getElementById('summary-style').innerHTML = `${state.selectedStyle.charAt(0).toUpperCase() + state.selectedStyle.slice(1)} <span class="text-xs text-text-secondary ml-2">${roomInfo}</span>`;
+    document.getElementById('summary-prompt').textContent = document.getElementById('prompt-input').value || '(sin descripción adicional)';
+    
     showSection('section-generate');
     setActiveStep(3);
+    nextBtn.classList.add('hidden'); // Use the main generate button instead
+    backBtn.classList.remove('invisible');
 }
 
 function showSection(id) {
-    ['section-upload','section-style','section-generate'].forEach(s => {
-        document.getElementById(s).classList.add('hidden');
+    ['section-upload','section-style','section-generate','result-panel'].forEach(s => {
+        const el = document.getElementById(s);
+        if (el) el.classList.add('hidden');
     });
-    document.getElementById(id).classList.remove('hidden');
+    const target = document.getElementById(id);
+    if (target) target.classList.remove('hidden');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function setActiveStep(n) {
     state.currentStep = n;
     [1,2,3].forEach(i => {
         const el = document.getElementById(`step-indicator-${i}`);
-        el.classList.remove('active','done');
-        if (i < n) el.classList.add('done');
-        else if (i === n) el.classList.add('active');
+        if (!el) return;
+        el.classList.remove('step-active','step-done','step-inactive');
+        if (i < n) {
+            el.classList.add('step-done');
+            el.closest('.flex').classList.remove('opacity-40');
+        } else if (i === n) {
+            el.classList.add('step-active');
+            el.closest('.flex').classList.remove('opacity-40');
+        } else {
+            el.classList.add('step-inactive');
+            el.closest('.flex').classList.add('opacity-40');
+        }
     });
 }
 
@@ -720,6 +746,6 @@ function selectQuality(q) {
         lbl.textContent = q === 'high' ? '2 cr├®ditos (Alta Fidelidad)' : '1 cr├®dito (B├ísica)';
     }
 }
-</script>
-</body>
-</html>
+
+// Initialize
+goToStep1();
