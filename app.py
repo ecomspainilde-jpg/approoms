@@ -95,11 +95,40 @@ webhook_secret = os.environ.get("STRIPE_WEBHOOK_SECRET", "whsec_placeholder")
 
 # Initialize Google Generative AI (AI Studio)
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
-if GEMINI_API_KEY:
-    genai.configure(api_key=GEMINI_API_KEY)
-    print("Google Generative AI configured successfully.")
+
+def is_valid_studio_key(key):
+    return key and not key.startswith("AQ.") and not key.startswith("projects/")
+
+if is_valid_studio_key(GEMINI_API_KEY):
+    try:
+        genai.configure(api_key=GEMINI_API_KEY)
+        print("Google Generative AI (AI Studio) configured successfully.")
+    except Exception as e:
+        print(f"Error configuring AI Studio: {e}")
 else:
-    print("WARNING: GEMINI_API_KEY is missing in .env")
+    print("AI Studio key missing or invalid (AQ./projects/). Using fallback if available.")
+
+# Initialize Vertex AI as fallback
+try:
+    project_id = os.environ.get("GCP_PROJECT_ID", "gen-lang-client-0426824151")
+    location = os.environ.get("GCP_LOCATION", "us-central1")
+    vertexai.init(project=project_id, location=location)
+    print(f"Vertex AI initialized for project: {project_id}")
+except Exception as e:
+    print(f"Vertex AI initialization skipped: {e}")
+
+def get_model(model_name):
+    """Returns a model from AI Studio or Vertex AI fallback."""
+    if is_valid_studio_key(GEMINI_API_KEY):
+        try:
+            return genai.GenerativeModel(model_name)
+        except:
+            pass
+    try:
+        return GenerativeModel(model_name)
+    except Exception as e:
+        print(f"Failed to initialize model {model_name}: {e}")
+        return None
 
 # GCP / Firebase Configuration
 project_id = os.environ.get("GCP_PROJECT_ID", "gen-lang-client-0426824151")
@@ -107,6 +136,12 @@ location = os.environ.get("GCP_LOCATION", "us-central1")
 storage_bucket = os.environ.get(
     "FIREBASE_STORAGE_BUCKET", f"{project_id}.firebasestorage.app"
 )
+
+# Stripe Webhook Secret check
+webhook_secret = os.environ.get("STRIPE_WEBHOOK_SECRET")
+if not webhook_secret or "holder" in webhook_secret:
+    print("WARNING: STRIPE_WEBHOOK_SECRET is missing or contains a placeholder.")
+    webhook_secret = None
 
 # Initialize Firebase Admin
 try:
@@ -229,7 +264,9 @@ def analyze_room_image(images_base64: list) -> dict:
     for model_name in models_to_try:
         try:
             print(f"Attempting analysis with {model_name}...")
-            model = genai.GenerativeModel(model_name)
+            model = get_model(model_name)
+            if not model:
+                continue
             response = model.generate_content(
                 contents,
                 generation_config={"response_mime_type": "application/json"}
@@ -271,7 +308,9 @@ def generate_room_render(
     for model_name in models_to_try:
         try:
             print(f"Generating render with {model_name} ({quality})...")
-            model = genai.GenerativeModel(model_name)
+            model = get_model(model_name)
+            if not model:
+                continue
             
             # Prepare contents
             contents = []
