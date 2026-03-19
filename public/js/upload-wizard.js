@@ -137,14 +137,13 @@ const nextBtn = document.getElementById('next-btn');
 const backBtn = document.getElementById('back-btn');
 const analysisPanel = document.getElementById('analysis-panel');
 
-dropzone.addEventListener('click', (e) => {
-    if (e.target.id === 'change-photo-btn') return;
-    fileInput.click();
-});
-document.getElementById('change-photo-btn').addEventListener('click', () => {
-    resetUpload();
-    fileInput.click();
-});
+const changePhotoBtn = document.getElementById('change-photo-btn');
+if (changePhotoBtn) {
+    changePhotoBtn.addEventListener('click', () => {
+        resetUpload();
+        fileInput.click();
+    });
+}
 
 dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('border-primary'); });
 dropzone.addEventListener('dragleave', () => dropzone.classList.remove('border-primary'));

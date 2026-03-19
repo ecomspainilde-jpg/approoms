@@ -457,16 +457,20 @@
 
                 <!-- PROGRESS BAR -->
                 <div id="gen-progress" class="hidden mt-12 space-y-6 fade-in">
-                    <div class="w-full bg-surface h-4 rounded-full border border-border overflow-hidden p-1">
-                        <div id="gen-progress-bar" class="h-full bg-gradient-to-r from-primary to-orange-500 rounded-full transition-all duration-[30s]" style="width: 0%"></div>
-                    </div>
-                    <div class="flex flex-col items-center gap-4">
-                        <div class="flex items-center gap-2">
-                            <div class="size-2 bg-primary rounded-full animate-ping"></div>
-                            <span id="gen-status-text" class="text-sm font-black text-text-primary uppercase tracking-widest">Iniciando Servidores Vertex AI...</span>
+                    <!-- Progress UI built dynamically in some versions, but keeping ids for consistency -->
+                    <div id="progress-steps" class="flex flex-col gap-4 max-w-sm mx-auto p-6 bg-white rounded-3xl border border-border shadow-sm">
+                        <div class="flex items-center gap-4 transition-all duration-500" id="step-pay-row">
+                            <div id="spin-pay" class="size-5 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+                            <span id="check-pay" class="material-symbols-outlined text-green-500 hidden scale-125">check_circle</span>
+                            <span id="label-pay" class="text-sm font-black uppercase tracking-widest text-primary">Validando Créditos...</span>
                         </div>
-                        <p class="text-xs text-text-secondary max-w-sm text-center">Estamos procesando tu habitación. Esto suele tardar entre 20 y 45 segundos dependiendo de la complejidad.</p>
+                        <div class="flex items-center gap-4 transition-all duration-500 opacity-40" id="step-ai-row">
+                            <div id="spin-ai" class="size-5 border-2 border-primary/20 border-t-primary rounded-full animate-spin hidden"></div>
+                            <span id="check-ai" class="material-symbols-outlined text-green-500 hidden scale-125">check_circle</span>
+                            <span id="label-ai" class="text-sm font-black uppercase tracking-widest">Generando Render IA...</span>
+                        </div>
                     </div>
+                    <p class="text-xs text-text-secondary max-w-sm text-center mx-auto">Estamos procesando tu habitación. Esto suele tardar entre 20 y 45 segundos dependiendo de la complejidad.</p>
                 </div>
             </section>
 
@@ -486,12 +490,9 @@
                         <img id="result-image" class="w-full h-auto rounded-[2rem] shadow-sm cursor-zoom-in" src="" alt="Render Final">
                         
                         <div class="absolute bottom-10 right-10 flex gap-3">
-                            <button id="download-btn-res" class="bg-white/90 backdrop-blur-md hover:bg-white text-text-primary px-6 py-3 rounded-2xl font-black text-sm flex items-center gap-2 shadow-xl transition-all hover:scale-105">
-                                <span class="material-symbols-outlined">download</span> Descargar 4K
-                            </button>
-                            <button id="share-btn" class="bg-primary text-white px-6 py-3 rounded-2xl font-black text-sm flex items-center gap-2 shadow-xl shadow-primary/20 transition-all hover:scale-110">
-                                <span class="material-symbols-outlined">share</span> Compartir
-                            </button>
+                            <a id="download-btn" href="#" download="render.png" class="bg-white/90 backdrop-blur-md hover:bg-white text-text-primary px-6 py-3 rounded-2xl font-black text-sm flex items-center gap-2 shadow-xl transition-all hover:scale-105">
+                                <span class="material-symbols-outlined">download</span> Descargar
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -504,12 +505,12 @@
                                 <span class="material-symbols-outlined text-primary">description</span> Propuesta de Diseño
                             </h3>
                             <div class="space-y-6">
-                                <div class="proposal-block">
+                                <div id="prop-analysis-wrap" class="proposal-block">
                                     <h4 class="text-[10px] font-black text-text-secondary/50 uppercase tracking-widest mb-2">Análisis Arquitectónico</h4>
                                     <p id="prop-analysis" class="text-sm text-text-secondary leading-relaxed whitespace-pre-line"></p>
                                 </div>
                                 <div class="proposal-block border-l-4 border-primary pl-6 mt-6">
-                                    <h4 class="text-[10px] font-black text-primary uppercase tracking-widest mb-1">Estilo Aplicado</h4>
+                                    <h4 class="text-[10px] font-black text-primary uppercase tracking-widest mb-1">Estilo <span id="prop-style-name"></span></h4>
                                     <p id="prop-style-desc" class="text-sm text-text-secondary leading-relaxed"></p>
                                 </div>
                             </div>
@@ -520,6 +521,10 @@
                             <ul id="prop-changes" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <!-- Injected by JS -->
                             </ul>
+                            <div class="mt-8 pt-8 border-t border-border/50">
+                                <p class="text-[10px] font-black text-text-secondary/50 uppercase tracking-widest mb-2">Prompt Completo IA</p>
+                                <p id="prop-prompt" class="text-[11px] text-text-secondary leading-relaxed font-mono opacity-60"></p>
+                            </div>
                         </div>
                     </div>
 
@@ -527,8 +532,8 @@
                         <div class="bg-primary/5 rounded-3xl p-8 border border-primary/10">
                             <h4 class="font-black text-lg mb-4">¿Te gusta el resultado?</h4>
                             <p class="text-sm text-text-secondary mb-8">Puedes descargar la propuesta completa en PDF para compartir con decoradores o tiendas de muebles.</p>
-                            <button id="btn-pdf" class="w-full bg-white text-text-primary border border-border hover:bg-surface font-black py-4 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2">
-                                <span class="material-symbols-outlined">picture_as_pdf</span> Descargar PDF
+                            <button id="btn-pdf" onclick="generatePDF()" class="w-full bg-white text-text-primary border border-border hover:bg-surface font-black py-4 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2">
+                                <span class="material-symbols-outlined">picture_as_pdf</span> Descargar Propuesta PDF
                             </button>
                         </div>
                         <a href="03-dashboard.html" class="block w-full text-center py-4 text-primary font-black hover:underline transition-all">Ver mis anteriores renders</a>
@@ -547,7 +552,7 @@
             </button>
             <div class="flex items-center gap-6">
                 <!-- Credits Display -->
-                <div id="header-credits-display" class="hidden items-center gap-3 px-4 py-2 bg-primary/5 border border-primary/10 rounded-2xl">
+                <div id="header-credits-display" class="flex items-center gap-3 px-4 py-2 bg-primary/5 border border-primary/10 rounded-2xl">
                     <div class="size-6 bg-primary rounded-lg flex items-center justify-center text-white scale-75">
                         <span class="material-symbols-outlined text-xs">database</span>
                     </div>
@@ -561,6 +566,19 @@
             </div>
         </div>
     </footer>
+
+    <!-- Disclaimer Modal (Required by JS) -->
+    <div id="disclaimer-modal" class="hidden fixed inset-0 z-[100] bg-background-dark/80 backdrop-blur-sm flex items-center justify-center p-6">
+        <div class="bg-white rounded-[2rem] p-8 max-w-lg w-full solar-glow space-y-6">
+            <h3 class="text-2xl font-black">Aviso de Privacidad</h3>
+            <p class="text-text-secondary text-sm">Al utilizar RenderRoom, confirmas que tienes derecho a utilizar las imágenes que subas y que el resultado generado se utilizará con fines informativos y decorativos.</p>
+            <label class="flex items-center gap-3 cursor-pointer">
+                <input type="checkbox" id="disclaimer-check" class="size-5 rounded border-border text-primary focus:ring-primary">
+                <span class="text-sm font-bold">He leído y acepto los términos</span>
+            </label>
+            <button id="disclaimer-confirm" disabled onclick="acceptDisclaimer()" class="w-full py-4 rounded-xl font-black bg-primary/30 text-primary/50 cursor-not-allowed transition-all">Comenzar</button>
+        </div>
+    </div>
 
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
