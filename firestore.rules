@@ -1,60 +1,18 @@
-rules_version = '2';
+rules_version='2'
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Helper to check if the user is an admin based on the users collection
-    function isAdmin() {
-      return request.auth != null && 
-             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
-    }
-    
-    // Users collection
-    match /users/{userId} {
-      // Users can read/write their own document
-      // Admins can read and write ALL user documents
-      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
-      allow write: if request.auth != null && (request.auth.uid == userId || isAdmin());
-      allow list: if isAdmin();
-    }
-    
-    // Renders collection - users can read their own renders, create new ones, delete their own
-    match /renders/{renderId} {
-      allow read, delete: if request.auth != null && (request.auth.uid == resource.data.userId || isAdmin());
-      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
-      // Admins can read all renders
-      allow list: if isAdmin();
-    }
-
-    // Purchases collection
-    match /purchases/{purchaseId} {
-      allow read: if request.auth != null && (request.auth.uid == resource.data.userId || isAdmin());
-      allow list: if isAdmin();
-      // Allow creation by anyone (though usually handled server-side via webhook, 
-      // sometimes clients log initiation)
-      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
-    }
-    
-    // Pricing - anyone can read, only admins can write
-    match /pricing/{docId} {
-      allow read: if true;
-      allow write: if isAdmin();
-    }
-    
-    // Packages - anyone can read, only admins can write
-    match /packages/{docId} {
-      allow read: if true;
-      allow write: if isAdmin();
-    }
-    
-    // Price history - only admins can read/write
-    match /priceHistory/{docId} {
-      allow read, write: if isAdmin();
-    }
-    
-    // Admin stats
-    match /stats/{docId} {
-      allow read: if isAdmin();
+    match /{document=**} {
+      // This rule allows anyone with your database reference to view, edit,
+      // and delete all data in your database. It is useful for getting
+      // started, but it is configured to expire after 30 days because it
+      // leaves your app open to attackers. At that time, all client
+      // requests to your database will be denied.
+      //
+      // Make sure to write security rules for your app before that time, or
+      // else all client requests to your database will be denied until you
+      // update your rules.
+      allow read, write: if request.time < timestamp.date(2026, 4, 18);
     }
   }
 }

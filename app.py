@@ -74,6 +74,13 @@ else:
 
 import google.generativeai as genai
 from google.generativeai import types as genai_types
+try:
+    import vertexai
+    from vertexai.generative_models import GenerativeModel
+    VERTEXAI_AVAILABLE = True
+except ImportError:
+    VERTEXAI_AVAILABLE = False
+    print("vertexai package not available, Vertex AI fallback disabled.")
 import firebase_admin  # type: ignore
 from firebase_admin import credentials, auth, firestore, storage  # type: ignore
 import stripe  # type: ignore
@@ -83,9 +90,16 @@ app = Flask(__name__, static_folder="public", static_url_path="")
 
 # Stripe Initialization with explicit check
 STRIPE_KEY = os.environ.get("STRIPE_SECRET_KEY")
-if not STRIPE_KEY or "placeholder" in STRIPE_KEY.lower():
-    print("WARNING: STRIPE_SECRET_KEY is missing or invalid in .env")
-    stripe.api_key = "invalid_key_placeholder"
+def is_valid_stripe_key(key):
+    """Check if a Stripe key is valid (not a placeholder or secret ref)."""
+    if not key:
+        return False
+    invalid_prefixes = ["projects/", "invalid_", "placeholder"]
+    return not any(key.lower().startswith(p) or p in key.lower() for p in invalid_prefixes)
+
+if not is_valid_stripe_key(STRIPE_KEY):
+    print(f"WARNING: STRIPE_SECRET_KEY is missing or invalid (got: {STRIPE_KEY[:20] if STRIPE_KEY else 'None'}...)")
+    stripe.api_key = None
 else:
     stripe.api_key = STRIPE_KEY
     stripe.api_version = "2026-02-25.clover"
@@ -109,13 +123,16 @@ else:
     print("AI Studio key missing or invalid (AQ./projects/). Using fallback if available.")
 
 # Initialize Vertex AI as fallback
-try:
-    project_id = os.environ.get("GCP_PROJECT_ID", "gen-lang-client-0426824151")
-    location = os.environ.get("GCP_LOCATION", "us-central1")
-    vertexai.init(project=project_id, location=location)
-    print(f"Vertex AI initialized for project: {project_id}")
-except Exception as e:
-    print(f"Vertex AI initialization skipped: {e}")
+if VERTEXAI_AVAILABLE:
+    try:
+        project_id = os.environ.get("GCP_PROJECT_ID", "gen-lang-client-0426824151")
+        location = os.environ.get("GCP_LOCATION", "us-central1")
+        vertexai.init(project=project_id, location=location)
+        print(f"Vertex AI initialized for project: {project_id}")
+    except Exception as e:
+        print(f"Vertex AI initialization skipped: {e}")
+else:
+    print("Vertex AI fallback not available (vertexai package not installed).")
 
 def get_model(model_name):
     """Returns a model from AI Studio or Vertex AI fallback."""
