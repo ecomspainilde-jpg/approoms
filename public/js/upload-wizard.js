@@ -45,29 +45,35 @@ function getAuthHeaders() {
     return token ? { 'Authorization': `Bearer ${token}` } : {};
 }
 
-// ÔöÇÔöÇ Disclaimer Modal ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
+// ─── Disclaimer Modal ──────────────────────────────────────────────────────────
 const disclaimerModal = document.getElementById('disclaimer-modal');
 const disclaimerCheck = document.getElementById('disclaimer-check');
 const disclaimerConfirm = document.getElementById('disclaimer-confirm');
-if (!sessionStorage.getItem('disclaimer_accepted')) {
-    disclaimerModal.style.display = 'flex';
-} else {
-    disclaimerModal.style.display = 'none';
-}
-disclaimerCheck.addEventListener('change', () => {
-    if (disclaimerCheck.checked) {
-        disclaimerConfirm.disabled = false;
-        disclaimerConfirm.classList.remove('bg-primary/30','text-primary/50','cursor-not-allowed');
-        disclaimerConfirm.classList.add('bg-primary','text-background-dark','hover:bg-primary/90','cursor-pointer');
+
+if (disclaimerModal) {
+    if (!sessionStorage.getItem('disclaimer_accepted')) {
+        disclaimerModal.style.display = 'flex';
     } else {
-        disclaimerConfirm.disabled = true;
-        disclaimerConfirm.classList.add('bg-primary/30','text-primary/50','cursor-not-allowed');
-        disclaimerConfirm.classList.remove('bg-primary','text-background-dark','hover:bg-primary/90','cursor-pointer');
+        disclaimerModal.style.display = 'none';
     }
-});
+}
+
+if (disclaimerCheck && disclaimerConfirm) {
+    disclaimerCheck.addEventListener('change', () => {
+        if (disclaimerCheck.checked) {
+            disclaimerConfirm.disabled = false;
+            disclaimerConfirm.classList.remove('bg-primary/30','text-primary/50','cursor-not-allowed');
+            disclaimerConfirm.classList.add('bg-primary','text-background-dark','hover:bg-primary/90','cursor-pointer');
+        } else {
+            disclaimerConfirm.disabled = true;
+            disclaimerConfirm.classList.add('bg-primary/30','text-primary/50','cursor-not-allowed');
+            disclaimerConfirm.classList.remove('bg-primary','text-background-dark','hover:bg-primary/90','cursor-pointer');
+        }
+    });
+}
 function acceptDisclaimer() {
     sessionStorage.setItem('disclaimer_accepted', '1');
-    disclaimerModal.style.display = 'none';
+    if (disclaimerModal) disclaimerModal.style.display = 'none';
 }
 
 // ÔöÇÔöÇ State ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
@@ -92,8 +98,10 @@ async function fetchPrices() {
         if (data.render_high) state.prices.high = data.render_high.price;
         
         // Update UI
-        document.getElementById('price-display-normal').textContent = `${state.prices.normal.toFixed(2).replace('.', ',')}Ôé¼`;
-        document.getElementById('price-display-high').textContent = `${state.prices.high.toFixed(2).replace('.', ',')}Ôé¼`;
+        const pNormal = document.getElementById('price-display-normal');
+        const pHigh = document.getElementById('price-display-high');
+        if (pNormal) pNormal.textContent = `${state.prices.normal.toFixed(2).replace('.', ',')}€`;
+        if (pHigh) pHigh.textContent = `${state.prices.high.toFixed(2).replace('.', ',')}€`;
     } catch (e) {
         console.error("Error fetching prices:", e);
     }
@@ -101,10 +109,23 @@ async function fetchPrices() {
 
 function selectQuality(q) {
     state.selectedQuality = q;
-    document.querySelectorAll('.quality-card').forEach(c => c.classList.remove('selected'));
-    const cards = document.querySelectorAll('.quality-card');
-    if (q === 'normal') cards[0].classList.add('selected');
-    else cards[1].classList.add('selected');
+    document.querySelectorAll('.quality-card').forEach(c => {
+        c.classList.remove('selected');
+        // Handle nested internal elements if they exist
+        const check = c.querySelector('.material-symbols-outlined');
+        if (check) check.classList.add('opacity-0');
+        const checkBg = c.querySelector('div.rounded-full');
+        if (checkBg) checkBg.classList.remove('border-primary', 'bg-primary');
+    });
+    
+    const selectedCard = document.querySelector(`.quality-card[data-quality="${q}"]`);
+    if (selectedCard) {
+        selectedCard.classList.add('selected');
+        const check = selectedCard.querySelector('.material-symbols-outlined');
+        if (check) check.classList.remove('opacity-0');
+        const checkBg = selectedCard.querySelector('div.rounded-full');
+        if (checkBg) checkBg.classList.add('border-primary', 'bg-primary');
+    }
 }
 
 // ————— Upload Zone ————————————————————————————————————————————————————————————
@@ -451,14 +472,15 @@ function updateStepper() {
 }
 
 function showSection(id) {
-    [1, 2, 3, 4, 5].forEach(num => {
-        const el = document.getElementById(`step-${num}`);
+    // Current IDs are section-upload, section-style, section-generate, result-panel
+    const sections = ['section-upload', 'section-style', 'section-generate', 'result-panel'];
+    sections.forEach(sid => {
+        const el = document.getElementById(sid);
         if (el) {
-            if (`step-${num}` === id) el.classList.remove('hidden');
+            if (sid === id) el.classList.remove('hidden');
             else el.classList.add('hidden');
         }
     });
-    updateStepper();
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -470,16 +492,18 @@ function setActiveStep(n) {
         el.classList.remove('step-active','step-done','step-inactive');
         if (i < n) {
             el.classList.add('step-done');
-            el.closest('.flex').classList.remove('opacity-40');
+            el.closest('.flex')?.classList.remove('opacity-40');
+            el.innerHTML = '<span class="material-symbols-outlined text-sm">check</span>';
         } else if (i === n) {
             el.classList.add('step-active');
-            el.closest('.flex').classList.remove('opacity-40');
+            el.closest('.flex')?.classList.remove('opacity-40');
+            el.innerHTML = i;
         } else {
             el.classList.add('step-inactive');
-            el.closest('.flex').classList.add('opacity-40');
+            el.closest('.flex')?.classList.add('opacity-40');
+            el.innerHTML = i;
         }
     });
-    updateStepper(); // Call the new stepper update function
 }
 
 // Generate
@@ -730,32 +754,7 @@ function buildChangesList(style, analysis, prompt) {
     return [...base, ...extras].slice(0, 7);
 }
 
-// ÔöÇÔöÇ Quality selection ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
-function selectQuality(q) {
-    state.selectedQuality = q;
-    document.querySelectorAll('.quality-card').forEach(card => {
-        card.classList.remove('selected', 'border-primary', 'border-primary/60');
-        card.classList.add('border-border-dark');
-        card.querySelector('.check-mark').classList.remove('bg-primary', 'border-primary');
-        card.querySelector('.check-mark').innerHTML = '';
-    });
-    const chosen = event ? event.currentTarget : document.querySelector(`.quality-card[onclick*="${q}"]`);
-    const all = document.querySelectorAll('.quality-card');
-    all.forEach(c => {
-        const isChosen = c.getAttribute('onclick') && c.getAttribute('onclick').includes(`'${q}'`);
-        if (isChosen) {
-            c.classList.add('selected', 'border-primary');
-            c.classList.remove('border-border-dark');
-            const cm = c.querySelector('.check-mark');
-            cm.classList.add('bg-primary', 'border-primary');
-            cm.innerHTML = '<span class="material-symbols-outlined text-[14px] text-background-dark">check</span>';
-        }
-    });
-    const lbl = document.getElementById('quality-cost-label');
-    if (lbl) {
-        lbl.textContent = q === 'high' ? '2 cr├®ditos (Alta Fidelidad)' : '1 cr├®dito (B├ísica)';
-    }
-}
+// Remove redundant selectQuality at end of file
 
 // Initialize
 goToStep1();
