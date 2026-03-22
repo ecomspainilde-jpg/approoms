@@ -265,15 +265,17 @@ def analyze_room_image(images_base64: list) -> dict:
     """
 
     # Prepare multimodal content parts
-    prompt_parts = [analysis_prompt]
+    prompt_parts = [{"text": analysis_prompt}]
     for i, img_b64 in enumerate(images_base64):
         # Clean base64 if it has metadata prefix
         if "," in img_b64:
             img_b64 = img_b64.split(",")[1]
             
         prompt_parts.append({
-            "mime_type": "image/jpeg",
-            "data": img_b64
+            "inline_data": {
+                "mime_type": "image/jpeg",
+                "data": img_b64
+            }
         })
 
     last_error = "Unknown"
@@ -329,15 +331,17 @@ def generate_room_render(
                 continue
             
             # Prepare content parts
-            prompt_parts = [edit_instruction]
+            prompt_parts = [{"text": edit_instruction}]
             if base_image_b64:
                 # Clean base64 if it has metadata prefix
                 if "," in base_image_b64:
                     base_image_b64 = base_image_b64.split(",")[1]
                     
                 prompt_parts.append({
-                    "mime_type": "image/jpeg",
-                    "data": base_image_b64
+                    "inline_data": {
+                        "mime_type": "image/jpeg",
+                        "data": base_image_b64
+                    }
                 })
 
             response = model.generate_content(

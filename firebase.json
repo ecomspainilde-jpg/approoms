@@ -9,7 +9,7 @@
     "providers": {
       "emailPassword": true,
       "googleSignIn": {
-        "oAuthBrandDisplayName": "RenderRoom App",
+        "oAuthBrandDisplayName": "Rooms con Chic",
         "supportEmail": "ecomspainilde@gmail.com"
       }
     }
