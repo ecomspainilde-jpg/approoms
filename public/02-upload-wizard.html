@@ -94,7 +94,30 @@
         }
     </style>
 </head>
-<body class="bg-background font-body text-on-surface min-h-screen bg-amber-glow">
+<body class="bg-background text-on-surface font-manrope selection:bg-primary/20">
+
+<!-- Disclaimer Modal (Restored Logic) -->
+<div id="disclaimer-modal" class="fixed inset-0 z-[100] bg-stone-900/80 backdrop-blur-sm flex items-center justify-center p-6 hidden">
+    <div class="bg-white dark:bg-stone-900 rounded-[3rem] max-w-lg w-full p-10 shadow-2xl space-y-8 border border-stone-100 dark:border-stone-800 animate-in fade-in zoom-in duration-500">
+        <div class="w-20 h-20 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 mx-auto">
+            <span class="material-symbols-outlined text-4xl">gavel</span>
+        </div>
+        <div class="text-center space-y-3">
+            <h2 class="text-3xl font-headline font-extrabold text-on-surface">Aviso Legal e IA</h2>
+            <p class="text-on-secondary-container leading-relaxed">Al usar nuestro motor de IA, aceptas que los resultados son <span class="font-bold underline text-primary">propuestas decorativas</span> y no planos técnicos vinculantes. La precisión depende de la calidad de tu foto.</p>
+        </div>
+        <div class="space-y-4">
+            <label class="flex items-center gap-4 p-4 rounded-3xl bg-surface-container-low cursor-pointer hover:bg-white transition-all border border-transparent hover:border-amber-200">
+                <input type="checkbox" id="disclaimer-check" class="w-6 h-6 rounded-full text-primary focus:ring-primary border-stone-300">
+                <span class="text-sm font-medium">He leído y acepto los términos de uso de la IA.</span>
+            </label>
+            <button id="disclaimer-confirm" class="w-full py-5 bg-stone-900 dark:bg-amber-600 text-white rounded-full font-bold text-lg shadow-xl hover:scale-[1.02] active:scale-95 transition-all opacity-50 cursor-not-allowed">
+                Comenzar Diseño
+            </button>
+        </div>
+    </div>
+</div>
+
 <!-- TopNavBar -->
 <nav class="fixed top-0 w-full z-50 bg-white/80 dark:bg-stone-900/80 backdrop-blur-xl shadow-sm shadow-stone-200/50 flex justify-between items-center px-8 h-20">
 <div class="flex items-center gap-12">
@@ -102,23 +125,23 @@
 <!-- Stepper -->
 <div class="hidden md:flex items-center gap-6">
 <div class="flex items-center gap-2 text-amber-700 dark:text-amber-500 border-b-2 border-amber-600 pb-1 font-manrope text-sm tracking-wide uppercase font-semibold">
-<span class="w-5 h-5 rounded-full bg-amber-600 text-white flex items-center justify-center text-[10px]">1</span>
+<span id="step-indicator-1" class="w-5 h-5 rounded-full bg-amber-600 text-white flex items-center justify-center text-[10px]">1</span>
 <span>Upload</span>
 </div>
-<div class="flex items-center gap-2 text-stone-500 dark:text-stone-400 font-manrope text-sm tracking-wide uppercase font-semibold">
-<span class="w-5 h-5 rounded-full bg-stone-200 dark:bg-stone-700 text-stone-600 dark:text-stone-300 flex items-center justify-center text-[10px]">2</span>
+<div class="flex items-center gap-2 text-stone-500 dark:text-stone-400 font-manrope text-sm tracking-wide uppercase font-semibold opacity-40">
+<span id="step-indicator-2" class="w-5 h-5 rounded-full bg-stone-200 dark:bg-stone-700 text-stone-600 dark:text-stone-300 flex items-center justify-center text-[10px]">2</span>
 <span>Style</span>
 </div>
-<div class="flex items-center gap-2 text-stone-500 dark:text-stone-400 font-manrope text-sm tracking-wide uppercase font-semibold">
-<span class="w-5 h-5 rounded-full bg-stone-200 dark:bg-stone-700 text-stone-600 dark:text-stone-300 flex items-center justify-center text-[10px]">3</span>
+<div class="flex items-center gap-2 text-stone-500 dark:text-stone-400 font-manrope text-sm tracking-wide uppercase font-semibold opacity-40">
+<span id="step-indicator-3" class="w-5 h-5 rounded-full bg-stone-200 dark:bg-stone-700 text-stone-600 dark:text-stone-300 flex items-center justify-center text-[10px]">3</span>
 <span>Generate</span>
 </div>
 </div>
 </div>
 <div class="flex items-center gap-6">
-<a class="flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-fixed text-on-primary-fixed text-xs font-bold uppercase tracking-wider hover:bg-primary-container transition-colors group" href="modal-compra.html">
+<a id="header-buy-credits-btn" class="flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-fixed text-on-primary-fixed text-xs font-bold uppercase tracking-wider hover:bg-primary-container transition-colors group" href="modal-compra.html">
 <span class="material-symbols-outlined text-sm group-hover:rotate-12 transition-transform" style="font-variation-settings: 'FILL' 1;">generating_tokens</span>
-                500 Credits
+                <span id="header-credits-count">500</span> Credits
             </a>
 <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-sm">
 <img alt="User profile avatar" class="w-full h-full object-cover" data-alt="Professional woman avatar for user profile" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDbWKCFt-q4SB5GGPCkMj3VzOE0YCsHFBpyQblvJFUjkrHWD5gS5KUWPgc6-7U4X1pZfB0zVefk1ZuI1Xbk_sIg09A233SmGi0U6Wo0IwIH_L-ZytbHUE7iFZCCtaz8OUJtZsbIVRN5Fp4TNRA-9NKN0hOlP4C3iZhexyZAl_ZI0PTdms-ajihCifYCGdQ9L9LPHsET0HKPZLbYcV5aJQCd5zbHNZK8EukMioR_VTrc4PT23NMY4EQRMEGdzmdLEAbAbkNYIgE-j9o"/>
@@ -128,7 +151,7 @@
 <!-- Main Content Canvas -->
 <main class="pt-32 pb-40 px-6 max-w-7xl mx-auto">
 <!-- Step 1 Content -->
-<div class="flex flex-col lg:flex-row gap-12 items-start" id="step-1">
+<div class="flex flex-col lg:flex-row gap-12 items-start" id="section-upload">
 <!-- Left: Hero & Upload Zone -->
 <div class="w-full lg:w-7/12 space-y-12">
 <div class="space-y-4">
@@ -141,8 +164,10 @@
 </div>
 <!-- Drag & Drop Zone -->
 <div class="dashed-amber group relative flex flex-col items-center justify-center p-12 min-h-[450px] transition-all duration-500 hover:bg-white/40 cursor-pointer overflow-hidden" id="dropzone">
-<input class="absolute inset-0 opacity-0 cursor-pointer z-10" id="file-input" type="file"/>
-<div class="text-center space-y-6 pointer-events-none">
+<input class="absolute inset-0 opacity-0 cursor-pointer z-10" id="file-input" type="file" accept="image/*"/>
+
+<!-- Dropzone Content -->
+<div class="text-center space-y-6 pointer-events-none" id="dropzone-content">
 <div class="relative">
 <div class="absolute inset-0 bg-primary/10 blur-3xl rounded-full scale-150 group-hover:bg-primary/20 transition-colors"></div>
 <span class="material-symbols-outlined text-7xl text-primary relative" style="font-variation-settings: 'FILL' 0, 'wght' 200;">add_photo_alternate</span>
@@ -157,55 +182,73 @@
                             </span>
 </div>
 </div>
+
+<!-- Image Preview UI (Restored Logic) -->
+<div id="image-preview" class="hidden relative w-full h-full min-h-[400px]">
+    <img id="preview-img" class="w-full h-full max-h-[500px] object-cover rounded-3xl" src="" alt="Vista previa">
+    <button id="change-photo-btn" class="absolute top-6 right-6 bg-white/90 backdrop-blur-md p-3 rounded-full shadow-lg hover:bg-white transition-all text-primary pointer-events-auto z-20">
+        <span class="material-symbols-outlined">edit</span>
+    </button>
+</div>
+
 <!-- Ambient Glow Decoration -->
 <div class="absolute -bottom-10 -right-10 w-40 h-40 bg-primary/5 rounded-full blur-3xl"></div>
 <div class="absolute -top-10 -left-10 w-40 h-40 bg-primary/5 rounded-full blur-3xl"></div>
 </div>
 </div>
-<!-- Right: Analysis Bento Grid -->
-<div class="w-full lg:w-5/12 grid grid-cols-1 sm:grid-cols-2 gap-6 lg:mt-32">
-<!-- Room Type Card -->
-<div class="sm:col-span-2 bg-surface-container-lowest p-8 rounded-3xl shadow-sm border border-outline-variant/10 flex items-center justify-between">
-<div class="space-y-1">
-<p class="text-xs font-bold uppercase tracking-widest text-on-secondary-container opacity-60">Detección IA</p>
-<h3 class="text-2xl font-bold">Bedroom</h3>
-</div>
-<div class="w-14 h-14 rounded-full bg-secondary-container flex items-center justify-center text-primary">
-<span class="material-symbols-outlined text-3xl">bed</span>
-</div>
-</div>
-<!-- Size Analysis -->
-<div class="bg-surface-container-lowest p-8 rounded-3xl shadow-sm border border-outline-variant/10 space-y-4">
-<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center text-on-surface-variant">
-<span class="material-symbols-outlined text-xl">straighten</span>
-</div>
-<div>
-<p class="text-xs font-bold uppercase tracking-widest text-on-secondary-container opacity-60">Tamaño Est.</p>
-<h4 class="text-xl font-bold">~ 24 m²</h4>
-</div>
-</div>
-<!-- Viability Badge -->
-<div class="bg-surface-container-lowest p-8 rounded-3xl shadow-sm border border-outline-variant/10 space-y-4">
-<div class="w-10 h-10 rounded-lg bg-primary-container/20 flex items-center justify-center text-primary">
-<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">verified</span>
-</div>
-<div>
-<p class="text-xs font-bold uppercase tracking-widest text-on-secondary-container opacity-60">Viabilidad</p>
-<h4 class="text-xl font-bold">98%</h4>
-</div>
-</div>
-<!-- Tip Card -->
-<div class="sm:col-span-2 bg-primary text-white p-8 rounded-3xl shadow-xl shadow-primary/10 relative overflow-hidden">
-<div class="relative z-10 space-y-3">
-<p class="text-sm font-medium opacity-80">Pro Tip:</p>
-<p class="text-lg leading-snug font-medium">Las fotos con luz natural diurna ofrecen resultados un <span class="font-bold underline">40% más realistas</span>.</p>
-</div>
-<span class="material-symbols-outlined absolute -bottom-4 -right-4 text-9xl opacity-10 rotate-12">lightbulb</span>
-</div>
+<!-- Right: Analysis Panel -->
+<div class="w-full lg:w-5/12 hidden" id="analysis-panel">
+    <!-- Analysis Loading -->
+    <div id="analysis-loading" class="hidden space-y-6 lg:mt-32">
+        <div class="animate-pulse space-y-4">
+            <div class="h-20 bg-stone-200 rounded-3xl"></div>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="h-32 bg-stone-200 rounded-3xl"></div>
+                <div class="h-32 bg-stone-200 rounded-3xl"></div>
+            </div>
+            <div class="h-40 bg-stone-200 rounded-3xl"></div>
+        </div>
+        <p class="text-center text-on-secondary-container animate-bounce font-bold">Analizando tu espacio...</p>
+    </div>
+
+    <!-- Analysis Result -->
+    <div id="analysis-result" class="hidden space-y-6 lg:mt-32">
+        <div id="analysis-text" class="space-y-4">
+            <!-- AI Content injected here -->
+        </div>
+
+        <!-- Validation Badge (Restored UI) -->
+        <div id="image-validation-panel" class="hidden p-8 rounded-3xl bg-surface-container-lowest border border-outline-variant/10 shadow-sm space-y-4">
+            <div id="validation-badge" class="flex items-center gap-3">
+                <span id="validation-icon" class="material-symbols-outlined text-primary">verified</span>
+                <span id="validation-label" class="font-bold">Imagen Validada</span>
+                <span id="validation-score" class="ml-auto font-black text-primary">98%</span>
+            </div>
+            <div id="validation-issues" class="hidden space-y-2"></div>
+        </div>
+        
+        <!-- Tip Card (Static) -->
+        <div class="bg-primary text-white p-8 rounded-3xl shadow-xl shadow-primary/10 relative overflow-hidden">
+            <div class="relative z-10 space-y-3">
+                <p class="text-sm font-medium opacity-80">Pro Tip:</p>
+                <p class="text-lg leading-snug font-medium">Las fotos con luz natural diurna ofrecen resultados un <span class="font-bold underline">40% más realistas</span>.</p>
+            </div>
+            <span class="material-symbols-outlined absolute -bottom-4 -right-4 text-9xl opacity-10 rotate-12">lightbulb</span>
+        </div>
+    </div>
+
+    <!-- Error State -->
+    <div id="analysis-error" class="hidden lg:mt-32 p-8 rounded-3xl bg-red-50 border border-red-200 text-red-700">
+        <div class="flex items-center gap-3 mb-2">
+            <span class="material-symbols-outlined">error</span>
+            <p class="font-bold">Error de análisis</p>
+        </div>
+        <p id="analysis-error-text" class="text-sm opacity-80"></p>
+    </div>
 </div>
 </div>
 <!-- Step 2 Content -->
-<div class="hidden flex-col gap-12" id="step-2">
+<div class="hidden flex-col gap-12" id="section-style">
 <div class="space-y-4 text-center max-w-3xl mx-auto">
 <h1 class="text-5xl md:text-6xl font-headline font-extrabold text-on-surface tracking-tight">
 <span class="text-primary italic">Selecciona</span> tu Estilo
@@ -214,38 +257,38 @@
 </div>
 <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
 <!-- Style Cards -->
-<div class="group cursor-pointer space-y-3" data-style="moderno">
-<div class="aspect-[3/4] rounded-3xl overflow-hidden border-2 border-transparent transition-all hover:scale-[1.02] group-hover:shadow-xl">
+<div class="style-card group cursor-pointer space-y-3" data-style="moderno" onclick="selectStyle(this)">
+<div class="aspect-[3/4] rounded-3xl overflow-hidden border-2 border-transparent transition-all hover:scale-[1.02] group-hover:shadow-xl group-[.selected]:border-primary">
 <img alt="Modern style" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDwbcg5KqnMV3ZnI3bBxzp5UhXVhV5o-iOonTze30PUzeokW2qPTG-BrvAWw9k2p73ehK__WZxhPeh7iUd1E-ONU0dKK3YO6gWTMA8wElh5cyLuSF2DJkTQ8pfDt92SEVKXkyJYReIW1_-tfZHnzqy7bnd-pT15oiehTB8kYBm8PEqjHY_PUkK8X2KhhHEW5sbayeX0IJ_IV0_C1ynXKPtcnykPgH_SJegJqNvaBdOJmfmkmi-zyl7rvcMXyjBy2RlyRmiypv90-Bo"/>
 </div>
 <p class="text-center font-bold text-lg">Moderno</p>
 </div>
-<div class="group cursor-pointer space-y-3" data-style="nordico">
-<div class="aspect-[3/4] rounded-3xl overflow-hidden border-2 border-transparent transition-all hover:scale-[1.02] group-hover:shadow-xl">
+<div class="style-card group cursor-pointer space-y-3" data-style="nordico" onclick="selectStyle(this)">
+<div class="aspect-[3/4] rounded-3xl overflow-hidden border-2 border-transparent transition-all hover:scale-[1.02] group-hover:shadow-xl group-[.selected]:border-primary">
 <img alt="Nordic style" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuARxqF5EZwJuYq7fMLZbqwt2PlUIbSWfowpqOvRDyOSh_t7Pb8GNlgOHYkdEYh7oyp0VT46uJlKQpPXDX5WDBIRJp6gyeE0SugTSNJiR-_vICcWx7t7mScb-fNRp59zMEVwkhb1uD8BQMrwHUnO8ZaljldGsHSCcIbX5gejE4xL0j1rwxQAOMy7--VkgKsg_gkwUh2MWpgHgD_PxWTOKK2xsFDU2JB0Bd7rYKbgwH2JQxk2uH3hMvyyxvh7C7m9yNsdBB9ugrrzbWE"/>
 </div>
 <p class="text-center font-bold text-lg">Nórdico</p>
 </div>
-<div class="group cursor-pointer space-y-3" data-style="industrial">
-<div class="aspect-[3/4] rounded-3xl overflow-hidden border-2 border-transparent transition-all hover:scale-[1.02] group-hover:shadow-xl">
+<div class="style-card group cursor-pointer space-y-3" data-style="industrial" onclick="selectStyle(this)">
+<div class="aspect-[3/4] rounded-3xl overflow-hidden border-2 border-transparent transition-all hover:scale-[1.02] group-hover:shadow-xl group-[.selected]:border-primary">
 <img alt="Industrial style" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDGY70IeIBfvbDlTAKBFOgHgu6WWVLE8YBeQqhFXaTIxQ2S3EtQpPq9oeetvUb08DW8dSOE05Ze1s6w98mHayV2IiH-YBvU2KQ6-T-R0BGewMz31DREsCy12n0tK4mNHFyDS6-yzKZ5z0wZyZyvIIfekz08uxH9sWHkmb0hkuWGw4buTvhsF063737nE2Fg6FMMeA2VVpCYslAH9Pi_daPgL4Wfv3byZwOEmAe5tIGDCUrLXveyDBJSzlpaV8bVlx9Y2LQKPiFcseU"/>
 </div>
 <p class="text-center font-bold text-lg">Industrial</p>
 </div>
-<div class="group cursor-pointer space-y-3" data-style="minimalista">
-<div class="aspect-[3/4] rounded-3xl overflow-hidden border-2 border-transparent transition-all hover:scale-[1.02] group-hover:shadow-xl">
+<div class="style-card group cursor-pointer space-y-3" data-style="minimalista" onclick="selectStyle(this)">
+<div class="aspect-[3/4] rounded-3xl overflow-hidden border-2 border-transparent transition-all hover:scale-[1.02] group-hover:shadow-xl group-[.selected]:border-primary">
 <img alt="Minimalist style" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBKn3rRONJxW1uxmodFCJmrNOMgcF9PKHE5JR_6X7QKALDqWCW042_USOngT9ZhTtK70MO-MjHClgBYdPqMT073ZB5cKS6leR8idwierb5kDLjwSJWPQhBk1b4NSt-_ErTh36aaYV8WweXZVkATMB8fIGVtY7xrAWtJBLUI6BpXaXD336HxFqU8Hu64o8ZdcXkV7QuuUt-6X-crijT4Kbl_kYQy5P3C1pxYrFf0OcVWY7eJR8-uTBKl7N-qedxdrXYUDQqojlMXQW4"/>
 </div>
 <p class="text-center font-bold text-lg">Minimalista</p>
 </div>
-<div class="group cursor-pointer space-y-3" data-style="rustico">
-<div class="aspect-[3/4] rounded-3xl overflow-hidden border-2 border-transparent transition-all hover:scale-[1.02] group-hover:shadow-xl">
+<div class="style-card group cursor-pointer space-y-3" data-style="rustico" onclick="selectStyle(this)">
+<div class="aspect-[3/4] rounded-3xl overflow-hidden border-2 border-transparent transition-all hover:scale-[1.02] group-hover:shadow-xl group-[.selected]:border-primary">
 <img alt="Rustic style" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAYWlPWPQ6qnykVnpVuYZv3LQmQU6qyIh09HfbSYMEOc9JjQlNaF3rhH31LKM8fmP7TwOJcqA5YVjkR4JYVxAxQYnEO1-pHPf_yqanwVIY_W_0kfgoYa8_uSR9e2Tzh2uwG1UUPBSwMUPivAuXT33Rpd7FrBLJ2yxpgAsEKuFDwT7jMPrG_uqLRnuSfNkvajyrViUq8iSLeKJF29kMke93uEWd-2Rc5XzjMAHV9n67LVRpVKERCtsW_lJ5cEOsnNDnUGS_vEhZ6kx0"/>
 </div>
 <p class="text-center font-bold text-lg">Rústico</p>
 </div>
-<div class="group cursor-pointer space-y-3" data-style="bohemio">
-<div class="aspect-[3/4] rounded-3xl overflow-hidden border-2 border-transparent transition-all hover:scale-[1.02] group-hover:shadow-xl">
+<div class="style-card group cursor-pointer space-y-3" data-style="bohemio" onclick="selectStyle(this)">
+<div class="aspect-[3/4] rounded-3xl overflow-hidden border-2 border-transparent transition-all hover:scale-[1.02] group-hover:shadow-xl group-[.selected]:border-primary">
 <img alt="Boho style" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBr93vkGv4RFr2zoK082bI8JWW2DGK1_gUJ9m3Yx8khRAji6yMz3ABD5amhwPGop8gLIWDg-tEGWG666dxVcClruuPQ3RjQdwtZFEDiqOCQ9WDObtens1vsI8CQqolppLzSAmMLY2kwGiTt9ItsOfpMY4jtAKXi563hcN-7dAAGhLkeCLZZh48T0JXJbPhbWbhFnNDYa9IbZ1ZPqvmX4gU61TPu985C23CyIv9KkBVGevTnMw_6dioleQhE7UpOfpdwMCjE2WZQsJE"/>
 </div>
 <p class="text-center font-bold text-lg">Bohemio</p>
@@ -256,29 +299,17 @@
 <label class="block text-xl font-bold" for="prompt-input">Instrucciones adicionales (Opcional)</label>
 <textarea class="w-full h-40 rounded-3xl border-outline-variant bg-surface-container-low p-6 focus:ring-primary focus:border-primary placeholder:text-stone-400" id="prompt-input" placeholder="Ej: Añade una planta alta en la esquina, cambia el color de las paredes a un verde suave..."></textarea>
 </div>
-<div class="space-y-6">
-<h3 class="text-xl font-bold">IA Sugerencias</h3>
+<div class="space-y-6" id="recommendations-section">
+<h3 class="text-xl font-bold">IA Sugerencias para <span id="rec-style-name">...</span></h3>
 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-<label class="flex items-center gap-4 p-6 rounded-3xl bg-surface-container-low border border-outline-variant/20 cursor-pointer hover:bg-white transition-all group">
-<input class="w-6 h-6 rounded-full text-primary focus:ring-primary border-stone-300" data-type="add" type="checkbox"/>
-<div class="space-y-0.5">
-<p class="font-bold">Añadir elementos</p>
-<p class="text-sm text-on-secondary-container/60">Decoración y plantas</p>
-</div>
-</label>
-<label class="flex items-center gap-4 p-6 rounded-3xl bg-surface-container-low border border-outline-variant/20 cursor-pointer hover:bg-white transition-all group">
-<input class="w-6 h-6 rounded-full text-primary focus:ring-primary border-stone-300" data-type="remove" type="checkbox"/>
-<div class="space-y-0.5">
-<p class="font-bold">Eliminar elementos</p>
-<p class="text-sm text-on-secondary-container/60">Limpieza visual de objetos</p>
-</div>
-</label>
+    <div id="rec-add-list" class="space-y-2"></div>
+    <div id="rec-remove-list" class="space-y-2"></div>
 </div>
 </div>
 </div>
 </div>
 <!-- Step 3 Content -->
-<div class="hidden flex-col gap-12 max-w-4xl mx-auto" id="step-3">
+<div class="hidden flex-col gap-12 max-w-4xl mx-auto" id="section-generate">
 <div class="space-y-4 text-center">
 <h1 class="text-5xl md:text-6xl font-headline font-extrabold text-on-surface tracking-tight">Confirma y <span class="text-primary italic">Genera</span></h1>
 <p class="text-lg text-on-secondary-container">Estás a un paso de ver tu habitación transformada por IA.</p>
@@ -289,23 +320,22 @@
 <h3 class="text-xl font-bold border-b border-stone-100 pb-4">Resumen de tu Diseño</h3>
 <div class="flex gap-4">
 <div class="w-24 h-24 rounded-2xl overflow-hidden shrink-0 border border-stone-100">
-<img alt="Upload preview" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDSSSlSPaNmppSxiwciYWy6yKglPfCYCOh76ET6hsAWqxA9LCC8yD3v8LmOKHN4YkzgXvVLnA2ih96j1aDYrR167XTXl0O_rs4FPbbkC8fUcxn45pzu-q2AIZixxBrohbH8ojDc9M_rRk_wNShIclGl3VokXiuZnYoQF3sxYotDpQA_CyxGSm5m5ER4Shu51pXZC_teLoRQAPkqQLokl7NxJx_kmrkIC4fH5pROyafWmicQZysyPRyKVvFo9aMGaG1w6A5bzFJbpSQ"/>
+<img alt="Upload preview" class="w-full h-full object-cover" id="summary-preview" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDSSSlSPaNmppSxiwciYWy6yKglPfCYCOh76ET6hsAWqxA9LCC8yD3v8LmOKHN4YkzgXvVLnA2ih96j1aDYrR167XTXl0O_rs4FPbbkC8fUcxn45pzu-q2AIZixxBrohbH8ojDc9M_rRk_wNShIclGl3VokXiuZnYoQF3sxYotDpQA_CyxGSm5m5ER4Shu51pXZC_teLoRQAPkqQLokl7NxJx_kmrkIC4fH5pROyafWmicQZysyPRyKVvFo9aMGaG1w6A5bzFJbpSQ"/>
 </div>
 <div class="space-y-1">
 <p class="text-xs font-bold text-primary uppercase tracking-widest">Estilo Seleccionado</p>
-<p class="text-2xl font-bold">Nórdico</p>
-<p class="text-sm text-on-secondary-container">Detección: Bedroom</p>
+<p class="text-2xl font-bold" id="summary-style">Nórdico</p>
 </div>
 </div>
 <div class="p-4 bg-stone-50 rounded-2xl">
-<p class="text-sm font-medium italic text-stone-600">"Verde suave en paredes y plantas en la esquina"</p>
+<p class="text-sm font-medium italic text-stone-600" id="summary-prompt">"Verde suave en paredes y plantas en la esquina"</p>
 </div>
 </div>
 <!-- Quality Selector -->
 <div class="space-y-4">
 <h3 class="text-xl font-bold">Selecciona Calidad</h3>
 <div class="space-y-3">
-<button class="w-full flex justify-between items-center p-6 rounded-3xl border-2 border-primary bg-white shadow-lg transition-all text-left">
+<button class="quality-card w-full flex justify-between items-center p-6 rounded-3xl border-2 border-primary bg-white shadow-lg transition-all text-left" data-quality="normal" onclick="selectQuality('normal')">
 <div class="flex gap-4 items-center">
 <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
 <span class="material-symbols-outlined">hd</span>
@@ -315,9 +345,9 @@
 <p class="text-sm text-on-secondary-container/60">Renderizado rápido 1080p</p>
 </div>
 </div>
-<span class="font-bold text-primary text-sm uppercase tracking-wider">1 Crédito</span>
+<span class="font-bold text-primary text-sm uppercase tracking-wider" id="price-display-normal">1 Crédito</span>
 </button>
-<button class="w-full flex justify-between items-center p-6 rounded-3xl border border-outline-variant/20 bg-surface-container-low hover:border-primary/50 transition-all text-left">
+<button class="quality-card w-full flex justify-between items-center p-6 rounded-3xl border border-outline-variant/20 bg-surface-container-low hover:border-primary/50 transition-all text-left" data-quality="high" onclick="selectQuality('high')">
 <div class="flex gap-4 items-center">
 <div class="w-12 h-12 rounded-full bg-stone-200 flex items-center justify-center text-stone-600">
 <span class="material-symbols-outlined">4k</span>
@@ -327,13 +357,28 @@
 <p class="text-sm text-on-secondary-container/60">Detalles ultra realistas</p>
 </div>
 </div>
-<span class="font-bold text-on-secondary-container/60 text-sm uppercase tracking-wider">2 Créditos</span>
+<span class="font-bold text-on-secondary-container/60 text-sm uppercase tracking-wider" id="price-display-high">2 Créditos</span>
 </button>
 </div>
 </div>
 </div>
+
+<!-- Generation Progress (Restored Logic) -->
+<div id="gen-progress" class="hidden w-full max-w-md mx-auto mt-8 p-6 rounded-3xl bg-white shadow-xl border border-primary/10 space-y-4">
+    <div class="flex items-center gap-4">
+        <div id="spin-pay" class="w-2 h-2 rounded-full bg-primary animate-ping"></div>
+        <span id="check-pay" class="material-symbols-outlined text-green-500 hidden text-xl">check_circle</span>
+        <p id="label-pay" class="text-sm font-bold">Validando créditos y suscripción...</p>
+    </div>
+    <div class="flex items-center gap-4 opacity-50 transition-opacity" id="ai-progress-row">
+        <div id="spin-ai" class="w-2 h-2 rounded-full bg-primary animate-ping hidden"></div>
+        <span id="check-ai" class="material-symbols-outlined text-green-500 hidden text-xl">check_circle</span>
+        <p id="label-ai" class="text-sm font-bold">Generando renderización 3D por IA...</p>
+    </div>
+</div>
+
 <div class="pt-8 flex flex-col items-center gap-6">
-<button class="group relative inline-flex items-center gap-4 bg-primary text-white rounded-full px-16 py-6 shadow-2xl shadow-primary/30 font-manrope font-extrabold text-xl hover:bg-amber-600 hover:scale-105 active:scale-95 transition-all w-full md:w-auto" id="btn-generate">
+<button class="group relative inline-flex items-center gap-4 bg-primary text-white rounded-full px-16 py-6 shadow-2xl shadow-primary/30 font-manrope font-extrabold text-xl hover:bg-amber-600 hover:scale-105 active:scale-95 transition-all w-full md:w-auto" id="btn-generate" onclick="generateRender()">
                 Generar Render Pro
                 <span class="material-symbols-outlined text-2xl group-hover:rotate-12 transition-transform">magic_button</span>
 <div class="absolute -top-3 -right-3 bg-stone-900 text-white text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-tighter border border-white/20">
@@ -346,18 +391,77 @@
             </p>
 </div>
 </div>
+
+<!-- Result Panel (Completely Restored) -->
+<div id="result-panel" class="hidden flex-col gap-12 max-w-5xl mx-auto">
+    <div class="text-center space-y-4">
+        <h1 class="text-5xl font-headline font-extrabold tracking-tight">¡Tu diseño ha <span class="text-primary italic">evolucionado</span>!</h1>
+        <p class="text-on-secondary-container text-lg">Descarga tu render o compártelo en tus redes sociales.</p>
+    </div>
+    
+    <div class="relative group rounded-[3xl] overflow-hidden shadow-2xl bg-stone-200 aspect-video">
+        <img id="result-image" class="w-full h-full object-cover" src="" alt="Resultado del diseño IA">
+        <div class="absolute bottom-0 left-0 w-full h-1.5 bg-black/10">
+            <div id="render-progress" class="h-full bg-primary transition-all duration-300" style="width: 0%"></div>
+        </div>
+        <a id="download-btn" href="#" download="mi-habitacion-pro.png" class="absolute top-6 right-6 bg-white/90 backdrop-blur-md p-4 rounded-full shadow-xl hover:bg-white transition-all text-primary">
+            <span class="material-symbols-outlined text-3xl">download</span>
+        </a>
+    </div>
+
+    <!-- Details Bento -->
+    <div class="grid md:grid-cols-3 gap-6">
+        <div class="md:col-span-2 bg-surface-container-lowest p-8 rounded-3xl border border-outline-variant/10 shadow-sm space-y-4" id="prop-analysis-wrap">
+            <h3 class="text-xl font-bold flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">auto_awesome</span>
+                Análisis de la Propuesta
+            </h3>
+            <p id="prop-analysis" class="text-on-secondary-container leading-relaxed"></p>
+            <div class="pt-4 mt-4 border-t border-stone-100">
+                <p class="text-xs font-bold uppercase tracking-widest opacity-40 mb-3">Cambios Sugeridos</p>
+                <ul id="prop-changes" class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm font-medium"></ul>
+            </div>
+        </div>
+        <div class="bg-primary text-white p-8 rounded-3xl shadow-xl shadow-primary/10 flex flex-col justify-between">
+            <div class="space-y-1">
+                <p class="text-xs font-bold uppercase tracking-widest opacity-60">Estilo Aplicado</p>
+                <h3 id="prop-style-name" class="text-3xl font-black capitalize">Nórdico</h3>
+            </div>
+            <p id="prop-style-desc" class="text-sm opacity-90 italic"></p>
+            <div class="pt-6">
+                <button id="btn-pdf" onclick="generatePDF()" class="w-full bg-white text-primary font-bold py-4 rounded-2xl hover:bg-stone-50 transition-all flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined">picture_as_pdf</span>
+                    Propuesta PDF
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sharing -->
+    <div class="flex flex-col items-center gap-8 pt-6">
+        <div class="flex gap-4">
+            <button onclick="shareResult('twitter')" class="w-14 h-14 rounded-full bg-stone-900 text-white flex items-center justify-center hover:scale-110 transition-transform">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></svg>
+            </button>
+            <button onclick="shareResult('whatsapp')" class="w-14 h-14 rounded-full bg-green-500 text-white flex items-center justify-center hover:scale-110 transition-transform">
+                <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.67-1.612-.916-2.207-.242-.579-.487-.5-.67-.508-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.335-1.662c1.72.937 3.659 1.432 5.628 1.433h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            </button>
+        </div>
+        <p class="text-xs font-bold text-stone-400 font-mono tracking-tighter" id="prop-prompt"></p>
+    </div>
+</div>
 </main>
 <!-- BottomNavBar (Functional Footer) -->
 <footer class="fixed bottom-0 left-0 w-full bg-white/90 dark:bg-stone-950/90 backdrop-blur-md shadow-[0_-4px_20px_rgba(0,0,0,0.05)] z-50 rounded-t-3xl">
 <div class="max-w-7xl mx-auto flex justify-between items-center px-8 lg:px-12 py-6">
-<button class="flex items-center gap-3 text-stone-600 dark:text-stone-400 font-manrope font-bold text-base px-6 py-3 hover:bg-stone-100 dark:hover:bg-stone-800 transition-all rounded-full" id="back-btn">
+<button class="invisible flex items-center gap-3 text-stone-600 dark:text-stone-400 font-manrope font-bold text-base px-6 py-3 hover:bg-stone-100 dark:hover:bg-stone-800 transition-all rounded-full" id="back-btn" onclick="prevStep()">
 <span class="material-symbols-outlined">arrow_back</span>
                 Atrás
             </button>
 <div class="hidden md:block">
 <a class="text-on-secondary-container/60 text-sm font-medium hover:text-primary transition-colors" href="03-dashboard.html">Volver al Dashboard</a>
 </div>
-<button class="flex items-center gap-3 bg-amber-600 text-white rounded-full px-10 py-4 shadow-lg shadow-amber-600/20 font-manrope font-bold text-base hover:bg-amber-700 hover:scale-105 active:scale-95 transition-all" id="next-btn">
+<button class="flex items-center gap-3 bg-amber-600 text-white rounded-full px-10 py-4 shadow-lg shadow-amber-600/20 font-manrope font-bold text-base hover:bg-amber-700 hover:scale-105 active:scale-95 transition-all" id="next-btn" onclick="nextStep()">
                 Continuar
                 <span class="material-symbols-outlined">magic_button</span>
 </button>
