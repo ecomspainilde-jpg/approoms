@@ -307,15 +307,8 @@ async function analyzeImage() {
                 document.getElementById('image-validation-panel').classList.remove('hidden');
 
                 // Block or allow advancing
-                if (!ok) {
-                    setBtnEnabled(nextBtn, false);
-                    const errorEl = document.getElementById('analysis-error');
-                    const errorText = document.getElementById('analysis-error-text');
-                    errorText.textContent = 'La imagen no es apta para generar un render. Por favor, sube una foto diferente siguiendo los consejos de abajo.';
-                    errorEl.classList.remove('hidden');
-                    return;
-                }
             }
+            // Only enable button if analysis was successful
             setBtnEnabled(nextBtn, true);
         } else {
             if (loading) loading.classList.add('hidden');
@@ -324,11 +317,11 @@ async function analyzeImage() {
             setBtnEnabled(nextBtn, false);
         }
     } catch (err) {
-        document.getElementById('analysis-loading').classList.add('hidden');
-        document.getElementById('analysis-error-text').textContent = 'Sin conexi├│n al servidor';
-        document.getElementById('analysis-error').classList.remove('hidden');
+        if (document.getElementById('analysis-loading')) document.getElementById('analysis-loading').classList.add('hidden');
+        if (document.getElementById('analysis-error-text')) document.getElementById('analysis-error-text').textContent = 'Sin conexión al servidor';
+        if (document.getElementById('analysis-error')) document.getElementById('analysis-error').classList.remove('hidden');
+        setBtnEnabled(nextBtn, false);
     }
-    setBtnEnabled(nextBtn, true);
 }
 
 // ÔöÇÔöÇ Style selector ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ
@@ -754,6 +747,18 @@ function buildChangesList(style, analysis, prompt) {
 }
 
 // Remove redundant selectQuality at end of file
+
+// Attach functions to window for HTML access
+window.nextStep = nextStep;
+window.prevStep = prevStep;
+window.selectStyle = selectStyle;
+window.selectQuality = selectQuality;
+window.generateRender = generateRender;
+window.acceptDisclaimer = acceptDisclaimer;
+window.resetUpload = resetUpload;
+window.goToStep1 = goToStep1;
+window.goToStep2 = goToStep2;
+window.goToStep3 = goToStep3;
 
 // Initialize
 goToStep1();
