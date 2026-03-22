@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+
+<html lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "tertiary-fixed": "#d5e3fc",
+              "on-surface": "#1a1c1c",
+              "inverse-on-surface": "#f1f0f0",
+              "primary-fixed": "#ffddb8",
+              "error": "#ba1a1a",
+              "outline": "#867461",
+              "inverse-surface": "#2f3130",
+              "primary": "#855300",
+              "primary-fixed-dim": "#ffb95f",
+              "surface-dim": "#dadad9",
+              "on-surface-variant": "#534434",
+              "on-error-container": "#93000a",
+              "background": "#faf9f8",
+              "secondary": "#545f73",
+              "on-tertiary-container": "#374558",
+              "surface-container-high": "#e9e8e7",
+              "tertiary-container": "#a4b2c9",
+              "surface-tint": "#855300",
+              "on-primary-fixed": "#2a1700",
+              "error-container": "#ffdad6",
+              "surface-container-lowest": "#ffffff",
+              "surface-container": "#eeeeed",
+              "on-tertiary-fixed-variant": "#3a485b",
+              "on-primary": "#ffffff",
+              "on-secondary-fixed-variant": "#3c475a",
+              "surface": "#faf9f8",
+              "outline-variant": "#d8c3ad",
+              "primary-container": "#f59e0b",
+              "on-tertiary": "#ffffff",
+              "tertiary-fixed-dim": "#b9c7df",
+              "secondary-fixed": "#d8e3fb",
+              "on-secondary-container": "#586377",
+              "secondary-container": "#d5e0f8",
+              "on-error": "#ffffff",
+              "surface-container-highest": "#e3e2e1",
+              "on-secondary": "#ffffff",
+              "on-background": "#1a1c1c",
+              "inverse-primary": "#ffb95f",
+              "on-tertiary-fixed": "#0d1c2e",
+              "tertiary": "#515f74",
+              "secondary-fixed-dim": "#bcc7de",
+              "surface-variant": "#e3e2e1",
+              "on-primary-fixed-variant": "#653e00",
+              "on-primary-container": "#613b00",
+              "surface-container-low": "#f4f3f2",
+              "on-secondary-fixed": "#111c2d",
+              "surface-bright": "#faf9f8"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Manrope"],
+              "label": ["Manrope"]
+            },
+            borderRadius: {"DEFAULT": "1rem", "lg": "1.6rem", "xl": "3rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .dashed-amber {
+            background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='48' ry='48' stroke='%23855300FF' stroke-width='3' stroke-dasharray='12%2c 16' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e");
+            border-radius: 3rem;
+        }
+        .bg-amber-glow {
+            background: radial-gradient(circle at top right, rgba(245, 158, 11, 0.08), transparent 40%),
+                        radial-gradient(circle at bottom left, rgba(245, 158, 11, 0.05), transparent 40%);
+        }
+    </style>
+</head>
+<body class="bg-background font-body text-on-surface min-h-screen bg-amber-glow">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-white/80 dark:bg-stone-900/80 backdrop-blur-xl shadow-sm shadow-stone-200/50 flex justify-between items-center px-8 h-20">
+<div class="flex items-center gap-12">
+<a class="text-2xl font-bold tracking-tighter text-stone-900 dark:text-stone-50" href="01-landing-page.html">RoomChic</a>
+<!-- Stepper -->
+<div class="hidden md:flex items-center gap-6">
+<div class="flex items-center gap-2 text-amber-700 dark:text-amber-500 border-b-2 border-amber-600 pb-1 font-manrope text-sm tracking-wide uppercase font-semibold">
+<span class="w-5 h-5 rounded-full bg-amber-600 text-white flex items-center justify-center text-[10px]">1</span>
+<span>Upload</span>
+</div>
+<div class="flex items-center gap-2 text-stone-500 dark:text-stone-400 font-manrope text-sm tracking-wide uppercase font-semibold">
+<span class="w-5 h-5 rounded-full bg-stone-200 dark:bg-stone-700 text-stone-600 dark:text-stone-300 flex items-center justify-center text-[10px]">2</span>
+<span>Style</span>
+</div>
+<div class="flex items-center gap-2 text-stone-500 dark:text-stone-400 font-manrope text-sm tracking-wide uppercase font-semibold">
+<span class="w-5 h-5 rounded-full bg-stone-200 dark:bg-stone-700 text-stone-600 dark:text-stone-300 flex items-center justify-center text-[10px]">3</span>
+<span>Generate</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-fixed text-on-primary-fixed text-xs font-bold uppercase tracking-wider">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">generating_tokens</span>
+                500 Credits
+            </div>
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-sm">
+<img alt="User profile avatar" class="w-full h-full object-cover" data-alt="Professional woman avatar for user profile" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDbWKCFt-q4SB5GGPCkMj3VzOE0YCsHFBpyQblvJFUjkrHWD5gS5KUWPgc6-7U4X1pZfB0zVefk1ZuI1Xbk_sIg09A233SmGi0U6Wo0IwIH_L-ZytbHUE7iFZCCtaz8OUJtZsbIVRN5Fp4TNRA-9NKN0hOlP4C3iZhexyZAl_ZI0PTdms-ajihCifYCGdQ9L9LPHsET0HKPZLbYcV5aJQCd5zbHNZK8EukMioR_VTrc4PT23NMY4EQRMEGdzmdLEAbAbkNYIgE-j9o"/>
+</div>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="pt-32 pb-40 px-6 max-w-7xl mx-auto">
+<!-- Step 1 Content -->
+<div class="flex flex-col lg:flex-row gap-12 items-start" id="step-1">
+<!-- Left: Hero & Upload Zone -->
+<div class="w-full lg:w-7/12 space-y-12">
+<div class="space-y-4">
+<h1 class="text-5xl md:text-6xl font-headline font-extrabold text-on-surface tracking-tight leading-tight">
+                        Sube tu <span class="text-primary italic">Habitación</span>
+</h1>
+<p class="text-lg text-on-secondary-container max-w-xl leading-relaxed">
+                        Nuestro motor de IA analizará la arquitectura y luz de tu espacio para ofrecerte las mejores propuestas de diseño.
+                    </p>
+</div>
+<!-- Drag & Drop Zone -->
+<div class="dashed-amber group relative flex flex-col items-center justify-center p-12 min-h-[450px] transition-all duration-500 hover:bg-white/40 cursor-pointer overflow-hidden" id="dropzone">
+<input class="absolute inset-0 opacity-0 cursor-pointer z-10" id="file-input" type="file"/>
+<div class="text-center space-y-6 pointer-events-none">
+<div class="relative">
+<div class="absolute inset-0 bg-primary/10 blur-3xl rounded-full scale-150 group-hover:bg-primary/20 transition-colors"></div>
+<span class="material-symbols-outlined text-7xl text-primary relative" style="font-variation-settings: 'FILL' 0, 'wght' 200;">add_photo_alternate</span>
+</div>
+<div class="space-y-2">
+<p class="text-xl font-bold text-on-surface">Arrastra tu foto aquí</p>
+<p class="text-on-secondary-container text-sm">O haz clic para explorar tus archivos (JPG, PNG)</p>
+</div>
+<div class="pt-4">
+<span class="px-8 py-3 bg-surface-container-lowest text-primary font-bold rounded-lg border border-primary/10 shadow-sm group-hover:shadow-md transition-all">
+                                Seleccionar Archivo
+                            </span>
+</div>
+</div>
+<!-- Ambient Glow Decoration -->
+<div class="absolute -bottom-10 -right-10 w-40 h-40 bg-primary/5 rounded-full blur-3xl"></div>
+<div class="absolute -top-10 -left-10 w-40 h-40 bg-primary/5 rounded-full blur-3xl"></div>
+</div>
+</div>
+<!-- Right: Analysis Bento Grid -->
+<div class="w-full lg:w-5/12 grid grid-cols-1 sm:grid-cols-2 gap-6 lg:mt-32">
+<!-- Room Type Card -->
+<div class="sm:col-span-2 bg-surface-container-lowest p-8 rounded-xl shadow-sm border border-outline-variant/10 flex items-center justify-between">
+<div class="space-y-1">
+<p class="text-xs font-bold uppercase tracking-widest text-on-secondary-container opacity-60">Detección IA</p>
+<h3 class="text-2xl font-bold">Bedroom</h3>
+</div>
+<div class="w-14 h-14 rounded-full bg-secondary-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-3xl">bed</span>
+</div>
+</div>
+<!-- Size Analysis -->
+<div class="bg-surface-container-lowest p-8 rounded-xl shadow-sm border border-outline-variant/10 space-y-4">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-xl">straighten</span>
+</div>
+<div>
+<p class="text-xs font-bold uppercase tracking-widest text-on-secondary-container opacity-60">Tamaño Est.</p>
+<h4 class="text-xl font-bold">~ 24 m²</h4>
+</div>
+</div>
+<!-- Viability Badge -->
+<div class="bg-surface-container-lowest p-8 rounded-xl shadow-sm border border-outline-variant/10 space-y-4">
+<div class="w-10 h-10 rounded-lg bg-primary-container/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+<div>
+<p class="text-xs font-bold uppercase tracking-widest text-on-secondary-container opacity-60">Viabilidad</p>
+<h4 class="text-xl font-bold">98%</h4>
+</div>
+</div>
+<!-- Tip Card -->
+<div class="sm:col-span-2 bg-primary text-white p-8 rounded-xl shadow-xl shadow-primary/10 relative overflow-hidden">
+<div class="relative z-10 space-y-3">
+<p class="text-sm font-medium opacity-80">Pro Tip:</p>
+<p class="text-lg leading-snug font-medium">Las fotos con luz natural diurna ofrecen resultados un <span class="font-bold underline">40% más realistas</span>.</p>
+</div>
+<span class="material-symbols-outlined absolute -bottom-4 -right-4 text-9xl opacity-10 rotate-12">lightbulb</span>
+</div>
+</div>
+</div>
+<!-- Hidden Steps (Placeholders for UI structure) -->
+<div class="hidden" id="step-2"></div>
+<div class="hidden" id="step-3"></div>
+</main>
+<!-- BottomNavBar (Functional Footer) -->
+<footer class="fixed bottom-0 left-0 w-full bg-white/90 dark:bg-stone-950/90 backdrop-blur-md shadow-[0_-4px_20px_rgba(0,0,0,0.05)] z-50 rounded-t-3xl">
+<div class="max-w-7xl mx-auto flex justify-between items-center px-8 lg:px-12 py-6">
+<button class="flex items-center gap-3 text-stone-600 dark:text-stone-400 font-manrope font-bold text-base px-6 py-3 hover:bg-stone-100 dark:hover:bg-stone-800 transition-all rounded-full" id="back-btn">
+<span class="material-symbols-outlined">arrow_back</span>
+                Atrás
+            </button>
+<div class="hidden md:block">
+<a class="text-on-secondary-container/60 text-sm font-medium hover:text-primary transition-colors" href="03-dashboard.html">Volver al Dashboard</a>
+</div>
+<button class="flex items-center gap-3 bg-amber-600 text-white rounded-full px-10 py-4 shadow-lg shadow-amber-600/20 font-manrope font-bold text-base hover:bg-amber-700 hover:scale-105 active:scale-95 transition-all" id="next-btn">
+                Continuar
+                <span class="material-symbols-outlined">magic_button</span>
+</button>
+</div>
+</footer>
+<!-- Image for Context (Pre-loading logic) -->
+<div class="hidden">
+<img alt="Background pattern" data-alt="Minimalist luxury living room background pattern" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAC3oQ4fLUktuXgCngxewtYurp6bl_awAqZhvMByppzKw0UMcOXBHZRVqvQ5XOocOG4ggd67OP6vGyu0ac8jwqbDkVaHRyRaA5S4BVj1w2RszPtfPMV0iQX9IGy-l78Ir_GOAehdfG7aVngUiAxUT53zz6xcoUmI4TmcdeuBCd5F_RcpPEUqq5xxh4xekcTAY5hUQNhq-gFvlQ8alOCEBrM0z8vabU7apjRkwJR4gZRLErY4RodE6SWI6E1RMWuSVS2sm5OwvI7s6I"/>
+</div>
+</body></html>
