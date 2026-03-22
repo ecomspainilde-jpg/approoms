@@ -40,24 +40,56 @@
 
     <style type="text/tailwindcss">
         @layer base {
-            body { @apply bg-white text-slate-600 antialiased; }
-            h1, h2, h3, h4 { @apply font-display text-slate-900; }
+            body { 
+                background-color: #FFFFFF;
+                color: #475569;
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
+            }
+            h1, h2, h3, h4 { 
+                font-family: 'Outfit', sans-serif;
+                color: #0f172a;
+            }
         }
         @layer components {
             .glass-nav {
-                @apply fixed top-0 w-full z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200/50;
+                position: fixed;
+                top: 0;
+                width: 100%;
+                z-index: 50;
+                background-color: rgba(255, 255, 255, 0.8);
+                backdrop-filter: blur(20px);
+                border-bottom: 1px solid rgba(226, 232, 240, 0.5);
             }
             .stat-card {
-                @apply bg-white rounded-3xl border border-slate-200/60 p-6 transition-all duration-300 hover:shadow-xl hover:shadow-slate-200/50 hover:-translate-y-1;
+                background-color: #FFFFFF;
+                border-radius: 1.5rem;
+                border: 1px solid rgba(226, 232, 240, 0.6);
+                padding: 1.5rem;
+                transition: all 0.3s;
+            }
+            .stat-card:hover {
+                box-shadow: 0 20px 25px -5px rgba(226, 232, 240, 0.5);
+                transform: translateY(-0.25rem);
             }
             .admin-tab {
-                @apply px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200;
+                padding: 0.5rem 1rem;
+                border-radius: 0.75rem;
+                font-size: 0.875rem;
+                font-weight: 700;
+                transition: all 0.2s;
             }
             .admin-tab.active {
-                @apply bg-amber-500 text-white shadow-lg shadow-amber-500/30;
+                background-color: #f59e0b;
+                color: #FFFFFF;
+                box-shadow: 0 10px 15px -3px rgba(245, 158, 11, 0.3);
             }
             .admin-tab:not(.active) {
-                @apply text-slate-500 hover:bg-slate-100 hover:text-slate-900;
+                color: #64748b;
+            }
+            .admin-tab:not(.active):hover {
+                background-color: #f1f5f9;
+                color: #0f172a;
             }
         }
         

@@ -37,13 +37,17 @@
     <style type="text/tailwindcss">
         @layer utilities {
             .glass-nav {
-                @apply bg-white/80 backdrop-blur-xl border-b border-slate-200/60;
-            }
-            .solar-glow {
-                box-shadow: 0 10px 40px rgba(245, 158, 11, 0.12);
+                background-color: rgba(255, 255, 255, 0.8);
+                backdrop-filter: blur(20px);
+                border-bottom: 1px solid rgba(226, 232, 240, 0.6);
             }
             .card-hover {
-                @apply transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-primary/10 hover:border-primary/20;
+                transition: all 0.3s;
+            }
+            .card-hover:hover {
+                transform: scale(1.02);
+                box-shadow: 0 20px 25px -5px rgba(245, 158, 11, 0.1);
+                border-color: rgba(245, 158, 11, 0.2);
             }
         }
         body { opacity: 0; transition: opacity 0.3s ease; }

@@ -48,7 +48,13 @@
                 box-shadow: 0 10px 40px rgba(245, 158, 11, 0.08);
             }
             .premium-card {
-                @apply bg-white border border-border transition-all duration-300 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5;
+                background-color: #FFFFFF;
+                border: 1px solid #F1F5F9;
+                transition: all 0.3s;
+            }
+            .premium-card:hover {
+                border-color: rgba(245, 158, 11, 0.3);
+                box-shadow: 0 20px 25px -5px rgba(245, 158, 11, 0.05);
             }
         }
         body { opacity: 0; transition: opacity 0.3s ease; }
