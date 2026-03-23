@@ -766,7 +766,6 @@ def add_credits_to_user(user_id, credits_amount, amount_paid):
         if snapshot.exists:
             current = snapshot.to_dict()
             new_credits = current.get("credits", 0) + credits_amount
-            new_purchases = current.to_dict().get("totalPurchases", 0) + amount_paid if hasattr(snapshot, 'to_dict') else amount_paid
             transaction.update(user_ref, {
                 "credits": new_credits,
                 "totalPurchases": firestore.Increment(amount_paid)

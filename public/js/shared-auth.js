@@ -68,6 +68,10 @@ auth.onAuthStateChanged((user) => {
         
         updateNavbar(null);
     }
+
+    // ── Global Visibility Fix ──
+    // Add 'auth-checked' to <html> to reveal pages hidden with opacity: 0
+    document.documentElement.classList.add('auth-checked');
 });
 
 /**

@@ -8,9 +8,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
     
     <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     
     <!-- Shared Logic -->
     <script src="js/firebase-config.js"></script>
@@ -176,8 +176,11 @@
                         <span class="material-symbols-outlined text-primary">account_balance_wallet</span>
                     </div>
                     <div class="flex-grow">
-                        <p class="text-slate-500 text-xs font-bold uppercase tracking-wider">Nuevo Saldo Total</p>
-                        <p id="dynamic-credits-total" class="text-slate-900 font-extrabold text-3xl">-- créditos</p>
+                        <p class="text-slate-500 text-xs font-bold uppercase tracking-wider">Estado de Créditos</p>
+                        <div id="credits-status-container" class="flex items-center gap-3">
+                            <p id="dynamic-credits-total" class="text-slate-900 font-extrabold text-3xl">-- créditos</p>
+                            <div id="credits-loader" class="size-5 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                        </div>
                     </div>
                 </div>
 
@@ -221,6 +224,8 @@
     </footer>
 <script>
     // Page specific logic
+    let initialCredits = null;
+    
     auth.onAuthStateChanged((u) => {
       if (u) {
         // Real-time listener for credits
@@ -228,7 +233,12 @@
             if (doc.exists) {
                 const credits = doc.data().credits || 0;
                 
-                // Update header (if any, though shared-auth should handle navbar)
+                // Track initial credits to know when they've been updated
+                if (initialCredits === null) {
+                    initialCredits = credits;
+                }
+                
+                // Update header
                 const headerCount = document.getElementById('header-credits-count');
                 if (headerCount) headerCount.textContent = credits;
                 
@@ -236,6 +246,17 @@
                 const dynamicCredits = document.getElementById('dynamic-credits-total');
                 if (dynamicCredits) {
                     dynamicCredits.textContent = `${credits} créditos`;
+                }
+                
+                // Hide loader if credits changed or if they are already positive/sufficient
+                // (This is a bit simplified, but helps with UX)
+                const loader = document.getElementById('credits-loader');
+                if (loader && credits > initialCredits) {
+                    loader.classList.add('hidden');
+                    // Add a tiny success glow
+                    const statusText = document.getElementById('dynamic-credits-total');
+                    statusText.classList.add('text-emerald-600');
+                    setTimeout(() => statusText.classList.remove('text-emerald-600'), 2000);
                 }
             }
         }, err => console.error("Snapshot error:", err));
