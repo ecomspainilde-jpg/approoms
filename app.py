@@ -110,42 +110,43 @@ webhook_secret = os.environ.get("STRIPE_WEBHOOK_SECRET", "whsec_placeholder")
 # Initialize Google Generative AI (AI Studio)
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
 
-def is_valid_studio_key(key):
-    return key and not key.startswith("AQ.") and not key.startswith("projects/")
-
-if is_valid_studio_key(GEMINI_API_KEY):
-    try:
+# Force configuration even for AQ keys (AI Studio SDK supports them as simple keys)
+try:
+    if GEMINI_API_KEY:
         genai.configure(api_key=GEMINI_API_KEY)
-        print("Google Generative AI (AI Studio) configured successfully.")
-    except Exception as e:
-        print(f"Error configuring AI Studio: {e}")
-else:
-    print("AI Studio key missing or invalid (AQ./projects/). Using fallback if available.")
+        print(f"AI Studio SDK configured with key: {GEMINI_API_KEY[:10]}...")
+except Exception as e:
+    print(f"GenAI configure error: {e}")
 
-# Initialize Vertex AI as fallback
+# Initialize Vertex AI as secondary
 if VERTEXAI_AVAILABLE:
     try:
         project_id = os.environ.get("GCP_PROJECT_ID", "gen-lang-client-0426824151")
-        # Standard Vertex location. API keys usually work best here.
         location = os.environ.get("GCP_LOCATION", "us-central1") 
         vertexai.init(project=project_id, location=location)
-        print(f"Vertex AI initialized for project: {project_id} in {location}")
+        print(f"Vertex AI initialized as fallback in {location}")
     except Exception as e:
         print(f"Vertex AI initialization skipped: {e}")
-else:
-    print("Vertex AI fallback not available (vertexai package not installed).")
 
 def get_model(model_name):
-    """Returns a model from AI Studio or Vertex AI fallback."""
-    if is_valid_studio_key(GEMINI_API_KEY):
-        try:
-            return genai.GenerativeModel(model_name)
-        except:
-            pass
+    """
+    Returns a model.
+    Prioritizes AI Studio (genai) to use the explicit API key.
+    Falls back to Vertex if genai fails or project has no key.
+    """
+    # Try AI Studio First (Best with AQ Key)
+    try:
+        m = genai.GenerativeModel(model_name)
+        # Quick test to see if it's usable
+        if m: return m
+    except:
+        pass
+
+    # Fallback to Vertex (Works with Cloud Service Account)
     try:
         return GenerativeModel(model_name)
     except Exception as e:
-        print(f"Failed to initialize model {model_name}: {e}")
+        print(f"Model initialization error: {e}")
         return None
 
 # GCP / Firebase Configuration
@@ -264,22 +265,27 @@ def analyze_room_image(images_base64: list) -> dict:
     for model_name in models_to_try:
         try:
             print(f"Attempting analysis with {model_name}...")
-            
-            # Always use Vertex AI Part objects (works with ADC on Cloud Run)
-            model = GenerativeModel(model_name)
-            parts = [Part.from_text(analysis_prompt)]
-            for img_b64 in images_base64:
-                if "," in img_b64:
-                    img_b64 = img_b64.split(",")[1]
-                img_bytes = base64.b64decode(img_b64)
-                parts.append(Part.from_data(data=img_bytes, mime_type="image/jpeg"))
-            response = model.generate_content(
-                parts,
-                generation_config={"response_mime_type": "application/json"}
-            )
+            model = get_model(model_name)
+            if not model: continue
+
+            # Determine if it's Vertex AI or AI Studio
+            if hasattr(model, '_model_name') and 'publishers/google/models/' in getattr(model, '_model_name', ''):
+                # Vertex AI format
+                parts = [Part.from_text(analysis_prompt)]
+                for img_b64 in images_base64:
+                    if "," in img_b64: img_b64 = img_b64.split(",")[1]
+                    img_bytes = base64.b64decode(img_b64)
+                    parts.append(Part.from_data(data=img_bytes, mime_type="image/jpeg"))
+                response = model.generate_content(parts, generation_config={"response_mime_type": "application/json"})
+            else:
+                # AI Studio format (standard GenAI)
+                contents = [analysis_prompt]
+                for img_b64 in images_base64:
+                    if "," in img_b64: img_b64 = img_b64.split(",")[1]
+                    contents.append({"mime_type": "image/jpeg", "data": img_b64})
+                response = model.generate_content(contents, generation_config={"response_mime_type": "application/json"})
             
             if response.text:
-                print(f"Success with {model_name}: {safe_truncate(response.text, 100)}")
                 return {"success": True, "data": json.loads(response.text)}
         except Exception as e:
             last_error = str(e)
@@ -313,33 +319,40 @@ def generate_room_render(
     for model_name in models_to_try:
         try:
             print(f"Generating render with {model_name} ({quality})...")
-            
-            # Always use Vertex AI Part objects (works with ADC on Cloud Run)
-            model = GenerativeModel(model_name)
-            prompt_parts = [Part.from_text(edit_instruction)]
-            if base_image_b64:
-                if "," in base_image_b64:
-                    base_image_b64 = base_image_b64.split(",")[1]
-                img_bytes = base64.b64decode(base_image_b64)
-                prompt_parts.append(Part.from_data(data=img_bytes, mime_type="image/jpeg"))
+            model = get_model(model_name)
+            if not model: continue
 
-            response = model.generate_content(
-                prompt_parts,
-                generation_config={
-                    "temperature": 0.4 if quality == "normal" else 0.2,
-                    "response_modalities": ["IMAGE", "TEXT"]
-                }
-            )
+            # Determine SDK
+            is_vertex = hasattr(model, '_model_name') and 'publishers/google/models/' in getattr(model, '_model_name', '')
             
-            # Extract image
+            if is_vertex:
+                prompt_parts = [Part.from_text(edit_instruction)]
+                if base_image_b64:
+                    if "," in base_image_b64: base_image_b64 = base_image_b64.split(",")[1]
+                    img_bytes = base64.b64decode(base_image_b64)
+                    prompt_parts.append(Part.from_data(data=img_bytes, mime_type="image/jpeg"))
+                response = model.generate_content(prompt_parts, generation_config={"temperature": 0.4, "response_modalities": ["IMAGE", "TEXT"]})
+            else:
+                contents = [edit_instruction]
+                if base_image_b64:
+                    if "," in base_image_b64: base_image_b64 = base_image_b64.split(",")[1]
+                    contents.append({"mime_type": "image/jpeg", "data": base_image_b64})
+                response = model.generate_content(contents, generation_config={"temperature": 0.4})
+            
+            # Extract image (SDK agnostic logic)
             image_b64 = None
-            for candidate in response.candidates:
-                if not hasattr(candidate, 'content') or not candidate.content.parts:
-                    continue
-                for part in candidate.content.parts:
-                    if part.inline_data and part.inline_data.mime_type.startswith("image/"):
-                        image_b64 = base64.b64encode(part.inline_data.data).decode("utf-8")
-                        break
+            if hasattr(response, 'candidates') and response.candidates:
+                candidate = response.candidates[0]
+                if hasattr(candidate, 'content') and hasattr(candidate.content, 'parts'):
+                    for part in candidate.content.parts:
+                        if hasattr(part, 'inline_data') and part.inline_data:
+                            if part.inline_data.mime_type.startswith("image/"):
+                                image_b64 = base64.b64encode(part.inline_data.data).decode("utf-8")
+                                break
+                        # Support for base64 string in some AI Studio versions
+                        elif hasattr(part, 'image'):
+                            # This depends on specific SDK version
+                            pass 
                 if image_b64: break
                 
             if image_b64:
