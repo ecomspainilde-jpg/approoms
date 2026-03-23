@@ -27,6 +27,8 @@ document.addEventListener('DOMContentLoaded', () => {
     disclaimerModal = document.getElementById('disclaimer-modal');
     dropzone = document.getElementById('dropzone');
     fileInput = document.getElementById('file-input');
+    fileInput.multiple = true;
+    fileInput.accept = 'image/*';
     dropzoneContent = document.getElementById('dropzone-content');
     imagePreview = document.getElementById('image-preview');
     analysisPanel = document.getElementById('analysis-panel');
@@ -49,7 +51,8 @@ document.addEventListener('DOMContentLoaded', () => {
         dropzone.addEventListener('drop', (e) => {
             e.preventDefault();
             dropzone.classList.remove('border-primary', 'bg-white/60');
-            const files = Array.from(e.dataTransfer.files).slice(0, 1);
+            const remaining = 3 - state.imagesBase64.length;
+            const files = Array.from(e.dataTransfer.files).slice(0, remaining);
             if (files.length > 0) handleFiles(files);
         });
 
@@ -60,8 +63,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (fileInput) {
         fileInput.addEventListener('change', () => {
-            const files = Array.from(fileInput.files).slice(0, 1);
+            const remaining = 3 - state.imagesBase64.length;
+            const files = Array.from(fileInput.files).slice(0, remaining);
             if (files.length > 0) handleFiles(files);
+            fileInput.value = '';
         });
     }
 
@@ -173,37 +178,118 @@ async function fetchPrices() {
 // ÔöÇÔöÇ Core Wizard Flow ÔöÇÔöÇÔöÇÔöÇÔöÇ
 async function handleFiles(files) {
     if (files.length === 0) return;
-    console.log("File received:", files[0].name);
     
-    state.imagesBase64 = [];
-    state.primaryIndex = 0;
+    // Limit total to 3
+    const available = 3 - state.imagesBase64.length;
+    const toProcess = Array.from(files).slice(0, available);
+    if (toProcess.length === 0) return;
     
-    const file = files[0];
-    const reader = new FileReader();
+    const readFile = (file) => new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve({ src: e.target.result, b64: e.target.result.split(',')[1] });
+        reader.readAsDataURL(file);
+    });
     
-    reader.onload = async (e) => {
-        try {
-            const base64 = e.target.result.split(',')[1];
-            state.imagesBase64 = [base64];
-            
-            console.log("File read success, updating preview...");
-            
-            const previewImg = document.getElementById('preview-img');
-            if (previewImg && imagePreview && dropzoneContent) {
-                previewImg.src = e.target.result;
-                imagePreview.classList.remove('hidden');
-                dropzoneContent.classList.add('hidden');
-                console.log("Preview revealed.");
-            }
-            
-            await analyzeImage();
-        } catch (err) {
-            console.error("handleFiles ERROR:", err);
-            alert("Error al procesar la imagen.");
-        }
-    };
-    reader.readAsDataURL(file);
+    try {
+        const results = await Promise.all(toProcess.map(readFile));
+        results.forEach(r => {
+            state.imagesBase64.push(r.b64);
+        });
+        
+        // Set primary to first image if not set
+        if (state.primaryIndex >= state.imagesBase64.length) state.primaryIndex = 0;
+        
+        renderImageGrid();
+        
+        // Analyze using the primary image
+        await analyzeImage();
+    } catch (err) {
+        console.error('handleFiles ERROR:', err);
+        alert('Error al procesar la imagen.');
+    }
 }
+
+function renderImageGrid() {
+    if (!imagePreview || !dropzoneContent) return;
+    
+    if (state.imagesBase64.length === 0) {
+        imagePreview.classList.add('hidden');
+        dropzoneContent.classList.remove('hidden');
+        return;
+    }
+    
+    // Build HTML for the image grid
+    const canAddMore = state.imagesBase64.length < 3;
+    
+    imagePreview.innerHTML = `
+        <div class="space-y-4 w-full">
+            <p class="text-xs font-bold text-stone-500 uppercase tracking-widest">
+                ${state.imagesBase64.length} de 3 fotos · Tap para seleccionar la principal
+            </p>
+            <div class="grid grid-cols-3 gap-3">
+                ${state.imagesBase64.map((b64, i) => `
+                    <div 
+                        class="relative aspect-square rounded-2xl overflow-hidden cursor-pointer border-4 transition-all ${
+                            i === state.primaryIndex 
+                            ? 'border-amber-500 shadow-lg shadow-amber-500/30' 
+                            : 'border-transparent hover:border-amber-300'
+                        }"
+                        onclick="setPrimary(${i})"
+                    >
+                        <img src="data:image/jpeg;base64,${b64}" class="w-full h-full object-cover">
+                        ${i === state.primaryIndex ? `
+                            <div class="absolute top-2 left-2 bg-amber-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
+                                Principal
+                            </div>
+                        ` : ''}
+                        <button 
+                            onclick="removeImage(event, ${i})" 
+                            class="absolute top-2 right-2 w-6 h-6 rounded-full bg-stone-900/80 text-white flex items-center justify-center hover:bg-red-500 transition-all pointer-events-auto"
+                        >
+                            <span class="material-symbols-outlined text-[14px]">close</span>
+                        </button>
+                    </div>
+                `).join('')}
+                ${canAddMore ? `
+                    <button 
+                        onclick="addMoreImages()" 
+                        class="aspect-square rounded-2xl border-2 border-dashed border-stone-300 flex flex-col items-center justify-center gap-2 text-stone-400 hover:border-amber-400 hover:text-amber-500 transition-all cursor-pointer"
+                    >
+                        <span class="material-symbols-outlined text-3xl">add_photo_alternate</span>
+                        <span class="text-[10px] font-bold">Añadir</span>
+                    </button>
+                ` : ''}
+            </div>
+        </div>
+    `;
+    
+    imagePreview.classList.remove('hidden');
+    dropzoneContent.classList.add('hidden');
+}
+
+window.setPrimary = function(idx) {
+    state.primaryIndex = idx;
+    renderImageGrid();
+    analyzeImage(); // Re-analyze with the new primary
+};
+
+window.removeImage = function(e, idx) {
+    e.stopPropagation();
+    state.imagesBase64.splice(idx, 1);
+    if (state.primaryIndex >= state.imagesBase64.length) {
+        state.primaryIndex = Math.max(0, state.imagesBase64.length - 1);
+    }
+    if (state.imagesBase64.length === 0) {
+        resetUpload();
+    } else {
+        renderImageGrid();
+        analyzeImage();
+    }
+};
+
+window.addMoreImages = function() {
+    if (fileInput) fileInput.click();
+};
 
 async function analyzeImage() {
     const loading = document.getElementById('analysis-loading');
@@ -216,10 +302,11 @@ async function analyzeImage() {
     if (errorPanel) errorPanel.classList.add('hidden');
 
     try {
+        const imageToAnalyze = state.imagesBase64[state.primaryIndex] || state.imagesBase64[0];
         const res = await fetch('/api/analyze-image', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
-            body: JSON.stringify({ images_base64: state.imagesBase64 })
+            body: JSON.stringify({ images_base64: [imageToAnalyze] })
         });
         
         const data = await res.json();
@@ -405,9 +492,13 @@ function setBtnEnabled(btn, on) {
 
 function resetUpload() {
     state.imagesBase64 = [];
+    state.primaryIndex = 0;
     state.roomData = null;
     if (dropzoneContent) dropzoneContent.classList.remove('hidden');
-    if (imagePreview) imagePreview.classList.add('hidden');
+    if (imagePreview) {
+        imagePreview.classList.add('hidden');
+        imagePreview.innerHTML = '';
+    }
     if (analysisPanel) analysisPanel.classList.add('hidden');
     setBtnEnabled(nextBtn, false);
     if (fileInput) fileInput.value = '';
@@ -425,15 +516,17 @@ async function generateRender() {
     const progressPanel = document.getElementById('gen-progress');
     if (progressPanel) progressPanel.classList.remove('hidden');
 
-    // Combine prompt and recommendations
-    const userPrompt = document.getElementById('prompt-input').value || '';
+    // Combine prompt — use a default style prompt if empty
+    const promptInputEl = document.getElementById('prompt-input');
+    const userPrompt = (promptInputEl ? promptInputEl.value.trim() : '') || `Redecorate this room in ${state.selectedStyle} style with high quality results.`;
     const addChecktips = Array.from(document.querySelectorAll('#rec-add-list input:checked')).map(i => i.dataset.item);
     const removeChecktips = Array.from(document.querySelectorAll('#rec-remove-list input:checked')).map(i => i.dataset.item);
     
     let fullPrompt = userPrompt;
-    if (addChecktips.length) fullPrompt += ". Add: " + addChecktips.join(", ");
-    if (removeChecktips.length) fullPrompt += ". Remove: " + removeChecktips.join(", ");
+    if (addChecktips.length) fullPrompt += '. Add: ' + addChecktips.join(', ');
+    if (removeChecktips.length) fullPrompt += '. Remove: ' + removeChecktips.join(', ');
 
+    const primaryImage = state.imagesBase64[state.primaryIndex] || state.imagesBase64[0];
     try {
         const res = await fetch('/api/generate-image', {
             method: 'POST',
@@ -442,7 +535,7 @@ async function generateRender() {
                 prompt: fullPrompt,
                 style: state.selectedStyle,
                 quality: state.selectedQuality,
-                image_base64: state.imagesBase64[0]
+                image_base64: primaryImage
             })
         });
         
