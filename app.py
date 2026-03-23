@@ -126,9 +126,10 @@ else:
 if VERTEXAI_AVAILABLE:
     try:
         project_id = os.environ.get("GCP_PROJECT_ID", "gen-lang-client-0426824151")
-        location = os.environ.get("GCP_LOCATION", "us-central1")
+        # Fixed 404: use europe-west1 or europe-west4 for gen-lang projects
+        location = os.environ.get("GCP_LOCATION", "europe-west1") 
         vertexai.init(project=project_id, location=location)
-        print(f"Vertex AI initialized for project: {project_id}")
+        print(f"Vertex AI initialized for project: {project_id} in {location}")
     except Exception as e:
         print(f"Vertex AI initialization skipped: {e}")
 else:
@@ -149,7 +150,7 @@ def get_model(model_name):
 
 # GCP / Firebase Configuration
 project_id = os.environ.get("GCP_PROJECT_ID", "gen-lang-client-0426824151")
-location = os.environ.get("GCP_LOCATION", "us-central1")
+location = os.environ.get("GCP_LOCATION", "europe-west1")
 storage_bucket = os.environ.get(
     "FIREBASE_STORAGE_BUCKET", f"{project_id}.firebasestorage.app"
 )
@@ -240,27 +241,23 @@ def analyze_room_image(images_base64: list) -> dict:
     # Validation and Analysis Prompt
     analysis_prompt = """You are the RoomChic Architectural AI. 
     Evaluate the MASTER IMAGE (first image) for viability.
-    Return ONLY valid JSON:
-    {
+    Return ONLY valid JSON:    {
       "image_validation": {
         "viability_score": 0-100,
         "viability_ok": true/false,
-        "viability_issues_es": [],
+        "viability_issues_es": ["lista de problemas en español"],
         "is_interior_room": true,
         "has_clear_perspective": true,
-        "is_not_blurry": true,
-        "sufficient_coverage": true,
-        "no_heavy_distortion": true,
-        "is_single_room": true
+        "lighting_quality": "excelente/pobre"
       },
-      "room_type": "string",
-      "approx_size": "string",
-      "detailed_description_es": "string",
+      "room_type": "Dormitorio/Salón/Cocina/Baño/Oficina/Terraza",
+      "approx_size": "Pequeño/Mediano/Grande",
+      "detailed_description_es": "Descripción detallada del espacio en ESPAÑOL resaltando arquitectura, muebles actuales y luz.",
       "recommendations": {
-        "add_es": [],
-        "remove_es": []
+        "add_es": ["muebles o accesorios a añadir en español"],
+        "remove_es": ["qué quitar para mejorar el estilo en español"]
       }
-    }
+    }"""
     """
 
     last_error = "Unknown"
