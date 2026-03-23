@@ -236,7 +236,7 @@ STYLE_DESCRIPTIONS = {
 
 def analyze_room_image(images_base64: list) -> dict:
     """RoomChic Engine: 3D Triangulation and Perspective Analysis using Gemini via Vertex AI."""
-    models_to_try = ["gemini-2.0-flash", "gemini-1.5-flash"]
+    models_to_try = ["gemini-2.0-flash-001", "gemini-1.5-flash-002", "gemini-1.5-flash"]
     
     # Validation and Analysis Prompt
     analysis_prompt = """You are the RoomChic Architectural AI. 
@@ -307,7 +307,7 @@ def generate_room_render(
     QUALITY: {quality}
     """
 
-    models_to_try = ["gemini-2.0-flash-exp", "gemini-1.5-flash"]
+    models_to_try = ["gemini-2.0-flash-001", "gemini-1.5-flash-002", "gemini-1.5-flash", "gemini-2.0-flash-exp"]
     last_error = "Unknown"
 
     for model_name in models_to_try:
