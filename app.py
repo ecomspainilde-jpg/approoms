@@ -126,8 +126,8 @@ else:
 if VERTEXAI_AVAILABLE:
     try:
         project_id = os.environ.get("GCP_PROJECT_ID", "gen-lang-client-0426824151")
-        # Fixed 404: use europe-west1 or europe-west4 for gen-lang projects
-        location = os.environ.get("GCP_LOCATION", "europe-west1") 
+        # Standard Vertex location. API keys usually work best here.
+        location = os.environ.get("GCP_LOCATION", "us-central1") 
         vertexai.init(project=project_id, location=location)
         print(f"Vertex AI initialized for project: {project_id} in {location}")
     except Exception as e:
@@ -150,7 +150,7 @@ def get_model(model_name):
 
 # GCP / Firebase Configuration
 project_id = os.environ.get("GCP_PROJECT_ID", "gen-lang-client-0426824151")
-location = os.environ.get("GCP_LOCATION", "europe-west1")
+location = os.environ.get("GCP_LOCATION", "us-central1")
 storage_bucket = os.environ.get(
     "FIREBASE_STORAGE_BUCKET", f"{project_id}.firebasestorage.app"
 )
