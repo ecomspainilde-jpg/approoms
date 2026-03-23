@@ -268,31 +268,18 @@ def analyze_room_image(images_base64: list) -> dict:
         try:
             print(f"Attempting analysis with {model_name}...")
             
-            if is_valid_studio_key(GEMINI_API_KEY):
-                # AI Studio path: plain dicts work for text + images
-                model = genai.GenerativeModel(model_name)
-                prompt_parts = [analysis_prompt]
-                for img_b64 in images_base64:
-                    if "," in img_b64:
-                        img_b64 = img_b64.split(",")[1]
-                    prompt_parts.append({"mime_type": "image/jpeg", "data": img_b64})
-                response = model.generate_content(
-                    prompt_parts,
-                    generation_config={"response_mime_type": "application/json"}
-                )
-            else:
-                # Vertex AI path: requires Part objects
-                model = GenerativeModel(model_name)
-                parts = [Part.from_text(analysis_prompt)]
-                for img_b64 in images_base64:
-                    if "," in img_b64:
-                        img_b64 = img_b64.split(",")[1]
-                    img_bytes = base64.b64decode(img_b64)
-                    parts.append(Part.from_data(data=img_bytes, mime_type="image/jpeg"))
-                response = model.generate_content(
-                    parts,
-                    generation_config={"response_mime_type": "application/json"}
-                )
+            # Always use Vertex AI Part objects (works with ADC on Cloud Run)
+            model = GenerativeModel(model_name)
+            parts = [Part.from_text(analysis_prompt)]
+            for img_b64 in images_base64:
+                if "," in img_b64:
+                    img_b64 = img_b64.split(",")[1]
+                img_bytes = base64.b64decode(img_b64)
+                parts.append(Part.from_data(data=img_bytes, mime_type="image/jpeg"))
+            response = model.generate_content(
+                parts,
+                generation_config={"response_mime_type": "application/json"}
+            )
             
             if response.text:
                 print(f"Success with {model_name}: {safe_truncate(response.text, 100)}")
@@ -330,23 +317,14 @@ def generate_room_render(
         try:
             print(f"Generating render with {model_name} ({quality})...")
             
-            if is_valid_studio_key(GEMINI_API_KEY):
-                # AI Studio path
-                model = genai.GenerativeModel(model_name)
-                prompt_parts = [edit_instruction]
-                if base_image_b64:
-                    if "," in base_image_b64:
-                        base_image_b64 = base_image_b64.split(",")[1]
-                    prompt_parts.append({"mime_type": "image/jpeg", "data": base_image_b64})
-            else:
-                # Vertex AI path: requires Part objects
-                model = GenerativeModel(model_name)
-                prompt_parts = [Part.from_text(edit_instruction)]
-                if base_image_b64:
-                    if "," in base_image_b64:
-                        base_image_b64 = base_image_b64.split(",")[1]
-                    img_bytes = base64.b64decode(base_image_b64)
-                    prompt_parts.append(Part.from_data(data=img_bytes, mime_type="image/jpeg"))
+            # Always use Vertex AI Part objects (works with ADC on Cloud Run)
+            model = GenerativeModel(model_name)
+            prompt_parts = [Part.from_text(edit_instruction)]
+            if base_image_b64:
+                if "," in base_image_b64:
+                    base_image_b64 = base_image_b64.split(",")[1]
+                img_bytes = base64.b64decode(base_image_b64)
+                prompt_parts.append(Part.from_data(data=img_bytes, mime_type="image/jpeg"))
 
             response = model.generate_content(
                 prompt_parts,
