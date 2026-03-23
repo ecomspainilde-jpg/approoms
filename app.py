@@ -258,7 +258,7 @@ def analyze_room_image(images_base64: list) -> dict:
         "remove_es": ["qué quitar para mejorar el estilo en español"]
       }
     }"""
-    """
+
 
     last_error = "Unknown"
     for model_name in models_to_try:
@@ -295,7 +295,7 @@ def generate_room_render(
     base_image_b64: Optional[str] = None,
     quality: str = "normal",
 ) -> Dict[str, Any]:
-    """RoomChic Render — Photo-faithful room restyling using Gemini 2.0."""
+    """RoomChic Render - Photo-faithful room restyling using Gemini 2.0."""
     style_desc = STYLE_DESCRIPTIONS.get(style.lower(), STYLE_DESCRIPTIONS["moderno"])
     
     # Combined instruction
