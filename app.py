@@ -76,7 +76,7 @@ import google.generativeai as genai
 from google.generativeai import types as genai_types
 try:
     import vertexai
-    from vertexai.generative_models import GenerativeModel
+    from vertexai.generative_models import GenerativeModel, Part, Image as VertexImage
     VERTEXAI_AVAILABLE = True
 except ImportError:
     VERTEXAI_AVAILABLE = False
@@ -234,8 +234,7 @@ STYLE_DESCRIPTIONS = {
 }
 
 def analyze_room_image(images_base64: list) -> dict:
-    """RoomChic Engine: 3D Triangulation and Perspective Analysis using Gemini via AI Studio."""
-    # Using more stable and specific model names for AI Studio
+    """RoomChic Engine: 3D Triangulation and Perspective Analysis using Gemini via Vertex AI."""
     models_to_try = ["gemini-2.0-flash", "gemini-1.5-flash"]
     
     # Validation and Analysis Prompt
@@ -264,37 +263,38 @@ def analyze_room_image(images_base64: list) -> dict:
     }
     """
 
-    # Prepare multimodal content parts (legacy format)
-    prompt_parts = []
-    # Add text part
-    prompt_parts.append({"text": analysis_prompt})
-    
-    for i, img_b64 in enumerate(images_base64):
-        # Clean base64 if it has metadata prefix
-        if "," in img_b64:
-            img_b64 = img_b64.split(",")[1]
-            
-        prompt_parts.append({
-            "inline_data": {
-                "mime_type": "image/jpeg",
-                "data": img_b64
-            }
-        })
-
     last_error = "Unknown"
     for model_name in models_to_try:
         try:
             print(f"Attempting analysis with {model_name}...")
-            model = get_model(model_name)
-            if not model:
-                continue
-            response = model.generate_content(
-                prompt_parts,
-                generation_config={"response_mime_type": "application/json"}
-            )
+            
+            if is_valid_studio_key(GEMINI_API_KEY):
+                # AI Studio path: plain dicts work for text + images
+                model = genai.GenerativeModel(model_name)
+                prompt_parts = [analysis_prompt]
+                for img_b64 in images_base64:
+                    if "," in img_b64:
+                        img_b64 = img_b64.split(",")[1]
+                    prompt_parts.append({"mime_type": "image/jpeg", "data": img_b64})
+                response = model.generate_content(
+                    prompt_parts,
+                    generation_config={"response_mime_type": "application/json"}
+                )
+            else:
+                # Vertex AI path: requires Part objects
+                model = GenerativeModel(model_name)
+                parts = [Part.from_text(analysis_prompt)]
+                for img_b64 in images_base64:
+                    if "," in img_b64:
+                        img_b64 = img_b64.split(",")[1]
+                    img_bytes = base64.b64decode(img_b64)
+                    parts.append(Part.from_data(data=img_bytes, mime_type="image/jpeg"))
+                response = model.generate_content(
+                    parts,
+                    generation_config={"response_mime_type": "application/json"}
+                )
             
             if response.text:
-                # Log a snippet for debugging (truncated)
                 print(f"Success with {model_name}: {safe_truncate(response.text, 100)}")
                 return {"success": True, "data": json.loads(response.text)}
         except Exception as e:
@@ -329,26 +329,24 @@ def generate_room_render(
     for model_name in models_to_try:
         try:
             print(f"Generating render with {model_name} ({quality})...")
-            model = get_model(model_name)
-            if not model:
-                continue
             
-            # Prepare content parts (legacy format)
-            prompt_parts = []
-            # Add text part
-            prompt_parts.append({"text": edit_instruction})
-            
-            if base_image_b64:
-                # Clean base64 if it has metadata prefix
-                if "," in base_image_b64:
-                    base_image_b64 = base_image_b64.split(",")[1]
-                    
-                prompt_parts.append({
-                    "inline_data": {
-                        "mime_type": "image/jpeg",
-                        "data": base_image_b64
-                    }
-                })
+            if is_valid_studio_key(GEMINI_API_KEY):
+                # AI Studio path
+                model = genai.GenerativeModel(model_name)
+                prompt_parts = [edit_instruction]
+                if base_image_b64:
+                    if "," in base_image_b64:
+                        base_image_b64 = base_image_b64.split(",")[1]
+                    prompt_parts.append({"mime_type": "image/jpeg", "data": base_image_b64})
+            else:
+                # Vertex AI path: requires Part objects
+                model = GenerativeModel(model_name)
+                prompt_parts = [Part.from_text(edit_instruction)]
+                if base_image_b64:
+                    if "," in base_image_b64:
+                        base_image_b64 = base_image_b64.split(",")[1]
+                    img_bytes = base64.b64decode(base_image_b64)
+                    prompt_parts.append(Part.from_data(data=img_bytes, mime_type="image/jpeg"))
 
             response = model.generate_content(
                 prompt_parts,
