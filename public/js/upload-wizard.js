@@ -352,6 +352,87 @@ async function analyzeImage() {
     }
 }
 
+function renderImageGrid() {
+    if (!imagePreview || !dropzoneContent) return;
+    
+    if (state.imagesBase64.length === 0) {
+        imagePreview.classList.add('hidden');
+        dropzoneContent.classList.remove('hidden');
+        return;
+    }
+    
+    const canAddMore = state.imagesBase64.length < 3;
+    
+    // Inject grid HTML
+    imagePreview.innerHTML = `
+        <div class="space-y-4 w-full">
+            <div class="flex items-center justify-between">
+                <p class="text-[10px] font-black text-stone-500 uppercase tracking-[0.2em]">
+                    ${state.imagesBase64.length} / 3 FOTOS SELECCIONADAS
+                </p>
+                <button onclick="resetUpload()" class="text-[10px] font-black text-primary uppercase tracking-widest hover:underline">
+                    Borrar todas
+                </button>
+            </div>
+            
+            <div class="grid grid-cols-3 gap-3">
+                ${state.imagesBase64.map((img, i) => `
+                    <div onclick="setPrimary(${i})" class="relative group aspect-square rounded-2xl overflow-hidden cursor-pointer border-4 transition-all duration-300 ${i === state.primaryIndex ? 'border-primary shadow-lg shadow-primary/20 scale-[1.02]' : 'border-white/10 hover:border-primary/50'}">
+                        <img src="data:image/jpeg;base64,${img}" class="w-full h-full object-cover">
+                        ${i === state.primaryIndex ? `
+                            <div class="absolute top-2 left-2 bg-primary text-white text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-tighter">
+                                Principal
+                            </div>
+                        ` : ''}
+                        <button onclick="removeImage(event, ${i})" class="absolute top-2 right-2 size-6 rounded-full bg-stone-900/80 text-white flex items-center justify-center hover:bg-red-500 transition-colors opacity-0 group-hover:opacity-100">
+                            <span class="material-symbols-outlined text-sm">close</span>
+                        </button>
+                    </div>
+                `).join('')}
+                
+                ${canAddMore ? `
+                    <button onclick="addMorePhotos()" class="aspect-square rounded-2xl border-2 border-dashed border-stone-300 flex flex-col items-center justify-center gap-1 text-stone-400 hover:border-primary hover:text-primary transition-all group">
+                        <span class="material-symbols-outlined text-2xl group-hover:scale-110 transition-transform">add_a_photo</span>
+                        <span class="text-[9px] font-black uppercase tracking-tighter">Añadir</span>
+                    </button>
+                ` : ''}
+            </div>
+            
+            <div class="bg-primary/5 rounded-xl p-3 border border-primary/10">
+                <p class="text-[10px] text-primary font-bold leading-tight">
+                    <span class="material-symbols-outlined text-xs align-middle mr-1">info</span>
+                    Toca una imagen para marcarla como la **principal** para el diseño.
+                </p>
+            </div>
+        </div>
+    `;
+
+    imagePreview.classList.remove('hidden');
+    dropzoneContent.classList.add('hidden');
+}
+
+window.setPrimary = function(index) {
+    if (state.primaryIndex === index) return;
+    state.primaryIndex = index;
+    renderImageGrid();
+    analyzeImage(); // Re-analyze with new primary
+};
+
+window.removeImage = function(e, index) {
+    e.stopPropagation();
+    state.imagesBase64.splice(index, 1);
+    if (state.primaryIndex >= state.imagesBase64.length) {
+        state.primaryIndex = Math.max(0, state.imagesBase64.length - 1);
+    }
+    renderImageGrid();
+    if (state.imagesBase64.length > 0) analyzeImage();
+    else resetUpload();
+};
+
+window.addMorePhotos = function() {
+    if (fileInput) fileInput.click();
+};
+
 function selectStyle(card) {
     document.querySelectorAll('.style-card').forEach(c => c.classList.remove('selected'));
     card.classList.add('selected');
