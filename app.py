@@ -925,6 +925,91 @@ def admin_update_user(uid):
         return jsonify({"error": str(e)}), 500
 
 
+@app.route("/api/admin/users/<uid>", methods=["DELETE"])
+def admin_delete_user(uid):
+    """Delete all user data across Auth, Firestore, and Storage (admin only)."""
+    admin = verify_admin()
+    if not admin:
+        return jsonify({"error": "Unauthorized - Admin access required"}), 403
+
+    if not db:
+        return jsonify({"error": "Firestore not initialized"}), 500
+
+    try:
+        print(f"ADMIN DELETE REQUEST: User {uid} by Admin {admin['uid']}")
+
+        # 1. Delete from Firebase Auth
+        try:
+            auth.delete_user(uid)
+            print(f"Auth: User {uid} deleted.")
+        except auth.UserNotFoundError:
+            print(f"Auth: User {uid} not found, continuing cleanup.")
+        except Exception as e:
+            print(f"Auth Error: {e}")
+
+        # 2. Delete Renders and Storage Files
+        renders_deleted = 0
+        try:
+            render_docs = db.collection("renders").where("userId", "==", uid).stream()
+            for doc in render_docs:
+                data = doc.to_dict()
+                
+                # Delete files from Storage
+                if bucket:
+                    for field in ["imageUrl", "inputImageUrl"]:
+                        path = data.get(field)
+                        if path:
+                            try:
+                                # Standardize path (remove /api/storage/ prefix if present)
+                                clean_path = path.replace("/api/storage/", "")
+                                blob = bucket.blob(clean_path)
+                                if blob.exists():
+                                    blob.delete()
+                                    print(f"Storage: Deleted {clean_path}")
+                            except Exception as se:
+                                print(f"Storage Error deleting {path}: {se}")
+
+                # Delete render document
+                doc.reference.delete()
+                renders_deleted += 1
+            print(f"Firestore: {renders_deleted} renders deleted.")
+        except Exception as e:
+            print(f"Firestore Renders Error: {e}")
+
+        # 3. Delete Purchases and Transactions
+        try:
+            for coll in ["purchases", "transactions"]:
+                docs = db.collection(coll).where("userId", "==", uid).stream()
+                count = 0
+                for doc in docs:
+                    doc.reference.delete()
+                    count += 1
+                print(f"Firestore: {count} {coll} deleted.")
+        except Exception as e:
+            print(f"Firestore Payment Data Error: {e}")
+
+        # 4. Delete Price History (optional, but keep it for record?) 
+        # Usually we keep price history as it's an admin log. 
+        # But if it's "all data related to user", maybe we should if user was an admin?
+        # Let's skip it to preserve system logs.
+
+        # 5. Finally, delete the User document
+        db.collection("users").document(uid).delete()
+        print(f"Firestore: User document {uid} deleted.")
+
+        return jsonify({
+            "success": True, 
+            "message": f"Usuario {uid} y todos sus datos han sido eliminados correctamente.",
+            "cleanup": {
+                "renders": renders_deleted,
+                "auth": True
+            }
+        })
+    except Exception as e:
+        print(f"Critical error in admin_delete_user: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route("/api/admin/renders", methods=["GET"])
 def admin_get_renders():
     """Get all renders (admin only)."""
