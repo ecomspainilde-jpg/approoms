@@ -122,36 +122,44 @@ except Exception as e:
 # Initialize Vertex AI as PRIMARY engine (uses ADC from Cloud Run service account)
 if VERTEXAI_AVAILABLE:
     try:
-        project_id = os.environ.get("GCP_PROJECT_ID", "gen-lang-client-0426824151")
+        # If GCP_PROJECT_ID is not provided, vertexai.init() auto-detects if running on GCP
+        project_id = os.environ.get("GCP_PROJECT_ID") 
         # us-central1 is the canonical region for Gemini models in Vertex AI
+        # Cloud Run in europe-southwest1 can call Vertex AI us-central1 cross-region
         location = "us-central1"
         vertexai.init(project=project_id, location=location)
-        print(f"Vertex AI initialized as PRIMARY in {location} (project: {project_id})")
+        print(f"Vertex AI initialized in {location} (project: {project_id or 'AUTO-DETECTED'})")
     except Exception as e:
         print(f"Vertex AI initialization error: {e}")
 
-def get_model(model_name):
+def get_model_providers(model_name):
     """
-    Returns (model, provider).
-    - Provider is 'studio' if using AI Studio SDK (PRIMARY).
-    - Provider is 'vertex' if using Vertex AI (ADC).
+    Returns a list of (model_object, provider_name) for a given model.
+    Tries AI Studio (studio) first if key is available, then Vertex AI (vertex).
     """
-    # PRIMARY: AI Studio SDK when real API key is available (AIza prefix = real key)
+    providers = []
+    
+    # ── AI Studio (genai) ──
     if GEMINI_API_KEY:
         try:
-            m = genai.GenerativeModel(model_name)
-            if m: return m, "studio"
+            # For AI Studio, it's often better to prefix with 'models/' if it doesn't have it
+            studio_model_name = model_name if model_name.startswith("models/") else f"models/{model_name}"
+            m_studio = genai.GenerativeModel(studio_model_name)
+            if m_studio: providers.append((m_studio, "studio"))
         except Exception as e:
             print(f"AI Studio model load error ({model_name}): {e}")
 
-    # FALLBACK: Vertex AI (ADC - works in Cloud Run without API key)
+    # ── Vertex AI (vertexai) ──
     if VERTEXAI_AVAILABLE:
         try:
-            return GenerativeModel(model_name), "vertex"
+            # For Vertex AI, we use the simple name, typically WITHOUT 'models/' prefix
+            vertex_model_name = model_name.replace("models/", "")
+            m_vertex = GenerativeModel(vertex_model_name)
+            if m_vertex: providers.append((m_vertex, "vertex"))
         except Exception as e:
             print(f"Vertex AI model load error ({model_name}): {e}")
 
-    return None, None
+    return providers
 
 # GCP / Firebase Configuration
 project_id = os.environ.get("GCP_PROJECT_ID", "gen-lang-client-0426824151")
@@ -268,68 +276,69 @@ def analyze_room_image(images_base64: list) -> dict:
 
     last_error = "Unknown"
     for model_name in models_to_try:
-        try:
-            print(f"Attempting analysis with {model_name}...")
-            model, provider = get_model(model_name)
-            if not model: continue
-
-            # SDK-specific content preparation
-            parts = []
-            if provider == "studio":
-                # AI Studio format
-                parts.append(analysis_prompt)
-                for img_b64 in images_base64:
-                    if "," in img_b64: img_b64 = img_b64.split(",")[1]
-                    # Optimize for speed (analysis doesn't need high resolution)
-                    opt_bytes, _ = optimize_image_data(img_b64, max_dim=1024, quality=70)
-                    parts.append({'mime_type': 'image/jpeg', 'data': opt_bytes})
-            else:
-                # Vertex AI format
-                parts.append(Part.from_text(analysis_prompt))
-                for img_b64 in images_base64:
-                    if "," in img_b64: img_b64 = img_b64.split(",")[1]
-                    # Optimize for speed
-                    opt_bytes, _ = optimize_image_data(img_b64, max_dim=1024, quality=70)
-                    parts.append(Part.from_data(data=opt_bytes, mime_type="image/jpeg"))
-
-            try:
-                # Try SDK call with 30s timeout to avoid Cloud Run 504 on first model failure
-                request_opts_studio = {"timeout": 35}
-                if provider == "studio":
-                    response = model.generate_content(
-                        parts, 
-                        generation_config={"response_mime_type": "application/json"},
-                        request_options=request_opts_studio
-                    )
-                else:
-                    # Vertex AI SDK has a different timeout structure sometimes, but newer ones support request_options
-                    response = model.generate_content(
-                        parts, 
-                        generation_config={"response_mime_type": "application/json"}
-                    )
-            except Exception as e:
-                # Fallback: without response_mime_type (older SDK or provider limitation)
-                print(f"Model {model_name} ({provider}) JSON mode error: {e}")
-                if provider == "studio":
-                    response = model.generate_content(parts, request_options=request_opts_studio)
-                else:
-                    response = model.generate_content(parts)
-
-            if response and response.text:
-                text = response.text.strip()
-                # Strip markdown code fences if present
-                if text.startswith("```"):
-                    parts_text = text.split("```")
-                    if len(parts_text) > 1:
-                        text = parts_text[1]
-                        if text.startswith("json"): text = text[4:]
-                return {"success": True, "data": json.loads(text.strip())}
-        except Exception as e:
-            last_error = str(e)
-            print(f"Error with model {model_name} ({provider}): {safe_truncate(e, 200)}")
+        # Get all providers for this model
+        providers = get_model_providers(model_name)
+        if not providers:
+            print(f"No providers available for model {model_name}")
             continue
+
+        for model, provider in providers:
+            try:
+                print(f"Attempting analysis with {model_name} via {provider}...")
+
+                # SDK-specific content preparation
+                parts = []
+                if provider == "studio":
+                    # AI Studio format (standard string or dict part)
+                    parts.append(analysis_prompt)
+                    for img_b64 in images_base64:
+                        if "," in img_b64: img_b64 = img_b64.split(",")[1]
+                        opt_bytes, _ = optimize_image_data(img_b64, max_dim=1024, quality=70)
+                        parts.append({'mime_type': 'image/jpeg', 'data': opt_bytes})
+                else:
+                    # Vertex AI format
+                    parts.append(Part.from_text(analysis_prompt))
+                    for img_b64 in images_base64:
+                        if "," in img_b64: img_b64 = img_b64.split(",")[1]
+                        opt_bytes, _ = optimize_image_data(img_b64, max_dim=1024, quality=70)
+                        parts.append(Part.from_data(data=opt_bytes, mime_type="image/jpeg"))
+
+                try:
+                    # Try call with per-provider timeout
+                    request_opts = {"timeout": 30}
+                    if provider == "studio":
+                        response = model.generate_content(
+                            parts, 
+                            generation_config={"response_mime_type": "application/json"},
+                            request_options=request_opts
+                        )
+                    else:
+                        response = model.generate_content(
+                            parts, 
+                            generation_config={"response_mime_type": "application/json"}
+                        )
+                except Exception as e:
+                    print(f"JSON failure with {model_name} ({provider}): {e}")
+                    # Fallback to text mode
+                    if provider == "studio":
+                        response = model.generate_content(parts, request_options=request_opts)
+                    else:
+                        response = model.generate_content(parts)
+
+                if response and response.text:
+                    text = response.text.strip()
+                    # Strip markdown markers
+                    if "```" in text:
+                        text = text.split("```")[1]
+                        if text.lower().startswith("json"): text = text[4:]
+                    return {"success": True, "data": json.loads(text.strip())}
+
+            except Exception as e:
+                last_error = str(e)
+                print(f"Error with model {model_name} ({provider}): {safe_truncate(e, 200)}")
+                continue
             
-    return {"success": False, "error": f"Fallo en motor RoomChic: {safe_truncate(last_error, 200)}"}
+    return {"success": False, "error": f"Motores RoomChic fallaron: {safe_truncate(last_error, 200)}"}
 
 def generate_room_render(
     prompt: str,
@@ -353,90 +362,78 @@ def generate_room_render(
     # Models available via AI Studio API (AIza key) / Vertex AI - ordered by stability and speed
     models_to_try = ["gemini-1.5-flash", "gemini-2.0-flash", "gemini-1.5-pro", "gemini-2.0-flash-lite"]
     last_error = "Unknown"
-
     for model_name in models_to_try:
-        try:
-            print(f"Generating render with {model_name} ({quality})...")
-            model, provider = get_model(model_name)
-            if not model: continue
+        # Try both providers for each model name
+        providers = get_model_providers(model_name)
+        if not providers: continue
 
-            # SDK-specific content preparation
-            prompt_parts = []
-            if provider == "studio":
-                # AI Studio format (prompt string, direct image dict)
-                prompt_parts.append(edit_instruction)
-                if base_image_b64:
-                    if "," in base_image_b64: base_image_b64 = base_image_b64.split(",")[1]
-                    # Optimize for render (higher res than analysis)
-                    opt_bytes, _ = optimize_image_data(base_image_b64, max_dim=2560, quality=85)
-                    prompt_parts.append({'mime_type': 'image/jpeg', 'data': opt_bytes})
-            else:
-                # Vertex AI format
-                prompt_parts.append(Part.from_text(edit_instruction))
-                if base_image_b64:
-                    if "," in base_image_b64: base_image_b64 = base_image_b64.split(",")[1]
-                    # Optimize for render
-                    opt_bytes, _ = optimize_image_data(base_image_b64, max_dim=2560, quality=85)
-                    prompt_parts.append(Part.from_data(data=opt_bytes, mime_type="image/jpeg"))
-
+        for model, provider in providers:
             try:
-                # 35s timeout to avoid Cloud Run 504. 
-                # Note: multimodal generation (IMAGE) might take longer, but 35s is usually enough for these models.
-                request_opts = {"timeout": 45} 
-                
-                generation_config = {"temperature": 0.4}
-                if "2.0" in model_name:
-                    generation_config["response_modalities"] = ["IMAGE", "TEXT"]
-                
+                print(f"Generating render with {model_name} via {provider} ({quality})...")
+
+                # SDK-specific content preparation
+                prompt_parts = []
                 if provider == "studio":
-                    response = model.generate_content(
-                        prompt_parts,
-                        generation_config=generation_config,
-                        request_options=request_opts
-                    )
+                    # AI Studio format (prompt string, direct image dict)
+                    prompt_parts.append(edit_instruction)
+                    if base_image_b64:
+                        if "," in base_image_b64: base_image_b64 = base_image_b64.split(",")[1]
+                        # Optimize for render (higher res than analysis)
+                        opt_bytes, _ = optimize_image_data(base_image_b64, max_dim=2560, quality=85)
+                        prompt_parts.append({'mime_type': 'image/jpeg', 'data': opt_bytes})
                 else:
-                    response = model.generate_content(
-                        prompt_parts,
-                        generation_config=generation_config
-                    )
-            except Exception as e:
-                print(f"Render generation error with {model_name} ({provider}): {e}")
-                if provider == "studio":
-                    response = model.generate_content(prompt_parts, generation_config={"temperature": 0.4}, request_options=request_opts)
-                else:
-                    response = model.generate_content(prompt_parts, generation_config={"temperature": 0.4})
-            
-            # Extract image from response
-            image_b64 = None
-            if hasattr(response, 'candidates') and response.candidates:
-                candidate = response.candidates[0]
-                if hasattr(candidate, 'content') and hasattr(candidate.content, 'parts'):
-                    for part in candidate.content.parts:
-                        if hasattr(part, 'inline_data') and part.inline_data:
-                            if part.inline_data.mime_type.startswith("image/"):
-                                image_b64 = base64.b64encode(part.inline_data.data).decode("utf-8")
+                    # Vertex AI format
+                    prompt_parts.append(Part.from_text(edit_instruction))
+                    if base_image_b64:
+                        if "," in base_image_b64: base_image_b64 = base_image_b64.split(",")[1]
+                        opt_bytes, _ = optimize_image_data(base_image_b64, max_dim=2560, quality=85)
+                        prompt_parts.append(Part.from_data(data=opt_bytes, mime_type="image/jpeg"))
+
+                try:
+                    # 45s timeout for render
+                    request_opts = {"timeout": 45} 
+                    generation_config = {"temperature": 0.4}
+                    if "2.0" in model_name:
+                        generation_config["response_modalities"] = ["IMAGE", "TEXT"]
+                    
+                    if provider == "studio":
+                        response = model.generate_content(prompt_parts, generation_config=generation_config, request_options=request_opts)
+                    else:
+                        response = model.generate_content(prompt_parts, generation_config=generation_config)
+                except Exception as e:
+                    print(f"Render generation fail ({model_name} {provider}): {e}")
+                    if provider == "studio":
+                        response = model.generate_content(prompt_parts, generation_config={"temperature": 0.4}, request_options=request_opts)
+                    else:
+                        response = model.generate_content(prompt_parts, generation_config={"temperature": 0.4})
+                
+                # Extract image from response
+                image_b64 = None
+                if hasattr(response, 'candidates') and response.candidates:
+                    candidate = response.candidates[0]
+                    if hasattr(candidate, 'content') and hasattr(candidate.content, 'parts'):
+                        for part in candidate.content.parts:
+                            if hasattr(part, 'inline_data') and part.inline_data:
+                                image_b64 = base64.b64encode(part.inline_data.data).decode('utf-8')
                                 break
-                if image_b64: break
                 
-            if image_b64:
-                print(f"Success generating render with {model_name}")
-                return {
-                    "success": True,
-                    "image_base64": image_b64,
-                    "full_prompt": edit_instruction,
-                    "style_description": style_desc
-                }
-            else:
-                print(f"Model {model_name} returned no image part.")
-                
-        except Exception as e:
-            last_error = str(e)
-            print(f"Error with {model_name}: {safe_truncate(e, 400)}")
-            continue
+                if image_b64:
+                    return {
+                        "success": True,
+                        "image_base64": image_b64,
+                        "full_prompt": edit_instruction,
+                        "style_description": style_desc
+                    }
+                else:
+                    print(f"Model {model_name} ({provider}) produced no image data.")
+            except Exception as e:
+                last_error = str(e)
+                print(f"Model error {model_name} ({provider}): {safe_truncate(e, 400)}")
+                continue
 
     return {
         "success": False,
-        "error": f"No se pudo generar el render. Detalle: {safe_truncate(last_error, 100)}"
+        "error": f"Motores RoomChic fallaron: {safe_truncate(last_error, 200)}"
     }
 
 
