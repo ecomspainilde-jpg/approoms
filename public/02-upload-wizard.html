@@ -6,7 +6,10 @@
 <link rel="stylesheet" href="/css/tailwind.css">
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
 <script id="tailwind-config">
+    // Safe initialization check
+    if (typeof window.tailwind !== 'undefined') {
       tailwind.config = {
         darkMode: "class",
         theme: {
@@ -69,7 +72,8 @@
             borderRadius: {"DEFAULT": "1rem", "lg": "1.6rem", "xl": "3rem", "3xl": "3rem", "full": "9999px"},
           },
         },
-      }
+      };
+    }
     </script>
 <style>
         .material-symbols-outlined {

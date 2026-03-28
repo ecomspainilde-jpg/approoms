@@ -19,11 +19,18 @@ def safe_truncate(text: Any, limit: int = 500) -> str:
         return text_val
     return text_val[0:limit] + "... [TRUNCATED]"  # type: ignore
 
-def optimize_image_data(image_base64, max_dim=1280, quality=75):
+def optimize_image_data(image_base64, max_dim=1600, quality=75):
     """
     Decodes base64 image, resizes if necessary, and compresses as JPEG.
     Returns the optimized binary data and the new content type.
     """
+    if not image_base64:
+        return b"", "image/jpeg"
+    
+    # Pre-strip common data URI prefixes if present
+    if "," in image_base64:
+        image_base64 = image_base64.split(",")[1]
+    
     try:
         # Decode base64 to bytes
         img_data = base64.b64decode(image_base64)
@@ -109,15 +116,19 @@ webhook_secret = os.environ.get("STRIPE_WEBHOOK_SECRET", "whsec_placeholder")
 
 # Initialize Google Generative AI (AI Studio) - local dev fallback only
 GEMINI_API_KEY = (os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY") or "").strip()
-try:
-    if GEMINI_API_KEY and not GEMINI_API_KEY.startswith("AQ.") and "API_KEY" not in GEMINI_API_KEY.upper():
-        genai.configure(api_key=GEMINI_API_KEY)
-        print(f"AI Studio SDK configured with key: {GEMINI_API_KEY[:10]}...")
+if GEMINI_API_KEY:
+    # Most keys start with AIza. Only ignore known generic placeholders.
+    generic_placeholders = ["API_KEY_HOLDER", "TU_API_KEY", "PLACE_HOLDER", "YOUR_API_KEY"]
+    if any(p in GEMINI_API_KEY.upper() for p in generic_placeholders) or GEMINI_API_KEY.startswith("AQ."):
+        print(f"Skipping placeholder API key: {GEMINI_API_KEY[:4]}...")
+        GEMINI_API_KEY = None
     else:
-        GEMINI_API_KEY = None # Mark as unavailable to skip studio provider later
-        print("AI Studio SDK skipped (key is placeholder, AQ.* OAuth type or missing, using Vertex AI instead)")
-except Exception as e:
-    print(f"GenAI configure error: {e}")
+        try:
+            genai.configure(api_key=GEMINI_API_KEY)
+            print(f"GenAI configure success with key: {GEMINI_API_KEY[:8]}...")
+        except Exception as e:
+            print(f"GenAI configure error: {e}")
+            GEMINI_API_KEY = None
 
 # Initialize Vertex AI as PRIMARY engine (uses ADC from Cloud Run service account)
 if VERTEXAI_AVAILABLE:
@@ -162,11 +173,12 @@ def get_model_providers(model_name):
     return providers
 
 # GCP / Firebase Configuration
-project_id = os.environ.get("GCP_PROJECT_ID", "gen-lang-client-0426824151")
+# Use None by default to allow auto-detection in Cloud Run
+project_id = os.environ.get("GCP_PROJECT_ID")
 location = os.environ.get("GCP_LOCATION", "us-central1")
-storage_bucket = os.environ.get(
-    "FIREBASE_STORAGE_BUCKET", f"{project_id}.firebasestorage.app"
-)
+storage_bucket = os.environ.get("FIREBASE_STORAGE_BUCKET")
+if not storage_bucket and project_id:
+    storage_bucket = f"{project_id}.firebasestorage.app"
 
 # Stripe Webhook Secret check
 webhook_secret = os.environ.get("STRIPE_WEBHOOK_SECRET")
@@ -198,11 +210,22 @@ def health_check():
         "status": "online",
         "firebase": db is not None,
         "storage": bucket is not None,
-        "stripe": stripe.api_key and "placeholder" not in stripe.api_key.lower(),
+        "stripe": stripe.api_key and "placeholder" not in stripe.api_key.lower() if stripe.api_key else False,
         "project_id": project_id,
-        "env_loaded": os.path.exists(env_path)
     }
     return jsonify(status)
+
+@app.errorhandler(Exception)
+def handle_unexpected_error(e):
+    # Log the full traceback to stdout for Cloud Run logging
+    import traceback
+    print("UNHANDLED EXCEPTION IN FLASK:")
+    traceback.print_exc()
+    return jsonify({
+        "error": "Internal Server Error",
+        "message": safe_truncate(str(e), 300),
+        "success": False
+    }), 500
 
 
 def get_render_price(quality: str = "normal"):
@@ -359,8 +382,13 @@ def generate_room_render(
     QUALITY: {quality}
     """
 
-    # Models available via AI Studio API (AIza key) / Vertex AI - ordered by stability and speed
-    models_to_try = ["gemini-1.5-flash", "gemini-2.0-flash", "gemini-1.5-pro", "gemini-2.0-flash-lite"]
+    # Comprehensive fallback list including specific versions
+    models_to_try = [
+        "gemini-1.5-flash-002", "gemini-1.5-flash", 
+        "gemini-2.0-flash-001", "gemini-2.0-flash",
+        "gemini-1.5-pro-002", "gemini-1.5-pro", 
+        "gemini-2.0-flash-lite-preview-02-05", "gemini-2.0-flash-lite"
+    ]
     last_error = "Unknown"
     for model_name in models_to_try:
         # Try both providers for each model name
