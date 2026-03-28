@@ -119,7 +119,7 @@ GEMINI_API_KEY = (os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API
 if GEMINI_API_KEY:
     # Most keys start with AIza. Only ignore known generic placeholders.
     generic_placeholders = ["API_KEY_HOLDER", "TU_API_KEY", "PLACE_HOLDER", "YOUR_API_KEY"]
-    if any(p in GEMINI_API_KEY.upper() for p in generic_placeholders) or GEMINI_API_KEY.startswith("AQ."):
+    if any(p in GEMINI_API_KEY.upper() for p in generic_placeholders):
         print(f"Skipping placeholder API key: {GEMINI_API_KEY[:4]}...")
         GEMINI_API_KEY = None
     else:
