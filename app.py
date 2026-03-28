@@ -130,18 +130,19 @@ if GEMINI_API_KEY:
             print(f"GenAI configure error: {e}")
             GEMINI_API_KEY = None
 
-# Initialize Vertex AI as PRIMARY engine (uses ADC from Cloud Run service account)
+# Initialize Vertex AI as PRIMARY engine
 if VERTEXAI_AVAILABLE:
     try:
-        # If GCP_PROJECT_ID is not provided, vertexai.init() auto-detects if running on GCP
-        project_id = os.environ.get("GCP_PROJECT_ID") 
-        # us-central1 is the canonical region for Gemini models in Vertex AI
-        # Cloud Run in europe-southwest1 can call Vertex AI us-central1 cross-region
-        location = "us-central1"
-        vertexai.init(project=project_id, location=location)
-        print(f"Vertex AI initialized in {location} (project: {project_id or 'AUTO-DETECTED'})")
+        # Priority: GCP_PROJECT_ID env, current PROJECT_ID, or None for auto-detect
+        vertex_project = os.environ.get("GCP_PROJECT_ID") or project_id or None
+        # Models like Gemini 2.0 should be used in us-central1 as the primary hub
+        vertex_location = os.environ.get("GCP_LOCATION", "us-central1")
+        
+        # Explicit initialization
+        vertexai.init(project=vertex_project, location=vertex_location)
+        print(f"Vertex AI: Ready in {vertex_location} (project: {vertex_project or 'AUTO-DETECTED'})")
     except Exception as e:
-        print(f"Vertex AI initialization error: {e}")
+        print(f"Vertex AI initialization error: {safe_truncate(e, 200)}")
 
 def get_model_providers(model_name):
     """
@@ -186,20 +187,24 @@ if not webhook_secret or "holder" in webhook_secret:
     print("WARNING: STRIPE_WEBHOOK_SECRET is missing or contains a placeholder.")
     webhook_secret = None
 
-# Initialize Firebase Admin
+# Initialize Firebase Admin with dynamic options (filters None values)
 try:
     if not firebase_admin._apps:
-        # Pass project_id explicitly for local development
-        firebase_admin.initialize_app(options={
-            "projectId": project_id,
-            "storageBucket": storage_bucket
-        })
-        print(f"Firebase Admin initialized: {project_id}")
+        fb_options = {}
+        if project_id: fb_options["projectId"] = project_id
+        if storage_bucket: fb_options["storageBucket"] = storage_bucket
+        
+        firebase_admin.initialize_app(options=fb_options)
+        print(f"Firebase Admin: Connected to {project_id or 'DEFAULT'}")
+    
     db = firestore.client()
-    bucket = storage.bucket()
-    print(f"Firestore and Storage clients initialized successfully.")
+    # Explicitly check if client is working
+    db.collection("health").document("ping").get(timeout=5)
+    
+    bucket = storage.bucket() if storage_bucket else None
+    print(f"Firebase Client: Success (db: {db.project if hasattr(db, 'project') else 'ok'}, bucket: {bucket.name if bucket else 'none'})")
 except Exception as e:
-    print(f"CRITICAL ERROR initializing Firebase Admin: {safe_truncate(e, 500)}")
+    print(f"Firebase initialization CRITICAL: {safe_truncate(e, 500)}")
     db = None
     bucket = None
 
