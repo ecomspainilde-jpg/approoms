@@ -1,0 +1,28 @@
+{
+  "name": "habitacion",
+  "version": "1.0.0",
+  "description": "[![Python](https://img.shields.io/badge/Python-3.14-blue.svg)](https://www.python.org/)\r [![Framework](https://img.shields.io/badge/Framework-Flask-black.svg)](https://flask.palletsprojects.com/)\r [![AI Engine](https://img.shields.io/badge/AI-Gemini%202.0%20%7C%20Imagen%203.0-orange.svg)](https://deepmind.google/technologies/gemini/)\r [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ecomspainilde-jpg/approoms.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/ecomspainilde-jpg/approoms/issues"
+  },
+  "homepage": "https://github.com/ecomspainilde-jpg/approoms#readme",
+  "devDependencies": {
+    "@tailwindcss/container-queries": "^0.1.1",
+    "@tailwindcss/forms": "^0.5.11",
+    "autoprefixer": "^10.4.27",
+    "postcss": "^8.5.8",
+    "tailwindcss": "^3.4.17"
+  }
+}

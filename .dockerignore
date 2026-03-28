@@ -24,3 +24,8 @@ brain/
 implementation_plan.md
 task.md
 walkthrough.md
+node_modules
+package.json
+package-lock.json
+src/input.css
+tailwind.config.js
