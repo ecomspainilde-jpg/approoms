@@ -130,19 +130,23 @@ if GEMINI_API_KEY:
             print(f"GenAI configure error: {e}")
             GEMINI_API_KEY = None
 
-# Initialize Vertex AI as PRIMARY engine
+# --- 1. Basic configuration ---
+project_id = os.environ.get("GCP_PROJECT_ID")
+location = os.environ.get("GCP_LOCATION", "us-central1")
+storage_bucket = os.environ.get("FIREBASE_STORAGE_BUCKET")
+if not storage_bucket and project_id:
+    storage_bucket = f"{project_id}.firebasestorage.app"
+
+# --- 2. Initialize Vertex AI PRIMARY hub ---
 if VERTEXAI_AVAILABLE:
     try:
-        # Priority: GCP_PROJECT_ID env, current PROJECT_ID, or None for auto-detect
-        vertex_project = os.environ.get("GCP_PROJECT_ID") or project_id or None
-        # Models like Gemini 2.0 should be used in us-central1 as the primary hub
-        vertex_location = os.environ.get("GCP_LOCATION", "us-central1")
-        
-        # Explicit initialization
+        # Use location from env or default to us-central1 (Vertex Gemini hub)
+        vertex_project = project_id or None
+        vertex_location = location
         vertexai.init(project=vertex_project, location=vertex_location)
-        print(f"Vertex AI: Ready in {vertex_location} (project: {vertex_project or 'AUTO-DETECTED'})")
+        print(f"Vertex AI: Hub initialized in {vertex_location} (project: {vertex_project or 'AUTO-DETECTED'})")
     except Exception as e:
-        print(f"Vertex AI initialization error: {safe_truncate(e, 200)}")
+        print(f"Vertex AI: Init skipped ({safe_truncate(e, 100)})")
 
 def get_model_providers(model_name):
     """
@@ -173,13 +177,7 @@ def get_model_providers(model_name):
 
     return providers
 
-# GCP / Firebase Configuration
-# Use None by default to allow auto-detection in Cloud Run
-project_id = os.environ.get("GCP_PROJECT_ID")
-location = os.environ.get("GCP_LOCATION", "us-central1")
-storage_bucket = os.environ.get("FIREBASE_STORAGE_BUCKET")
-if not storage_bucket and project_id:
-    storage_bucket = f"{project_id}.firebasestorage.app"
+# (Removed redundant initialization blocks, moved to top)
 
 # Stripe Webhook Secret check
 webhook_secret = os.environ.get("STRIPE_WEBHOOK_SECRET")
