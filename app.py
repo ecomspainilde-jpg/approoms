@@ -92,6 +92,9 @@ import firebase_admin  # type: ignore
 from firebase_admin import credentials, auth, firestore, storage  # type: ignore
 import stripe  # type: ignore
 from fpdf import FPDF # type: ignore
+import replicate
+import requests
+from vertexai.preview.vision_models import ImageGenerationModel, Image as VertexVisionImage
 
 app = Flask(__name__, static_folder="public", static_url_path="")
 
@@ -684,6 +687,121 @@ def api_generate_image():
             )
     else:
         return jsonify({"error": result.get("error", "Unknown error")}), 500
+
+
+@app.route("/api/rediseñar", methods=["POST"])
+def api_redesign():
+    """
+    Virtual Staging Engine (Spec 3): 
+    Orchestrates Replicate (Mask) + Vertex AI Imagen 3 (Style).
+    """
+    user = verify_token()
+    if not user:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    data = request.json
+    image_b64 = data.get("imagen_original_b64")
+    style_deseado = data.get("estilo_deseado", "modern")
+
+    if not image_b64:
+        return jsonify({"error": "Falta el campo imagen_original_b64"}), 400
+
+    # Clean base64
+    if "," in image_b64:
+        image_b64_clean = image_b64.split(",")[1]
+    else:
+        image_b64_clean = image_b64
+
+    try:
+        original_bytes = base64.b64decode(image_b64_clean)
+    except Exception as e:
+        return jsonify({"error": f"Error decodificando imagen: {str(e)}"}), 400
+
+    # --- Especificación 1: Generación Automática de Máscara (Vía Replicate) ---
+    mask_bytes = None
+    try:
+        # Token must be provided via ENV for security
+        replicate_token = os.environ.get("REPLICATE_API_TOKEN")
+        if not replicate_token:
+            raise Exception("REPLICATE_API_TOKEN no configurado en el servidor")
+            
+        client = replicate.Client(api_token=replicate_token)
+        
+        print(f"RoomChic: Iniciando segmentación en Replicate para estilo {style_deseado}...")
+        # Usamos un modelo de segmentación de interiores (Segformer-B5 ADE20K)
+        output = client.run(
+            "lucataco/segformer-b5-finetuned-ade-640-640",
+            input={"image": io.BytesIO(original_bytes)}
+        )
+        
+        # El modelo devuelve una URL de la máscara segmentada
+        mask_url = output if isinstance(output, str) else output[0]
+        mask_res = requests.get(mask_url)
+        if mask_res.status_code != 200:
+            raise Exception(f"No se pudo descargar la máscara: {mask_res.status_code}")
+        
+        mask_bytes = mask_res.content
+        print("RoomChic: Máscara obtenida exitosamente.")
+
+    except Exception as e:
+        print(f"Replicate Error: {e}")
+        return jsonify({"error": f"Error en Spec 1 (Replicate): {safe_truncate(e, 200)}"}), 500
+
+    # --- Especificación 2: El Motor de Estilo (Vertex AI Imagen 3) ---
+    try:
+        # Ingeniería de Prompts (Spec 2)
+        prompt_profesional = f"{style_deseado} room, highly detailed, photorealistic, 8k resolution, architectural digest style, professional interior photography, masterpiece, soft volumetric lighting, global illumination, ray tracing. Maintain the exact architectural structure, perspective, and original geometric layout of the room strictly."
+        negative_prompt = "low resolution, blurry, distorted architecture, cartoon, painting, sketch, unrealistic lighting, extra windows, missing walls, bad perspective, ugly furniture, artifacts, noise."
+
+        print("RoomChic: Llamando a Vertex AI Imagen 3 (edit_image)...")
+        model = ImageGenerationModel.from_pretrained("imagegeneration@006")
+        
+        # Preparar imágenes para el SDK de Vertex Vision
+        try:
+            base_image = VertexVisionImage(original_bytes)
+            mask_image = VertexVisionImage(mask_bytes)
+        except:
+            # Fallback para versiones que requieren from_bytes
+            base_image = VertexVisionImage.from_bytes(original_bytes)
+            mask_image = VertexVisionImage.from_bytes(mask_bytes)
+        
+        # Ejecutar edición (Inpainting)
+        results = model.edit_image(
+            base_image=base_image,
+            mask=mask_image,
+            prompt=prompt_profesional,
+            negative_prompt=negative_prompt,
+            edit_mode="inpainting-insert",
+            guidance_scale=21,
+            number_of_images=1
+        )
+        
+        if not results or not results.images:
+            raise Exception("Vertex AI no devolvió ninguna imagen generada.")
+            
+        # Extraer bytes de la primera imagen
+        generated_image = results.images[0]
+        if hasattr(generated_image, "_image_bytes"):
+            generated_bytes = generated_image._image_bytes
+        else:
+            # Fallback: salvar a buffer
+            buf = io.BytesIO()
+            generated_image.save(buf, format="PNG")
+            generated_bytes = buf.getvalue()
+            
+        generated_b64 = base64.b64encode(generated_bytes).decode("utf-8")
+        print("RoomChic: Renderizado virtual completado.")
+
+    except Exception as e:
+        print(f"Vertex AI Error: {e}")
+        return jsonify({"error": f"Error en Spec 2 (Vertex AI): {safe_truncate(e, 200)}"}), 500
+
+    # --- Spec 3: Respuesta ---
+    return jsonify({
+        "success": True,
+        "imagen_generada_b64": generated_b64,
+        "style_applied": style_deseado
+    })
 
 
 @app.route("/api/my-renders", methods=["GET"])
