@@ -143,11 +143,13 @@ if not storage_bucket and project_id:
 # --- 2. Initialize Vertex AI PRIMARY hub ---
 if VERTEXAI_AVAILABLE:
     try:
-        # Use location from env or default to us-central1 (Vertex Gemini hub)
-        vertex_project = project_id or None
+        # Explicit project ID to prevent fallback to old 'rooms-con-chic'
+        vertex_project = project_id or "gen-lang-client-0426824151"
         vertex_location = location
         vertexai.init(project=vertex_project, location=vertex_location)
-        print(f"Vertex AI: Hub initialized in {vertex_location} (project: {vertex_project or 'AUTO-DETECTED'})")
+        print(f"Vertex AI: Hub initialized in {vertex_location} (project: {vertex_project})")
+    except Exception as e:
+        print(f"Vertex AI: Init skipped ({safe_truncate(e, 100)})")
     except Exception as e:
         print(f"Vertex AI: Init skipped ({safe_truncate(e, 100)})")
 
